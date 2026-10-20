@@ -1,0 +1,521 @@
+Title: SWAP: Test-Time Steerable Humanoid Whole-Body Collision Avoidance
+
+URL Source: https://arxiv.org/pdf/2610.25711v1
+
+Published Time: Tue, 20 Oct 2026 02:30:27 GMT
+
+Number of Pages: 20
+
+Markdown Content:
+# SWAP: Test-Time Steerable Humanoid Whole-Body Collision Avoidance 
+
+Zeji Yi 1,2 ∗, Guanqi He 2, Xiaofeng Guo 2, Guannan Qu 1,Pieter Abbeel 2, Yan Duan 2, Karen Liu 2, Guanya Shi 1,2 
+
+> 1
+
+Carnegie Mellon University 2Amazon FAR 
+
+> ∗
+
+Work done at Amazon FAR d e      
+
+> abBase Height: 0.4m Twisting: 1.5rad
+> Steering Objective Steering Objective
+> Waypoints Total Horizon=35s 2.1m 3.4m
+> e.1 e.2 e.1 e.2 c.1 c.2 c.2 c.1 c
+> Swinging ball Swing Ball Max Speed: 2.8m/s Non-steering: has to lift hand Non-steering: has to hold arm behind its back
+
+Figure 1: SWAP enables whole-body obstacle avoidance for humanoid robots. Unlike prior methods that adjust only footsteps, our hierarchical diffusion framework generates coordinated full-body maneuvers including ducking, sidestepping, and twisting. (a) Ducking gait with base height as low as 0.40 m to pass under low-clearance obstacles. (b) Torso twisting maneuver with waist rotation up to 1.5 rad to navigate through narrow gaps. (c.1–c.2) Sidestepping behavior with different steering objectives: (c.1) faces left while (c.2) faces right to avoid the obstacles. Notably, the arm lifting and retraction emerges naturally from the diffusion policy rather than explicit steering, demonstrating that collision avoidance generalizes across different objectives. (d) Long-horizon traversal through a cluttered environment with four obstacle sets, demonstrating reliable and consistent avoidance behavior. (e.1–e.2) Dynamic obstacle avoidance against a swinging ball on a rope: (e.1) steers to raise arms while (e.2) steers to lower arms to evade the moving obstacle. 
+
+Date: October 20, 2026 
+
+Website: https://iscoyizj.github.io/SWAP-steerable-humanoid-oa-website/ 
+
+Abstract 
+
+Humanoid robots operating in human-centric environments must coordinate the entire body to traverse tight, cluttered spaces while maintaining balance. Existing methods often struggle to jointly consider dynamic stability and collision avoidance from high-dimensional perceptual inputs. Moreover, for humanoids, safe behavior is inherently multimodal: the same obstacle may admit multiple valid traversals, which is difficult to represent with a single deterministic policy. To address these challenges, we propose SWAP ( Steerable Whole-body Avoidance Policy ), a hierarchical framework that separates collision-aware decision making from stabilization. A 
+
+1arXiv:2610.25711v1 [cs.RO] 19 Oct 2026 high-level, perception-conditioned diffusion policy generates multimodal, collision-aware mo-tion proposals, while a low-level whole-body RL controller tracks these proposals and maintains dynamic balance. To efficiently train the high-level policy, we obtain scalable supervision via hindsight labeling: we roll out the low-level policy under randomized commands, place obsta-cles only in the space that each executed motion did not sweep, so the motion is collision-free by construction, and re-render the perception the robot would have seen. At deployment, Monte Carlo sampling with simple cost signals steers the diffusion model toward safe, task-aligned behaviors without heavy reward tuning. Experiments in simulation and on a real Unitree G1 humanoid show reliable avoidance with static and dynamic obstacles. Test-time steering further enables customization, improving tar-geted rewards (e.g., speed, orientation, or posture) by 34% on average while maintaining a high collision avoidance rate. Together, these results support a practical solution to humanoid whole-body collision avoidance with test-time steerability. Project website: 
+
+https://iscoyizj.github.io/SWAP-steerable-humanoid-oa-website/ 
+
+# 1 Introduction 
+
+Humanoid robots possess the kinematic flexibility to navigate cluttered, human-centric environ-ments in ways that simpler platforms cannot: ducking under obstacles, twisting through narrow gaps, and sidestepping around barriers while maintaining balance. Exploiting this flexibility requires 
+
+whole-body coordination —orchestrating not just footsteps, but whole-body posture in concert [Ra-dosavovic et al., 2024, Cheng et al., 2024 ]. This capability represents both the defining advantage of the humanoid form factor and its central control challenge. Yet, achieving reliable whole-body obstacle avoidance remains fundamentally difficult precisely be-cause of the high degree-of-freedom, inherently unstable nature of humanoid robots. A successful policy must simultaneously satisfy dynamic feasibility, control stability, and collision avoidance—a combination that existing methods struggle to achieve. Reinforcement learning struggles with the multimodality of avoidance: many valid traversals exist, but reward-driven optimization collapses to a narrow mode. Shaped, multi-term objectives introduce spurious local minima and reward-sensitive behavior as shown in both humanoid and other legged robots [Wang et al., 2025b, He et al., 2024 ]. Model-based planners face analogous issues—whole-body planning with hand-crafted costs is nonconvex and initialization-sensitive, often yielding stiff, conservative motions that underutilize the humanoid’s flexibility [Sun et al., 2025, Zucker et al., 2013 ]. Behavior cloning can learn natural motions from demonstrations but requires large-scale data; teleoperation on humanoids is difficult and does not scale. In manipulation, imitation-based generative policies can represent multimodal manipulation while achieving collision avoidance, but still depend on demonstration coverage [Li et al., 2025, Jung et al., 2025, Ze et al., 2024, Chi et al., 2023 ]. Moreover, policies trained under any of these paradigms cannot easily adapt to changing objectives at deployment—any shift in user preference (e.g., prioritizing certain gestures) typically demands retraining. In this work, we propose SWAP ( Steerable Whole-body Avoidance Policy ), a hierarchical framework that decouples high-level collision-aware decision making from low-level locomotion control. This separation is key to resolving the stability and collision avoidance dilemma that plagues joint opti-mization: the low-level RL controller focuses solely on stable trajectory tracking, while the high-level planner handles collision-aware motion generation. For the high-level policy, inspired by diffusion-based whole-body motion synthesis [Huang et al., 2025, Liao et al., 2025 ], we adopt a Diffusion Transformer (DiT) [Peebles and Xie, 2023 ] conditioned on LiDAR observations and trained on tra-jectories derived from the LAFAN1 human motion dataset [Harvey et al., 2020 ]. This motion prior helps the planner preserve diverse, human-like whole-body behavior. 2Tracking command:                
+
+> •Base vel
+> •Upper-body joint
+> Proprioception Action Perception Encoder ϕ!
+> Perception LiDAR
+> Collision Reward 𝑟
+> Proprioception .𝑧 !
+> Perception Embedding 𝑧 "High-level Diffusion Policy Command Chunks τ
+> Steering
+> Rollout Env
+> Stage 3 - Test-time Diffusion Steering Stage 1 - Low-level RL training
+> High-level Dataset
+> Stage 2 - High-level Diffusion Policy training
+> Simulator Low-level RL policy 𝜋
+> Rollout Env
+> Proprioception 𝑧 !
+> LiDAR point cloud
+> Plug-and-Play Objective function
+> 𝑓 𝑠 !, 𝑧 !, 𝜏 "
+> 𝜋
+> Command
+> 𝑟 𝑧 !𝑧 "
+> 𝜋
+
+Figure 2: Overview of the SWAP framework. The high-level diffusion policy generates collision-aware whole-body trajectories from perception observations, which are tracked by a low-level RL locomotion controller. To obtain collision labels without teleoperation, we use a hindsight labeling [Andrychowicz et al., 2017, Gu et al., 2024 ] pipeline in simulation. We roll out the low-level controller under randomized commands, then run geometric collision checking along the executed motion by testing the robot’s swept volume against the environment, producing collision-free labels for each trajectory. This yields scalable collision-aware supervision while avoiding reward shaping: collision enters only as a label on motion-prior trajectories, which helps retain multimodality and naturalness while learning to avoid obstacles. This self-supervised pipeline provides a more scalable way of collecting data and bypasses the need for teleoperation. At deployment, we further steer the diffusion sampling process using Monte Carlo sampling with lightweight cost signals. Together, these components transform avoidance from a fixed reactive mapping into a flexible, steerable generative task, enabling zero-shot adaptation to new objectives without retraining. The key capability of SWAP is not any single motion primitive, such as ducking or sidestepping, but the ability to produce collision-aware whole-body proposals that remain steerable at deployment . A user can plug in analytical objectives such as speed, heading, height, or posture, or use a learned collision-aware Q-function, and the same trained diffusion prior can adapt by selecting among its sampled trajectory modes. This distinguishes SWAP from approaches that require a new reward, curriculum, or demonstration set whenever the deployment objective changes. Our main contributions are three-fold: 1. A hierarchical framework combining a perception-conditioned DiT with an RL-based controller for whole-body obstacle avoidance, validated on the Unitree G1 in simulation and real-world deployment. 2. A hindsight labeling pipeline that uses synthetic environments to generate collision-aware supervision for the high-level diffusion policy at scale, without teleoperation. 3. A lightweight test-time steering mechanism that adapts to new objectives without retraining, improving targeted metrics by 34% on average. We validate SWAP extensively in simulation and on a Unitree G1 humanoid equipped with Li-DAR sensors in the real world. Our experiments demonstrate reliable avoidance of both static and dynamic obstacles, with the robot exhibiting diverse whole-body maneuvers including ducking, sidestepping, and twisting. Together, these results establish a practical framework for humanoid whole-body collision avoidance that integrates naturally with downstream navigation stacks. 32 Related Work 
+
+Our approach lies at the intersection of learning-based locomotion, generative models for control, and safe humanoid navigation. We review relevant work in each area. 
+
+2.1 Learning-Based Humanoid Locomotion 
+
+Humanoid locomotion has seen significant progress through reinforcement learning (RL), mov-ing from basic bipedal balance [Radosavovic et al., 2024 ] to perceptive locomotion in rough ter-rains [Zhuang et al., 2024 ]. Recent hierarchical approaches, such as HWC-Loco [Lin et al., 2025 ],decompose the problem into high-level planning and low-level control to achieve robust gait. Simi-larly, HumanPlus [Fu et al., 2024 ] demonstrates the effectiveness of shadowing and imitation learn-ing for whole-body coordination. Generative motion priors, such as NaturalGMP [Zhang et al., 2025a ], further enhance motion naturalness without hand-crafted style rewards. While these re-search efforts provide a solid foundation for mobility, the integration of these motor skills into active collision avoidance in complex, cluttered environments remains a central challenge. 
+
+2.2 Diffusion Models for Motion Planning 
+
+Diffusion models have emerged as powerful generative priors for robot policy learning. In manipu-lation, diffusion policies have shown strong performance [Chi et al., 2023, Ze et al., 2024 ], including on humanoid robots [Ze et al., 2025 ]. For navigation, NavDP [Cai et al., 2026 ] combines a diffu-sion policy with privileged information guidance and a safety critic, achieving successful sim-to-real navigation transfer. For humanoid control specifically, recent works leverage diffusion as a motion prior. DreamCon-trol [Kalaria et al., 2026 ] uses a diffusion prior over human motions to help an RL policy solve long-horizon humanoid tasks. Most relevant to our work, BeyondMimic [Liao et al., 2025 ] demon-strates that guided diffusion can achieve zero-shot task adaptation, including obstacle avoidance, by applying cost-guided sampling to a diffusion controller. While these frameworks excel at gener-ating feasible behaviors, steering them toward task-specific safety in cluttered environments often requires expert data or costly online optimization; this motivates our hindsight collision labeling as an efficient supervision signal for systematic whole-body obstacle avoidance. 
+
+2.3 Safe Navigation for Legged Robots 
+
+Ensuring safety in humanoid navigation remains challenging, as it requires satisfying dynamic feasibility, control stability, and collision avoidance simultaneously. Control barrier functions (CBFs) [Ames et al., 2019 ] provide formal safety guarantees but can be conservative. Wang et al. 
+
+[2025b ] formulate humanoid locomotion as a constrained MDP with CBF costs, achieving safe and comfortable walking in crowds with the perception module of Omni-Perception [Wang et al., 2025a ]. However, such constraint-based approaches often require careful tuning and may not generalize across diverse environments. To address these limitations, reactive approaches like HumanoidPF [Xue et al., 2026 ] encode humanoid-obstacle relationships into an artificial potential field to guide RL policies. While ef-fective for narrow passage traversal, such methods typically rely on explicit geometric mappings and require intensive reward engineering to balance stability with safety. Other learning-based ap-proaches to safety include training with collision penalties, using safety critics as seen in NavDP [Cai et al., 2026 ], or employing curriculum learning. For example, Kim et al. [2024 ] propose ARMOR, 4which uses an inverse hindsight strategy by synthetically placing obstacles around known collision-free human motions to guarantee safe demonstrations. In contrast, our approach introduces a physically grounded hindsight labeling strategy derived from the robot’s own swept volume. This enables the policy to internalize diverse, multimodal avoidance maneuvers consistent with its kinematic limits, eliminating the need for manual reward shaping or external expert demonstrations. 
+
+Positioning. Prior systems provide important pieces of the humanoid avoidance stack, but none combines whole-body obstacle avoidance with plug-and-play test-time objectives. Motion-imitation and generative locomotion methods provide natural behavior priors but do not directly solve perception-conditioned collision avoidance. ARMOR [Kim et al., 2024 ] and HumanoidPF [Xue et al., 2026 ] target perception-driven avoidance, but their deployment behavior is tied to the trained objective or hand-designed potential field. Model-based planners such as SPARK [Sun et al., 2025 ] can optimize explicit costs, but scaling them to real-time whole-body humanoid motion with learned perception remains difficult. SWAP instead learns a multimodal diffusion prior over feasible whole-body commands and adapts online by scoring sampled trajectories, preserving the hierarchy while avoiding task-specific retraining. 
+
+# 3 Steerable Hierarchical Policy for Whole-Body Obstacle Avoidance 
+
+We consider a humanoid robot navigating cluttered, human-centric environments. The robot must reach goal locations while avoiding collisions using its full body—not only via footstep adjustments, but through coordinated motions of the torso, arms, and legs. Appendix A summarizes our notation. 
+
+Why Hierarchical Control? Directly generating joint-level commands with diffusion models poses challenges for humanoid control: the extensive computation of iterative denoising struggles to meet high-frequency requirements (30–50 Hz), and end-to-end policies must simultaneously learn colli-sion avoidance and dynamic stability—competing objectives that are difficult to balance. We adopt a hierarchical decomposition: a high-level diffusion planner generates trajectory commands at lower frequency, while a low-level RL controller runs at high frequency for stable execution. As we show in Section 4, this separation yields significantly stronger performance compared to end-to-end diffusion baselines. 
+
+Hierarchical Control Formulation. Let oobs  
+
+> t
+
+denote an exteroceptive observation of nearby obsta-cles (e.g., LiDAR point clouds), and st the proprioceptive state. A perception encoder first processes the observation with temporal context to produce a perception embedding zt = Enc (oobs  
+
+> t
+
+, zt−1). The high-level policy πH then outputs a trajectory command over a horizon H:
+
+τt:t+H = πH (zt , st ) (3.1) where τt:t+H represents commanded waypoints for the robot’s base (position, velocity, height) and upper-body DoFs—not full joint-level commands. The low-level controller πL tracks these waypoints and outputs motor commands: 
+
+at = πL (τt , qt , ˙ qt ) (3.2) This separation allows πH to specify desired base and upper-body motion for collision avoidance, while πL determines the full joint trajectories needed to achieve stable tracking. Figure 2 illustrates this architecture. 
+
+3.1 Low-Level RL Policy Pretraining 
+
+The low-level controller is trained via reinforcement learning to track high-level commands while maintaining dynamic stability. To decouple navigation from stabilization, the policy is 5proprioceptive-only, focusing exclusively on locomotion and balance without exteroceptive obstacle information. Once trained, the policy is frozen to serve as a fixed action space for the high-level planner. 
+
+Observation and Action Space. Following the decoupled control paradigm in FALCON [Zhang et al., 2025b ], we design a hierarchical command space to separate locomotion from upper-body posturing. The policy πL receives an observation oLt consisting of the target trajectory waypoint, the robot’s proprioceptive state (joint positions, velocities, and orientation), and the previous action. It outputs target joint positions at converted to motor torques via a PD controller. To ensure the policy masters a diverse range of whole-body configurations, we employ a hybrid command sampling strategy during training. For the lower body, base linear and angular velocity commands vb∗ 
+
+> t
+
+are sampled from a random distribution to promote robust locomotion. For the upper body, reference joint positions pu∗ 
+
+> t
+
+are randomly sampled from the LAFAN1 human motion dataset [Harvey et al., 2020 ]. This exploration is crucial for generating the rich swept volume data used for subsequent hindsight labeling. 
+
+Reward Design. The policy is optimized via a reward r = wtrack · rtrack + rlocomotion which balances tracking accuracy with fundamental stability. The tracking term is defined as: 
+
+rtrack = exp 
+
+
+
+− 1
+
+> σ2
+> v
+
+∥vbt − vb∗ 
+
+> t
+
+∥22 − 1
+
+> σ2
+> p
+
+∥pbt − pb∗ 
+
+> t
+
+∥22
+
+− 1
+
+> σ2
+> h
+
+(ht − h∗ 
+
+> t
+
+)2 − 1
+
+> σ2
+> u
+
+∥put − pu∗ 
+
+> t
+
+∥22
+
+ . (3.3) The term rlocomotion penalizes body tilting, base angular velocities, and joint accelerations to ensure smooth movement. 
+
+3.2 Hindsight Labeling for High-Level Diffusion Policy 
+
+Training the high-level diffusion policy requires perception–trajectory pairs. We obtain supervision via hindsight labeling using executed trajectory replay: we first generate diverse motions by rolling out randomized commands through the low-level controller, then retrospectively construct a labeled obstacle representation from the swept volume of the executed motion, and finally re-render per-ception observations along that trajectory. 
+
+Procedure. We first roll out commands from a human motion prior in simulation: we sample upper-body motion segments from LAFAN1 and concatenate them with randomized base waypoints (position /heading /height targets) to form a desired high-level command sequence {τt }Tt=0. Exe-cuting {τt } with the frozen low-level controller yields an actual joint trajectory {qt }Tt=0. We use this executed trajectory, not the commanded reference, to compute the swept volume—the set of workspace points occupied by the robot body over time. Thus, the high-level dataset already reflects low-level tracking errors and physically feasible motions. Formally, define 
+
+S =
+
+> T
+
+[
+
+> t=0
+
+R(qt ), (3.4) where R(qt ) ⊂ R3 is the robot body occupancy at configuration qt . We label obstacles from the un-swept space by sampling obstacle configurations from the complement W \ S , where W is the workspace region. Intuitively, S is the space traversed by the robot, so any obstacle set Ohind ⊆ W \S 
+
+forms a collision-free training pair for that executed trajectory. 
+
+Data Augmentation. From each base obstacle configuration Ohind , we generate augmented variants for two purposes. (1) Augmentation for positive data : we randomly remove subsets of obstacles 6from Ohind . The smaller obstacle set still lies in the un-swept space W \ S , so the original trajectory remains collision-free. This increases the diversity of safe training pairs for the diffusion policy. (2) Augmentation for negative data : we add obstacles inside the swept volume S , making the same kinematic rollout unsafe under the new obstacle configuration. These negative samples are used for training the objective function f for test-time steering (Section 3.5), not for the diffusion policy. Importantly, both augmentation strategies maintain physical plausibility by ensuring all obstacles are grounded (no floating obstacles) and respect spatial coherence. Augmentation for positive data Obstacle Representation Augmentation for negative data    
+
+> 𝒪 𝒽𝒾𝓃𝒹 Obstacle
+> 𝒮 Free Space
+> Command Trajectory Negative Positive Safe Obstacle Setting Unsafe Obstacle Setting
+
+Figure 3: Hindsight labeling pipeline with kinematic replay. Randomized rollouts generate diverse motions; the swept volume of the replayed trajectory is used to label a conservative obsta-cle representation, and perception is re-rendered along the replay for training the diffusion policy. Finally, we re-render perception by replaying the kine-matic trajectory and synthesizing observations oobs  
+
+> t
+
+(via ray casting) against the augmented obstacle configura-tions. Random Gaussian noise is added to the re-rendered perception to simulate the real-world noise. This hind-sight construction avoids manual annotation: labels and perception are generated automatically from the robot’s motion trace, while augmentation provides diverse super-vision for both the diffusion policy and the steering objec-tive function f .
+
+Dataset and Filtering. Our hindsight dataset contains 2,356 executed rollouts. We apply 100 × positive and negative augmentation and remove physically implausi-ble obstacle configurations (e.g., an obstacle floating with-out support), which leaves 78,900 perception–trajectory pairs. Upper-body commands are sampled from LAFAN1 motion segments, while base position, heading, velocity, and height targets are sampled independently to cover di-verse whole-body commands. We filter rollouts in which the low-level controller falls or exhibits large tracking er-ror; this removes about 3% of the collected data. This fil-tering biases the high-level planner toward motions that the low-level controller can actually execute, which is de-sirable for a hierarchical system because infeasible high-level plans would otherwise fail at deployment. 
+
+Domain Randomization. We randomize the wall con-figuration in Figure 3 by perturbing its yaw within 
+
+[−20 ◦, 20 ◦] and shifting its center by ±0.5 m. Commands are sampled from the LAFAN1 human motion dataset, and we inject Gaussian noise into both the upper body command stream and the base waypoint targets (e.g., initial position, velocity, and height) to improve robustness. 
+
+3.3 Perception Module 
+
+The robot is equipped with (i) an exteroceptive perception sensor providing oobs  
+
+> t
+
+(e.g., LiDAR point clouds or depth images), and (ii) proprioception including joint positions qt , velocities ˙ qt , and IMU measurements. 
+
+Perception Encoder with Temporal Context. The point cloud observation oobs  
+
+> t
+
+is processed by an encoder network that incorporates temporal context (Figure 4). The encoder takes as input both the current observation and the previous perception embedding zt−1:
+
+zt = Enc (oobs  
+
+> t
+
+, zt−1) (3.5) 7GRU Pointcloud 
+
+𝑧 !
+
+Reconstruct Decoder Obstacle Configuration Pointcloud 
+
+𝑧 !"# 
+
+𝑜 !$%& 
+
+PointNet++ Encoder Figure 4: Perception encoder architecture . Point clouds are encoded via PointNet ++ and a GRU into a perception embedding zt . To ensure spatial awareness, zt is supervised via reconstruction of point clouds and obstacle configuration. This recurrent structure enables the encoder to capture temporal patterns in obstacle motion and maintain spatial awareness across frames, with the embedding zt serving as both the output for the current step and the temporal context for the next. The perception embedding zt is concatenated with the proprioceptive state st to form the condi-tioning vector for the high-level diffusion policy, whose input is c = ( zt , st ) and output is a future action chunk τt:t+H . In our implementation, we use LiDAR point clouds processed by a PointNet-style encoder [Wang et al., 2025a,b ], though the framework is agnostic to the specific perception modality. 
+
+3.4 High-Level Diffusion Policy Training 
+
+The high-level policy is a conditional diffusion model that maps perception-conditioned context to whole-body trajectory commands. Unlike approaches that output simple velocity commands, our planner generates rich trajectory information (e.g., body poses / waypoints over a prediction horizon). 
+
+Diffusion Model Architecture. We adopt a denoising diffusion probabilistic model (DDPM). Given a noisy trajectory τ(k) at diffusion step k, here we omit the subscript t : t + H for brevity, the model predicts a denoising direction: 
+
+εθ (τ(k), k, c) → τ(k−1) (3.6) In practice, the conditioning uses a 5-step history: c = ( zt , st−4: t ) consists of the perception embed-ding zt from the encoder (Section 3.3) and the proprioceptive state st−4: t .
+
+Training with Hindsight Labels. We train the diffusion policy on the hindsight-labeled dataset (Section 3.2) using the standard DDPM objective. Given a clean trajectory τ0 from the dataset and Gaussian noise ε ∼ N (0, I), the noisy trajectory at diffusion step k is constructed as: 
+
+τ(k) = p ¯αkτ0 + p1 − ¯αkε, (3.7) where ¯ αk = Qki=1 αi is the cumulative noise schedule. The model is trained to predict the added noise by minimizing: 
+
+LDDPM = Ek,τ0,ε
+
+∥ε − εθ (τ(k), k, c)∥2 , (3.8) where k ∼ Uniform (1, K) and c = ( zt , st−4: t ) is the perception-proprioception conditioning. By training on collision-free trajectories from hindsight labeling, the diffusion policy learns to generate motions that are implicitly biased toward safe regions of the trajectory space. Combined with the motion prior from human data, this yields a planner capable of proposing diverse, feasible whole-body trajectories. 8Table 1: Examples of plug-in analytical steering objectives. Each objective can replace f in Eq. (3.9) without retraining the diffusion policy. 
+
+Objective Score f (τ)
+
+Base speed exp (−∥ vbt:t+H − v∗∥2/β )
+
+Turning direction exp (−∥ ψt:t+H − ψ∗∥2/β )
+
+Base goal reaching exp (−∥ pbt+H − pgoal ∥2/β )
+
+Base height exp (−∥ ht:t+H − h∗∥2/β )
+
+Left arm lifting exp (−∥ plt:t+H − pl∗∥2/β )
+
+Right arm lifting exp (−∥ prt:t+H − pr∗∥2/β )
+
+Multimodality and Natural Motion. A key advantage of hindsight-augmented training is multi-modal behavior. Consider two obstacle configurations O1 and O2 from different base rollouts: their intersection O1 ∩ O 2 may admit multiple collision-free trajectories, each originally labeled for one configuration but valid for both. The diffusion model thus learns to associate similar perceptual contexts with diverse trajectory modes. Furthermore, since our command space is grounded in LAFAN1 [Harvey et al., 2020 ], the generated trajectories inherit natural, human-like characteris-tics. Together, this yields a planner proposing diverse, feasible whole-body trajectories for test-time steering. 
+
+3.5 Test-Time Steering 
+
+While the trained diffusion policy produces generally safe trajectories, we further refine behavior at test time using lightweight steering mechanisms. This enables adapting to new objectives without retraining. 
+
+Monte Carlo Sampling. At each planning step, we generate N candidate trajectories from the diffusion policy and select the best one according to a user-defined objective function f (st , zt , τ):
+
+τ∗ = arg max  
+
+> τ(i),i∈{ 1,..., N}
+
+f (st , zt , τ(i)), (3.9) where st is the proprioceptive state, zt is the perception embedding, and τ(i) is the i-th sampled trajectory (action chunk). This formulation admits any objective that depends on the current state and candidate trajectory. For instance, simple objectives such as commanding the robot to turn toward a specific heading or maintaining a desired upper-body posture can be defined analytically and tuned online without retraining. Table 1 lists the analytical objectives used in our experiments. 
+
+Learned Collision-Aware Q-Function. For more complex objectives such as collision avoidance, we learn a Q-function through offline policy evaluation on the hindsight-labeled rollouts. The high-level MDP runs at 20 Hz with state ct = ( st , zt ) and action τt:t+H , the trajectory chunk proposed by the diffusion model. The environment transition is induced by executing the selected chunk through the low-level controller. We assign a chunk-level reward 
+
+rt = 0.1 Vswept (τt:t+H ) − Vcollision (τt:t+H , O ), (3.10) where Vswept rewards progress through free swept volume and Vcollision penalizes intersection with obstacles. Because the dataset consists of complete rollouts, we estimate returns with offline GAE [Schulman et al., 2016 ] using λ = 0.95 and γ = 0.99, then regress Qφ (ct , τt:t+H ) to these targets. At test time, this learned Q-function is used only to score sampled candidates; it does not modify the diffusion prior or require task-specific retraining of the policy. 9Comparison with Guidance Methods. We compare Monte Carlo steering with two prominent alternatives. Classifier-based guidance [Dhariwal and Nichol, 2021 ] modifies the score using classifier gradients: ˜εθ = εθ (τ(k), k, c) − s · ∇ τ(k) log pφ ( y | τ(k)). (3.11) This requires differentiable objectives and careful tuning of s at each noise level. Classifier-free guidance (CFG) [Ho and Salimans, 2022 ] co-trains conditional and unconditional models: ˜εθ = εθ (τ(k), k, c) + w ·  εθ (τ(k), k, c, y) − εθ (τ(k), k, c) . (3.12) However, CFG requires retraining with each new objective label y. In contrast, our Monte Carlo steering operates purely at test time by selecting among samples from the learned distribution ac-cording to f , avoiding out-of-distribution artifacts from gradient-based guidance. 
+
+# 4 Experiments 
+
+We evaluate SWAP in both simulation and real-world deployment on the Unitree G1 humanoid robot. Our experiments address the following questions: 1. Can SWAP successfully solve the obstacle avoidance problem in both simulation and the real world? 2. How does hindsight labeling benefit the data? Is it scalable and how well does it generalize? 3. How does test-time steering benefit the framework? Is it easy to integrate as a plug-in module? 
+
+4.1 Experimental Setup 
+
+Task Design. We use Isaac Gym [Makoviychuk et al., 2021 ] for physics simulation with a Unitree G1 humanoid model (29 DoF). We evaluate on five obstacle avoidance tasks: Walk sideways —navigating through a narrow lateral gap between two close obstacles; Ducking —lowering the body to pass under a head-height horizontal bar; Lift hand to pass —raising one arm to clear an arm-height obstacle; 
+
+Fast dynamic obstacle —avoiding a ball swinging on a rope; and Slow dynamic obstacle —upper-body adjustments to avoid a slowly moving obstacle while the base remains stationary. 
+
+LiDAR Simulation. We simulate a spinning LiDAR sensor mounted on the robot’s torso, providing 360-degree coverage with 16 vertical channels [Wang et al., 2025a,b ]. Point clouds are generated at 10 Hz with realistic noise characteristics. 
+
+Training Details. We train the low-level controller with PPO [Schulman et al., 2017 ] for 50K iter-ations. The perception encoder is trained for 200K steps on 8 × L40S GPUs (6 hours) and produces a 32-dimensional embedding. The high-level diffusion model is trained for 500K steps on 8 × L40S GPUs (5 hours). Test-time steering uses N = 32 Monte Carlo samples. Unless otherwise stated, all static obstacle tasks use the same high-level diffusion policy and perception encoder; adaptation across speed, heading, and posture preferences is performed only through test-time steering. Dy-namic obstacle tasks use a separately trained high-level policy because the 10 Hz LiDAR stream is insufficient for high-frequency dynamic obstacle state estimation. 
+
+Sim2Sim Validation. To validate simulation fidelity, we perform sim2sim transfer by deploying policies trained in Isaac Gym to MuJoCo [Todorov et al., 2012 ], confirming consistent behavior across physics engines. 
+
+Baselines. We compare the following methods: 10 Table 2: Success rate (Succ.) and collision rate (Coll.) across different obstacle avoidance tasks (mean ± std over 3 seeds). End2End Diffusion uses diffusion outputs directly without the whole-body tracking RL policy, which fails to maintain balance in most locomotion tasks. SWAP with steering achieves the best overall performance. Task End2End Diffusion SWAP (no steer) SWAP (full) Succ. ↑ Coll. ↓ Succ. ↑ Coll. ↓ Succ. ↑ Coll. ↓
+
+Walk sideways 8.2% ±2.1 4.1% ±1.3 72.5% ±3.8 12.3% ±2.9 88.4 %±2.4 2.2 %±0.8 
+
+Ducking 5.6% ±1.8 3.2% ±1.1 68.3% ±4.2 16.8% ±3.5 85.7 %±2.9 2.5 %±1.1 
+
+Lift hand to pass 15.4% ±4.6 20.8% ±8.7 74.1% ±3.5 10.5% ±2.8 91.2 %±2.1 1.3 %±0.3 
+
+Fast dynamic obs. 6.3% ±1.9 - 65.8% ±4.6 - 82.6 %±3.2 -Slow dynamic obs. 51.5% ±4.3 - 81.2% ±3.1 - 93.4 %±1.8 -Average 17.4% ±2.9 9.4% ±3.7 72.4% ±3.8 13.2% ±3.1 88.3 %±2.5 2.0 %±0.5 
+
+• End2End Diffusion [Huang et al., 2024, 2025 ]: Uses diffusion policy outputs directly for control without the low-level RL policy, to validate the necessity of the hierarchical design • SWAP (no steering) : Full hierarchical framework with hindsight training but no test-time steering • SWAP (full) : Complete framework with both hindsight training and Monte Carlo steering 
+
+Metrics. We evaluate using: Success Rate —percentage of episodes reaching the goal without falling or collision; and Collision Rate —the obstacle set is a wall of 180 cubes, as shown in Figure 5, and the collision rate is the percentage of cubes that are contacted by any part of the robot body. 
+
+4.2 Obstacle Avoidance Performance (Q1) 
+
+We first evaluate whether SWAP can successfully solve the obstacle avoidance problem in both sim-ulation and real-world settings. 
+
+4.2.1 Simulation Results 
+
+Table 2 presents our main simulation results across five obstacle avoidance tasks. The collision rate is missing for Fast dynamic obstacle and Slow dynamic obstacle tasks because there is only one obstacle in the scene, so an unsuccessful episode means the obstacle hit the robot. Key observations: 
+
+End-to-end diffusion control fails without the RL policy. Using diffusion outputs directly for control—i.e., removing the low-level RL policy—fails on locomotion-intensive tasks (5–15% suc-cess). The robot frequently falls when agility is required, e.g., turning while sidestepping or squat-ting to duck under obstacles. Performance is higher on Lift hand to pass , which largely reduces to straight-line walking with upper-body motion. The main exception is Slow dynamic obstacle : the robot can remain stationary and move only its arms to avoid slowly approaching objects, achieving 51.5% success. This also explains why End2End Diffusion can show a low collision rate despite low success: many failures occur before the robot reaches the obstacle because the generated motion is dynamically unstable rather than overly conservative. 
+
+Steering significantly improves performance. Comparing SWAP with and without steering reveals consistent improvements across all tasks. Steering reduces collision rates by 9–14% absolute while boosting success rates by 12–18%, demonstrating the effectiveness of Monte Carlo sampling for test-11 Robot Localization from Mocap 
+
+> Dynamic Setting: Mocap for robot and obstacle
+> Obstacle from LiDAR
+> Livox Mid360
+> Different Command Seq
+
+Figure 5: Simulation results and real-world settings for five obstacle avoidance tasks. Table 3: Real-world performance on the Unitree G1 across 5 trials per scenario. Walk sideways Ducking Lift hand Fast dyn. Slow dyn. Succ 4/5 3/5 4/5 3/5 4/5time trajectory selection. The objective function f (·) used for collision-aware steering is the learned Q-function described in Section 3.5. 
+
+SWAP enables diverse whole-body avoidance. Our full method achieves an 88.3% average success rate, demonstrating effective whole-body coordination across diverse scenarios, even for dynamic obstacle avoidance. 
+
+4.2.2 Real-World Deployment 
+
+We deploy SWAP on a physical Unitree G1 equipped with a Livox Mid-360 LiDAR sensor (Figure 5). The LiDAR produces point clouds at 10 Hz, and the perception encoder runs at the same rate. The high-level diffusion policy runs at 20 Hz and outputs a 5-step action chunk, which is tracked by the low-level RL controller running at 50 Hz on an onboard NVIDIA Jetson Orin. Chunks are executed in a receding-horizon manner: a new high-level plan replaces the previous one every 0.05 s, while the low-level controller interpolates and tracks the current waypoint buffer. For static obstacle avoid-ance tasks, obstacle perception comes entirely from the LiDAR-based perception module. Motion capture (MoCap) is used for robot localization and for specifying dynamic obstacle states, but not for static obstacle perception. Table 3 shows that SWAP successfully transfers to the real world. The robot exhibits the same whole-body avoidance behaviors (ducking, sidestepping) observed in simulation. Performance degrades gracefully in more challenging combined scenarios, with failure cases primarily due to LiDAR occlusion from extreme body poses and sim-to-real tracking mismatch for more agile motions. These observations suggest that perception and tracking fidelity, rather than high-level mode diversity, are the main bottlenecks in the current hardware deployment. 12 1x 2x 5x 10x 20x 50x 100x      
+
+> Augmentation Multiplier
+> 40 50 60 70
+> Success Rate (%)
+> (a) Effect of Trajectory Count
+> 500 trajs 1000 trajs 2000 trajs 1x 2x 5x 10x 20x 50x 100x
+> Augmentation Multiplier
+> 50 60 70 80 90
+> (b) Effect of Negative/Positive Ratio
+> r=5% r=10% r=20% r=50%
+
+Figure 6: Ablation study on hindsight labeling. (a) Trajectory count and data augmentation, without test-time steering: more base trajectories and higher augmentation multipliers yield higher success rates. (b) Positive /negative augmentation ratio, with test-time steering: a 10% ratio achieves opti-mal performance; higher ratios (50%) introduce too many negative samples, degrading performance at high augmentation levels. Error bars indicate standard deviation over 5 seeds. 
+
+4.3 Analysis of Hindsight Labeling (Q2) 
+
+We investigate three aspects of hindsight labeling: (1) its effectiveness and scalability, (2) the role of cost augmentation ratio, and (3) generalization to unseen scenarios. 
+
+Hindsight labeling is effective and scalable. Figure 6(a) shows that both increasing the number of base trajectories and applying data augmentation consistently improve success rate. The aug-mentation process requires only simulation rollouts with automatic collision annotation, making it straightforward to scale data collection. 
+
+Cost augmentation ratio is critical. Hindsight labeling augments the dataset with both safe (pos-itive) and collision (negative) trajectory samples. The negative samples provide a correction signal that guides the Q-function away from collision-prone behaviors. However, the ratio of negative to positive samples significantly impacts performance. As shown in Figure 6(b), a 10% negative ratio achieves optimal performance by balancing safety awareness with behavioral diversity. Excessive negative samples (50%) undermine the quality of the training distribution, leading to overly con-servative policies that degrade at high augmentation levels. Notably, when combined with test-time steering, performance saturates earlier (around 50 × augmentation) compared to the no-steering setting. This indicates that steering effectively exploits the Q-function learned from hindsight data, reducing the data requirements for the diffusion policy. 
+
+Generalization to unseen scenarios. The results of Figure 6 are evaluated on held-out obstacle configurations disjoint from those used during training. Here, “unseen” means new wall positions, yaw angles, gap locations, and gap sizes sampled from the same distribution family with a separate random seed. Figure 7 visualizes the closest training configurations for representative held-out scenes. Although the closest training obstacle overlaps 84–90% with the test configuration, the remaining geometric differences are sufficient to change the feasible whole-body maneuver. This supports the claim that the perception encoder learns a spatial representation useful for obstacle reasoning rather than memorizing exact obstacle grids. We do not claim full out-of-distribution generalization to arbitrary furniture-like scenes; broader scene diversity remains a limitation and a natural direction for scaling the hindsight pipeline. 13 Overlap 83.7% Overlap 90.1% Overlap 89.9% 
+
+Wall cubes Closest training config Test obstacle (unseen) Figure 7: Training obstacles (orange) and held-out test obstacles (blue) for representative wall configurations. The closest training configuration overlaps 84–90% with the test scene, but the exact wall positions, yaw angles, and gap sizes are never seen during training. Speed Turning Direction Lifting Upper Left Lifting Upper Right Base Height Base Goal Reaching       
+
+> 0.5 1.0 1.5
+> +29% +30% +31% +30% +29% +31%
+> -15% -8% -5% -6% +20% +22%
+> (a) Static Obstacles
+> Speed Turning Direction Lifting Upper Left Lifting Upper Right Base Height Base Goal Reaching
+> 0.5 1.0 1.5 1.6
+> +44% +44% +35% +34% +36% +41%
+> -18% -12% -10% -9% +18% +25%
+> (b) Dynamic Obstacles
+> No Steering (Baseline) Gradient Guidance Monte-Carlo Steering (Ours)
+
+Figure 8: Steering improvement across six objectives. Radar charts compare baseline (no steering) versus different steering methods for (a) static and (b) dynamic obstacles. 
+
+4.4 Analysis of Test-Time Steering (Q3) 
+
+We analyze test-time steering along three dimensions: (1) plug-in flexibility with simple objectives, (2) effectiveness across different objectives, and (3) coupling between steering objectives. 
+
+Real deployment configuration. In our real-world experiments, the diffusion policy generates a batch of action chunks with chunk size 5 and batch size N = 32. By leveraging GPU-accelerated ONNX inference [ONNX Runtime developers, 2021 ], batch size N = 32 runs at essentially the same speed as N = 1, enabling effective Monte Carlo steering without sacrificing the 20 Hz policy fre-quency required for high-speed obstacle avoidance. Appendix B gives the full latency benchmark. 
+
+Any simple objective can be plugged in. Our steering framework supports any objective function that can be evaluated from the candidate trajectory τ. For example, to bias the robot toward a desired posture, we use 
+
+f (τ) = exp 
+
+
+
+− q[ j] 
+
+> t:t+H
+
+− q[ j]  
+
+> des, t:t+H2
+
+/β 
+
+
+
+,where [ j] indexes the joints relevant to the objective and β is a normalization hyperparameter. 14 Hold arm Nominal 
+
+# a b c
+
+# Left turn Figure 9: Comparison of three steering configurations: (a) holding both arms, (b) nominal without steering, and (c) turning left. Each panel shows the values of both objectives over time. We evaluate six such objectives: base speed, turning direction, base goal reaching, base height, and left /right arm lifting. This plug-and-play design requires no retraining: users specify the tar-get posture, and Monte Carlo sampling selects the trajectory that best satisfies it. Compared to gradient-based guidance, which requires careful tuning per objective, sampling-based selection is robust across objectives and less sensitive to hyperparameter choices. 
+
+Objective dimensionality affects steering effectiveness. Figure 8 shows that, with dynamic obsta-cles, base-related objectives (speed, turning direction, goal reaching) achieve larger improvements (41–44%) than upper-body objectives (arm lifting, 34–35%). With static obstacles, all six objectives improve by a similar 29–31%. Lower-dimensional objectives (1–2 dimensions for base control) are easier to optimize via sampling, whereas higher-dimensional objectives (arm configurations) are more sensitive for gradient-based guidance. The base objectives gain more with dynamic obstacles because the feasible non-collision set is larger and the diffusion policy’s output distribution is wider, providing more diverse candidates for selection. 
+
+Steering induces distinct avoidance modes. Figure 9 compares three steering configurations: holding both arms (a), nominal without steering (b), and turning left (c). Two key observations emerge. First, steering objectives are not orthogonal—when steering to hold both arms (a), the turning objective, which is not steered, drops below its nominal value, indicating that the diffusion policy couples these behaviors rather than treating them as independent joint-level controls. Second, steering does not merely override specific joints but guides the robot into fundamentally different avoidance strategies. The hold-arm objective induces lateral sidestepping behavior, while the left-turning objective triggers upper-body adjustments with accompanying postural changes. This holistic response demonstrates that Monte Carlo steering operates at the level of motion modes rather than individual degrees of freedom. 
+
+# 5 Conclusion 
+
+We presented SWAP, a hierarchical diffusion-based framework for whole-body obstacle avoidance in humanoid robots. By combining a perception-conditioned diffusion planner with a low-level RL 15 locomotion controller, our approach enables natural, multimodal avoidance behaviors that exploit the full kinematic capabilities of a humanoid body. Hindsight data collection automatically generates collision-aware supervision without manual labeling, while test-time Monte Carlo steering enables robust navigation with minimal reward engineering. Experiments on the Unitree G1 demonstrate significant improvements over baselines, with diverse avoidance strategies—sidestepping, ducking, twisting—emerging naturally from the learned motion prior. 
+
+Limitations. Our framework has two primary limitations. First, test-time steering currently operates with a limited batch size ( N = 32 Monte Carlo samples) due to running the high-level diffusion policy at 20 Hz; larger batch sizes could improve steering capability for more challenging environments. Second, our perception module generalizes to held-out obstacle configurations within our training distribution, but may struggle with highly diverse unseen environments that differ significantly from training scenarios. 
+
+Future Work. Promising directions include deeper integration with foundation navigation models, where hindsight labeling combined with procedural scene generation could produce more diverse training environments. Additional directions include extending SWAP to loco-manipulation tasks, incorporating vision or language for semantic navigation, and investigating efficient diffusion archi-tectures to increase sampling throughput. 
+
+# References 
+
+Aaron D. Ames, Samuel Coogan, Magnus Egerstedt, Gennaro Notomista, Koushil Sreenath, and Paulo Tabuada. Control Barrier Functions: Theory and Applications. In European Control Confer-ence (ECC) , 2019. Marcin Andrychowicz, Filip Wolski, Alex Ray, Jonas Schneider, Rachel Fong, Peter Welinder, Bob McGrew, Josh Tobin, Pieter Abbeel, and Wojciech Zaremba. Hindsight Experience Replay. In 
+
+Advances in Neural Information Processing Systems (NeurIPS) , 2017. Wenzhe Cai, Jiaqi Peng, Yuqiang Yang, Yujian Zhang, Meng Wei, Hanqing Wang, Yilun Chen, Tai Wang, and Jiangmiao Pang. NavDP: Learning Sim-to-Real Navigation Diffusion Policy with Privi-leged Information Guidance. In IEEE International Conference on Robotics and Automation (ICRA) ,2026. Xuxin Cheng, Yandong Ji, Junming Chen, Ruihan Yang, Ge Yang, and Xiaolong Wang. Expressive Whole-Body Control for Humanoid Robots. In Robotics: Science and Systems (RSS) , 2024. Cheng Chi, Zhenjia Xu, Siyuan Feng, Eric Cousineau, Yilun Du, Benjamin Burchfiel, Russ Tedrake, and Shuran Song. Diffusion Policy: Visuomotor Policy Learning via Action Diffusion. In Robotics: Science and Systems (RSS) , 2023. Prafulla Dhariwal and Alexander Nichol. Diffusion Models Beat GANs on Image Synthesis. In Ad-vances in Neural Information Processing Systems , 2021. Zipeng Fu, Qingqing Zhao, Qi Wu, Gordon Wetzstein, and Chelsea Finn. HumanPlus: Humanoid Shadowing and Imitation from Humans. In Conference on Robot Learning (CoRL) , 2024. Jiayuan Gu, Sean Kirmani, Paul Wohlhart, Yao Lu, Montserrat Gonzalez Arenas, Kanishka Rao, Wen-hao Yu, Chuyuan Fu, Keerthana Gopalakrishnan, Zhuo Xu, Priya Sundaresan, Peng Xu, Hao Su, 16 Karol Hausman, Chelsea Finn, Quan Vuong, and Ted Xiao. RT-Trajectory: Robotic Task General-ization via Hindsight Trajectory Sketches. In International Conference on Learning Representations (ICLR) , 2024. Félix G. Harvey, Mike Yurick, Derek Nowrouzezahrai, and Christopher Pal. Robust Motion In-betweening. ACM Transactions on Graphics , 39(4), 2020. Tairan He, Chong Zhang, Wenli Xiao, Guanqi He, Changliu Liu, and Guanya Shi. Agile But Safe: Learning Collision-Free High-Speed Legged Locomotion. In Robotics: Science and Systems (RSS) ,2024. Jonathan Ho and Tim Salimans. Classifier-Free Diffusion Guidance. arXiv preprint arXiv:2207.12598 , 2022. Xiaoyu Huang, Yufeng Chi, Ruofeng Wang, Zhongyu Li, Xue Bin Peng, Sophia Shao, Borivoje Nikolic, and Koushil Sreenath. DiffuseLoco: Real-Time Legged Locomotion Control with Diffusion from Offline Datasets. In Conference on Robot Learning (CoRL) , 2024. Xiaoyu Huang, Takara Truong, Yunbo Zhang, Fangzhou Yu, Jean Pierre Sleiman, Jessica Hodgins, Koushil Sreenath, and Farbod Farshidian. Diffuse-CLoC: Guided Diffusion for Physics-based Char-acter Look-ahead Control. ACM Transactions on Graphics , 44, 2025. Wonsuhk Jung, Dennis Anthony, Utkarsh A. Mishra, Nadun Ranawaka Arachchige, Matthew Bronars, Danfei Xu, and Shreyas Kousik. RAIL: Reachability-Aided Imitation Learning for Safe Policy Exe-cution. In IEEE International Conference on Robotics and Automation (ICRA) , 2025. Dvij Kalaria, Sudarshan S Harithas, Pushkal Katara, Sangkyung Kwak, Sarthak Bhagat, Shankar Sas-try, Srinath Sridhar, Sai Vemprala, Ashish Kapoor, and Jonathan Chung-Kuan Huang. DreamCon-trol: Human-Inspired Whole-Body Humanoid Control for Scene Interaction via Guided Diffusion. In IEEE International Conference on Robotics and Automation (ICRA) , 2026. Daehwa Kim, Mario Srouji, Chen Chen, and Jian Zhang. ARMOR: Egocentric Perception for Hu-manoid Robot Collision Avoidance and Motion Planning. arXiv preprint arXiv:2412.00396 , 2024. Hang Li, Qian Feng, Zhi Zheng, Jianxiang Feng, Zhaopeng Chen, and Alois Knoll. Language-Guided Object-Centric Diffusion Policy for Generalizable and Collision-Aware Robotic Manipulation. In 
+
+IEEE International Conference on Robotics and Automation (ICRA) , 2025. Qiayuan Liao, Takara E. Truong, Xiaoyu Huang, Yuman Gao, Guy Tevet, Koushil Sreenath, and C. Karen Liu. BeyondMimic: From Motion Tracking to Versatile Humanoid Control via Guided Diffusion. arXiv preprint arXiv:2508.08241 , 2025. Sixu Lin, Guanren Qiao, Yunxin Tai, Ang Li, Kui Jia, and Guiliang Liu. HWC-Loco: A Hi-erarchical Whole-Body Control Approach to Robust Humanoid Locomotion. arXiv preprint arXiv:2503.00923 , 2025. Viktor Makoviychuk, Lukasz Wawrzyniak, Yunrong Guo, Michelle Lu, Kier Storey, Miles Macklin, David Hoeller, Nikita Rudin, Arthur Allshire, Ankur Handa, and Gavriel State. Isaac Gym: High Performance GPU-Based Physics Simulation For Robot Learning. In NeurIPS Datasets and Bench-marks Track , 2021. ONNX Runtime developers. ONNX Runtime. https://onnxruntime.ai/ , 2021. William Peebles and Saining Xie. Scalable Diffusion Models with Transformers. In IEEE /CVF Inter-national Conference on Computer Vision (ICCV) , 2023. 17 Ilija Radosavovic, Tete Xiao, Bike Zhang, Trevor Darrell, Jitendra Malik, and Koushil Sreenath. Real-World Humanoid Locomotion with Reinforcement Learning. Science Robotics , 9, 2024. John Schulman, Philipp Moritz, Sergey Levine, Michael Jordan, and Pieter Abbeel. High-Dimensional Continuous Control Using Generalized Advantage Estimation. In International Con-ference on Learning Representations (ICLR) , 2016. John Schulman, Filip Wolski, Prafulla Dhariwal, Alec Radford, and Oleg Klimov. Proximal Policy Optimization Algorithms. arXiv preprint arXiv:1707.06347 , 2017. Yifan Sun, Rui Chen, Kai S. Yun, Yikuan Fang, Sebin Jung, Feihan Li, Bowei Li, Weiye Zhao, and Changliu Liu. SPARK: Safe Protective and Assistive Robot Kit. arXiv preprint arXiv:2502.03132 ,2025. Presented at the IFAC Symposium on Robotics. Emanuel Todorov, Tom Erez, and Yuval Tassa. MuJoCo: A Physics Engine for Model-Based Control. In IEEE /RSJ International Conference on Intelligent Robots and Systems (IROS) , pages 5026–5033. IEEE, 2012. Zifan Wang, Teli Ma, Yufei Jia, Xun Yang, Jiaming Zhou, Wenlong Ouyang, Qiang Zhang, and Junwei Liang. Omni-Perception: Omnidirectional Collision Avoidance for Legged Locomotion in Dynamic Environments. arXiv preprint arXiv:2505.19214 , 2025a. Zifan Wang, Xun Yang, Jianzhuang Zhao, Jiaming Zhou, Teli Ma, Ziyao Gao, Arash Ajoudani, and Junwei Liang. End-to-End Humanoid Robot Safe and Comfortable Locomotion Policy. arXiv preprint arXiv:2508.07611 , 2025b. Han Xue, Sikai Liang, Zhikai Zhang, Zicheng Zeng, Yun Liu, Yunrui Lian, Jilong Wang, Qingtao Liu, Xuesong Shi, and Li Yi. Collision-Free Humanoid Traversal in Cluttered Indoor Scenes. IEEE Robotics and Automation Letters , 11, 2026. Yanjie Ze, Gu Zhang, Kangning Zhang, Chenyuan Hu, Muhan Wang, and Huazhe Xu. 3D Diffusion Policy: Generalizable Visuomotor Policy Learning via Simple 3D Representations. In Robotics: Science and Systems (RSS) , 2024. Yanjie Ze, Zixuan Chen, Wenhao Wang, Tianyi Chen, Xialin He, Ying Yuan, Xue Bin Peng, and Jiajun Wu. Generalizable Humanoid Manipulation with 3D Diffusion Policies. In IEEE /RSJ International Conference on Intelligent Robots and Systems (IROS) , 2025. Haodong Zhang, Liang Zhang, Zhenghan Chen, Lu Chen, Yue Wang, and Rong Xiong. Natural Humanoid Robot Locomotion with Generative Motion Prior. In IEEE /RSJ International Conference on Intelligent Robots and Systems (IROS) , 2025a. Yuanhang Zhang, Yifu Yuan, Prajwal Gurunath, Ishita Gupta, Shayegan Omidshafiei, Ali-akbar Agha-mohammadi, Marcell Vazquez-Chanlatte, Liam Pedersen, Tairan He, and Guanya Shi. FALCON: Learning Force-Adaptive Humanoid Loco-Manipulation. arXiv preprint arXiv:2505.06776 , 2025b. Ziwen Zhuang, Shenzhe Yao, and Hang Zhao. Humanoid Parkour Learning. In Conference on Robot Learning (CoRL) , 2024. Matt Zucker, Nathan Ratliff, Anca D. Dragan, Mihail Pivtoraiko, Matthew Klingensmith, Christo-pher M. Dellin, J. Andrew Bagnell, and Siddhartha S. Srinivasa. CHOMP: Covariant Hamiltonian Optimization for Motion Planning. The International Journal of Robotics Research , 32(9–10), 2013. 18 A Notation Reference 
+
+Table 4 summarizes the key notation used throughout this paper. We follow these typographic conventions: • x (bold roman): vectors and matrices representing concrete numerical values • τ (bold Greek): trajectory-related quantities • X (calligraphic): sets and spaces Table 4: Summary of notation. 
+
+Symbol Description 
+
+State & Observation (vectors: x)
+
+oobs  
+
+> t
+
+Exteroceptive observation (LiDAR point clouds) 
+
+st Proprioceptive state 
+
+qt , ˙ qt Joint positions and velocities 
+
+pbt , vbt , ht Base position, velocity, height 
+
+put Upper-body position 
+
+at Motor commands (joint position targets) 
+
+oLt Low-level policy observation (waypoint, proprioception, previous action) 
+
+Perception Encoder 
+
+zt Perception embedding: Enc (oobs  
+
+> t
+
+, zt−1)
+
+Trajectory & Planning (bold Greek: τ)
+
+τt:t+H Trajectory command over horizon H
+
+τt Single waypoint command at time t
+
+τ(k) Noisy trajectory at diffusion step k
+
+τ∗ Selected trajectory (highest score under f )
+
+εθ Denoising network 
+
+Policy & Conditioning 
+
+πH High-level diffusion policy 
+
+πL Low-level RL controller 
+
+c Diffusion conditioning: (zt , st−4: t )
+
+H Planning horizon 
+
+K Total diffusion steps 
+
+N Number of Monte Carlo samples 
+
+Reward & Steering Objective rtrack , rlocomotion Low-level tracking and locomotion rewards 
+
+f (st , zt , τ) Steering objective (score of a candidate trajectory) 
+
+Vswept , Vcollision Swept-volume progress reward and collision penalty 
+
+Qφ (ct , τt:t+H ) Learned collision-aware Q-function for steering 
+
+Sets & Spaces (calligraphic: X )
+
+R(qt ) Robot body occupancy at configuration qt
+
+S Swept volume: S 
+
+> t
+
+R(qt )
+
+W Workspace region 
+
+Ohind Hindsight obstacle label 
+
+# B Inference Latency and Deployment Pipeline 
+
+Low-latency inference is critical for dynamic obstacle avoidance: the high-level policy must react quickly to moving obstacles, and Monte Carlo steering requires generating multiple trajectory can-19 Figure 10: ONNX inference benchmark across four CUDA execution configurations (with /without IO binding, with /without FP16). 
+
+Top : latency per inference call vs. batch size. 
+
+Bottom : throughput vs. batch size. IO binding combined with FP16 achieves the lowest la-tency and highest throughput. Notably, latency remains nearly flat up to batch size ∼32 due to GPU parallelism. 
+
+Figure 11: Final reward vs. inference latency under the CUDA + IO binding + FP16 con-figuration, annotated with batch sizes N =
+
+1, 2, 4, . . . , 256. Reward increases sharply from 
+
+N =1 to N =32, then plateaus, while latency grows substantially beyond N =32. The batch size N =32 at ∼13 ms offers the best trade-off. didates per planning step. To meet these demands, we export the diffusion model to ONNX Run-time [ONNX Runtime developers, 2021 ] and benchmark different execution configurations on the deployment GPU. Figure 10 compares four CUDA execution variants: default CUDA, CUDA with IO binding, CUDA with FP16, and CUDA with both IO binding and FP16. IO binding eliminates redun-dant host-device memory copies, while FP16 halves the arithmetic precision, together yielding the lowest per-call latency and highest throughput. A key observation is that latency stays nearly flat from batch size N =1 up to N ≈32, because the GPU’s parallel execution units are not yet saturated at these batch sizes. Figure 11 shows the reward–latency trade-off evaluated on a dynamic obstacle avoidance task. The final reward increases sharply as the number of trajectory candidates grows from N =1 to N =32— more candidates give Monte Carlo steering a better chance of finding a high-quality trajectory—but plateaus beyond N =32 as the marginal benefit of additional samples diminishes. Meanwhile, latency begins to increase substantially for N > 32. The batch size N =32 at approximately 13 ms strikes the best balance between reward and latency. Based on these results, our deployment configuration uses an action chunk length of 5, a sample batch size of N =32, and the CUDA + IO binding + FP16 execution provider. The high-level diffusion policy runs as fast as possible at approximately 20 Hz: at each planning step it generates 32 candidate trajectory chunks, selects the best one via Monte Carlo steering, and writes it to a shared action buffer. The low-level RL controller reads from this buffer at 50 Hz, converting the selected trajectory waypoint into motor commands. This asynchronous two-rate architecture ensures that the high-level planner can exploit the full GPU throughput for trajectory sampling while the low-level controller maintains smooth, high-frequency joint tracking. 20

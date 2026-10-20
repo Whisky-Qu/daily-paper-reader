@@ -1,0 +1,336 @@
+Title: Locomotion with Online Awareness of Dynamics for Precision Footholds
+
+URL Source: https://arxiv.org/pdf/2610.17930v1
+
+Published Time: Wed, 14 Oct 2026 05:27:07 GMT
+
+Number of Pages: 8
+
+Markdown Content:
+# LOAD: Locomotion with Online Awareness of Dynamics for Precision Footholds 
+
+Kunzhao Ren 1, Zhishuo Zhu 2, and Xiaobin Xiong 1,†
+
+Abstract — Unknown payloads alter robot dynamics and make precise contact execution difficult when foothold margins are small. We present LOAD, a perceptive locomotion frame-work that combines explicit inertial estimates with implicit dy-namics features for narrow-beam traversal. Separate recurrent modules infer torso inertial changes and task-relevant history from proprioception, while a height-map teacher is distilled into a depth-based student. We extensively evaluate LOAD and its variants in simulation and on hardware across beam widths and payload configurations. The results show that implicit dynamics features accelerate training, while explicit inertial estimation further improves traversal success; combining both enables LOAD to approach the performance of a privileged policy supplied with ground-truth inertial parameters. Hardware experiments demonstrate traversal with unilateral payloads of 6 kg on a 10 cm beam and 9 kg on a 15 cm beam, and an evenly distributed 11 kg payload on a 15 cm beam. These results support combining physical estimates and history features for precision locomotion under unknown loads. 
+
+I. I NTRODUCTION 
+
+Legged robots have demonstrated increasingly agile loco-motion over rough and unstructured environments. Learning-based controllers have enabled quadrupeds to traverse chal-lenging terrain with dynamic and robust motions [1], [2], [3]. The integration of exteroceptive sensing has further im-proved locomotion over stairs, gaps, obstacles, and parkour-like environments [4], [5], [6]. Recent studies have also moved toward sparse and risky footholds through terrain-aware learning, terrain reconstruction, and foothold-aware perception [7], [8], [9], [10], [11]. Complementary work in-corporates explicit constraints into locomotion learning [12]. These developments highlight the importance of determining where and how each contact should be established. Perceptive locomotion methods emphasize learning terrain representations to guide contact placement. Robustness to variations in robot dynamics is commonly promoted through domain randomization [13], [14], while Rapid Motor Adapta-tion (RMA) and related history-based estimation methods use proprioceptive history to adapt to changing conditions [15], [16], [17]. Building on these advances, we investigate how implicit dynamics features and explicit inertial estimates jointly support precise contact execution on narrow beams under unknown payloads. Existing narrow-beam studies report real-world traversal of an 18 cm-wide single-plank bridge with Go2 [18] and 20 cm-wide beams separated by gaps with ANYmal-D [7]. An A1 equipped with a reaction-wheel module has also  
+
+> 1Shanghai Innovation Institute.
+> 2University of Wisconsin-Madison.
+> †Corresponding author: xiaobin.xiong@sii.edu.cn .
+
+Fig. 1: Overview of LOAD. Terrain perception, implicit dynamics features, and explicit inertial estimates jointly guide narrow-beam traversal under unknown payloads. traversed a beam less than 6 cm-wide with external motion capture [19]. More recently, START demonstrated traversal of 20 cm-wide indoor balance beams and 15 cm-wide outdoor flowerbed edges with Lite3 using onboard depth sensing and terrain reconstruction [10]. Complementary progress has been made in payload-adaptive locomotion. Rapid Em-bodiment Adaptation infers physical parameters from short interaction histories and conditions a locomotion policy on these estimates, enabling Go2 to adapt to a 5 kg payload [20]. FLAP combines physics-informed dynamics prediction with adaptive control to compensate for disturbances from shifting payloads, demonstrating Go1 locomotion with 5 L of water across varied outdoor terrains [21]. These results motivate studying payload adaptation under the restricted support geometry of narrow beams. Unknown payloads change mass, center-of-mass location, and rotational inertia, so the same contact forces can produce different body motions. The beam simultaneously limits lateral foot placement and corrective stepping, leaving little room to compensate for these changes. Reliable traversal therefore requires adapting contact behav-ior and body motion to the current dynamics within the available support geometry. To address this challenge, we present LOAD, a loco-motion framework that integrates terrain perception with implicit dynamics features and explicit inertial estimates for narrow-beam traversal under unknown payloads. Two sepa-rate branches process proprioceptive history: one learns task-relevant dynamics features through reinforcement learning, while the other is supervised to estimate payload-induced changes in the torso’s inertial properties relative to a nom-inal model. This pairing provides physically interpretable information about the current dynamics while retaining arXiv:2610.17930v1 [cs.RO] 13 Oct 2026 task-relevant history that does not need to be expressed through inertial parameters. The policy uses both outputs together with terrain features to adapt whole-body motion and foothold execution. A teacher trained with privileged height maps is distilled into a student using onboard depth images for deployment. We evaluate LOAD in simulation and on hardware across beam widths and payload configurations. In the reported training runs, policies with implicit dynamics features reach high traversal success earlier than their counterparts without these features. These features also improve evaluated traver-sal performance, with benefits persisting even when ground-truth inertial parameters are available. Combining these features with explicit inertial estimates brings the LOAD teacher closer to its privileged counterpart, LOAD-GT, over the tested conditions. The benefit of combining explicit and implicit dynamics information persists after visual distillation on narrow beams within the training payload range. Tests with heavier, unseen payloads reveal limitations in both inertial identification and policy generalization, indicating that accurate dynamics information alone does not ensure successful extrapolation. The contributions of this work are threefold:  
+
+> •
+
+We develop LOAD, a perceptive locomotion framework that combines online inertial estimation with implicit dynamics features to adapt whole-body motion and foothold execution to unknown torso payloads.  
+
+> •
+
+We evaluate six policy variants to characterize the separate and combined benefits of explicit inertial in-formation and implicit history. The comparisons show improved narrow-beam traversal with the combined rep-resentation and identify limitations beyond the training payload range.  
+
+> •
+
+We demonstrate narrow-beam traversal on a Unitree Go2 with unknown unilateral payloads of 6 kg on a 10 cm beam and 9 kg on a 15 cm beam, as well as an evenly distributed 11 kg payload on a 15 cm beam. II. R ELATED WORK 
+
+A. Perceptive and Precision Locomotion 
+
+Proprioceptive reinforcement learning has enabled robust quadrupedal locomotion over challenging terrain [1], [2]. Perceptive approaches incorporate elevation maps or depth observations to anticipate terrain geometry [3], [4], [5], [6]. For sparse footholds, recent methods use terrain-aware learning [7], [8], terrain reconstruction [9], [10], and foothold priors [11]. Complementary work incorporates explicit con-straints into policy optimization to reduce reward engi-neering and guide locomotion behavior [12]. Model-based approaches address contact feasibility through centroidal planning, trajectory optimization, and multi-contact optimal control [22], [23], [24]. These studies motivate our focus on how payload-induced dynamics changes affect the execution of contacts on narrow support surfaces. 
+
+B. Robust and Adaptive Locomotion 
+
+Dynamics randomization improves robustness by exposing policies to variations in physical parameters during training [13], [14]. RMA infers a latent dynamics context from recent observations and actions to condition a policy trained with privileged information [15]. Concurrent estimation and control [16] and learned terrain and state representations [17] further demonstrate the value of history-based inference. Such representations can retain control-relevant information without explicitly identifying inertial parameters. LOAD preserves this implicit pathway while adding supervised inertial estimates. Our comparisons examine the separate and combined contributions of these two information sources. 
+
+C. Physical Parameter Estimation 
+
+System identification and adaptive control use observed responses to recover uncertain physical parameters [25], [26]. For legged robots, kinematics and contact constraints sup-port state estimation [27], [28], while constrained moving-horizon estimation jointly recovers states and ground-reaction forces [29]. SPI-Active combines sampling-based parameter identification with active exploration for sim-to-real transfer [30]. PRIME jointly estimates motion, contact forces, and inertial parameters through physically consistent optimization [31]. LOAD uses a learned recurrent identifier to supply online inertial estimates directly to the locomotion policy. Its evaluation centers on how these estimates com-plement implicit history in precision foothold control. III. LOAD: L OCOMOTION WITH ONLINE AWARENESS OF 
+
+DYNAMICS 
+
+LOAD integrates dynamics perception and terrain per-ception for precision foothold locomotion under unknown payloads. Two separate gated recurrent unit (GRU) networks process proprioceptive history to extract an implicit dynamics feature and estimate payload-induced changes in the torso’s inertial properties relative to a nominal model. A teacher policy uses terrain features encoded from privileged height maps and is distilled into a student policy that uses on-board depth images for deployment. The locomotion policy combines the implicit dynamics feature, inertial estimates, and terrain features with current proprioceptive observations. Fig. 2 provides an overview of LOAD. 
+
+A. Observation and Action Spaces 
+
+We train the teacher policy using proximal policy opti-mization (PPO) [32] with an asymmetric actor–critic archi-tecture. The actor is a multilayer perceptron (MLP) policy 
+
+πϕ with parameters ϕ. The teacher πϕT and student πϕS have separate parameter sets and follow the same policy form: 
+
+at = πϕ
+
+
+
+oprop  
+
+> t
+
+, pt, ct, N ( ˆθt), zDyn  
+
+> t
+
+, zTer 
+
+> t
+
+
+
+, (1) where oprop  
+
+> t
+
+is the current proprioceptive observation, pt
+
+is the gait-phase encoding, ct is the locomotion command, 
+
+ˆθt is the online estimate of the torso inertial parameter variation θ defined in Sec. III-C, N normalizes the inertial coordinates, zDyn  
+
+> t
+
+and zTer  
+
+> t
+
+are the dynamics and terrain Fig. 2: Overview of LOAD. sg denotes stop-gradient. features, respectively. The policy action at is clipped, scaled, and offset to obtain joint-position targets, which are tracked by low-level proportional–derivative controllers. The proprioceptive observation oprop  
+
+> t
+
+includes base an-gular velocity and projected gravity in the body frame, joint position offsets from the default configuration, joint velocities, and the previous action. The gait-phase encoding 
+
+pt contains the sine and cosine of the global gait phase with a period of 0.6 s and is set to zero for standing. The command 
+
+ct specifies the desired planar velocity and yaw rate. During privileged training, the teacher receives a local height map mt. During deployment, this privileged observa-tion is unavailable, and the student instead receives a depth image dt from the onboard camera. Their encoded terrain features are denoted by zTt and zSt , respectively, and are used as zTer  
+
+> t
+
+in Eq. (1). The terrain encoders are described in Sec. III-D. The MLP critic receives noise-free proprioceptive obser-vations, commands, gait phases, ground-truth inertial param-eters and height maps, together with base linear velocity and foot heights, air times, contact states, and forces. 
+
+B. Teacher Policy Training 
+
+Reward design : We adapt the locomotion rewards from Unitree RL Mjlab [33] and introduce a posture reference tailored to narrow-beam traversal. The reference joint con-figuration is computed using leg inverse kinematics with a reference support width of 0.10 m to encourage a consistently narrow walking stance. Table I lists the reward terms and their weights wk. At each control step, the total reward is rt = ∆ t P 
+
+> k
+
+wkfk(t), where fk denotes the unweighted TABLE I: Rewards used for training teacher policy.                            
+
+> Reward term Weight Reward term Weight
+> Linear velocity tracking 1Soft joint limits −10
+> Angular velocity tracking 1Action rate −0.05
+> Gait contact agreement 0.5Joint acceleration −2.5×10 −7
+> Support-width posture 1Foot clearance −1
+> Standing posture −1Foot slip −0.25
+> Upright orientation −1Touchdown impact −10 −3
+> Body angular velocity −0.05 Failure termination −200
+> Centroidal Ang. moment. −0.025
+
+reward term and ∆t = 0 .02 s . All terms, including the failure penalty, are scaled by ∆t.Forward commands are sampled uniformly from 
+
+[0 .5, 0.7] m/s, with zero lateral and yaw commands; 5% of environments receive standing commands. Hip/thigh/calf tolerances for the support-width posture reward are (0 .05 , 0.10 , 0.15) rad for standing and 
+
+(0 .15 , 0.35 , 0.50) rad for moving commands. Gait-phase offsets are (0 , 0.5, 0.25 , 0.75) for (FR , FL , RR , RL) , with a stance duty factor of 0.8. The target terrain-relative foot clearance is 0.10 m, and soft joint limits span 90% of the joint range. The action-rate term uses the clipped action before joint-target scaling and offset. 
+
+Action regularization : Clipping limits the executed actions but does not directly constrain the underlying policy means. To discourage excessive growth of the teacher action means, we adopt the action-bound regularization used in the Deep-Mimic implementation [34], penalizing deviations beyond the clipping bounds: 
+
+Lbound = 1
+
+na
+
+Et
+
+" naX
+
+> i=1
+
+max( |μt,i | − amax , 0) 2
+
+#
+
+, (2) where μt,i is the unclipped teacher action mean for joint 
+
+i, na = 12 is the action dimension, and amax = 3 is the action clipping limit. This term is added directly to the PPO optimization loss with weight λbound = 10 −3, without timestep scaling. 
+
+Termination : Episodes terminate upon any of four failure conditions: body tilt exceeding 70 ◦ from upright, non-foot terrain contact, self-collision, or a fall from the beam. Episodes also end when all four feet contact the terminal platform without failure (success), or at the 20 s time limit (timeout). Success and timeout alone incur no failure penalty. 
+
+Terrain curriculum : We use a terrain curriculum with 15 width levels. All environments begin on a 3.20 m-wide sup-port surface. The nominal beam width decreases to 0.50 m, followed by 0.20 m, and subsequently decreases in 0.01 m increments to 0.08 m. Each environment advances one level after a successful crossing without failure and retreats one level after an unsuccessful episode, including a timeout, with the level bounded below by the initial level. After a successful crossing at the narrowest level, a new level is sampled uniformly from all levels. Beam lengths are sampled from 0.75–3.00 m, and beam widths beyond the initial level are perturbed uniformly by up to ±0.005 m. Beam surface heights are sampled uniformly from 0.20–0.60 m. TABLE II: Key domain randomization settings.                                 
+
+> Parameter Range / value
+> Payload item count {0, . . . , 8}
+> Foot friction coefficient [0 .3,1.6]
+> Encoder bias (rad) [−0.02 ,0.02]
+> Action delay (ms) {0,5,10 }
+> Proprio. noise bounds ±(0 .20 ,0.05 ,0.01 ,1.50)
+> Height map noise (m) T[−0.10 ,0.10]
+> Camera position offset (m) S[−0.01 ,0.01]
+> Camera angle bounds (rad) S±(0 .02 ,0.10 ,0.02)
+> Depth multiplier S[0 .98 ,1.02]
+> Depth Gaussian noise (m) Sσ= 0 .01
+> Pixel / frame dropout prob. S0.002 /0.05
+> Depth delay (ms) S{0,20 ,40 }
+> T/S: Teacher/Student only; unmarked rows apply to both. Intervals and discrete sets denote uniform sampling.
+
+Domain randomization : Table II summarizes the key dy-namics and observation randomization settings. Propriocep-tive noise bounds are ordered as angular velocity (rad/s), projected gravity, joint position (rad), and joint velocity (rad/s). At each episode reset, we uniformly sample an inte-ger number of payload items from zero to eight and randomly stack them in the basket with support from below. Each item has a mass of 1 kg and dimensions of 0.15 ×0.08 ×0.03 m. In simulation, the basket measures 0.30 ×0.24 ×0.15 m (length 
+
+× width × height). The stacking layout has 2×3×6 available positions along these directions, with stacks allowed to extend above the rim. The combined base and payload mass, center of mass, and inertia are computed from their rigid-body composition, yielding coupled inertial variations. 
+
+C. Online Dynamics Perception 
+
+Inertia Parameterization : We represent payload-induced changes through the inertial properties of the torso, including the rigidly attached basket and payload. Let m, c, and IC
+
+denote its mass, CoM position and inertia tensor about its CoM expressed in the body frame. We use a log-Cholesky parameterization [35] to represent physically consistent torso inertial properties with unconstrained coordinates:  
+
+> 12
+
+tr( IC )I3 − IC
+
+m = UU ⊤, U =
+
+
+
+ed1 s12 s13 
+
+0 ed2 s23 
+
+0 0 ed3
+
+ ,
+
+where I3 is the identity matrix. The corresponding ten coordinates are 
+
+T (m, c, IC ) =  12 log m, d 1, d 2, d 3, s 12 , s 23 , s 13 , c⊤⊤.
+
+Dynamics Perception : The dynamics encoder and inertial estimator use separate GRUs, each followed by an MLP output head. Both the encoder and estimator receive the normalized proprioceptive observations, gait phases, and commands defined in Sec. III-A. Omitting input normaliza-tion for brevity, their recurrent updates are 
+
+hkt = f k
+
+> GRU
+
+ oprop  
+
+> t
+
+, pt, ct, hkt−1
+
+ , (3) where k ∈ {imp , exp } denotes the implicit and explicit branches. Each branch has a 64-dimensional hidden state 
+
+hkt ; neither parameters nor hidden states are shared between branches. The dynamics encoder maps its hidden state to the implicit feature supplied to the actor: 
+
+zDyn  
+
+> t
+
+= f imp MLP (himp  
+
+> t
+
+), zDyn  
+
+> t
+
+∈ R6. (4) This branch is trained through PPO. The estimation target for the inertial estimator is the coordinate difference from the nominal torso model: 
+
+θ = T (m, c, IC ) − T (m0, c0, IC, 0), (5) where subscript 0 denotes the nominal torso model without the basket or payload. Thus, the explicit estimate represents inertial changes in log-Cholesky coordinates rather than the mass, center of mass, and inertia tensor components of the payload alone. The inertial estimator maps its hidden state to the explicit estimate: 
+
+ˆθt = f exp MLP (hexp  
+
+> t
+
+), ˆθt ∈ R10 . (6) It is trained using simulated ground-truth inertial parameters with the supervised loss 
+
+Lid = Et
+
+ 110 N ( ˆθt) − N (θ) 22
+
+
+
+, (7) where N uses running means and standard deviations of the ground-truth coordinates collected during training. The same normalization is applied to predictions and targets. The estimator is trained alongside PPO using Lid with unit weight, while its normalized output is detached before being passed to the actor. The two branches provide complementary information: the explicit estimate supplies a representation supervised by physical inertial parameters, while the implicit feature retains task-relevant history without requiring all information to be expressed through the inertial coordinates. Both modules infer their outputs from proprioceptive history without visual input and are trained during teacher learning, then frozen during distillation. 
+
+D. Terrain Perception 
+
+Terrain perception encodes local support geometry into the terrain feature supplied to the locomotion policy. 
+
+Height-map encoding : The teacher receives a yaw-aligned height map mt covering 0.80 × 0.40 m, centered 0.12 m forward of the torso origin. Longitudinal and lateral sampling intervals are 0.04 m and 0.02 m, respectively, yielding a 21 ×
+
+21 grid supplied at each policy step. An MLP-based height-map encoder compresses the map into the terrain feature zTt .
+
+Depth-based encoding : For deployment, the student instead uses a CNN to extract spatial features from the current 
+
+424 × 240 depth image dt from a forward-facing camera. Depth is represented as distance along the camera optical axis, clipped to [0 .3, 3.0] m, and normalized to [0 , 1] before encoding. The terrain memory uses a GRU to integrate these features with normalized proprioceptive observations, gait phases, and commands to form the student terrain feature 
+
+zSt . Proprioception provides motion cues, while the recurrent memory retains terrain information after the corresponding region leaves the camera’s field of view. 
+
+E. Policy Distillation 
+
+We train the depth-based student to imitate the height-map teacher using DAgger-style online imitation learning [36], which is common practice in perceptive locomotion [37]. 
+
+Imitation objective : The student minimizes the action im-itation loss Ldist = 1 
+
+> na
+
+Et[∥aSt − ¯aTt ∥22], where na is the action dimension, aSt is the deterministic action output of the student policy πϕS , and ¯aTt is the clipped deterministic action target from the teacher policy πϕT . The action regularization in Sec. III-B discourages but does not strictly prevent teacher action means from exceeding the clipping bounds. Imitating raw teacher actions could therefore cause the student to reproduce excessively large outputs, even though the excess beyond the clipping bounds is discarded before execution. 
+
+Training procedure : During rollout collection, the proba-bility of executing teacher actions decreases linearly from one to zero, while the teacher provides supervision at every visited state. Student training uses the same beam-width curriculum, physical randomization and proprioceptive noise as teacher training. To account for onboard depth sensing, we ad-ditionally apply the camera pose perturbations and depth corruption listed in Table II. Camera position bounds apply to each axis, and angle bounds follow roll, pitch, and yaw. Depth corruption includes spatially and temporally correlated missing regions and simulated stereo occlusions. To retain the dynamics representations learned during teacher training, we freeze the teacher and the inherited dynamics encoder and inertial estimator, while training the student depth encoder, terrain memory, and actor. Jointly up-dating the two dynamics modules with the depth encoder and terrain memory led to distillation failure in our experiments. IV. E XPERIMENTS AND RESULTS 
+
+A. Evaluation Protocol 
+
+Experiment Setup : We evaluate LOAD in simulation and on a Unitree Go2 equipped with a torso-mounted shopping basket with a measured mass of 0.76 kg. The payload consists of modular one-kilogram fitness-vest sandbags that can be stacked or repositioned inside the basket. Reported payload masses refer to the sandbags alone and exclude the basket. We vary the payload configuration by changing the number and placement of the sandbags. All variants use payload randomization during training, with payload masses ranging from 0 to 8 kg. Unless otherwise stated, tests use left-side payloads, a 3 m-long beam, and a forward velocity command of 0.6 m/s. Unilateral loading introduces a lateral CoM offset, increasing the demands on balance control. We use traversal success rate as the primary evaluation metric. TABLE III: Policy variants by implicit feature and inertial input.                     
+
+> Inertial input Implicit feature None Estimated Ground truth No Baseline Explicit Explicit -GT Yes Implicit LOAD LOAD-GT 0246810
+> Training time (h)
+> 020 40 60 80 100
+> Success (%)
+> (a)
+> 812 16 20
+> Beam width (cm)
+> 025 50 75 100
+> Success (%) (b)
+> 8 kg Front Payload (top view)
+> 04812
+> Payload mass (kg) (c)
+> 8 cm Beam (top view)
+> Baseline Implicit Explicit LOAD Explicit-GT LOAD-GT
+
+Fig. 3: Teacher-policy comparison: (a) success rate over the latest 1,000 episodes on the narrowest beam (0.08 m). Faint lines show raw rates; bold lines show exponential moving averages with a 3 min time constant. (b) Varying beam width at 8 kg and (c) varying payload mass at 8 cm after 17,000 training iterations with left-side payloads. Shading in (b,c) shows pointwise 95% Wilson intervals over 192 trials (64 per evaluation seed); the vertical dashed line in (c) marks the 8 kg training limit. 
+
+B. Teacher Policy Evaluation 
+
+We compare the six policy variants summarized in Ta-ble III. All teacher policies are evaluated with the same height-map observations, commands, and low-level con-troller. In the reported training runs, policies with implicit dy-namics features reach high traversal success earlier than their counterparts without these features (Fig. 3(a)). This trend also holds when ground-truth inertial parameters are available, as illustrated by LOAD-GT versus Explicit -GT. Fig. 3(b,c) compares the six teacher policies across beam widths and payload masses. Three trends emerge. First, the implicit dynamics feature improves performance across different inertial inputs, as shown by Baseline versus 
+
+Implicit , Explicit versus LOAD, and Explicit -GT versus LOAD-GT. Its benefit persists even when ground-truth in-Fig. 4: Identification with a 6 kg left-side payload over 1024 episodes. Solid curves and bands show the mean and ±1
+
+standard deviation; dashed lines indicate ground truth. The CoM panel and insets show the first second. ertial parameters are available. Second, comparisons within the training payload range highlight the value of inertial information and its accuracy. With an 8 kg payload on an 8 cm beam, success rises from 41.7% for Baseline to 62.0% for Explicit and 78.6% for Explicit -GT. However, the decline of Explicit -GT on heavier, out-of-distribution (OOD) payloads of 10–12 kg shows that ground-truth inertial parameters alone do not guarantee generalization beyond the training range. Finally, on an 8 cm beam, LOAD achieves 95.3% success with an 8 kg payload, compared with 91.7% for Implicit . At 10 kg, the corresponding rates are 69.8% and 57.8%. LOAD also achieves the overall success rate closest to LOAD-GT: 96.5% versus 97.8%, averaged over all 49 tested beam-width and payload-mass combinations, including OOD payloads. This supports combining implicit dynamics features with supervised inertial estimates. 
+
+C. Identification Accuracy and Generalization 
+
+We evaluate the LOAD teacher after 17,500 training itera-tions on a 20 cm-wide beam. Physical domain randomization and proprioceptive noise are enabled. The decoded physical quantities describe the combined torso, basket, and payload, excluding the legs. CoM coordinates and inertia components are reported relative to the base-link origin. Fig. 4 shows rapid recovery of the lateral CoM offset, while mass and diagonal inertia estimates retain positive biases during traversal. For aggregate evaluation, we sample 1,024 payload configurations with integer masses uniformly distributed from 0 to 12 kg and use the training stack-placement procedure. Fig. 5 shows higher mass, vertical CoM, and inertia errors for unseen heavier payloads, while horizontal CoM errors remain small. This indicates limited 
+
+Fig. 5: Full-episode mean absolute error (MAE) for random payloads: 0–8 kg within the training range and 9–12 kg outside it. Errors include the initial transient and give equal weight to each episode within a group. extrapolation of the inertial estimates beyond the training mass range. 
+
+D. Student Policy Comparison 
+
+To assess deployment performance, we compare the depth-based students obtained by distilling Explicit , Implicit , and LOAD (Fig. 6). We exclude Baseline due to its low teacher-policy success rate, and Explicit -GT and LOAD-GT because they require ground-truth inertial parameters unavailable at deployment. The comparison evaluates whether combining implicit dynamics features with explicit inertial estimates remains beneficial when terrain observations come from depth images. Physical domain randomization and propri-oceptive noise are enabled, while depth randomization is disabled during evaluation. During distillation, we freeze the inherited dynamics encoder in Implicit , the inertial estimator in Explicit , and both modules in LOAD, as described in Sec. III-C. LOAD retains a clear advantage on narrow beams within the training mass range. At 8 kg on a 10 cm beam, its student achieves approximately 90% success, compared with 70% for Implicit and 12% for Explicit . On an 8 cm beam with a 6 kg payload, the corresponding rates are 63%, 23%, and 2%. These results support the complementary roles of implicit and explicit dynamics information after visual dis-tillation. Generalization to heavier payloads remains limited: at 12 kg, LOAD stays below 50% success at every tested beam width, and Explicit performs better on the wider beams. Thus, LOAD’s advantage after distillation does not extend uniformly beyond the training mass range. 
+
+E. Hardware Evaluation 
+
+We evaluate Implicit and LOAD on hardware, as both perform well in simulation and require no ground-truth iner-tial parameters. Fig. 7 shows representative LOAD traversals with unilateral and evenly distributed payloads. With payloads placed on one side, the maximum success-fully tested payloads on a 15 cm beam are 6 kg for Implicit 
+
+and 9 kg for LOAD, with the latter placed on the left side Fig. 6: Post-distillation traversal success of depth-based student policies with left-side payloads: (a) Explicit , (b) Implicit ,and (c) LOAD. Each cell reports success (%) over 128 trials across four evaluation seeds. Dashed orange curves indicate interpolated 50% success contours. 
+
+Fig. 7: Hardware demonstrations of LOAD on Go2 robot: (a) a 6 kg right-side payload on a 10 cm beam, (b) a 9 kg left-side payload on a 15 cm beam, and (c) an evenly distributed 11 kg payload on a 15 cm beam. Note that the payload masses exclude the 0.76 kg basket, and the beams have round edges with ∼1cm radius which reduces actual support width. (Fig. 7(b)). On a 10 cm beam, the maximum successfully tested payloads are 0 kg for Implicit and 6 kg for LOAD, with the latter placed on the right side (Fig. 7(a)). With an evenly distributed payload, LOAD also traverses the 15 cm 
+
+beam carrying 11 kg (Fig. 7(c)). Including the 0.76 kg basket, the combined basket and payload mass reaches 11.76 kg. Unitree specifies maximum payloads of approximately 10– 12 kg across Go2 variants [38], placing this narrow-beam demonstration near the manufacturer’s stated payload limits. Fig. 8 shows lateral velocity oscillations consistent with inverted pendulum dynamics during locomotion, while the estimated forward velocity remains below the commanded value. 
+
+F. Discussion 
+
+Across the experiments, three consistent trends emerge. First, within the training mass range, performance differences are small on wide beams and become pronounced on narrow beams. Second, LOAD provides a task-level advantage over 
+
+Fig. 8: Beam traversal with a 6 kg right-side payload on a 0.15 m-wide beam: (a) foot placement, base trajectory, and estimated lateral velocity; (b) estimated and commanded forward velocities. Base and foot positions are reconstructed using a revised version of PRIME [31] that operates without motion-capture input. 
+
+Implicit and approaches LOAD-GT performance for in-distribution payloads. Third, OOD generalization remains limited in both inertial estimation and control. Together, these results support the central claim of LOAD: precise foothold locomotion benefits from perceiving both the external terrain and the robot’s current physical condition. V. C ONCLUSION AND FUTURE WORK 
+
+We presented LOAD, a locomotion approach that com-bines terrain perception, explicit inertial estimation, and implicit dynamics features for narrow-beam traversal un-der unknown payloads. Separate recurrent modules recover physically interpretable inertial changes and task-relevant history, while a privileged teacher using height maps is distilled into a deployable student using onboard depth images. Comparisons across six policy variants demonstrate the complementary value of explicit and implicit dynamics information: history remains beneficial even with ground-truth inertial parameters, and the LOAD teacher achieves an overall success rate close to that of LOAD-GT over the tested conditions. The benefit of the combined representation persists after visual distillation, particularly on narrow beams within the training payload range. Hardware experiments demonstrate traversal with unilateral payloads of 9 kg on a 15 cm beam and 6 kg on a 10 cm beam. Generalization beyond the training payload range remains limited. Inertial estimates exhibit increased errors for heav-ier loads, while performance degradation with ground-truth parameters indicates that accurate identification alone does not ensure successful extrapolation. Future work will inves-tigate uncertainty-aware conditioning and training strategies that improve both identification and control under unseen dynamics. We will also extend the evaluation to payload changes during locomotion and more varied support geome-tries, examining how terrain and dynamics perception jointly support reliable contact execution. REFERENCES [1] J. Hwangbo, J. Lee, A. Dosovitskiy, D. Bellicoso, V. Tsounis, V. Koltun, and M. Hutter, “Learning agile and dynamic motor skills for legged robots,” Science Robotics , vol. 4, no. 26, p. eaau5872, 2019. [2] J. Lee, J. Hwangbo, L. Wellhausen, V. Koltun, and M. Hutter, “Learning quadrupedal locomotion over challenging terrain,” Science Robotics , vol. 5, no. 47, p. eabc5986, 2020. [3] N. Rudin, D. Hoeller, P. Reist, and M. Hutter, “Learning to walk in minutes using massively parallel deep reinforcement learning,” in 
+
+Proceedings of the Conference on Robot Learning , ser. Proceedings of Machine Learning Research, vol. 164. PMLR, 2022, pp. 91–100. [4] T. Miki, J. Lee, J. Hwangbo, L. Wellhausen, V. Koltun, and M. Hutter, “Learning robust perceptive locomotion for quadrupedal robots in the wild,” Science Robotics , vol. 7, no. 62, p. eabk2822, 2022. [5] X. Cheng, K. Shi, A. Agarwal, and D. Pathak, “Extreme parkour with legged robots,” in 2024 IEEE International Conference on Robotics and Automation (ICRA) . IEEE, 2024, pp. 11 443–11 450. [6] D. Hoeller, N. Rudin, D. Sako, and M. Hutter, “ANYmal parkour: Learning agile navigation for quadrupedal robots,” Science Robotics ,vol. 9, no. 88, p. eadi7566, 2024. [7] C. Zhang, N. Rudin, D. Hoeller, and M. Hutter, “Learning agile locomotion on risky terrains,” in Proceedings of the IEEE/RSJ In-ternational Conference on Intelligent Robots and Systems . IEEE, 2024, pp. 11 864–11 871. [8] H. Wang, Z. Wang, J. Ren, Q. Ben, T. Huang, W. Zhang, and J. Pang, “BeamDojo: Learning agile humanoid locomotion on sparse footholds,” in Proceedings of Robotics: Science and Systems , 2025. [9] R. Yu, Q. Wang, Y. Wang, Z. Wang, J. Wu, and Q. Zhu, “Walking with terrain reconstruction: Learning to traverse risky sparse footholds,” arXiv preprint arXiv:2409.15692 , 2024. [Online]. Available: https://arxiv.org/abs/2409.15692 [10] R. Yu, Q. Wang, H. Li, Z. Jun, Z. Wang, J. Wu, and Q. Zhu, “Start: Traversing sparse footholds with terrain reconstruction,” IEEE Robotics and Automation Letters , vol. 11, no. 2, pp. 2194–2201, 2026. [11] L. Wang, K. Yao, Y. Liu, W. Qin, J. Wu, Z. Sun, and Q. Zhu, “PUMA: Perception-driven unified foothold prior for mobility aug-mented quadruped parkour,” IEEE Robotics and Automation Letters ,vol. 11, no. 9, pp. 10 290–10 297, 2026. [12] Y. Kim, H. Oh, J. Lee, J. Choi, G. Ji, M. Jung, D. Youm, and J. Hwangbo, “Not only rewards but also constraints: Applications on legged robot locomotion,” IEEE Transactions on Robotics , vol. 40, pp. 2984–3003, 2024. [13] X. B. Peng, M. Andrychowicz, W. Zaremba, and P. Abbeel, “Sim-to-real transfer of robotic control with dynamics randomization,” in 
+
+Proceedings of the IEEE International Conference on Robotics and Automation . IEEE, 2018, pp. 3803–3810. [14] J. Tan, T. Zhang, E. Coumans, A. Iscen, Y. Bai, D. Hafner, S. Bo-hez, and V. Vanhoucke, “Sim-to-real: Learning agile locomotion for quadruped robots,” in Proceedings of Robotics: Science and Systems ,2018. [15] A. Kumar, Z. Fu, D. Pathak, and J. Malik, “RMA: Rapid motor adaptation for legged robots,” in Proceedings of Robotics: Science and Systems , 2021. [16] G. Ji, J. Mun, H. Kim, and J. Hwangbo, “Concurrent training of a control policy and a state estimator for dynamic and robust legged locomotion,” IEEE Robotics and Automation Letters , vol. 7, no. 2, pp. 4630–4637, 2022. [17] I. M. A. Nahrendra, B. Yu, and H. Myung, “DreamWaQ: Learning robust quadrupedal locomotion with implicit terrain imagination via deep reinforcement learning,” in Proceedings of the IEEE International Conference on Robotics and Automation . IEEE, 2023, pp. 5078–5084. [18] Y. Dong, J. Ma, L. Zhao, W. Li, and P. Lu, “MARG: MAstering risky gap terrains for legged robots with elevation mapping,” IEEE Transactions on Robotics , vol. 41, pp. 6123–6139, 2025. [19] C.-Y. Lee, S. Yang, B. Bokser, and Z. Manchester, “Enhanced balance for legged robots using reaction wheels,” in 2023 IEEE International Conference on Robotics and Automation (ICRA) . IEEE, 2023, pp. 9980–9987. [20] D. Li, B. Ai, N. Bohlinger, J. Peters, H. Su, and H. I. Christensen, “Rapid embodiment adaptation for quadrupedal locomotion,” arXiv preprint arXiv:2608.01506 , 2026. [Online]. Available: https://arxiv. org/abs/2608.01506 [21] O. Youngquist and H. Zhang, “Learning forward looking adaptation to dynamic payloads for quadruped locomotion via physics-informed neural networks,” in 2026 IEEE International Conference on Robotics and Automation (ICRA) , 2026. [Online]. Available: https://hcrlab.gitlab.io/project/flap/ [22] H. Dai, A. Valenzuela, and R. Tedrake, “Whole-body motion planning with centroidal dynamics and full kinematics,” in Proceedings of the IEEE-RAS International Conference on Humanoid Robots . IEEE, 2014, pp. 295–302. [23] A. W. Winkler, C. D. Bellicoso, M. Hutter, and J. Buchli, “Gait and trajectory optimization for legged systems through phase-based end-effector parameterization,” IEEE Robotics and Automation Letters ,vol. 3, no. 3, pp. 1560–1567, 2018. [24] C. Mastalli, R. Budhiraja, W. Merkt, G. Saurel, B. Hammoud, M. Naveau, J. Carpentier, L. Righetti, S. Vijayakumar, and N. Mansard, “Crocoddyl: An efficient and versatile framework for multi-contact optimal control,” in Proceedings of the IEEE Interna-tional Conference on Robotics and Automation . IEEE, 2020, pp. 2536–2542. [25] J.-J. E. Slotine and W. Li, Applied Nonlinear Control . Englewood Cliffs, NJ: Prentice Hall, 1991. [26] S. Sastry and M. Bodson, Adaptive Control: Stability, Convergence, and Robustness . Englewood Cliffs, NJ: Prentice Hall, 1989. [27] M. Bloesch, M. Hutter, M. A. Hoepflinger, S. Leutenegger, C. Gehring, C. D. Remy, and R. Siegwart, “State estimation for legged robots: Consistent fusion of leg kinematics and IMU,” in Proceedings of Robotics: Science and Systems , Sydney, Australia, 2012. [28] R. Hartley, M. Ghaffari, R. M. Eustice, and J. W. Grizzle, “Contact-aided invariant extended kalman filtering for robot state estimation,” 
+
+The International Journal of Robotics Research , vol. 39, no. 4, pp. 402–430, 2020. [29] J. Kang and X. Xiong, “Simultaneous ground reaction force and state estimation via constrained moving horizon estimation,” in Proceedings of the IEEE International Conference on Robotics and Automation .IEEE, 2025, pp. 7080–7086. [30] N. Sobanbabu, G. He, T. He, Y. Yang, and G. Shi, “Sampling-based system identification with active exploration for legged Sim2Real learning,” in Proceedings of The 9th Conference on Robot Learning ,ser. Proceedings of Machine Learning Research, vol. 305. PMLR, 2025, pp. 578–598. [31] J. Kang, K. Ren, T. Pang, and X. Xiong, “PRIME: Physically-consistent robotic inertial and motion estimation for legged and humanoid robots,” in Proceedings of Robotics: Science and Systems ,2026. [Online]. Available: https://arxiv.org/abs/2605.17681 [32] J. Schulman, F. Wolski, P. Dhariwal, A. Radford, and O. Klimov, “Proximal policy optimization algorithms,” arXiv preprint arXiv:1707.06347 , 2017. [33] Unitree Robotics, “Unitree RL Mjlab,” GitHub repository, accessed: Sep. 13, 2026. [Online]. Available: https://github.com/unitreerobotics/ unitree rl mjlab [34] X. B. Peng, P. Abbeel, S. Levine, and M. Van de Panne, “Deepmimic: Example-guided deep reinforcement learning of physics-based char-acter skills,” ACM Transactions On Graphics (TOG) , vol. 37, no. 4, pp. 1–14, 2018. [35] C. Rucker and P. M. Wensing, “Smooth parameterization of rigid-body inertia,” IEEE Robotics and Automation Letters , vol. 7, no. 2, pp. 2771–2778, 2022. [36] S. Ross, G. Gordon, and D. Bagnell, “A reduction of imitation learning and structured prediction to no-regret online learning,” in Proceedings of the Fourteenth International Conference on Artificial Intelligence and Statistics , 2011, pp. 627–635. [37] N. Rudin, J. He, J. Aurand, and M. Hutter, “Parkour in the wild: Learning a general and extensible agile locomotion policy using multi-expert distillation and rl fine-tuning,” The International Journal of Robotics Research , p. 02783649261455067, 2026. [38] Unitree Robotics, “Unitree Go2,” https://www.unitree.com/go2/, ac-cessed: Sep. 16, 2026.

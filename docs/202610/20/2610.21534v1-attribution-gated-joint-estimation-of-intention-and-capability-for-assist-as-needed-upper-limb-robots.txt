@@ -1,0 +1,589 @@
+Title: Attribution-Gated Joint Estimation of Intention and Capability for Assist-as-Needed Upper-Limb Robots
+
+URL Source: https://arxiv.org/pdf/2610.21534v1
+
+Published Time: Fri, 16 Oct 2026 01:03:22 GMT
+
+Number of Pages: 31
+
+Markdown Content:
+## Attribution-Gated Joint Estimation of Intention and Capability for Assist-as-Needed Upper-Limb Robots 
+
+Pengcheng Li a, Shuxiang Guo a,b, ∗, Hanze Wang a, Jun Leng a, Bin Wang c,Mingchao Ding c
+
+> a
+
+Department of Electronic and Electrical Engineering, Southern University of Science and Technology, Shenzhen, China 
+
+> b
+
+Aerospace Center Hospital, School of Life Science, and the Key Laboratory of Convergence Medical Engineering System and Healthcare Technology, Ministry of Industry and Information Technology, Beijing Institute of Technology, Beijing, China 
+
+> c
+
+Department of Peripheral Vascular Intervention, Aerospace Center Hospital, School of Life Science, Beijing Institute of Technology, Beijing, 100081, China 
+
+Abstract 
+
+Assist-as-needed (AAN) control must distinguish between changes in in-tended motion and changes in effective voluntary torque capability, even though both can produce similar kinematic and interaction responses. Adual-measurand multimodal MHE–MPC architecture is developed as the base framework, in which the intended trajectory and the task-dependent effective voluntary torque capability are estimated online as distinct quanti-ties, and both estimates are used to adapt robotic assistance. Building on this architecture, the ambiguity between the two update channels is formulated as a continuous credit-assignment problem and resolved by an attribution gate. A trajectory-change indicator is obtained from persistent corrective in-teraction, whereas a capability-change indicator is derived from the residual between normalized muscle activation and dynamics-reconstructed voluntary torque. Nine healthy participants completed factorial target-height–load tri-als and a pre–post fatigue cup-transport task. Without target-height input, the gated method generated correctly ordered Low–Middle–High references under every load: target changes were preferentially assigned to trajectory adaptation, whereas added load shifted adaptation toward the capability channel. It achieved the lowest RMSE in all nine conditions (0.017 rad ver-
+
+> ∗
+
+Corresponding author. 
+
+Email address: guo.shuxiang@sustech.edu.cn (Shuxiang Guo) arXiv:2610.21534v1 [cs.RO] 15 Oct 2026 sus 0.041 rad for ungated dual estimation and 0.127 rad for fixed-reference error-based AAN). Post-fatigue capability estimates decreased and assistance increased at all heights, supporting functional feasibility. 
+
+Keywords: Attribution gating, Assist-as-needed control, Motion intention estimation, Voluntary torque capability, Model predictive control. 
+
+1. Introduction 
+
+Upper-limb motor impairment creates demand for intensive and task-specific rehabilitation training [1, 2]. Repeatable movement practice can be delivered and human–robot interaction can be quantified by rehabilitation robots during training [2]. Robot-mediated rehabilitation can be further extended by wearable platforms toward functional tasks and less structured environments [3–6]. Task completion can be facilitated by assist-as-needed (AAN) control while the user’s voluntary contribution is preserved. This balance is par-ticularly difficult in wearable systems, which operate in continuous physical interaction with users whose movement goals, effort, fatigue, and physical limitations may vary across repetitions [7, 8]. A reference trajectory that is inconsistent with the user’s intended movement can produce tracking er-ror and interaction torque, but similar responses can also arise when volun-tary capability is insufficient for the required motion. Active participation may be suppressed by excessive assistance, whereas task completion may be compromised or interaction load may be increased by insufficient assistance. Effective AAN control must therefore address both trajectory compatibility and assistance demand. Trajectory compatibility has been addressed by one line of research through human-intention estimation and reference adaptation. sEMG, kine-matics, and interaction torque are combined with model-based or data-driven inference by multimodal methods [9–14]; the reference is further adapted by iterative learning and optimization [11, 12, 15]. Motion intention and arm stiffness have also been estimated simultaneously for variable-impedance interaction [10]. However, stiffness is an interaction property rather than the voluntary torque effectively available for the current task. To the best of the authors’ knowledge, intended trajectory and task-dependent effective voluntary torque capability have not been jointly estimated as distinct online measurands for AAN. Moreover, trajectory-adaptation signals depend on 2whether the user can execute the intended movement. Assistance is modulated by error-based AAN schemes from kinematic de-viation [16–19], whereas voluntary torque, stiffness, or strength are estimated by capability-centered methods to compensate for an inferred deficit [20– 24]. Physiological effort information is provided by direct sEMG-based as-sistance, although signal variability and session-specific calibration remain practical considerations [23, 24]. How much assistance should be provided is determined by these approaches, but tracking and effort deviations may also reflect a purposeful change in the desired trajectory. Trajectory adaptation and capability-based assistance consequently can-not be treated as unrelated estimation problems. The task demand is modi-fied by a change in intention, while the effective voluntary contribution avail-able in the current task context is modified by fatigue, activation–torque in-consistency, and unmodeled external demand. These effects can occur during the same movement and appear in the same motion, interaction, and effort observations. If the two states are updated from overlapping residuals with-out explicit credit assignment, capability- or demand-related signals can be absorbed into trajectory adaptation, while intention-related signals can be absorbed into assistance. To address this problem, a dual-estimation architecture is established and then extended by automatic attribution. The contributions are as follows: (1) An ungated dual-measurand MHE–MPC architecture is developed to esti-mate intended-trajectory deformation and task-dependent effective voluntary torque capability online, and both estimates are used for AAN. (2) An attribution gate is introduced to compensate cross-sensitivity by al-locating shared observations through a gating variable α ∈ [0 , 1] and its complement 1 − α, thereby limiting leakage between intention and capability estimates. (3) The two layers are evaluated separately: dual estimation is tested by comparison with error-based AAN, whereas credit assignment is tested by gated–ungated comparison. 
+
+2. Measurement System and Estimated Quantities 
+
+2.1. Robot and Sensor Platform 
+
+A lightweight, portable upper-limb wearable robot was developed as the experimental platform for elbow and wrist assistance, as depicted in Fig. 1. The device employs a cable-driven mechanism to deliver assistive torque 3to the elbow and wrist. A Unitree motor (GO-M8010-6, YuShu Technol-ogy Co., Hangzhou, China) actuates the elbow module, while two Damiao motors (DM-J4310-2EC, Damiao Technology Co., Shenzhen, China) actu-ate wrist flexion/extension and pronation/supination. Inertial measurement units (IMUs) (JY-901B, WitMotion, Shenzhen, China) mounted on the robot provide estimates of joint angles. An Arduino Mega 2560 microcontroller (Ar-duino, Ivrea, Italy) interfaces with the motor drivers and IMUs, executing the embedded torque control loop at 500 Hz. A laptop runs the upper-level dual-estimation MPC on ROS 2 at 50 Hz, communicating with the Arduino over a local Wi-Fi link. In this setup, the effective one-way communication latency was approximately 20 ms (about one upper-level sampling interval). Because the high-bandwidth torque loop is closed on the Arduino and the upper-level assistance/trajectory-deformation updates are rate-limited and dominated by slow task dynamics (typically 1–10 Hz), this latency mainly acts as a one-step hold on slowly varying commands. A lithium-ion battery powers the system, enabling untethered operation for extended periods. To improve wearability, the actuators are placed away from the dis-tal joints and the assistive torques are transmitted to the elbow and wrist through cables. The robot has a total mass below 5 kg and a wearable mass of approximately 0.7 kg. Adjustable straps support rapid fitting across participants. IMU 
+
+> Unitree motor Damiao motor
+> Lithium battery Arduino
+> PC
+> Wifi
+> Figure 1: Wearable upper-limb robot and control hardware. Cable-driven modules assist elbow and wrist motion, IMUs measure joint angles, and ROS 2 communicates with the embedded motor drivers.
+
+42.2. Sensor Signals and Voluntary Torque Reconstruction 
+
+In the joint-level representation of the cable-driven robot, τ robot denotes the effective joint-side torque returned by the embedded low-level actuation loop. Unmodeled cable compliance, friction, intermittent slack, linearization error, and sensing error are included in the lumped disturbance term d(t)
+
+used in Section 3.5. The robot dynamics in joint space are modeled as 
+
+MR ¨θ + CR(θ, ˙θ) ˙θ + GR(θ) = τ robot − τ HRI , (1) where θ is the joint angle vector, and MR, CR, and GR are the robot’s inertia matrix, Coriolis/centrifugal matrix, and gravity vector, respectively. 
+
+τ robot ∈ Rn is the commanded motor torque, and τ HRI ∈ Rn denotes the generalized human–robot interaction torque in joint space. The signs of 
+
+τ HRI in Eqs. (1) and (2) follow the action–reaction convention at the cuff interface. The dynamics of the human limb are expressed as: 
+
+MH ¨θ + CH (θ, ˙θ) ˙θ + GH (θ) = τ vol + τ HRI , (2) where τ vol represents the net voluntary torque generated by the user, and 
+
+MH , CH , and GH are the human limb’s inertia matrix, Coriolis/centrifugal matrix, and gravity vector, respectively. Under the chosen sign convention, the measured interaction torque is decomposed as: 
+
+τ HRI = τ Assi − τ corr , (3) where τ Assi is the task-aligned assistive torque from the robot, and τ corr 
+
+denotes the corrective interaction torque relative to the current reference. 
+
+2.3. Motion Intention and Capability Variables 
+
+The user’s intended motion is represented as a smooth deformation of a nominal joint-space task trajectory: 
+
+θint (s) = θnom (s) + Φ(s)w, (4) where s ∈ [0 , 1] is the task phase, θnom (s) is the nominal joint trajectory, 
+
+Φ(s) is a fixed smooth basis, and w is the trajectory-deformation parameter vector estimated online. The vector w encodes the amplitude and direction of spatial path deformation, such as raising or lowering the endpoint relative to the nominal reach. 5The effective voluntary capability is represented by a vector-valued, control-oriented torque envelope τ max . Each component corresponds to one controlled joint direction. This state represents the voluntary torque effectively available under the current task and interaction conditions. It may therefore reflect fatigue, activation–torque consistency, and external demand not represented separately in the prediction model. Given a la-tent task-demand torque τ desire , the available voluntary contribution is approximated by an element-wise saturation abstraction: 
+
+τ vol = S(τ desire ; τ max ),
+
+[S(x; τmax )] i = sign( xi) min {| xi|, τ max,i }. (5) The net voluntary contribution is decomposed as 
+
+τ vol = τ task + τ corr , (6) where τ task supports task progression and τ corr represents corrective inter-action relative to the current reference. These representations provide the state coordinates used by the credit-assignment controller in Section III. 
+
+3. Joint Estimation of Intention and Capability 
+
+3.1. Problem Definition 
+
+At control step k, the two latent measurands are stacked in 
+
+zk = wTk τ Tmax,k 
+
+T , (7) where wk parameterizes intended-trajectory deformation and τ max,k denotes the vector-valued, task-dependent effective voluntary capability. Each com-ponent of τ max,k corresponds to the magnitude of voluntary torque that the user can reliably produce in one controlled joint direction under the current task context. Measured motion, interaction, and muscle activity provide the multimodal observation 
+
+yk =
+
+n
+
+θk, ˙θk, ˆτ corr,k , τ EM G vol,k 
+
+o
+
+. (8) Here τ EM G vol,k is the voluntary torque estimated from sEMG; it is decomposed in the calibration stage (Section 4.1.2) into a normalized activation ¯ap,k and a dynamics-reconstructed mechanical voluntary torque τ mech p,k , which are the quantities used in subsequent estimation steps. 6The measurement problem is to infer zk online from a recent window of 
+
+yk. The effects of its two components overlap: deviation from the nominal path may reflect either a different movement goal or insufficient capacity to realize that goal. Defining the errors relative to the nominal and intended paths gives 
+
+enom,k = eint,k + Φ(sk)wk. (9) Thus, nominal tracking error alone cannot determine whether the reference or the assistance should change. Misclassifying an intentional trajectory change as a loss of capability produces unnecessary assistance, whereas mis-classifying a capability loss as a new intention may deform the reference and withhold needed support. The control problem is therefore to identify trajectory intention and voluntary capability simultaneously. 
+
+3.2. System Overview Participant-speci fi c calibration sEMG scale • motion template • dynamics • capability prior Measurements MHE Capability state Trajectory indicator Capability indicator attribution MPC optimize Reference adaption Torque de fi cit Torque/impedance Human–robot system 
+
+> scale/prior
+
+Figure 2: Two-layer joint estimation and assistive-control method. Base MHE and MPC estimate capability and intended trajectory, respectively; both estimates determine as-sistance. The added gate is updated first: 1 − α weights capability data and α weights trajectory correction. 
+
+The method comprises three layers (Fig. 2). In the base architecture, ca-pability is estimated by MHE and intended-trajectory deformation by MPC, and both estimates determine assistance. The extension uses αk to gate their updates. Participant-specific quantities are obtained from the calibration in 7Section 4.1.2; synchronized kinematics, sEMG, and robot torque are then used to reconstruct the participant’s mechanical contribution. The central, joint-direction-specific attribution state αk compensates cross-sensitivity between the two measurement channels. Persistent cor-rective interaction supports a change in movement intention and therefore updates the reference trajectory, whereas disagreement between muscle acti-vation and model-implied voluntary torque supports a change in capability. Importantly, αk is a supervisory state, not an MPC decision variable. At each cycle it is computed before the two optimizations: 1 − αk gates the capability indicator in MHE, whereas αk gates the trajectory indicator in MPC. Moving-horizon estimation (MHE) uses a recent window of measurements to update the effective-capability estimate under reliability, physiological, and rate constraints [25]. The accepted capability is then supplied to model predictive control (MPC), which predicts future motion and jointly optimizes reference deformation and the required assistance subject to joint, torque, and slew-rate limits [26]. Thus, MHE estimates what the participant can effectively contribute under the current task context from the past obser-vation horizon, while the attribution-conditioned MPC estimates intended trajectory over the predictive horizon and jointly determines the remaining assistance demand. 
+
+3.3. Separating Intention and Capability Effects 3.3.1. Trajectory Update From Corrective Torque 
+
+The joint-side interaction torque is reconstructed from the identified robot dynamics, 
+
+ˆτ HRI = τ robot −  MR ¨θ + CR ˙θ + GR
+
+, (10) and the component opposing the current assistance is 
+
+ˆτ corr = τ Assi − ˆτ HRI . (11) Using the human-limb dynamics in Eq. (2), the mechanical voluntary torque is reconstructed as 
+
+ˆτ mech vol,k = MH (θk)¨θk + CH (θk, ˙θk) ˙θk
+
++ GH (θk) − ˆτ HRI,k . (12) For participant p, τ mech p,k denotes the corresponding joint-direction component of this reconstructed torque. To suppress brief impacts and model error, 8the corrective torque is passed through a normalized, leaky observer. Let 
+
+τ norm,k be the calibration-derived maximum voluntary torque for the current joint, used to nondimensionalize the corrective interaction. The observer is constructed as 
+
+¯τ corr,k = sat [−1,1] 
+
+ Dϵ(ˆ τ corr,k )
+
+τ norm,k + ϵ0
+
+
+
+,
+
+˙χk = (1 − λχ∆t) ˙ χk−1 + ∆ t Bχ ¯τ corr,k ,
+
+χk = Π X
+
+ χk−1 + ∆ t ˙χk
+
+ ,
+
+(13) where Dϵ is a dead-zone operator, Bχ = diag( bχ, 1, . . . , b χ,n ) with bχ,i > 0 is a positive diagonal gain matrix that controls the integration rate for each joint direction, ϵ0 > 0 only guards the normalization against near-zero τ norm,k ,and ΠX enforces the admissible deformation range. This construction follows standard robust leaky-integrator observer design: the dead zone rejects sub-threshold noise, and the exponential forgetting in ˙χk bounds the observer state under persistent excitation. The bounded state χk therefore indicates a persistent, rather than impulsive, need to change the reference path. 
+
+3.3.2. Capability Estimation 
+
+The participant-specific activation scale and initial effective-capability prior are obtained from calibration (Section 4.1.2). Let ¯ap,k denote the resulting normalized task activation and τ mech p,k the corresponding volun-tary torque reconstructed using the participant-specific dynamics. The calibration-derived effective capability is used only as the prior for online estimation. The linear scaling ¯ap,j τ in the MHE residual is a local approx-imation of the voluntary torque–activation relationship validated during calibration. Online, the effective-capability estimate is updated over a moving window 
+
+Wk. Each sample j contributes to the capability estimate only to the extent that it is attributed to a capability-related change, with the weight given directly by the complement of the trajectory-attribution gate: 
+
+ωj = 1 − αj . (14) 9For one joint-direction component, the moving-horizon estimate is then 
+
+˜τmax,k = arg min   
+
+> τ∈T
+
+λa(τ − ˆτmax,k −1)2
+
++ X
+
+> j∈W k
+
+ωj Hδc
+
+ τ mech p,j − ¯ap,j τ  ,
+
+ˆτmax,k = Π T , ˙τ (˜ τmax,k ) .
+
+(15) Here T = [0 , τ phys max ] is the physiologically plausible torque range for the current joint direction, and ΠT , ˙τ additionally enforces a maximum rate of change 
+
+˙τ max max between consecutive estimates. The arrival term preserves continuity in the moving-horizon sense of [25], and the Huber loss Hδc is the standard M-estimator that interpolates between quadratic and linear penalties to limit the influence of EMG and acceleration outliers. 
+
+3.4. Joint Estimation and Assistive Control 3.4.1. Attribution Weight Update 
+
+The trajectory indicator Etraj k is derived from persistent corrective inter-action, whereas the capability indicator Ecap k is derived from the dynamics– EMG residual evaluated at the previous accepted capability. For one joint direction, the two nonnegative indicators are 
+
+Etraj k = |χk|,rcap j (τ ) = τ mech p,j − ¯ap,j τ, 
+
+¯rcap j (τ ) = rcap j (τ )
+
+τscale,p + ϵτ
+
+,Ecap k =
+
+X
+
+> j∈W k
+
+ωj Hδc
+
+ ¯rcap j (ˆ τmax,k −1)X
+
+> j∈W k
+
+ωj + ϵE
+
+.
+
+(16) Here τscale,p > 0 is the calibration-derived torque scale (see Section 4.1.2), which together with the normalized corrective-torque observer in Eq. (13) makes the two indicator channels dimensionless. The weights ωj in the sum-mation use the attribution value αj stored at the time sample j was acquired, not the current αk, thus decoupling the two updates and preventing an al-gebraic loop. The small constants ϵτ , ϵ E > 0 appearing above only guard 10 against division by near-zero denominators and do not otherwise affect the estimator. The ratio of the two indicators defines the attribution target: 
+
+αtar k =
+
+
+
+Etraj k + 0 .5E0
+
+Etraj k + Ecap k + E0
+
+, Etraj k + Ecap k ≥ ϵα,
+
+0.5, otherwise ,αk = Π [0 ,1] , ˙α
+
+ αk−1 + λα(αtar k − αk−1) .
+
+(17) In this update, E0 > 0 is a small baseline-evidence constant that acts as a pseudo-count prior to prevent weak observations from driving the gate to an extreme, ϵα > 0 is a threshold that forces neutral attribution when neither indicator provides sufficient evidence, and ˙αmax is the maximum rate of change enforced by the projection Π[0 ,1] , ˙α.In addition to gating the MHE observations through 1 − αk, attribution complementarily shapes the trajectory-deformation residual in the MPC: 
+
+Dα,k = diag( αk),
+
+rtraj i|k = Dα,k χk − Φ(si|k)wi|k,Jtraj = 
+
+> N−1
+
+X
+
+> i=0
+
+rtraj i|k
+
+> 2
+> Qg
+
+.
+
+(18) 
+
+3.4.2. Reference Update and Assistance Calculation 
+
+The participant-specific nominal trajectory is obtained from calibration. It is expressed by a smooth progression βp(s) from the comfortable start posture θ0,p to the middle-target endpoint θh1,p :
+
+θnom,p (s) = θ0,p + βp(s)∆ θp,
+
+∆θp = θh1,p − θ0,p , βp(0) = 0 , βp(1) = 1 . (19) All target conditions share this nominal trajectory; target height is shown to the participant but is not supplied to the controller. The intended path must therefore be inferred online through 
+
+θRef, i |k = θnom,p (si|k) + γtraj Φ(si|k)wi|k, (20) where γtraj bounds the applied deformation. The corresponding task torque is predicted from the coupled dynamics: 
+
+τ req, i |k = M0 ¨θRef, i |k + C0 ˙θRef, i |k + G0, (21) 11 The nonnegative deficit aneed i|k and rate-limited command acmd i|k are retained separately so that assistance can change smoothly without discarding the estimated demand. 
+
+3.4.3. MPC Cost Function and Constraints 
+
+MPC is implemented as a receding-horizon quadratic program. Starting from the current measured joint state xk = [ θTk , ˙θTk ]T , the discretized coupled dynamics predict 
+
+x0|k = xk,
+
+xi+1 |k = fd
+
+ xi|k, acmd i|k ,
+
+θRef,i |k, ˆτ max,k 
+
+, i = 0 , . . . , N − 1.
+
+(22) The capability estimate is constant only within this short prediction horizon; it may be updated by MHE at the next measured cycle. The prediction therefore evaluates how a candidate reference deformation and assistance sequence would affect future motion, rather than assuming that the current tracking error remains unchanged. The finite-horizon cost balances tracking, assistance, smooth adaptation, and attribution consistency: 
+
+JM P C k = 
+
+> N−1
+
+X
+
+> i=0
+
+
+
+∥eR, i |k∥2 
+
+> Qe
+
++ ρ ∥aneed i|k ∥2
+
++ qa∥acmd i|k − aneed i|k ∥2 + ηw ∥∆wi|k∥2
+
+
+
++ ∥eR, N |k∥2 
+
+> P
+
++ Jtraj .
+
+(23) where eR is the reference-tracking error. Penalizing assistance preserves the AAN objective, while the remaining terms prevent abrupt changes in refer-ence or torque. 12 Joint, deformation, and torque bounds are imposed as 
+
+θRef, i |k ∈ C ,
+
+aneed i|k ≥ 0, aneed i|k ≥ τ req, i |k − κˆτ max,k ,
+
+0 ≤ acmd i|k ≤ τ max Assi ,
+
+∥acmd i|k − acmd i−1|k∥ ≤ ˙τ max Assi ∆t, 
+
+∥Φ(si|k)wi|k∥ ≤ θmax def ,
+
+∥wi|k − wi−1|k∥ ≤ ˙wmax ∆t, 
+
+∥¨θRef,i |k∥ ≤ ¨θmax Ref .
+
+(24) where C is the safe joint set and κ ∈ [0 , 1] is the fraction of estimated vol-untary capability used as the assistance-onset threshold. The acceleration bound on ¨θRef is enforced through the smoothness of the deformation basis 
+
+Φ(s) and the slew-rate limit on w. Since aneed is nonnegative and penalized, the optimizer selects the smallest feasible deficit. Assistance is therefore triggered by predicted task demand exceeding κˆτ max,k , rather than by raw EMG or tracking error. After solving Eqs. (23)–(24), only acmd⋆  
+
+> 0|k
+
+is sent to the lower-level controller and the first deformation value updates the reference. The remaining predicted sequence is used only as a warm start. At k + 1 ,new measurements replace the prediction origin and the entire MHE–MPC sequence is repeated. This feedback update allows model mismatch and vol-untary behavior changes to be corrected continually while retaining explicit joint and torque constraints. 
+
+3.4.4. Torque–Impedance Assistance 
+
+The optimal first-step command from the MPC is taken as the assis-tive torque, i.e., τ Assi = acmd⋆  
+
+> 0|k
+
+. This assistance is combined with compliant impedance feedback: 
+
+τ robot = −KReR − BRev + τ Assi , KR ≻ 0, BR ≻ 0. (25) 
+
+3.5. Tracking Stability and Command Boundedness 
+
+Let M = MR + MH , C = CR + CH , and G = GR + GH . On the compact rehabilitation workspace, assume that M is uniformly positive defi-nite and bounded and that ˙M − 2C is skew-symmetric. The projections and MPC constraints bound α, ˆτ max , θRef , its first two derivatives, and τ Assi .Voluntary torque τ vol is saturated by the bounded envelope ˆτ max,k (whose 13 magnitude is physically limited by τ phys max ) and is therefore also bounded. Dy-namics error, cable-transmission error, and the one-sample command-hold error are additionally assumed bounded. For eR = θ − θRef and ev = ˙θ − ˙θRef , adding the human and robot dynamics and applying Eq. (25) gives 
+
+M ˙ev + Cev + BRev + KReR = def f , (26) where 
+
+def f = τ vol + τ Assi − M¨θRef − C ˙θRef − G
+
++ dmodel + dhold , ∥def f ∥ ≤ ¯def f . (27) The bound follows from the capability and assistance limits, the bounded-ness of τ vol argued above, the compact workspace, the reference-acceleration constraint, and the bounded-error assumptions. To establish boundedness of both position and velocity errors, rather than velocity alone, consider the strict Lyapunov function 
+
+Vε = 12eTv Mev + 12eTRKReR + εeTRMev. (28) For sufficiently small ε > 0, there exist positive constants cl, c u, c 1, c 2 such that, with ze = [ eTR, eTv ]T ,
+
+cl∥ze∥2 ≤ Vε ≤ cu∥ze∥2, ˙Vε ≤ − c1∥ze∥2 + c2 ¯def f ∥ze∥. (29) Consequently, the tracking state is uniformly ultimately bounded, with 
+
+lim sup 
+
+> t→∞
+
+∥ze(t)∥ ≤ (c2/c 1) ¯def f .
+
+For a fixed reference and zero effective disturbance, the same inequality gives asymptotic convergence. 
+
+4. Experiments 
+
+Two experiments were designed to evaluate the proposed method. Ex-periment 1 systematically varied movement intention and effective voluntary capability as separable factors, testing whether the dual-estimation architec-ture and attribution gate can distinguish these two sources of perturbation. Experiment 2 embedded the controller in a functional cup-transport task with a pre–post fatigue protocol, assessing its practical feasibility in a controlled ADL-like setting. 14 4.1. Experimental Setup 4.1.1. Participants and Equipment 
+
+The robot was configured for two seated tasks. Experiment 1 used re-peated reaching movements across target-height and wrist-load conditions (Fig. 3), whereas Experiment 2 used a functional cup-transport task requiring coordinated elbow, wrist, and forearm motion (Fig. 4). Adaptive assistance was applied at the elbow in both experiments. Nine healthy young participants (age: 24.3 ± 4.6 years, height: 171.4 
+
+± 5.3 cm, weight: 62.1 ± 21.0 kg; two females) were recruited. All nine participants completed both experiments. All participants provided writ-ten informed consent under a protocol approved by the Institutional Review Board of Southern University of Science and Technology (No. 20250066). Participants were screened for neurological or musculoskeletal disorders, were right-handed, and wore the robot on their dominant arm. (a) (b) (c) (d)        
+
+> 00.5 11.5 22.5 33.5
+> Time (s)
+> 0.2 0.4 0.6 0.8 11.2 1.4
+> Elbow angle (rad)
+
+Figure 3: Experimental setup. (a) Participant wearing the upper-limb robot. (b) Three target heights used to vary movement intention. (c) Representative elbow trajectories. (d) Wrist-mounted loads used to vary task demand. 
+
+15 (a) (b) (c)              
+
+> 01234
+> Time (s)
+> 0510 15 Forearm Pronation/Supination
+> 01234
+> Time (s)
+> 020 40 60
+> Angle (°)
+> Elbow Flexion/Extension
+> 01234
+> Time (s)
+> 010 20 30
+> Wrist Flexion/Extension
+
+Figure 4: Experiment 2 functional cup-transport task. (a) A seated participant wearing the upper-limb robot reaches from the initial posture toward the cup. (b) Cup placement at the Low, Middle, and High target heights. (c) Representative joint-angle profiles for elbow flexion/extension, wrist flexion/extension, and forearm pronation/supination during one transport trial. 
+
+4.1.2. Individual Calibration 
+
+Before formal testing, each participant completed three short calibra-tion stages: resting sEMG recording, three EMG-only maximum voluntary contraction (MVC) attempts, and three comfortable unassisted reaches to the middle target. sEMG was recorded from the biceps brachii and triceps brachii using bipolar sensors (Sichiray, Wuxi, China; sampling rate: 1000 Hz) with Ag/AgCl electrodes. The calibration identified the participant-specific EMG baseline and activation scale, nominal middle-target trajectory, initial effective voluntary-torque capability, and associated uncertainty. Neither target-height information nor load data were used in calibration. Elbow dynamic parameters were estimated from participant anthropo-metrics using standard ratios [18]: 
+
+mf ≈ 0.016 mH , lf ≈ 0.682 Lf a (30) where mH is body mass and Lf a is forearm length. These parameters and the calibration-derived quantities initialized the participant-specific model. The assistance-onset factor was fixed at κ = 0 .5 for all reported experiments. 
+
+4.2. Experiment 1: Controlled Variation of Intention and Capability 
+
+To evaluate the separate response to intention and capability changes, target height (Low, Middle, High) was varied to induce intended trajectory 16 deviations, while unmodeled wrist loads (Free, Light, Heavy) were applied to alter the effective voluntary capability–demand balance. All conditions shared a common nominal trajectory derived from the Middle target; the controller had to infer any intended deviation online. Target changes oc-curred only within a fixed load, and load changes occurred only at block boundaries with unchanged target, ensuring that the two perturbation types were temporally decoupled. Three controllers were compared within subjects: (1) error-based AAN (baseline without estimation), (2) ungated dual-estimation MPC (base archi-tecture without credit assignment), and (3) attribution-gated dual-estimation MPC (the proposed method). This progressive comparison isolated the con-tributions of dual estimation and of the attribution gate. Each controller– load block consisted of nine randomized trials (3 targets × 3 repetitions), and the capability estimate was reset to the calibrated prior at each block boundary. The same target sequence was reused across controllers, yielding 
+
+3 × 3 × 3 × 3 = 81 trials per participant. 
+
+4.3. Experiment 2: Functional Task Under Induced Fatigue 
+
+The gated controller was further evaluated in a cup-transport task (Fig. 4) that combined elbow, wrist, and forearm motion. A functional reference was built from three phase-aligned demonstrations. Nine trials (3 heights × 3repetitions) were performed before and after a fatigue-inducing weight-lifting procedure, with the controller unchanged. This design tested whether the estimator could track a fatigue-induced decline in effective capability and increase assistance accordingly, without explicit fatigue modeling. In this experiment, elbow flexion/extension, wrist flexion/extension, and forearm pronation/supination were assisted, while only the elbow joint as-sistance was adjusted by the proposed method. The other two joints were assisted with a fixed-gain impedance controller to maintain the functional task. 
+
+4.4. Statistical Analysis 
+
+Results are reported as mean ± sample standard deviation across the nine participants after within-participant averaging. Experiment 1 was analyzed using a three-way repeated-measures ANOVA with controller, load, and tar-get height as within-participant factors. Experiment 2 was analyzed using a two-way repeated-measures ANOVA with fatigue state and target height as within-participant factors. Omnibus effects were evaluated first; significant 17 effects were followed by paired comparisons with Holm correction. Statistical significance was set at p < 0.05 .
+
+5. Experimental Results 
+
+5.1. Experiment 1: Dual Estimation and Credit Assignment 
+
+The primary goal of Experiment 1 was to test whether the dual-estimation framework can distinguish intended trajectory changes from capability-related changes, and whether the attribution gate improves this separation. Three findings jointly address this goal. First, the attribution-gated MPC achieved the lowest tracking RMSE in every load–height condition (Table 1), providing descriptive evidence for the benefit of jointly estimating and separating the two measurands. Its condition-level RMSE averaged 0.017 rad, compared with 0.041 rad for the independent-estimation variant and 0.127 rad for error-based AAN. Across the nine conditions, the respective RMSE ranges were 0.011–0.024, 0.029– 0.057, and 0.067–0.183 rad. The repeated-measures analysis confirmed sig-nificant effects of controller ( p < 0.001 ) and controller–height interaction (p = 0 .011 ) on RMSE; both dual-estimation controllers significantly outper-formed error-based AAN after Holm correction ( p ≤ 0.004 ). 18 0.4 0.6 0.8 1.0 1.2    
+
+> Elbow angle (rad)
+> Middle Low High
+> (a)
+
+Error-based AAN    
+
+> Original ref. (unupdated) Adapted ref. Actual
+> Middle Low High
+> (b)
+
+Independent-estimation MPC    
+
+> Original ref. (unupdated) Adapted ref. Actual
+> Middle Low High
+> (c)
+
+Attribution-gated MPC                
+
+> Original ref. (unupdated) Adapted ref. Actual
+> 0.2 0.4 0.6 0.8
+> Attribution  α
+> (d)
+> Attribution α
+> (e)
+> Attribution α
+> (f)
+> Attribution α
+> 010 20 30 40 50
+> Capability ̂  τmax  (N m)
+> (g)
+> Capability ̂ τmax
+> (h)
+> Capability ̂ τmax
+> (i)
+> Capability ̂ τmax
+> 0510 15
+> Elapsed time (s)
+> 0.0 0.1 0.2 0.3 0.4 0.5
+> Normalized EMG
+> (j)
+> Normalized EMG Assistive torque
+> 0510 15
+> Elapsed time (s)
+> (k)
+> Normalized EMG Assistive torque
+> 0510 15
+> Elapsed time (s)
+> (l)
+> Normalized EMG Assistive torque
+> 0.0 0.5 1.0 1.5
+> Assistive torque (N m)
+
+Figure 5: Continuous Experiment 1 responses from a representative recording, used to illustrate the controller behavior underlying the aggregate comparison. Signals are ar-ranged by controller (columns) and signal group (rows). For each controller, consecutive raw trials in the Heavy-load block covering target heights Middle, Low, and High once each, retain that acquisition order, and were not selected based on response appearance. The top row overlays the measured elbow trajectory and the reference used by the con-troller; the repeated dotted trace is the same original, unupdated Middle-target nominal trajectory for all three target trials, whereas the dashed trace shows the resulting online-adapted reference. The next two rows show, on separate scales, logged attribution α and the capability estimate ˆτmax in N ·m. The bottom row overlays normalized EMG (left axis) and commanded motor assistive torque (right axis, shown only on the rightmost panel). 
+
+The representative Heavy-load trials in Fig. 5 illustrate the mechanism behind this ordering. Because error-based AAN does not deform the refer-ence, its reference remains superimposed on the repeated nominal trajectory and substantial target-dependent mismatch remains in the Low and High tri-als. Both dual-estimation controllers instead deform the reference downward 19 Table 1: Experiment 1 outcomes. 
+
+Load Height Controller Actual endpoint (rad) Reference endpoint (rad) Tracking RMSE (rad) Mean attribution α Normalized EMG Motor assistive torque (N m) 
+
+Free (0 kg) Low Error-based AAN 0.783 ± 0.037 0.980 ± 0.030 0.170 ± 0.028 0.500 ± 0.000 0.009 ± 0.004 0.151 ± 0.026 Independent MPC 0.730 ± 0.028 0.690 ± 0.035 0.037 ± 0.013 0.500 ± 0.000 0.015 ± 0.011 0.007 ± 0.022 Attribution-gated MPC 0.702 ± 0.034 0.686 ± 0.033 0.017 ± 0.014 0.573 ± 0.029 0.026 ± 0.028 0.004 ± 0.011 Middle Error-based AAN 1.018 ± 0.058 0.980 ± 0.030 0.067 ± 0.037 0.500 ± 0.000 0.015 ± 0.007 0.038 ± 0.047 Independent MPC 0.986 ± 0.025 0.972 ± 0.026 0.034 ± 0.018 0.500 ± 0.000 0.018 ± 0.012 0.017 ± 0.023 Attribution-gated MPC 1.002 ± 0.043 1.000 ± 0.048 0.013 ± 0.016 0.489 ± 0.034 0.026 ± 0.023 0.005 ± 0.010 High Error-based AAN 1.202 ± 0.128 0.980 ± 0.030 0.128 ± 0.017 0.500 ± 0.000 0.062 ± 0.014 -0.093 ± 0.032 Independent MPC 1.223 ± 0.052 1.294 ± 0.111 0.057 ± 0.043 0.500 ± 0.000 0.027 ± 0.013 0.048 ± 0.040 Attribution-gated MPC 1.284 ± 0.088 1.312 ± 0.118 0.024 ± 0.018 0.617 ± 0.066 0.033 ± 0.016 0.020 ± 0.018 Light Low Error-based AAN 0.774 ± 0.077 0.980 ± 0.030 0.181 ± 0.060 0.500 ± 0.000 0.059 ± 0.019 0.162 ± 0.055 Independent MPC 0.724 ± 0.021 0.686 ± 0.025 0.031 ± 0.010 0.500 ± 0.000 0.078 ± 0.015 0.281 ± 0.223 Attribution-gated MPC 0.713 ± 0.045 0.702 ± 0.044 0.011 ± 0.010 0.549 ± 0.068 0.066 ± 0.028 0.375 ± 0.322 Middle Error-based AAN 0.999 ± 0.062 0.980 ± 0.030 0.093 ± 0.053 0.500 ± 0.000 0.097 ± 0.054 0.053 ± 0.082 Independent MPC 0.980 ± 0.036 0.973 ± 0.028 0.029 ± 0.012 0.500 ± 0.000 0.095 ± 0.030 0.250 ± 0.193 Attribution-gated MPC 0.991 ± 0.037 0.989 ± 0.037 0.012 ± 0.014 0.377 ± 0.045 0.082 ± 0.042 0.254 ± 0.213 High Error-based AAN 1.208 ± 0.054 0.980 ± 0.030 0.125 ± 0.043 0.500 ± 0.000 0.177 ± 0.050 -0.081 ± 0.071 Independent MPC 1.237 ± 0.033 1.306 ± 0.092 0.053 ± 0.038 0.500 ± 0.000 0.110 ± 0.033 0.395 ± 0.285 Attribution-gated MPC 1.298 ± 0.089 1.330 ± 0.118 0.023 ± 0.018 0.745 ± 0.106 0.108 ± 0.042 0.443 ± 0.396 Heavy Low Error-based AAN 0.762 ± 0.070 0.980 ± 0.030 0.183 ± 0.067 0.500 ± 0.000 0.244 ± 0.107 0.169 ± 0.061 Independent MPC 0.749 ± 0.036 0.700 ± 0.043 0.040 ± 0.026 0.500 ± 0.000 0.245 ± 0.104 0.428 ± 0.365 Attribution-gated MPC 0.722 ± 0.052 0.708 ± 0.051 0.015 ± 0.023 0.435 ± 0.074 0.224 ± 0.098 0.491 ± 0.432 Middle Error-based AAN 0.989 ± 0.083 0.980 ± 0.030 0.080 ± 0.023 0.500 ± 0.000 0.267 ± 0.125 0.043 ± 0.036 Independent MPC 0.989 ± 0.035 0.986 ± 0.038 0.032 ± 0.030 0.500 ± 0.000 0.258 ± 0.130 0.389 ± 0.316 Attribution-gated MPC 0.991 ± 0.041 0.991 ± 0.038 0.013 ± 0.026 0.402 ± 0.068 0.256 ± 0.137 0.379 ± 0.319 High Error-based AAN 1.202 ± 0.140 0.980 ± 0.030 0.120 ± 0.050 0.500 ± 0.000 0.576 ± 0.172 -0.083 ± 0.055 Independent MPC 1.234 ± 0.048 1.315 ± 0.120 0.056 ± 0.044 0.500 ± 0.000 0.313 ± 0.139 0.621 ± 0.494 Attribution-gated MPC 1.273 ± 0.077 1.298 ± 0.102 0.021 ± 0.025 0.606 ± 0.166 0.255 ± 0.058 0.689 ± 0.577 
+
+Note: Values are reported as mean ± sample standard deviation across nine partic-ipants, after first averaging repetitions within each participant at each load–height– controller condition. Low, Middle, and High target heights are reported separately. Actual and reference endpoints are the respective mean angles over normalized phase 0.90–1.00. Tracking RMSE is calculated from paired finite actual/reference phase samples; attribution, normalized EMG, and signed motor assistance are phase-sample means. Normalized EMG is reported from the biceps brachii as the primary elbow flexor. 
+
+20 for Low and upward for High. The gated controller’s measured trajectory re-mains closely aligned with these adapted references, consistent with its lower aggregate RMSE in Table 1. Second, the attribution state α varied systematically with load and height (Table 1), confirming that the gate dynamically assigned credit between the two update channels rather than remaining at a fixed neutral value. Under the nominal Free–Middle condition, mean α stayed near 0.489. Adding load at the same Middle target decreased α (0.377 Light, 0.402 Heavy), shifting weight toward the capability channel. Conversely, changing target under Free load shifted α upward (0.573 Low, 0.617 High), increasing trajectory-channel weight. The continuous traces in Fig. 5 show that these state adjustments oc-curred within trials and across successive trials, consistent with the intended credit-assignment mechanism. Third, the load manipulation produced the expected rise in normalized EMG of the biceps brachii, the primary elbow flexor (e.g., for the gated controller: Free 0.028, Light 0.085, Heavy 0.245), yet the height-averaged tracking RMSE of the gated controller remained low and similar across loads (0.018, 0.015, and 0.016 rad, respectively). This dissociation between in-creased effort and stable tracking indicates that the capability estimate and resulting assistance compensated for the added demand. The assistance torque itself showed a significant controller–height interaction ( p < 0.001 ), reflecting condition-specific modulation rather than a uniform load-driven in-crease. The actual-versus-reference endpoint differences in Table 1, together with the repeated unupdated nominal traces in Fig. 5, further show that the online reference was deformed toward the cued target height even though the controller received no target-height input. 
+
+5.2. Experiment 2: Functional Task Under Fatigue 
+
+Experiment 2 tested whether the gated controller can track a fatigue-induced decline in effective capability and respond with increased assistance during a functional cup-transport task. The results showed consistent direc-tional changes: after fatigue, the terminal effective capability ˆτmax decreased at all three placement heights (by 8.005–10.783 N m across heights), while trial-mean assistance increased (by 0.249–0.300 N m) and tracking RMSE rose (by 0.007–0.025 rad) (Table 2). The mean and median sEMG frequen-cies decreased (70.94 to 69.20 Hz and 51.74 to 49.39 Hz, respectively; Fig. 6), independently corroborating the presence of fatigue, although these EMG shifts did not reach significance. 21 Fresh Post-fatigue    
+
+> Fatigue state
+> 020 40 60 80
+> n.s.
+> (a) EMG mean frequency (Hz)
+> Fresh Post-fatigue
+> Fatigue state
+> 020 40 60
+> n.s.
+> (b) EMG median frequency (Hz)
+
+Figure 6: Experiment 2 EMG (a) mean and (b) median frequency before and after fatigue, averaged across targets and repetitions within each participant. 
+
+Only the increase in RMSE was statistically significant ( p < 0.001 ), while the capability and assistance changes showed consistent trends across partic-ipants without reaching significance ( p = 0 .331 and p = 0 .488 , respectively). The continuous trial data in Fig. 7 illustrate the coordinated controller re-sponse: a reduction in ˆτmax and an increase in assistance accompanied greater tracking deviation after fatigue. 
+
+Table 2: Experiment 2 outcomes by target height before and after fatigue (mean ± sample standard deviation; n = 9 ). 
+
+Target State ˆτmax (N m) Mean assist (N m) RMSE (rad) 
+
+Low Fresh 47.240 ± 11.950 -0.005 ± 0.004 0.041 ± 0.022 Post-fatigue 36.457 ± 20.231 0.244 ± 0.380 0.062 ± 0.012 Middle Fresh 46.734 ± 12.298 0.009 ± 0.033 0.053 ± 0.023 Post-fatigue 36.260 ± 16.491 0.282 ± 0.325 0.060 ± 0.011 High Fresh 45.268 ± 9.308 0.069 ± 0.077 0.056 ± 0.016 Post-fatigue 37.263 ± 20.503 0.369 ± 0.530 0.081 ± 0.015 22 0.00 0.25 0.50 0.75 1.00 1.25    
+
+> Elbow angle (rad)
+> (a) High Low Middle
+
+Fresh     
+
+> Reference Actual
+> (b) High Low Middle
+
+Post-fatigue                  
+
+> Reference Actual
+> 0.50 0.55 0.60 0.65 0.70
+> Attribution  α
+> (c)
+> Attribution α
+> (d)
+> Attribution α
+> 30 40 50 60 70
+> Capability ̂  τmax  (N m)
+> (e)
+> Capability ̂ τmax
+> (f)
+> Capability ̂ τmax
+> 0510 15 20 25 30
+> Elapsed time (s)
+> 0.00 0.01 0.02 0.03
+> Normalized EMG
+> (g)
+> Normalized EMG Assistive torque
+> 0510 15 20 25 30
+> Elapsed time (s)
+> (h)
+> Normalized EMG Assistive torque
+> −0.25 0.00 0.25 0.50 0.75
+> Assistive torque (N m)
+
+Figure 7: Representative Experiment 2 responses for one participant before and after fatigue. Each column contains three consecutive target-height trials in acquisition order; rows show elbow tracking, α, ˆτmax , and normalized EMG/assistance. 
+
+6. Discussion 
+
+Recent studies have advanced individual components of this problem but do not resolve the ambiguity at the closed-loop control level. Multi-task networks recognize motion intention and fatigue simultaneously from sEMG [29], and separate work detects fatigue by fusing time- and frequency-domain features [30], but these outputs are discrete labels rather than contin-uous control-relevant measurands. Simultaneous intention–stiffness estima-tion has been demonstrated for physical human–robot interaction [10], yet stiffness characterizes mechanical impedance rather than voluntary torque 23 capability. Reference-adaptation methods [11, 12] and capability-centered AAN schemes [21, 22] therefore assign deviations to one prespecified chan-nel. The unresolved issue is structural: when intention and capability share kinematic, interaction, and sEMG observations, parallel estimators cannot determine which latent cause should receive credit for a new residual. Joint estimation is needed to expose both hypotheses to the same evidence, and at-tribution is needed to prevent the same evidence from driving both estimates simultaneously. 
+
+6.1. Simultaneous Estimation of Intention and Capability 
+
+A central finding is that intended trajectory deformation and task-dependent effective voluntary capability can be updated online as distinct, control-relevant quantities with condition-consistent responses. This goes beyond recent simultaneous recognition results [10, 29]: it produces two continuous measurands and explicitly models their competing explanations of the observations. In Experiment 1, the reference endpoints of the gated controller remained correctly ordered (Low, Middle, High) under all three load conditions, despite receiving no target-height information and using the same Middle-target nominal trajectory. The updated first row of Fig. 5 makes this distinction explicit: the dotted original trajectory repeats across the three targets, whereas the online reference deforms downward for Low and upward for High and remains close to the measured path. Thus, the target-specific reference changes cannot be attributed to different original trajectories. At the same time, ˆτmax progressively declined during the Heavy-load block, showing that the capability channel continued to respond to the added demand while the reference followed the cued target transitions. The capability estimator’s response to unmodeled load also explains why tracking RMSE remained low across load-averaged values for the gated controller. Because the MHE continuously updates ˆτmax from the EMG–dynamics residual, the MPC can anticipate the required assistance without relying on a growing tracking error. Recent work has shown that EMG-to-force mappings can be adapted across fatigue states [31], and that physiological and functional measurements capture complementary aspects of fatigue [30, 32]. However, estimating force or detecting fatigue alone cannot tell an AAN controller whether a task mismatch should increase assistance or deform the reference. The proposed paired measurands provide that missing decision context. This predictive compensation decouples assistance from raw kinematic deviation—a property that error-based AAN 24 fundamentally lacks. The significant controller–height interaction in assis-tance torque further confirms that the commanded torque was modulated by task context rather than by a uniform, load-driven offset. 
+
+6.2. Dynamic Credit Assignment Through the Attribution State 
+
+The attribution gate α prevents cross-contamination between the two es-timation channels. This role differs from feature sharing in multitask recog-nition [29] and from cost arbitration in shared-control adaptation [11, 12]: the gate acts on the causal destination of a residual before it changes the reference or assistance demand. Under the nominal Free–Middle condition, 
+
+α remained near neutral (0.489). Adding load at the same target decreased 
+
+α (0.377 Light, 0.402 Heavy), shifting weight toward the capability channel, because the load increased the EMG–dynamics residual without producing a directionally consistent corrective torque. Changing target under Free load shifted α upward (0.573 Low, 0.617 High), as persistent corrective interac-tion provided clear trajectory-change evidence. These shifts were continuous, allowing the gate to express varying confidence and combine evidence when both intention and capability changed simultaneously. The temporal dynamics in Fig. 5 illustrate this arbitration against an unchanged nominal-trajectory baseline. During the displayed Middle and Low Heavy-load trials, decreases in α accompanied downward revisions of 
+
+ˆτmax , placing more weight on capability evidence. In the subsequent High trial, α rose strongly while the adapted reference moved upward away from the repeated nominal trace; capability and assistance continued to change as well. The response therefore reflects continuous assignment when tra-jectory and capability evidence coexist, rather than a sequence of isolated hard classifications. This temporal coordination is consistent with the gate operating as a supervisory scheduler that limits capability deficits from be-ing absorbed as intended deformations and deliberate target changes from being interpreted solely as capability loss. The RMSE improvement of the gated over the independent-estimation variant, although not significant after correction, aligns with this mechanistic interpretation and warrants further investigation with larger sample sizes. 
+
+6.3. Controlled Evidence and Functional Feasibility 
+
+The two experiments provided complementary validation. Experiment 1 employed a full factorial manipulation of target height and load, creating a 3 × 3 grid in which intention and capability perturbations were applied 25 independently and in combination. This allowed controller-state responses to be mapped directly onto known perturbation types, establishing strong internal validity. Experiment 2 extended this validation to an ecologically more relevant setting involving multi-joint coordination and a natural movement sequence under fatigue. This is important because recent high-performing sEMG fa-tigue models have predominantly been validated under structured contrac-tions [29, 30], and a recent review identifies context, sensing modality, and calibration as persistent obstacles to interpreting fatigue during functional performance [32]. Although the pre–post changes in ˆτmax and assistance did not reach significance, their consistent direction across all participants and target heights, together with the significant RMSE increase and sEMG spectral compression, strongly suggests that the controller detected and re-sponded to the fatigue-induced deficit. The continuous traces in Fig. 7 con-firm that the coordinated state adaptations observed in controlled reaching were preserved during functional movement. This transfer to an ADL-like task supports the practical feasibility of the proposed framework. 
+
+6.4. Limitations and Future Work 
+
+The study enrolled healthy participants and used external loads and acute fatigue to simulate capability changes. While this enabled controlled, re-peatable perturbations, it does not reproduce the complex neuromuscular impairments or long-term adaptation of clinical populations. Moreover, no single biosignal fully characterizes central and peripheral fatigue [32]. The results therefore validate algorithmic function rather than therapeutic effi-cacy. Subsequent studies should involve individuals with upper-limb motor deficits to evaluate patient-specific adaptation. Second, adaptive capability estimation and assistance were restricted to elbow flexion. The cup-transport task involved wrist and forearm motion, but capability changes in those degrees of freedom were not estimated or com-pensated. Extending the framework to multiple joints will require managing the increased dimensionality of the MHE–MPC problem and interactions be-tween joint-level attribution states, which is an important direction for future work. 26 7. Conclusion 
+
+This work addresses a fundamental ambiguity in assist-as-needed control—that similar kinematic and interaction responses can arise from changes in movement intention or from reduced voluntary capability—by simultaneously estimating both quantities online and dynamically routing shared sensory evidence through an attribution gate. The key contribu-tion lies in the credit-assignment mechanism that prevents intention- and capability-related signals from contaminating each other, enabling the con-troller to adapt the reference trajectory and adjust assistance appropriately without requiring hard event classification. The attribution-gated controller achieved a condition-level mean tracking RMSE of 0.017 rad across nine load–height conditions, approximately 60% lower than the independent-estimation variant and 87% lower than error-based AAN. The attribution state α varied systematically with load and target height, while the continuous responses showed target-specific refer-ence deformation away from a repeated unupdated nominal trajectory to-gether with coordinated capability and assistance changes. A functional cup-transport task under induced fatigue provided further proof-of-concept evidence in a multi-joint ADL-like context: post-fatigue capability estimates decreased and assistance increased at all target heights, although these two changes were not statistically significant. Together, these findings support the proposed credit-assignment framework while motivating larger studies in clinical populations. 
+
+Ethics approval and informed consent 
+
+The study protocol was approved by the Institutional Review Board of Southern University of Science and Technology (No. 20250066). All partici-pants provided written informed consent before participation. 
+
+Funding 
+
+This work was supported by the High Level Special Funds under Grant G03034K003 from Southern University of Science and Technology, Shenzhen, China, and by the Shenzhen “Medical Engineering Integration” Special Sup-port Program Project under Grant F-2024-Z99-502365, Shenzhen, China. 27 Declaration of competing interest 
+
+The authors declare that they have no known competing financial inter-ests or personal relationships that could have appeared to influence the work reported in this paper. 
+
+Data availability 
+
+The data that support the findings of this study are available from the corresponding author upon reasonable request. 
+
+References 
+
+[1] T. Tian et al., “Needs for rehabilitation in China: Estimates based on the global burden of disease study 1990–2019,” Chinese Medical Journal ,vol. 138, no. 1, pp. 49–59, Jan. 2025. [2] D. F. Brown and S. Q. Xie, “Effectiveness of intelligent control strate-gies in robot-assisted rehabilitation—a systematic review,” IEEE Trans. Neural Syst. Rehabil. Eng. , vol. 32, pp. 1828–1840, 2024. [3] H. Li, S. Guo, R. He, H. Wang, and M. Kawanishi, “A home-based up-per limb rehabilitation system via cloud-based teleoperation and sEMG-driven bilateral control,” IEEE Internet Things J. , vol. 12, no. 17, pp. 35510–35521, Sept. 2025. [4] P. Li, S. Guo, J. Leng, and Z. Wang, “A Cable-Driven Home-Based Upper-Limb Rehabilitation Robot for ADL-Based Training in Unstruc-tured Daily Environments,” IEEE Robot. Autom. Lett. , pp. 1–8, 2025, doi: 10.1109/LRA.2025.3636027. [5] Y. Feng et al., “Power-free knee rehabilitation robot for home-based isokinetic training,” Nat. Commun. , vol. 16, no. 1, p. 2347, Mar. 2025. [6] T. Proietti and A. Bandini, “Wearable Technologies for Monitoring Up-per Extremity Functions During Daily Life in Neurologically Impaired Individuals,” IEEE Trans. Neural Syst. Rehabil. Eng. , vol. 32, pp. 2737– 2748, 2024. 28 [7] Z. Yang, S. Guo, L. Ren, Z. Qian, R. An, Y. Liu, and M. Kawanishi, “DBR-TILT: A Novel Direct Biomechanics Reflecting Therapist-in-the-Loop Telerehabilitation System,” IEEE/ASME Trans. Mechatron. , pp. 1–13, 2025, doi: 10.1109/TMECH.2025.3627075. [8] H. Li, S. Guo, R. He, B. Wang, and M. Ding, “A home-based dual-mode upper limb rehabilitation system: Teleoperation mode and bilat-eral mode with sEMG and IMU,” IEEE J. Biomed. Health Inform. , pp. 1–14, 2025. [9] Y. Zhou, Z. Li, A. Feng, Y. Li, and M. Zhu, “Physical Human–Robot In-teraction of Dual-Arm Manipulators With Human Intention Estimation and Two-Level Admittance Adaptation,” IEEE/ASME Trans. Mecha-tron. , vol. 30, no. 3, pp. 1705–1717, Jun. 2025. [10] H. Wu, C. Zhu, L. Cheng, C. Yang, and Y. Li, “Simultaneous estimation of human motion intention and time-varying arm stiffness for enhanced human–robot interaction,” IEEE Trans. Cogn. Dev. Syst. , vol. 17, no. 3, pp. 510–524, Jun. 2025. [11] L. Han, J. Zhang, and H. Wang, “Shared Control in pHRI: Integrat-ing Local Trajectory Replanning and Cooperative Game Theory,” IEEE Trans. Robot. , vol. 41, pp. 1263–1277, 2025. [12] P. Franceschi, D. Cassinelli, N. Pedrocchi, M. Beschi, and P. Rocco, “De-sign of an Assistive Controller for Physical Human–Robot Interaction Based on Cooperative Game Theory and Human Intention Estimation,” 
+
+IEEE Trans. Automat. Sci. Eng. , vol. 22, pp. 5741–5756, 2025. [13] Z. Yang et al., “Hierarchical Trajectory Deformation Algorithm With Hybrid Controller for Active Lower Limb Rehabilitation,” IEEE Robot. Autom. Lett. , vol. 9, no. 7, pp. 6240–6247, Jul. 2024. [14] D. Xiong, D. Zhang, Y. Chu, Y. Zhao, and X. Zhao, “Intuitive Human–Robot–Environment Interaction with EMG Signals: A Review,” 
+
+IEEE/CAA J. Autom. Sinica , vol. 11, no. 5, pp. 1075–1091, May 2024. [15] Ö. Özen, K. A. Buetler, and L. Marchal-Crespo, “Towards functional robotic training: motor learning of dynamic tasks is enhanced by haptic rendering but hampered by arm weight support,” J. Neuroeng. Rehabil. ,vol. 19, no. 1, p. 19, Dec. 2022. 29 [16] M. Zhang, H. Li, K. Shi, and A. Song, “A two-layer adaptive assist-as-needed control scheme for rehabilitation robotics,” IEEE Robot. Autom. Lett. , vol. 10, no. 10, pp. 9830–9837, Oct. 2025. [17] N. Garcia-Hernandez, C. Munguia-Angeles, and V. Parra-Vega, “Assist-as-needed robotic strategy based on velocity fields for enhancing motor training,” IEEE/ASME Trans. Mechatron. , vol. 30, no. 2, pp. 1504– 1513, Apr. 2025. [18] Z. Yang, S. Guo, Y. Liu, M. Kawanishi, and H. Hirata, “A Task Performance-Based sEMG-Driven Variable Stiffness Control Strategy for Upper Limb Bilateral Rehabilitation System,” IEEE/ASME Trans. Mechatron. , vol. 28, no. 2, pp. 792–803, Apr. 2023. [19] X. Xiong, C. D. Do, and P. Manoonpong, “Learning-Based Multifunc-tional Elbow Exoskeleton Control,” IEEE Trans. Ind. Electron. , vol. 69, no. 9, pp. 9216–9224, Sept. 2022. [20] M. Sharifi, S. Tripathi, Y. Chen, Q. Zhang, and M. Tavakoli, “Reinforce-ment learning methods for assistive and rehabilitation robotic systems: A survey,” IEEE Trans. Syst., Man, Cybern., Syst. , vol. 55, no. 7, pp. 4534–4551, Jul. 2025. [21] M. F. Shah, P. K. Jamwal, M. H. Ghayesh, and S. Hussain, “Assist-as-needed control of a shoulder rehabilitation robot using a virtual biome-chanical model and online stiffness adaptation,” IEEE Trans. Neural Syst. Rehabil. Eng. , vol. 33, pp. 2358–2367, 2025. [22] R. S. Zarrin, A. Zeiaee, and R. Langari, “A variable-admittance assist-as-needed controller for upper-limb rehabilitation exoskeletons,” IEEE Robot. Autom. Lett. , vol. 9, no. 6, pp. 5903–5910, Jun. 2024. [23] P. Sedighi, X. Li, and M. Tavakoli, “EMG-based intention detection using deep learning for shared control in upper-limb assistive exoskele-tons,” IEEE Robot. Autom. Lett. , vol. 9, no. 1, pp. 41–48, Jan. 2024. [24] Y. Cao, X. Chen, M. Zhang, and J. Huang, “Adaptive position con-strained assist-as-needed control for rehabilitation robots,” IEEE Trans. Ind. Electron. , vol. 71, no. 4, pp. 4059–4068, Apr. 2024. 30 [25] C. V. Rao, J. B. Rawlings, and D. Q. Mayne, “Constrained state estima-tion for nonlinear discrete-time systems: Stability and moving horizon approximations,” IEEE Trans. Autom. Control , vol. 48, no. 2, pp. 246– 258, Feb. 2003, doi: 10.1109/TAC.2002.808470. [26] D. Q. Mayne, J. B. Rawlings, C. V. Rao, and P. O. M. Scokaert, “Constrained model predictive control: Stability and optimality,” Au-tomatica , vol. 36, no. 6, pp. 789–814, Jun. 2000, doi: 10.1016/S0005-1098(99)00214-9. [27] F. Wagenblast, T. L"aubli, R. Seibt, M. A. Rieger, and B. Steinhilber, “Wrist extensor muscle fatigue during a dual task with two muscular and cognitive load levels in younger and older adults,” Hum. Factors , vol. 66, no. 11, pp. 2433–2450, Nov. 2024, doi: 10.1177/00187208231218196. [28] I. Ben Abdallah, Y. Bouteraa, and A. Alotaibi, “A hybrid EMG–EEG interface for robust intention detection and fatigue-adaptive control of an elbow rehabilitation robot,” Sci. Rep. , vol. 15, Art. no. 40895, Nov. 2025, doi: 10.1038/s41598-025-24831-w. [29] P. Tu, J. Li, and H. Wang, “A multitask deep learning approach for sEMG-based human motion intention and muscle fatigue levels recogni-tion,” IEEE Trans. Instrum. Meas. , vol. 74, pp. 1–10, Art. no. 2518710, 2025, doi: 10.1109/TIM.2025.3550611. [30] W.-T. Wu, S.-J. Ruan, Y.-W. Tu, Y.-L. Huang, and H.-J. Guo, “A hy-brid model for muscle fatigue detection: Integrating time and frequency domain features of sEMG signals with RPE scale during isometric con-traction,” IEEE Trans. Instrum. Meas. , vol. 74, pp. 1–11, 2025, doi: 10.1109/TIM.2025.3548790. [31] H. Pan, D. Li, C. Chen, and P. B. Shull, “High-density EMG grip force estimation during muscle fatigue via domain adaptation,” IEEE Trans. Neural Syst. Rehabil. Eng. , vol. 33, pp. 925–934, 2025, doi: 10.1109/TNSRE.2025.3541227. [32] R. F. Pitzalis et al., “Evaluating muscle fatigue with non-invasive ap-proaches: A review of methods, metrics, and implications,” IEEE Trans. Neural Syst. Rehabil. Eng. , vol. 33, pp. 2707–2723, 2025, doi: 10.1109/TNSRE.2025.3578843. 31

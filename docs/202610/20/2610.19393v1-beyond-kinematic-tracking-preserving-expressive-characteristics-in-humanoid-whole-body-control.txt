@@ -1,0 +1,4537 @@
+Title: Beyond Kinematic Tracking: Preserving Expressive Characteristics in Humanoid Whole-Body Control
+
+URL Source: https://arxiv.org/pdf/2610.19393v1
+
+Published Time: Thu, 15 Oct 2026 00:41:49 GMT
+
+Number of Pages: 9
+
+Markdown Content:
+# Beyond Kinematic Tracking: Preserving Expressive Characteristics in Humanoid Whole-Body Control 
+
+Lingfan Bao, Hanshang Zhu, Yan Pan, Jincheng Wang, Jingyang Yu, Tianhu Peng, Yiyang Jia, Dimitrios Kanoulas, and Chengxu Zhou Dynamic 
+
+(a) Amplitude (b) Energy 
+
+> Postural
+
+(c) Body expansion (d) Body lean (e) Pelvis height 
+
+Fig. 1. We demonstrate residual compensation for expressive motions on the Unitree G1. Pairs show executions without (left) and with (right) compensation for (a) amplitude, (b) energy, (c) body expansion, (d) body lean, and (e) pelvis height. 
+
+Abstract —Whole-body control plays a crucial role in enabling humanoid robots to execute expressive motions. Faithful ex-ecution requires preserving both the intended action and its expressive characteristics. Existing whole-body trackers typically balance joint and keypoint tracking with physical stability across diverse motions, but these objectives do not necessarily priori-tize the expressive characteristics of each action. Our analysis shows that lower average positional tracking error does not guarantee better preservation of dynamic and postural motion characteristics. To address this gap, we propose a residual learning framework with compensation objectives targeting am-plitude, energy, body expansion, body lean, and pelvis height. To concentrate compensation while limiting interference with the underlying tracking behavior, motion-aware gating allocates correction capacity according to body-part activity, preserving larger correction ranges in more active parts and restricting them elsewhere. For each frozen tracker, we train motion-specific residual policies and distill them into a unified policy shared across motion categories. Simulation and physical experiments on the Unitree G1 across eight motion categories demonstrate superior preservation of dynamic and postural motion charac-teristics compared with the corresponding baselines. 
+
+Index Terms —Whole-Body Motion Planning and Control, Human and Humanoid Motion Analysis and Synthesis, Rein-forcement Learning. 
+
+I. I NTRODUCTION 
+
+Whole-body motion allows humanoid robots to convey intent and express themselves through physical behavior. Ges-tures and movements carry meaning through both the actions performed and how they unfold. Movement dynamics and posture are thus integral to the behaviors a robot seeks to re-produce. Bringing such expressiveness to physical humanoids 
+
+This work was partially supported by the Advanced Research and Invention Agency (grant number SMRB-SE01-P06) and the NVIDIA Academic Grant Program. The authors are with the Department of Computer Science, University College London, London, UK. chengxu.zhou@ucl.ac.uk 
+
+Corresponding author: Chengxu Zhou. 
+
+requires whole-body control that coordinates movement while maintaining balance [1]–[7]. Recent advances in whole-body control have enabled hu-manoids to reproduce a broad repertoire of reference motions with a shared tracking policy [3], [4]. Maintaining balance and satisfying physical constraints, however, may require devia-tions from the reference motion [7]. While aggregate tracking errors measure whole-body motion fidelity, expressiveness may depend on particular postural and dynamic features, such as hand movement amplitude during waving or forward lean during bowing [8], [9]. These features may be diminished despite low overall tracking error. This raises two questions. How are expressive motion characteristics altered during physical execution? How can we recover these characteristics while maintaining stable execution and accounting for tracking accuracy? 
+
+Previous work has leveraged residual learning to improve tracking and adapt pretrained controllers to challenging mo-tions [10], object interaction [11], and deployment differ-ences [12]. Residual policies refine execution by correcting nominal actions while retaining the underlying controller. This offers a way to address expressive characteristic discrepancies while keeping the pretrained tracker fixed. To this end, we propose a residual learning framework for preserving expressive motion characteristics. Inspired by analyses of expressive movement [9], [13], we characterize dynamics through amplitude and energy, and posture through body expansion, body lean, and pelvis height. Discrepancies in these characteristics guide compensation by a unified residual policy shared across motion categories for each frozen tracker. To accommodate both postural and dynamic corrections, we introduce motion-aware gating that allocates larger correction bounds to more active body parts while retaining correc-tion capacity in less active regions. Tracking constraints and bounded corrections further balance expressive preservation arXiv:2610.19393v1 [cs.RO] 14 Oct 2026 Expressive Compensation Reward 
+
+𝑟 ! = 𝑟 "#$ + 𝑟 %"& + 𝑟 '() 
+
+2. Residual Policy Learning & Distillation (Training) 
+
+𝜋 !"# (%) 🔥 
+
+𝑋 !"# 
+
+𝑋 $%𝑠" 
+
+𝑋 "&"' 
+
+𝜋 !"# (') 
+
+𝜋 !"# (() 
+
+𝜋 !"# ()) 
+
+> … …
+> DAgger
+
+𝜋 !"# 
+
+*+% 🔥 
+
+> PPO update
+
+Stage I: Task -specific Residual Policy Training Stage II: Policy Distillation 
+
+Physical Simulator 
+
+𝜋 *+! ❄ 
+
+> 𝐸𝑥𝑝𝑎𝑛𝑠𝑖𝑜𝑛 𝑎𝑚𝑝𝑙𝑡𝑖𝑡𝑢𝑑𝑒 𝑒𝑛𝑒𝑟𝑔𝑦
+
+𝑷𝒐𝒔 𝒕𝒖𝒓 𝒂𝒍 𝑫𝒚𝒏𝒂𝒎𝒊𝒄 
+
+1. Motion Data Curation 
+
+Motion Retargeting 
+
+𝑢 ' 𝑢 ( 𝑢 -
+
+Motion Unit Segmentation 
+
+Reference Motion Units: 𝑋 #$%& 𝜋 !"# 
+
+*+% 🔥 
+
+𝜋 *+! ❄
+
+3. Deployment 
+
+Human Motion Dataset 
+
+🔥 ❄ Frozen Trainable Motion-Aware Gate Policy Update eexpansion elean eheight eAeEErrors ortortawbt 
+
+tΔ̂ ares 
+
+> t
+
+Δares 
+
+tatMotion-aware gate αgtFeedback 
+
+> Body lean Pelvis height
+
+Expressive Compensation Reward 
+
+𝑟 ! = 𝑟 "#$ + 𝑟 %"& + 𝑟 '() 
+
+2. Residual Policy Learning & Distillation (Training) 
+
+𝜋 !"# (%) 🔥 
+
+𝑋 !"# 
+
+𝑋 $%𝑠" 
+
+𝑋 "&"' 
+
+𝜋 !"# (') 
+
+𝜋 !"# (() 
+
+𝜋 !"# ()) 
+
+> … …
+> DAgger
+
+𝜋 !"# 
+
+*+% 🔥 
+
+> PPO update
+
+Stage I: Task -specific Residual Policy Training Stage II: Policy Distillation 
+
+Physical Simulator 
+
+𝜋 *+! ❄ 
+
+> 𝐸𝑥𝑝𝑎𝑛𝑠𝑖𝑜𝑛 𝑎𝑚𝑝𝑙𝑡𝑖𝑡𝑢𝑑𝑒 𝑒𝑛𝑒𝑟𝑔𝑦
+
+𝑷𝒐𝒔 𝒕𝒖𝒓 𝒂𝒍 𝑫𝒚𝒏𝒂𝒎𝒊𝒄 
+
+1. Motion Data Curation 
+
+Motion Retargeting 
+
+𝑢 ' 𝑢 ( 𝑢 -
+
+Motion Unit Segmentation 
+
+Reference Motion Units: 𝑋 #$%& 𝜋 !"# 
+
+*+% 🔥 
+
+𝜋 *+! ❄
+
+3. Deployment 
+
+Human Motion Dataset 
+
+🔥 ❄ Frozen Trainable Motion-Aware Gate Policy Update eexpansion elean eheight eAeEErrors ortortawbt 
+
+tΔ̂ ares 
+
+> t
+
+Δares 
+
+tatMotion-aware gate αgtFeedback 
+
+> Body lean Pelvis height
+
+Expressive Compensation Reward 
+
+𝑟 ! = 𝑟 "#$ + 𝑟 %"& + 𝑟 '() 
+
+2. Residual Policy Learning & Distillation (Training) 
+
+𝜋 !"# (%) 🔥 
+
+𝑋 !"# 
+
+𝑋 $%𝑠" 
+
+𝑋 "&"' 
+
+𝜋 !"# (') 
+
+𝜋 !"# (() 
+
+𝜋 !"# ()) 
+
+> … …
+> DAgger
+
+𝜋 !"# 
+
+*+% 🔥 
+
+> PPO update
+
+Stage I: Task -specific Residual Policy Training Stage II: Policy Distillation 
+
+Physical Simulator 
+
+𝜋 *+! ❄ 
+
+> 𝐸𝑥𝑝𝑎𝑛𝑠𝑖𝑜𝑛 𝑎𝑚𝑝𝑙𝑡𝑖𝑡𝑢𝑑𝑒 𝑒𝑛𝑒𝑟𝑔𝑦
+
+𝑷𝒐𝒔 𝒕𝒖𝒓 𝒂𝒍 𝑫𝒚𝒏𝒂𝒎𝒊𝒄 
+
+1. Motion Data Curation 
+
+Motion Retargeting 
+
+𝑢 ' 𝑢 ( 𝑢 -
+
+Motion Unit Segmentation 
+
+Reference Motion Units: 𝑋 #$%& 𝜋 !"# 
+
+*+% 🔥 
+
+𝜋 *+! ❄
+
+3. Deployment 
+
+Human Motion Dataset 
+
+🔥 ❄ Frozen Trainable Motion-Aware Gate Policy Update eexpansion elean eheight eAeEErrors ortortawbt 
+
+tΔ̂ ares 
+
+> t
+
+Δares 
+
+tatMotion-aware gate αgtFeedback 
+
+> Body lean Pelvis height
+
+Expressive Compensation Reward 
+
+𝑟 ! = 𝑟 "#$ + 𝑟 %"& + 𝑟 '() 
+
+2. Residual Policy Learning & Distillation (Training) 
+
+𝜋 !"# (%) 🔥 
+
+𝑋 !"# 
+
+𝑋 $%𝑠" 
+
+𝑋 "&"' 
+
+𝜋 !"# (') 
+
+𝜋 !"# (() 
+
+𝜋 !"# ()) 
+
+> … …
+> DAgger
+
+𝜋 !"# 
+
+*+% 🔥 
+
+> PPO update
+
+Stage I: Task -specific Residual Policy Training Stage II: Policy Distillation 
+
+Physical Simulator 
+
+𝜋 *+! ❄ 
+
+> 𝐸𝑥𝑝𝑎𝑛𝑠𝑖𝑜𝑛 𝑎𝑚𝑝𝑙𝑡𝑖𝑡𝑢𝑑𝑒 𝑒𝑛𝑒𝑟𝑔𝑦
+
+𝑷𝒐𝒔 𝒕𝒖𝒓 𝒂𝒍 𝑫𝒚𝒏𝒂𝒎𝒊𝒄 
+
+1. Motion Data Curation 
+
+Motion Retargeting 
+
+𝑢 ' 𝑢 ( 𝑢 -
+
+Motion Unit Segmentation 
+
+Reference Motion Units: 𝑋 #$%& 𝜋 !"# 
+
+*+% 🔥 
+
+𝜋 *+! ❄
+
+3. Deployment 
+
+Human Motion Dataset 
+
+🔥 ❄ Frozen Trainable Motion-Aware Gate Policy Update eexpansion elean eheight eAeEErrors ortortawbt 
+
+tΔ̂ ares 
+
+> t
+
+Δares 
+
+tatMotion-aware gate αgtFeedback 
+
+> Body lean Pelvis height
+
+Expressive Compensation Reward 
+
+𝑟 ! = 𝑟 "#$ + 𝑟 %"& + 𝑟 '() 
+
+2. Residual Policy Learning & Distillation (Training) 
+
+𝜋 !"# (%) 🔥 
+
+𝑋 !"# 
+
+𝑋 $%𝑠" 
+
+𝑋 "&"' 
+
+𝜋 !"# (') 
+
+𝜋 !"# (() 
+
+𝜋 !"# ()) 
+
+> … …
+> DAgger
+
+𝜋 !"# 
+
+*+% 🔥 
+
+> PPO update
+
+Stage I: Task -specific Residual Policy Training Stage II: Policy Distillation 
+
+Simulator 
+
+𝜋 *+! ❄ 
+
+> 𝐸𝑥𝑝𝑎𝑛𝑠𝑖𝑜𝑛 𝑎𝑚𝑝𝑙𝑡𝑖𝑡𝑢𝑑𝑒 𝑒𝑛𝑒𝑟𝑔𝑦
+
+𝑷𝒐𝒔 𝒕𝒖𝒓 𝒂𝒍 𝑫𝒚𝒏𝒂𝒎𝒊𝒄 
+
+1. Motion Data Curation 
+
+Motion Retargeting 
+
+𝑢 ' 𝑢 ( 𝑢 -
+
+Motion Unit Segmentation 
+
+Reference Motion Units: 𝑋 #$%& 𝜋 !"# 
+
+*+% 🔥 
+
+𝜋 *+! ❄
+
+3. Deployment 
+
+an Motion Dataset 
+
+🔥 rozen Trainable Motion-Aware Gate Policy Update eexpansion elean eheight eAeEErrors ortortawbt 
+
+tΔ̂ ares 
+
+> t
+
+Δares 
+
+tatMotion-aware gate αgtFeedback 
+
+> Body lean Pelvis height
+
+Expressive Compensation Reward 
+
+𝑟 ! = 𝑟 "#$ + 𝑟 %"& + 𝑟 '() 
+
+2. Residual Policy Learning & Distillation (Training) 
+
+𝜋 !"# (%) 🔥 
+
+𝑋 !"# 
+
+𝑋 $%𝑠" 
+
+𝑋 "&"' 
+
+𝜋 !"# (') 
+
+𝜋 !"# (() 
+
+𝜋 !"# ()) 
+
+> … …
+> DAgger
+
+𝜋 !"# 
+
+*+% 🔥 
+
+> PPO update
+
+Stage I: Task -specific Residual Policy Training Stage II: Policy Distillation 
+
+Physical Simulator 
+
+𝜋 *+! ❄ 
+
+> 𝐸𝑥𝑝𝑎𝑛𝑠𝑖𝑜𝑛 𝑎𝑚𝑝𝑙𝑡𝑖𝑡𝑢𝑑𝑒 𝑒𝑛𝑒𝑟𝑔𝑦
+
+𝑷𝒐𝒔 𝒕𝒖𝒓 𝒂𝒍 𝑫𝒚𝒏𝒂𝒎𝒊𝒄 
+
+1. Motion Data Curation 
+
+Motion Retargeting 
+
+𝑢 ' 𝑢 ( 𝑢 -
+
+Motion Unit Segmentation 
+
+Reference Motion Units: 𝑋 #$%& 𝜋 !"# 
+
+*+% 🔥 
+
+𝜋 *+! ❄
+
+3. Deployment 
+
+Human Motion Dataset 
+
+🔥 ❄ Frozen Trainable Motion-Aware Gate Policy Update eexpansion elean eheight eAeEErrors ortortawbt 
+
+tΔ̂ ares 
+
+> t
+
+Δares 
+
+tatMotion-aware gate αgtFeedback 
+
+> Body lean Pelvis height
+
+Expressive Compensation Reward 
+
+𝑟 ! = 𝑟 "#$ + 𝑟 %"& + 𝑟 '() 
+
+2. Residual Policy Learning & Distillation (Training) 
+
+𝜋 !"# (%) 🔥 
+
+𝑋 !"# 
+
+𝑋 $%𝑠" 
+
+𝑋 "&"' 
+
+𝜋 !"# (') 
+
+𝜋 !"# (() 
+
+𝜋 !"# ()) 
+
+> … …
+> DAgger
+
+𝜋 !"# 
+
+*+% 🔥 
+
+> PPO update
+
+Stage I: Task -specific Residual Policy Training Stage II: Policy Distillation 
+
+Physical Simulator 
+
+𝜋 *+! ❄ 
+
+> 𝐸𝑥𝑝𝑎𝑛𝑠𝑖𝑜𝑛 𝑎𝑚𝑝𝑙𝑡𝑖𝑡𝑢𝑑𝑒 𝑒𝑛𝑒𝑟𝑔𝑦
+
+𝑷𝒐𝒔 𝒕𝒖𝒓 𝒂𝒍 𝑫𝒚𝒏𝒂𝒎𝒊𝒄 
+
+1. Motion Data Curation 
+
+Motion Retargeting 
+
+𝑢 ' 𝑢 ( 𝑢 -
+
+Motion Unit Segmentation 
+
+Reference Motion Units: 𝑋 #$%& 𝜋 !"# 
+
+*+% 🔥 
+
+𝜋 *+! ❄
+
+3. Deployment 
+
+Human Motion Dataset 
+
+🔥 ❄ Frozen Trainable Motion-Aware Gate Policy Update eexpansion elean eheight eAeEErrors ortortawbt 
+
+tΔ̂ ares 
+
+> t
+
+Δares 
+
+tatMotion-aware gate αgtFeedback 
+
+> Body lean Pelvis height
+
+awbt 
+
+> t
+
+Δ̂ ares 
+
+> t
+
+Δares 
+
+> t
+
+atgtFig. 2. Residual compensation framework. (1) Human motions are retargeted, filtered, and segmented into units. (2) We train motion-specific teachers π(i)res 
+
+(Stage I) and distill them into a unified student πuni res (Stage II). (3) The student augments the frozen tracker πwbt , with motion-aware gating setting correction ranges by body-part activity. 
+
+with tracking accuracy and stable execution. Our contributions are threefold. 1) We analyze postural and dynamic deviations across motions and trackers, revealing that lower mean posi-tional error does not necessarily correspond to better preservation of expressive motion characteristics. 2) We propose a motion-aware residual learning framework that augments a frozen whole-body tracker with a unified policy to recover expressive motion characteristics. 3) We conduct extensive evaluations across eight motion categories in simulation and on the physical Unitree G1. Results demonstrate that our framework outperforms the corresponding baselines in preserving dynamic and postural motion characteristics. II. R ELATED WORK 
+
+A. Expressive Motion Analysis 
+
+Human movement studies relate expressive qualities to movement dynamics and body posture, including trunk and arm configuration, movement direction, and intensity [9], [13]. Research on bodily expression organizes these aspects into interpretable motion factors and quantitative measures [14]. Laban-based studies associate combinations of movement el-ements with emotions elicited through movement [15], while computational approaches combine spatial body representa-tions with energy-based temporal features for emotion recog-nition [16]. Dynamic and postural features have also been examined in virtual avatars. Head inclination, head position, body openness, and joint velocities have been used to ex-tract representative static poses from expressive walking, with perceptual evaluations supporting the transfer of expressive information [17]. Extending expressive movement to robots requires accounting for task requirements and physical embod-iment. Work in this direction has explored learning expressive motion objectives from human feedback [18] and combining human motion style transfer with physics-aware generation and whole-body tracking [19]. Drawing on these studies, we focus on the dynamic and postural characteristics that contribute to each motion’s expressive qualities and use them to define explicit compensation targets for humanoid motion execution. 
+
+B. Whole-Body Motion Tracking and Residual Adaptation 
+
+Whole-body motion tracking enables humanoids to repro-duce diverse reference motions while maintaining balance [2]– [4], [20]–[22]. Expressive control has progressed from coordi-nating upper-body imitation with velocity-controlled locomo-tion [6] to reproducing dynamic full-body motions [7]. Recent residual and adapter-based methods further extend pretrained controllers to challenging motion distributions [10], [23], object interaction [11], and changing task requirements [24]. Related approaches address dynamics mismatch [25] and deployment-interface differences [12]. In contrast to these adaptation objectives, our work focuses on preserving ex-pressive motion characteristics by explicitly compensating for deviations in posture and movement dynamics. III. M ETHOD 
+
+Figure 2 summarizes our framework, from motion curation to residual policy learning, distillation, and deployment. Body expansion Motion energy   
+
+> Motion amplitude Motion amplitude
+> Body lean Pelvis height Fig. 3. Kinematic cues for amplitude, energy, body expansion, body lean, and pelvis height.
+
+A. Problem Formulation 
+
+We formulate expressive whole-body residual adaptation as goal-conditioned reinforcement learning (RL). The pretrained tracker πwbt supplies nominal joint-position targets awbt  
+
+> t
+
+.At step t, the residual policy observes ot = [opt , o rt , e kp  
+
+> t
+
+],comprising proprioception and control history, local target motion states, and keypoint tracking errors. Its output ∆ˆ ares  
+
+> t
+
+=
+
+πres (ot) ∈ [−1, 1] na yields at = awbt  
+
+> t
+
++ α gt ⊙ ∆ˆ ares  
+
+> t
+
+,where na is the action dimension of the underlying tracker, 
+
+α = 0.2 rad , gt ∈ [0 .2, 1] na is the motion-aware gate, and ⊙ denotes element-wise multiplication. We optimize the residual policy using proximal policy optimization (PPO) [26] to maximize Eπres [PT −1 
+
+> t=0
+
+γtrt], where T is the horizon and γ
+
+is the discount factor. Framewise and unit-completion rewards combine characteristic preservation, soft tracking constraints, and residual regularization. 
+
+B. Data Curation 
+
+We select eight motion categories from AMASS [27] using BABEL annotations [28]: walk, kick, punch, crouch, wave, clap, cross arms, and bow, covering diverse limb movements and postural changes. After excluding unsupported interactions and mixed actions, we retarget the motions to G1 using SOMA [29], resample them to 50 Hz , and apply PHC-based preprocessing [30] to obtain robot reference trajectories. To compute motion characteristics over complete move-ments or sustained poses, we segment references into units 
+
+u with trajectories Xref  
+
+> u
+
+. Following the distinction between discrete and rhythmic movements [31], we identify one-shot movements, periodic cycles, and sustained holds. Limb-trajectory extrema, direction reversals, and inferred foot con-tacts guide movement boundaries; pelvis height, torso incli-nation, and relative hand positions identify posture changes and holds. Cycles span successive same-phase events, while one-shot units span onset to completion. We record each unit’s type and frame boundaries according to its observed motion pattern, using the same intervals for characteristic computation and comparison across methods. 
+
+C. Expressive Motion Descriptors 
+
+Following expressive movement analyses [9], [17], we de-scribe dynamics through amplitude and energy, and posture through body expansion, body lean, and pelvis height, as illustrated in Fig. 3. We compute these descriptors over motion units of Tu frames from J = 29 joint angles and 14 forward-kinematic keypoints at 50 Hz , with definitions given in Table I. Throughout, L and R denote left and right. The five amplitude components are indexed by B = (LH , RH , LA , RA , W) ,corresponding to the left hand, right hand, left ankle, right ankle, and waist, respectively. The left and right shoulder origins are denoted by LS and RS . For body expansion, 
+
+S = {L, R } indexes the two sides, while K = {e, w } indexes the elbow and wrist points.     
+
+> Table I Expressive motion descriptors computed over a motion unit uof Tuframes.
+
+Descriptor Definition Unit Amplitude damp ,u = ( ab,u )b∈B m
+
+aW,u = ac,u 
+
+ak,u = max 
+
+> 1≤t,t ′≤Tu
+
+∥zk,t − zk,t ′ ∥2
+
+Motion energy denergy ,u = 1
+
+Tu − 1
+
+> Tu
+
+X
+
+> t=2
+> J
+
+X
+
+> j=1
+
+(qt,j − qt−1,j )2 rad 2
+
+Body expansion dexp ,u = 1
+
+TuTuX
+
+> t=1
+
+X
+
+> s∈S
+
+X
+
+> k∈K
+
+∥psk,t − pc,t ∥2 mBody lean dlean ,u = 1
+
+TuTuX
+
+> t=1
+
+sin θt –Pelvis height dheight ,u = 1
+
+TuTuX
+
+> t=1
+
+ht m
+
+Dynamic descriptors: Amplitude and energy describe movement extent and kinematic intensity [9], [17]. For refer-ence and executed motions, we use pelvis-frame trajectories 
+
+zk,t = R⊤
+
+> pelvis ,t
+
+(pk,t − ppelvis ,t ), where p is a world-frame position and Rpelvis ,t maps pelvis to world coordinates. Hands use fixed fingertip offsets from wrist links; ankles use ankle-roll origins. The chest midpoint is pc,t = ( pLS ,t + pRS ,t )/2,whose trajectory diameter defines waist amplitude aW,u =
+
+ac,u . Motion energy uses squared increments of joint angles 
+
+qt,j as a kinematic intensity proxy, not mechanical energy. 
+
+Postural descriptors: We describe body configuration through body expansion, body lean, and pelvis height, which remain informative during sustained holds [17]. Body expan-sion captures upper-body openness through the four elbow-and wrist-to-chest distances, ℓsk,t = ∥psk,t − pc,t ∥2. Body lean characterizes torso inclination through sin θt, where θt
+
+is world-frame torso pitch, positive for forward bending. To capture body elevation, we measure pelvis height relative to the lowest sole point as ht = zpelvis ,t − min s∈S zs
+
+> sole ,t
+
+, where 
+
+z denotes world-frame height and zs 
+
+> sole ,t
+
+is the height of the lowest point on sole s.
+
+D. Motion-Aware Residual Control 
+
+To accommodate both postural and dynamic corrections, the motion-aware gate assigns larger correction bounds to more active body parts while retaining correction capacity in less active regions. The gated residual is added to the nominal action as ∆ares  
+
+> t
+
+= α gt ⊙ ∆ˆ ares  
+
+> t
+
+,
+
+at = awbt  
+
+> t
+
++ ∆ ares  
+
+> t
+
+. (1) We divide the 29 joints into five body groups for motion-energy computation and gating. The left and right arms, denoted by LH and RH , contain seven joints each; the left and right legs, denoted by LA and RA , contain six each; and the waist W contains three. Group activity rt,b is measured by the root-mean-square reference joint velocity over up to ten future intervals. Let rmax  
+
+> t
+
+= max b rt,b and bj denote the group containing joint j. The gate is defined as 
+
+gt,j =
+
+(
+
+0.2 + 0 .8 rt,b j /r max  
+
+> t
+
+, rmax  
+
+> t
+
+> 0,
+
+0.2, rmax  
+
+> t
+
+= 0 . (2) For nonzero reference activity, the most active group receives the full correction bound of ±0.2 rad , while all groups retain at least ±0.04 rad for postural adjustments. The gate uses only reference frames available to the actor. 
+
+E. Residual Policy Training 
+
+For each tracker, we train eight motion-specific residual policies π(i)res , one per motion category, and distill them into a unified policy πuni res .
+
+State space design. We define proprioception as opt =[qt, ˙qt, bt, ωt, awbt 
+
+> t−1
+
+, ∆ares 
+
+> t−1
+
+], where qt and ˙qt are joint po-sitions and velocities, bt and ωt are the gravity direction and angular velocity expressed in the body frame, and awbt 
+
+> t−1
+
+and ∆ares  
+
+> t−1
+
+are the previous nominal targets and applied residual corrections. The motion goal ort = [ qref 
+
+> t−10: t+10
+
+, bref  
+
+> t
+
+]
+
+contains a 21-frame reference joint-position window and gravity expressed in the current reference body frame, with indices clamped at sequence boundaries. Keypoint errors ekp 
+
+> t
+
+stack position differences (reference minus current) at elbows, knees, wrists, and ankles in their respective pelvis frames. The training critic additionally receives motion phase and its validity, base velocity, height, and foot contacts. 
+
+Reward design. The reward r = rexp + rcon + rreg combines characteristic preservation, tracking constraints, and residual smoothness. We use rexp = ramp + renergy + rexpansion +
+
+rlean + rheight , with functions and weights in Table II. Dynamic rewards average the five body groups equally. Amplitude uses eAb,u = |aexec  
+
+> b,u
+
+− aref 
+
+> b,u
+
+| at unit completion with a 0.02 m tolerance. Energy uses the absolute difference eEb,t 
+
+between executed and reference sums of squared joint-angle increments within group b at consecutive frames. Postural rewards compare body configurations at corre-sponding frames. We define eXs,k,t = |ℓs, exec  
+
+> k,t
+
+− ℓs, ref  
+
+> k,t
+
+| for elbow/wrist-to-chest distances, eLt = | sin θexec  
+
+> t
+
+− sin θref  
+
+> t
+
+| for body lean, and eHt = |hexec  
+
+> t
+
+−href  
+
+> t
+
+| for pelvis height. Amplitude and postural errors are mapped to bounded rewards using 
+
+ρ(z) = (1+ z2)−1 after normalization, with [x]+ = max(0 , x )
+
+denoting the positive part. Scales are shared across motion categories and trackers. We set σA = 0 .04 m , σX = 0 .01 m for all four elbow/wrist-to-chest distances, σlean = 0 .04 , and σheight = 0 .01 m . Group 
+
+> Table II Reward functions and weights for residual policy training.
+
+Term Function Weight Amplitude 1
+
+|B| 
+
+X
+
+> b∈B
+
+ρ [eAb,u − 0.02] +
+
+σA
+
+!
+
+2
+
+Energy − 1(Tu − 1) |B| 
+
+X
+
+> b∈B
+
+log 1 + eEb,t 
+
+σE,b 
+
+!
+
+λE
+
+Body expansion 14Tu
+
+X
+
+> s∈S
+
+X
+
+> k∈K
+
+ρ eXs,k,t 
+
+σX
+
+!
+
+1
+
+Body lean 1
+
+Tu
+
+ρ
+
+ eLt
+
+σlean 
+
+
+
+1
+
+Pelvis height 1
+
+Tu
+
+ρ
+
+ eHt
+
+σheight 
+
+
+
+1
+
+Tracking constraint −[vtrk  
+
+> u
+
+]+ λtrk 
+
+Residual action rate − ∥∆ares  
+
+> t
+
+− ∆ares 
+
+> t−1
+
+∥22
+
+naα2 3
+
+energy scales σE,b use reference motions pooled across the full training dataset. We calibrate λE from tracker-only rollouts to balance amplitude rewards and energy penalties, then keep all scales and this weight fixed. Framewise postural and energy terms are divided by Tu and Tu − 1, respectively, to normalize unit duration; amplitude contributes once at completion. 
+
+Soft constraints and regularization. The tracking constraint limits increases in positional error relative to the frozen tracker. For each motion unit u, let mu denote the mean wrist and ankle position error, m0 
+
+> u
+
+its tracker-only value, and ¯m0 the tracker-only mean across units. At unit completion, we apply 
+
+rcon = −λtrk [vtrk  
+
+> u
+
+]+, where vtrk  
+
+> u
+
+= (mu − 1.25 m0
+
+> u
+
+)/ ¯m0
+
+allows a 25% increase before incurring a penalty. The multi-plier λtrk starts at zero and increases with the mean positive violation, up to a maximum of 10 .Residual regularization rreg penalizes squared changes in applied corrections at every control step without unit-length weighting, as defined in Table II. 
+
+Initialization and termination. Episodes are initialized from reference poses and velocities at motion-unit boundaries or preceding run-ins. Run-ins provide tracking context before characteristic rewards become active. An episode ends when the reference motion is exhausted or a fall occurs, detected when pelvis height above ground drops below 0.15 m . A fall replaces the final-step reward with −1. Incomplete units retain their framewise rewards but receive no unit-completion terms. 
+
+Domain randomization. The underlying trackers are pre-trained with domain randomization for sim-to-real transfer [3], [4]. We train residual policies under nominal dynamics. 
+
+Policy distillation. Following MOSAIC [12], we consoli-date the motion-specific policies through dataset aggregation (DAgger). Teacher rollouts initialize the dataset, which is progressively augmented with student-visited states labeled by the corresponding teacher’s clipped mean action. One unified policy per tracker minimizes action mean-squared error on 0.0 0.5 1.0 
+
+Time (s) 
+
+−20 020 
+
+> Hand (cm)
+
+abc
+
+Motion energy 
+
+0510 15 
+
+> 10⁻³ rad²/frame
+
+0.0 0.8 1.6 
+
+Time (s) 
+
+020 40 
+
+abc
+
+22.8 23.4 24.0 
+
+L elbow–chest (cm) 
+
+22.2 22.8 
+
+R elbow–chest (cm) 
+
+0.0 0.4 0.8 
+
+Time (s) 
+
+17.5 20.0 22.5 
+
+L wrist–chest (cm) 
+
+0.0 0.4 0.8 
+
+Time (s) 
+
+15 16 17 
+
+R wrist–chest (cm) 
+
+0.0 1.5 3.0 
+
+Time (s) 
+
+25 50 75 abc
+
+a b c
+
+(a) 
+
+a b c
+
+(b) 
+
+a b c
+
+(c) 
+
+a b c
+
+(d) 
+
+Reference 
+
+w/o Res. w/ Res. 
+
+w/o Res. w/ Res. 
+
+> Body lean (°) Pelvis height (cm)
+
+0.0 0.5 1.0 
+
+Time (s) 
+
+−20 020 
+
+> Hand (cm)
+
+abc
+
+Motion energy 
+
+0510 15 
+
+> 10⁻³ rad²/frame
+
+0.0 0.8 1.6 
+
+Time (s) 
+
+020 40 
+
+> Forward lean (°)
+
+abc
+
+22.8 23.4 24.0 
+
+L elbow–chest (cm) 
+
+22.2 22.8 
+
+R elbow–chest (cm) 
+
+0.0 0.4 0.8 
+
+Time (s) 
+
+17.5 20.0 22.5 
+
+L wrist–chest (cm) 
+
+0.0 0.4 0.8 
+
+Time (s) 
+
+15 16 17 
+
+R wrist–chest (cm) 
+
+0.0 1.5 3.0 
+
+Time (s) 
+
+25 50 75 
+
+> Root height (cm)
+
+abc
+
+a b c
+
+(a) 
+
+a b c
+
+(b) 
+
+a b c
+
+(c) 
+
+a b c
+
+(d) 
+
+Reference 
+
+w/o Res. w/ Res. 
+
+w/o Res. w/ Res. 0.0 0.5 1.0 
+
+Time (s) 
+
+−20 020 
+
+> Hand (cm)
+
+abc
+
+Motion energy 
+
+0510 15 
+
+> 10⁻³ rad²/frame
+
+0.0 0.8 1.6 
+
+Time (s) 
+
+020 40 
+
+> Forward lean (°)
+
+abc
+
+22.8 23.4 24.0 
+
+L elbow–chest (cm) 
+
+22.2 22.8 
+
+R elbow–chest (cm) 
+
+0.0 0.4 0.8 
+
+Time (s) 
+
+17.5 20.0 22.5 
+
+L wrist–chest (cm) 
+
+0.0 0.4 0.8 
+
+Time (s) 
+
+15 16 17 
+
+R wrist–chest (cm) 
+
+0.0 1.5 3.0 
+
+Time (s) 
+
+25 50 75 
+
+> Root height (cm)
+
+abc
+
+a b c
+
+(a) 
+
+a b c
+
+(b) 
+
+a b c
+
+(c) 
+
+a b c
+
+(d) 
+
+Reference 
+
+w/o Res. w/ Res. 
+
+w/o Res. w/ Res. 0.0 0.5 1.0 
+
+Time (s) 
+
+−20 020 
+
+> Hand (cm)
+
+abc
+
+Motion energy 
+
+0510 15 
+
+> 10⁻³ rad²/frame
+
+0.0 0.8 1.6 
+
+Time (s) 
+
+020 40 
+
+> Forward lean (°)
+
+abc
+
+22.8 23.4 24.0 
+
+L elbow–chest (cm) 
+
+22.2 22.8 
+
+R elbow–chest (cm) 
+
+0.0 0.4 0.8 
+
+Time (s) 
+
+17.5 20.0 22.5 
+
+L wrist–chest (cm) 
+
+0.0 0.4 0.8 
+
+Time (s) 
+
+15 16 17 
+
+R wrist–chest (cm) 
+
+0.0 1.5 3.0 
+
+Time (s) 
+
+25 50 75 
+
+> Root height (cm)
+
+abc
+
+a b c
+
+(a) 
+
+a b c
+
+(b) 
+
+a b c
+
+(c) 
+
+a b c
+
+(d) 
+
+Reference 
+
+w/o Res. w/ Res. 
+
+w/o Res. w/ Res. 0.0 0.5 1.0 
+
+Time (s) 
+
+−20 020 
+
+> Hand (cm)
+
+abc
+
+Motion energy 
+
+0510 15 
+
+> 10⁻³ rad²/frame
+
+0.0 0.8 1.6 
+
+Time (s) 
+
+020 40 
+
+> Forward lean (°)
+
+abc
+
+22.8 23.4 24.0 
+
+L elbow–chest (cm) 
+
+22.2 22.8 
+
+R elbow–chest (cm) 
+
+0.0 0.4 0.8 
+
+Time (s) 
+
+17.5 20.0 22.5 
+
+L wrist–chest (cm) 
+
+0.0 0.4 0.8 
+
+Time (s) 
+
+15 16 17 
+
+R wrist–chest (cm) 
+
+0.0 1.5 3.0 
+
+Time (s) 
+
+25 50 75 
+
+> Root height (cm)
+
+abc
+
+a b c
+
+(a) 
+
+a b c
+
+(b) 
+
+a b c
+
+(c) 
+
+a b c
+
+(d) 
+
+Reference 
+
+w/o Res. w/ Res. 
+
+w/o Res. w/ Res. 0.0 0.5 1.0 
+
+Time (s) 
+
+−20 020 
+
+> Hand (cm)
+
+abc
+
+Motion energy 
+
+0510 15 
+
+> 10⁻³ rad²/frame
+
+0.0 0.8 1.6 
+
+Time (s) 
+
+020 40 
+
+abc
+
+22.8 23.4 24.0 
+
+L elbow–chest (cm) 
+
+22.2 22.8 
+
+R elbow–chest (cm) 
+
+0.0 0.4 0.8 
+
+Time (s) 
+
+17.5 20.0 22.5 
+
+L wrist–chest (cm) 
+
+0.0 0.4 0.8 
+
+Time (s) 
+
+15 16 17 
+
+R wrist–chest (cm) 
+
+0.0 1.5 3.0 
+
+Time (s) 
+
+25 50 75 abc
+
+a b c
+
+(a) 
+
+a b c
+
+(b) 
+
+a b c
+
+(c) 
+
+a b c
+
+(d) 
+
+Reference 
+
+w/o Res. w/ Res. 
+
+w/o Res. w/ Res. 
+
+> Body lean (°) Pelvis height (cm)
+
+0.0 0.5 1.0 
+
+Time (s) 
+
+−20 020 
+
+> Hand (cm)
+
+abc
+
+Motion energy 
+
+0510 15 
+
+> 10⁻³ rad²/frame
+
+0.0 0.8 1.6 
+
+Time (s) 
+
+020 40 
+
+> Forward lean (°)
+
+abc
+
+22.8 23.4 24.0 
+
+L elbow–chest (cm) 
+
+22.2 22.8 
+
+R elbow–chest (cm) 
+
+0.0 0.4 0.8 
+
+Time (s) 
+
+17.5 20.0 22.5 
+
+L wrist–chest (cm) 
+
+0.0 0.4 0.8 
+
+Time (s) 
+
+15 16 17 
+
+R wrist–chest (cm) 
+
+0.0 1.5 3.0 
+
+Time (s) 
+
+25 50 75 
+
+> Root height (cm)
+
+abc
+
+a b c
+
+(a) 
+
+a b c
+
+(b) 
+
+a b c
+
+(c) 
+
+a b c
+
+(d) 
+
+Reference 
+
+w/o Res. w/ Res. 
+
+w/o Res. w/ Res. 0.0 0.5 1.0 
+
+Time (s) 
+
+−20 020 
+
+> Hand (cm)
+
+abc
+
+Motion energy 
+
+0510 15 
+
+> 10⁻³ rad²/frame
+
+0.0 0.8 1.6 
+
+Time (s) 
+
+020 40 
+
+> Forward lean (°)
+
+abc
+
+22.8 23.4 24.0 
+
+L elbow–chest (cm) 
+
+22.2 22.8 
+
+R elbow–chest (cm) 
+
+0.0 0.4 0.8 
+
+Time (s) 
+
+17.5 20.0 22.5 
+
+L wrist–chest (cm) 
+
+0.0 0.4 0.8 
+
+Time (s) 
+
+15 16 17 
+
+R wrist–chest (cm) 
+
+0.0 1.5 3.0 
+
+Time (s) 
+
+25 50 75 
+
+> Root height (cm)
+
+abc
+
+a b c
+
+(a) 
+
+a b c
+
+(b) 
+
+a b c
+
+(c) 
+
+a b c
+
+(d) 
+
+Reference 
+
+w/o Res. w/ Res. 
+
+w/o Res. w/ Res. 0.0 0.5 1.0 
+
+Time (s) 
+
+−20 020 
+
+> Hand (cm)
+
+abc
+
+Motion energy 
+
+0510 15 
+
+> 10⁻³ rad²/frame
+
+0.0 0.8 1.6 
+
+Time (s) 
+
+020 40 
+
+> Forward lean (°)
+
+abc
+
+22.8 23.4 24.0 
+
+L elbow–chest (cm) 
+
+22.2 22.8 
+
+R elbow–chest (cm) 
+
+0.0 0.4 0.8 
+
+Time (s) 
+
+17.5 20.0 22.5 
+
+L wrist–chest (cm) 
+
+0.0 0.4 0.8 
+
+Time (s) 
+
+15 16 17 
+
+R wrist–chest (cm) 
+
+0.0 1.5 3.0 
+
+Time (s) 
+
+25 50 75 
+
+> Root height (cm)
+
+abc
+
+a b c
+
+(a) 
+
+a b c
+
+(b) 
+
+a b c
+
+(c) 
+
+a b c
+
+(d) 
+
+Reference 
+
+w/o Res. w/ Res. 
+
+w/o Res. w/ Res. 0.0 0.5 1.0 
+
+Time (s) 
+
+−20 020 
+
+> Hand (cm)
+
+abc
+
+Motion energy 
+
+0510 15 
+
+> 10⁻³ rad²/frame
+
+0.0 0.8 1.6 
+
+Time (s) 
+
+020 40 
+
+> Forward lean (°)
+
+abc
+
+22.8 23.4 24.0 
+
+L elbow–chest (cm) 
+
+22.2 22.8 
+
+R elbow–chest (cm) 
+
+0.0 0.4 0.8 
+
+Time (s) 
+
+17.5 20.0 22.5 
+
+L wrist–chest (cm) 
+
+0.0 0.4 0.8 
+
+Time (s) 
+
+15 16 17 
+
+R wrist–chest (cm) 
+
+0.0 1.5 3.0 
+
+Time (s) 
+
+25 50 75 
+
+> Root height (cm)
+
+abc
+
+a b c
+
+(a) 
+
+a b c
+
+(b) 
+
+a b c
+
+(c) 
+
+a b c
+
+(d) 
+
+Reference 
+
+w/o Res. w/ Res. 
+
+w/o Res. w/ Res. 0.0 0.5 1.0 
+
+Time (s) 
+
+−20 020 
+
+> Hand (cm)
+
+abc
+
+Motion energy 
+
+0510 15 
+
+> 10⁻³ rad²/frame
+
+0.0 0.8 1.6 
+
+Time (s) 
+
+020 40 
+
+abc
+
+22.8 23.4 24.0 
+
+L elbow–chest (cm) 
+
+22.2 22.8 
+
+R elbow–chest (cm) 
+
+0.0 0.4 0.8 
+
+Time (s) 
+
+17.5 20.0 22.5 
+
+L wrist–chest (cm) 
+
+0.0 0.4 0.8 
+
+Time (s) 
+
+15 16 17 
+
+R wrist–chest (cm) 
+
+0.0 1.5 3.0 
+
+Time (s) 
+
+25 50 75 abc
+
+a b c
+
+(a) 
+
+a b c
+
+(b) 
+
+a b c
+
+(c) 
+
+a b c
+
+(d) 
+
+Reference 
+
+w/o Res. w/ Res. 
+
+w/o Res. w/ Res. 
+
+> Body lean (°) Pelvis height (cm)
+
+0.0 0.5 1.0 
+
+Time (s) 
+
+−20 020 
+
+> Hand (cm)
+
+abc
+
+Motion energy 
+
+0510 15 
+
+> 10⁻³ rad²/frame
+
+0.0 0.8 1.6 
+
+Time (s) 
+
+020 40 
+
+> Forward lean (°)
+
+abc
+
+22.8 23.4 24.0 
+
+L elbow–chest (cm) 
+
+22.2 22.8 
+
+R elbow–chest (cm) 
+
+0.0 0.4 0.8 
+
+Time (s) 
+
+17.5 20.0 22.5 
+
+L wrist–chest (cm) 
+
+0.0 0.4 0.8 
+
+Time (s) 
+
+15 16 17 
+
+R wrist–chest (cm) 
+
+0.0 1.5 3.0 
+
+Time (s) 
+
+25 50 75 
+
+> Root height (cm)
+
+abc
+
+a b c
+
+(a) 
+
+a b c
+
+(b) 
+
+a b c
+
+(c) 
+
+a b c
+
+(d) 
+
+Reference 
+
+w/o Res. w/ Res. 
+
+w/o Res. w/ Res. 0.0 0.5 1.0 
+
+Time (s) 
+
+−20 020 
+
+> Hand (cm)
+
+abc
+
+Motion energy 
+
+0510 15 
+
+> 10⁻³ rad²/frame
+
+0.0 0.8 1.6 
+
+Time (s) 
+
+020 40 
+
+> Forward lean (°)
+
+abc
+
+22.8 23.4 24.0 
+
+L elbow–chest (cm) 
+
+22.2 22.8 
+
+R elbow–chest (cm) 
+
+0.0 0.4 0.8 
+
+Time (s) 
+
+17.5 20.0 22.5 
+
+L wrist–chest (cm) 
+
+0.0 0.4 0.8 
+
+Time (s) 
+
+15 16 17 
+
+R wrist–chest (cm) 
+
+0.0 1.5 3.0 
+
+Time (s) 
+
+25 50 75 
+
+> Root height (cm)
+
+abc
+
+a b c
+
+(a) 
+
+a b c
+
+(b) 
+
+a b c
+
+(c) 
+
+a b c
+
+(d) 
+
+Reference 
+
+w/o Res. w/ Res. 
+
+w/o Res. w/ Res. 0.0 0.5 1.0 
+
+Time (s) 
+
+−20 020 
+
+> Hand (cm)
+
+abc
+
+Motion energy 
+
+0510 15 
+
+> 10⁻³ rad²/frame
+
+0.0 0.8 1.6 
+
+Time (s) 
+
+020 40 
+
+> Forward lean (°)
+
+abc
+
+22.8 23.4 24.0 
+
+L elbow–chest (cm) 
+
+22.2 22.8 
+
+R elbow–chest (cm) 
+
+0.0 0.4 0.8 
+
+Time (s) 
+
+17.5 20.0 22.5 
+
+L wrist–chest (cm) 
+
+0.0 0.4 0.8 
+
+Time (s) 
+
+15 16 17 
+
+R wrist–chest (cm) 
+
+0.0 1.5 3.0 
+
+Time (s) 
+
+25 50 75 
+
+> Root height (cm)
+
+abc
+
+a b c
+
+(a) 
+
+a b c
+
+(b) 
+
+a b c
+
+(c) 
+
+a b c
+
+(d) 
+
+Reference 
+
+w/o Res. w/ Res. 
+
+w/o Res. w/ Res. 0.0 0.5 1.0 
+
+Time (s) 
+
+−20 020 
+
+> Hand (cm)
+
+abc
+
+Motion energy 
+
+0510 15 
+
+> 10⁻³ rad²/frame
+
+0.0 0.8 1.6 
+
+Time (s) 
+
+020 40 
+
+> Forward lean (°)
+
+abc
+
+22.8 23.4 24.0 
+
+L elbow–chest (cm) 
+
+22.2 22.8 
+
+R elbow–chest (cm) 
+
+0.0 0.4 0.8 
+
+Time (s) 
+
+17.5 20.0 22.5 
+
+L wrist–chest (cm) 
+
+0.0 0.4 0.8 
+
+Time (s) 
+
+15 16 17 
+
+R wrist–chest (cm) 
+
+0.0 1.5 3.0 
+
+Time (s) 
+
+25 50 75 
+
+> Root height (cm)
+
+abc
+
+a b c
+
+(a) 
+
+a b c
+
+(b) 
+
+a b c
+
+(c) 
+
+a b c
+
+(d) 
+
+Reference 
+
+w/o Res. w/ Res. 
+
+w/o Res. w/ Res. 1.0 
+
+s) 
+
+b
+
+Motion energy 
+
+0510 15 
+
+> 10⁻³ rad²/frame
+
+0.0 0.8 1.6 
+
+Time (s) 
+
+020 40 
+
+abc
+
+22.8 23.4 24.0 
+
+L elbow–chest (cm) 
+
+22.2 22.8 
+
+R elbow–chest (cm) 
+
+0.0 0.4 0.8 
+
+Time (s) 
+
+17.5 20.0 22.5 
+
+L wrist–chest (cm) 
+
+0.0 0.4 0.8 
+
+Time (s) 
+
+15 16 17 
+
+R wrist–chest (cm) 
+
+0.0 1.5 3.0 
+
+Time (s) 
+
+25 50 75 abc
+
+b c a b c
+
+(b) 
+
+a b c
+
+(c) 
+
+a b c
+
+(d) 
+
+Reference w/o Res. w/ Res. 
+
+> Body lean (°) Pelvis height (cm)
+
+1.0 
+
+s) 
+
+b
+
+Motion energy 
+
+0510 15 
+
+> 10⁻³ rad²/frame
+
+0.0 0.8 1.6 
+
+Time (s) 
+
+020 40 
+
+> Forward lean (°)
+
+abc
+
+22.8 23.4 24.0 
+
+L elbow–chest (cm) 
+
+22.2 22.8 
+
+R elbow–chest (cm) 
+
+0.0 0.4 0.8 
+
+Time (s) 
+
+17.5 20.0 22.5 
+
+L wrist–chest (cm) 
+
+0.0 0.4 0.8 
+
+Time (s) 
+
+15 16 17 
+
+R wrist–chest (cm) 
+
+0.0 1.5 3.0 
+
+Time (s) 
+
+25 50 75 
+
+> Root height (cm)
+
+abc
+
+b c a b c
+
+(b) 
+
+a b c
+
+(c) 
+
+a b c
+
+(d) 
+
+Reference w/o Res. w/ Res. 1.0 
+
+s) 
+
+b
+
+Motion energy 
+
+0510 15 
+
+> 10⁻³ rad²/frame
+
+0.0 0.8 1.6 
+
+Time (s) 
+
+020 40 
+
+> Forward lean (°)
+
+abc
+
+22.8 23.4 24.0 
+
+L elbow–chest (cm) 
+
+22.2 22.8 
+
+R elbow–chest (cm) 
+
+0.0 0.4 0.8 
+
+Time (s) 
+
+17.5 20.0 22.5 
+
+L wrist–chest (cm) 
+
+0.0 0.4 0.8 
+
+Time (s) 
+
+15 16 17 
+
+R wrist–chest (cm) 
+
+0.0 1.5 3.0 
+
+Time (s) 
+
+25 50 75 
+
+> Root height (cm)
+
+abc
+
+b c a b c
+
+(b) 
+
+a b c
+
+(c) 
+
+a b c
+
+(d) 
+
+Reference w/o Res. w/ Res. 1.0 
+
+s) 
+
+b
+
+Motion energy 
+
+0510 15 
+
+> 10⁻³ rad²/frame
+
+0.0 0.8 1.6 
+
+Time (s) 
+
+020 40 
+
+> Forward lean (°)
+
+abc
+
+22.8 23.4 24.0 
+
+L elbow–chest (cm) 
+
+22.2 22.8 
+
+R elbow–chest (cm) 
+
+0.0 0.4 0.8 
+
+Time (s) 
+
+17.5 20.0 22.5 
+
+L wrist–chest (cm) 
+
+0.0 0.4 0.8 
+
+Time (s) 
+
+15 16 17 
+
+R wrist–chest (cm) 
+
+0.0 1.5 3.0 
+
+Time (s) 
+
+25 50 75 
+
+> Root height (cm)
+
+abc
+
+b c a b c
+
+(b) 
+
+a b c
+
+(c) 
+
+a b c
+
+(d) 
+
+Reference w/o Res. w/ Res. 1.0 
+
+s) 
+
+b
+
+Motion energy 
+
+0510 15 
+
+> 10⁻³ rad²/frame
+
+0.0 0.8 1.6 
+
+Time (s) 
+
+020 40 
+
+> Forward lean (°)
+
+abc
+
+22.8 23.4 24.0 
+
+L elbow–chest (cm) 
+
+22.2 22.8 
+
+R elbow–chest (cm) 
+
+0.0 0.4 0.8 
+
+Time (s) 
+
+17.5 20.0 22.5 
+
+L wrist–chest (cm) 
+
+0.0 0.4 0.8 
+
+Time (s) 
+
+15 16 17 
+
+R wrist–chest (cm) 
+
+0.0 1.5 3.0 
+
+Time (s) 
+
+25 50 75 
+
+> Root height (cm)
+
+abc
+
+b c a b c
+
+(b) 
+
+a b c
+
+(c) 
+
+a b c
+
+(d) 
+
+Reference w/o Res. w/ Res. 1.0 
+
+s) 
+
+b
+
+Motion energy 
+
+0510 15 
+
+> 10⁻³ rad²/frame
+
+0.0 0.8 1.6 
+
+Time (s) 
+
+020 40 
+
+abc
+
+22.8 23.4 24.0 
+
+L elbow–chest (cm) 
+
+22.2 22.8 
+
+R elbow–chest (cm) 
+
+0.0 0.4 0.8 
+
+Time (s) 
+
+17.5 20.0 22.5 
+
+L wrist–chest (cm) 
+
+0.0 0.4 0.8 
+
+Time (s) 
+
+15 16 17 
+
+R wrist–chest (cm) 
+
+0.0 1.5 3.0 
+
+Time (s) 
+
+25 50 75 abc
+
+b c a b c
+
+(b) 
+
+a b c
+
+(c) 
+
+a b c
+
+(d) 
+
+Reference w/o Res. w/ Res. 
+
+> Body lean (°) Pelvis height (cm)
+
+1.0 
+
+s) 
+
+b
+
+Motion energy 
+
+0510 15 
+
+> 10⁻³ rad²/frame
+
+0.0 0.8 1.6 
+
+Time (s) 
+
+020 40 
+
+> Forward lean (°)
+
+abc
+
+22.8 23.4 24.0 
+
+L elbow–chest (cm) 
+
+22.2 22.8 
+
+R elbow–chest (cm) 
+
+0.0 0.4 0.8 
+
+Time (s) 
+
+17.5 20.0 22.5 
+
+L wrist–chest (cm) 
+
+0.0 0.4 0.8 
+
+Time (s) 
+
+15 16 17 
+
+R wrist–chest (cm) 
+
+0.0 1.5 3.0 
+
+Time (s) 
+
+25 50 75 
+
+> Root height (cm)
+
+abc
+
+b c a b c
+
+(b) 
+
+a b c
+
+(c) 
+
+a b c
+
+(d) 
+
+Reference w/o Res. w/ Res. 1.0 
+
+s) 
+
+b
+
+Motion energy 
+
+0510 15 
+
+> 10⁻³ rad²/frame
+
+0.0 0.8 1.6 
+
+Time (s) 
+
+020 40 
+
+> Forward lean (°)
+
+abc
+
+22.8 23.4 24.0 
+
+L elbow–chest (cm) 
+
+22.2 22.8 
+
+R elbow–chest (cm) 
+
+0.0 0.4 0.8 
+
+Time (s) 
+
+17.5 20.0 22.5 
+
+L wrist–chest (cm) 
+
+0.0 0.4 0.8 
+
+Time (s) 
+
+15 16 17 
+
+R wrist–chest (cm) 
+
+0.0 1.5 3.0 
+
+Time (s) 
+
+25 50 75 
+
+> Root height (cm)
+
+abc
+
+b c a b c
+
+(b) 
+
+a b c
+
+(c) 
+
+a b c
+
+(d) 
+
+Reference w/o Res. w/ Res. 1.0 
+
+s) 
+
+b
+
+Motion energy 
+
+0510 15 
+
+> 10⁻³ rad²/frame
+
+0.0 0.8 1.6 
+
+Time (s) 
+
+020 40 
+
+> Forward lean (°)
+
+abc
+
+22.8 23.4 24.0 
+
+L elbow–chest (cm) 
+
+22.2 22.8 
+
+R elbow–chest (cm) 
+
+0.0 0.4 0.8 
+
+Time (s) 
+
+17.5 20.0 22.5 
+
+L wrist–chest (cm) 
+
+0.0 0.4 0.8 
+
+Time (s) 
+
+15 16 17 
+
+R wrist–chest (cm) 
+
+0.0 1.5 3.0 
+
+Time (s) 
+
+25 50 75 
+
+> Root height (cm)
+
+abc
+
+b c a b c
+
+(b) 
+
+a b c
+
+(c) 
+
+a b c
+
+(d) 
+
+Reference w/o Res. w/ Res. 1.0 
+
+s) 
+
+b
+
+Motion energy 
+
+0510 15 
+
+> 10⁻³ rad²/frame
+
+0.0 0.8 1.6 
+
+Time (s) 
+
+020 40 
+
+> Forward lean (°)
+
+abc
+
+22.8 23.4 24.0 
+
+L elbow–chest (cm) 
+
+22.2 22.8 
+
+R elbow–chest (cm) 
+
+0.0 0.4 0.8 
+
+Time (s) 
+
+17.5 20.0 22.5 
+
+L wrist–chest (cm) 
+
+0.0 0.4 0.8 
+
+Time (s) 
+
+15 16 17 
+
+R wrist–chest (cm) 
+
+0.0 1.5 3.0 
+
+Time (s) 
+
+25 50 75 
+
+> Root height (cm)
+
+abc
+
+b c a b c
+
+(b) 
+
+a b c
+
+(c) 
+
+a b c
+
+(d) 
+
+Reference w/o Res. w/ Res. 1.0 
+
+s) 
+
+b
+
+Motion energy 
+
+0510 15 
+
+> 10⁻³ rad²/frame
+
+0.0 0.8 1.6 
+
+Time (s) 
+
+020 40 
+
+abc
+
+22.8 23.4 24.0 
+
+L elbow–chest (cm) 
+
+22.2 22.8 
+
+R elbow–chest (cm) 
+
+0.0 0.4 0.8 
+
+Time (s) 
+
+17.5 20.0 22.5 
+
+L wrist–chest (cm) 
+
+0.0 0.4 0.8 
+
+Time (s) 
+
+15 16 17 
+
+R wrist–chest (cm) 
+
+0.0 1.5 3.0 
+
+Time (s) 
+
+25 50 75 abc
+
+b c a b c
+
+(b) 
+
+a b c
+
+(c) 
+
+a b c
+
+(d) 
+
+Reference w/o Res. w/ Res. 
+
+> Body lean (°) Pelvis height (cm)
+
+1.0 
+
+s) 
+
+b
+
+Motion energy 
+
+0510 15 
+
+> 10⁻³ rad²/frame
+
+0.0 0.8 1.6 
+
+Time (s) 
+
+020 40 
+
+> Forward lean (°)
+
+abc
+
+22.8 23.4 24.0 
+
+L elbow–chest (cm) 
+
+22.2 22.8 
+
+R elbow–chest (cm) 
+
+0.0 0.4 0.8 
+
+Time (s) 
+
+17.5 20.0 22.5 
+
+L wrist–chest (cm) 
+
+0.0 0.4 0.8 
+
+Time (s) 
+
+15 16 17 
+
+R wrist–chest (cm) 
+
+0.0 1.5 3.0 
+
+Time (s) 
+
+25 50 75 
+
+> Root height (cm)
+
+abc
+
+b c a b c
+
+(b) 
+
+a b c
+
+(c) 
+
+a b c
+
+(d) 
+
+Reference w/o Res. w/ Res. 1.0 
+
+s) 
+
+b
+
+Motion energy 
+
+0510 15 
+
+> 10⁻³ rad²/frame
+
+0.0 0.8 1.6 
+
+Time (s) 
+
+020 40 
+
+> Forward lean (°)
+
+abc
+
+22.8 23.4 24.0 
+
+L elbow–chest (cm) 
+
+22.2 22.8 
+
+R elbow–chest (cm) 
+
+0.0 0.4 0.8 
+
+Time (s) 
+
+17.5 20.0 22.5 
+
+L wrist–chest (cm) 
+
+0.0 0.4 0.8 
+
+Time (s) 
+
+15 16 17 
+
+R wrist–chest (cm) 
+
+0.0 1.5 3.0 
+
+Time (s) 
+
+25 50 75 
+
+> Root height (cm)
+
+abc
+
+b c a b c
+
+(b) 
+
+a b c
+
+(c) 
+
+a b c
+
+(d) 
+
+Reference w/o Res. w/ Res. 1.0 
+
+s) 
+
+b
+
+Motion energy 
+
+0510 15 
+
+> 10⁻³ rad²/frame
+
+0.0 0.8 1.6 
+
+Time (s) 
+
+020 40 
+
+> Forward lean (°)
+
+abc
+
+22.8 23.4 24.0 
+
+L elbow–chest (cm) 
+
+22.2 22.8 
+
+R elbow–chest (cm) 
+
+0.0 0.4 0.8 
+
+Time (s) 
+
+17.5 20.0 22.5 
+
+L wrist–chest (cm) 
+
+0.0 0.4 0.8 
+
+Time (s) 
+
+15 16 17 
+
+R wrist–chest (cm) 
+
+0.0 1.5 3.0 
+
+Time (s) 
+
+25 50 75 
+
+> Root height (cm)
+
+abc
+
+b c a b c
+
+(b) 
+
+a b c
+
+(c) 
+
+a b c
+
+(d) 
+
+Reference w/o Res. w/ Res. 1.0 
+
+s) 
+
+b
+
+Motion energy 
+
+0510 15 
+
+> 10⁻³ rad²/frame
+
+0.0 0.8 1.6 
+
+Time (s) 
+
+020 40 
+
+> Forward lean (°)
+
+abc
+
+22.8 23.4 24.0 
+
+L elbow–chest (cm) 
+
+22.2 22.8 
+
+R elbow–chest (cm) 
+
+0.0 0.4 0.8 
+
+Time (s) 
+
+17.5 20.0 22.5 
+
+L wrist–chest (cm) 
+
+0.0 0.4 0.8 
+
+Time (s) 
+
+15 16 17 
+
+R wrist–chest (cm) 
+
+0.0 1.5 3.0 
+
+Time (s) 
+
+25 50 75 
+
+> Root height (cm)
+
+abc
+
+b c a b c
+
+(b) 
+
+a b c
+
+(c) 
+
+a b c
+
+(d) 
+
+Reference w/o Res. w/ Res. (b) 0.0 0.5 1.0 
+
+Time (s) 
+
+−20 020 
+
+> Hand (cm)
+
+abc
+
+Motion energy 
+
+0510 15 
+
+> 10⁻³ rad²/frame
+
+0.0 0.8 1.6 
+
+Time (s) 
+
+020 40 
+
+abc
+
+22.8 23.4 24.0 
+
+L elbow–chest (cm) 
+
+22.2 22.8 
+
+R elbow–chest (cm) 
+
+0.0 0.4 0.8 
+
+Time (s) 
+
+17.5 20.0 22.5 
+
+L wrist–chest (cm) 
+
+0.0 0.4 0.8 
+
+Time (s) 
+
+15 16 17 
+
+R wrist–chest (cm) 
+
+0.0 
+
+25 50 75 
+
+a b c
+
+(a) 
+
+a b c
+
+(b) 
+
+a b c
+
+(c) 
+
+a
+
+(d) 
+
+Reference 
+
+w/o Res. w/ Res. 
+
+w/o Res. w/ Res. 
+
+> Body lean (°) Pelvis height (cm)
+
+0.0 0.5 1.0 
+
+Time (s) 
+
+−20 020 
+
+> Hand (cm)
+
+abc
+
+Motion energy 
+
+0510 15 
+
+> 10⁻³ rad²/frame
+
+0.0 0.8 1.6 
+
+Time (s) 
+
+020 40 
+
+> Forward lean (°)
+
+abc
+
+22.8 23.4 24.0 
+
+L elbow–chest (cm) 
+
+22.2 22.8 
+
+R elbow–chest (cm) 
+
+0.0 0.4 0.8 
+
+Time (s) 
+
+17.5 20.0 22.5 
+
+L wrist–chest (cm) 
+
+0.0 0.4 0.8 
+
+Time (s) 
+
+15 16 17 
+
+R wrist–chest (cm) 
+
+0.0 
+
+25 50 75 
+
+> Root height (cm)
+
+a
+
+a b c
+
+(a) 
+
+a b c
+
+(b) 
+
+a b c
+
+(c) 
+
+a
+
+(d) 
+
+Reference 
+
+w/o Res. w/ Res. 
+
+w/o Res. w/ Res. 0.0 0.5 1.0 
+
+Time (s) 
+
+−20 020 
+
+> Hand (cm)
+
+abc
+
+Motion energy 
+
+0510 15 
+
+> 10⁻³ rad²/frame
+
+0.0 0.8 1.6 
+
+Time (s) 
+
+020 40 
+
+> Forward lean (°)
+
+abc
+
+22.8 23.4 24.0 
+
+L elbow–chest (cm) 
+
+22.2 22.8 
+
+R elbow–chest (cm) 
+
+0.0 0.4 0.8 
+
+Time (s) 
+
+17.5 20.0 22.5 
+
+L wrist–chest (cm) 
+
+0.0 0.4 0.8 
+
+Time (s) 
+
+15 16 17 
+
+R wrist–chest (cm) 
+
+0.0 
+
+25 50 75 
+
+> Root height (cm)
+
+a
+
+a b c
+
+(a) 
+
+a b c
+
+(b) 
+
+a b c
+
+(c) 
+
+a
+
+(d) 
+
+Reference 
+
+w/o Res. w/ Res. 
+
+w/o Res. w/ Res. 0.0 0.5 1.0 
+
+Time (s) 
+
+−20 020 
+
+> Hand (cm)
+
+abc
+
+Motion energy 
+
+0510 15 
+
+> 10⁻³ rad²/frame
+
+0.0 0.8 1.6 
+
+Time (s) 
+
+020 40 
+
+> Forward lean (°)
+
+abc
+
+22.8 23.4 24.0 
+
+L elbow–chest (cm) 
+
+22.2 22.8 
+
+R elbow–chest (cm) 
+
+0.0 0.4 0.8 
+
+Time (s) 
+
+17.5 20.0 22.5 
+
+L wrist–chest (cm) 
+
+0.0 0.4 0.8 
+
+Time (s) 
+
+15 16 17 
+
+R wrist–chest (cm) 
+
+0.0 
+
+25 50 75 
+
+> Root height (cm)
+
+a
+
+a b c
+
+(a) 
+
+a b c
+
+(b) 
+
+a b c
+
+(c) 
+
+a
+
+(d) 
+
+Reference 
+
+w/o Res. w/ Res. 
+
+w/o Res. w/ Res. 0.0 0.5 1.0 
+
+Time (s) 
+
+−20 020 
+
+> Hand (cm)
+
+abc
+
+Motion energy 
+
+0510 15 
+
+> 10⁻³ rad²/frame
+
+0.0 0.8 1.6 
+
+Time (s) 
+
+020 40 
+
+> Forward lean (°)
+
+abc
+
+22.8 23.4 24.0 
+
+L elbow–chest (cm) 
+
+22.2 22.8 
+
+R elbow–chest (cm) 
+
+0.0 0.4 0.8 
+
+Time (s) 
+
+17.5 20.0 22.5 
+
+L wrist–chest (cm) 
+
+0.0 0.4 0.8 
+
+Time (s) 
+
+15 16 17 
+
+R wrist–chest (cm) 
+
+0.0 
+
+25 50 75 
+
+> Root height (cm)
+
+a
+
+a b c
+
+(a) 
+
+a b c
+
+(b) 
+
+a b c
+
+(c) 
+
+a
+
+(d) 
+
+Reference 
+
+w/o Res. w/ Res. 
+
+w/o Res. w/ Res. 0.0 0.5 1.0 
+
+Time (s) 
+
+−20 020 
+
+> Hand (cm)
+
+abc
+
+Motion energy 
+
+0510 15 
+
+> 10⁻³ rad²/frame
+
+0.0 0.8 1.6 
+
+Time (s) 
+
+020 40 
+
+abc
+
+22.8 23.4 24.0 
+
+L elbow–chest (cm) 
+
+22.2 22.8 
+
+R elbow–chest (cm) 
+
+0.0 0.4 0.8 
+
+Time (s) 
+
+17.5 20.0 22.5 
+
+L wrist–chest (cm) 
+
+0.0 0.4 0.8 
+
+Time (s) 
+
+15 16 17 
+
+R wrist–chest (cm) 
+
+0.0 
+
+25 50 75 
+
+a b c
+
+(a) 
+
+a b c
+
+(b) 
+
+a b c
+
+(c) 
+
+a
+
+(d) 
+
+Reference 
+
+w/o Res. w/ Res. 
+
+w/o Res. w/ Res. 
+
+> Body lean (°) Pelvis height (cm)
+
+0.0 0.5 1.0 
+
+Time (s) 
+
+−20 020 
+
+> Hand (cm)
+
+abc
+
+Motion energy 
+
+0510 15 
+
+> 10⁻³ rad²/frame
+
+0.0 0.8 1.6 
+
+Time (s) 
+
+020 40 
+
+> Forward lean (°)
+
+abc
+
+22.8 23.4 24.0 
+
+L elbow–chest (cm) 
+
+22.2 22.8 
+
+R elbow–chest (cm) 
+
+0.0 0.4 0.8 
+
+Time (s) 
+
+17.5 20.0 22.5 
+
+L wrist–chest (cm) 
+
+0.0 0.4 0.8 
+
+Time (s) 
+
+15 16 17 
+
+R wrist–chest (cm) 
+
+0.0 
+
+25 50 75 
+
+> Root height (cm)
+
+a
+
+a b c
+
+(a) 
+
+a b c
+
+(b) 
+
+a b c
+
+(c) 
+
+a
+
+(d) 
+
+Reference 
+
+w/o Res. w/ Res. 
+
+w/o Res. w/ Res. 0.0 0.5 1.0 
+
+Time (s) 
+
+−20 020 
+
+> Hand (cm)
+
+abc
+
+Motion energy 
+
+0510 15 
+
+> 10⁻³ rad²/frame
+
+0.0 0.8 1.6 
+
+Time (s) 
+
+020 40 
+
+> Forward lean (°)
+
+abc
+
+22.8 23.4 24.0 
+
+L elbow–chest (cm) 
+
+22.2 22.8 
+
+R elbow–chest (cm) 
+
+0.0 0.4 0.8 
+
+Time (s) 
+
+17.5 20.0 22.5 
+
+L wrist–chest (cm) 
+
+0.0 0.4 0.8 
+
+Time (s) 
+
+15 16 17 
+
+R wrist–chest (cm) 
+
+0.0 
+
+25 50 75 
+
+> Root height (cm)
+
+a
+
+a b c
+
+(a) 
+
+a b c
+
+(b) 
+
+a b c
+
+(c) 
+
+a
+
+(d) 
+
+Reference 
+
+w/o Res. w/ Res. 
+
+w/o Res. w/ Res. 0.0 0.5 1.0 
+
+Time (s) 
+
+−20 020 
+
+> Hand (cm)
+
+abc
+
+Motion energy 
+
+0510 15 
+
+> 10⁻³ rad²/frame
+
+0.0 0.8 1.6 
+
+Time (s) 
+
+020 40 
+
+> Forward lean (°)
+
+abc
+
+22.8 23.4 24.0 
+
+L elbow–chest (cm) 
+
+22.2 22.8 
+
+R elbow–chest (cm) 
+
+0.0 0.4 0.8 
+
+Time (s) 
+
+17.5 20.0 22.5 
+
+L wrist–chest (cm) 
+
+0.0 0.4 0.8 
+
+Time (s) 
+
+15 16 17 
+
+R wrist–chest (cm) 
+
+0.0 
+
+25 50 75 
+
+> Root height (cm)
+
+a
+
+a b c
+
+(a) 
+
+a b c
+
+(b) 
+
+a b c
+
+(c) 
+
+a
+
+(d) 
+
+Reference 
+
+w/o Res. w/ Res. 
+
+w/o Res. w/ Res. 0.0 0.5 1.0 
+
+Time (s) 
+
+−20 020 
+
+> Hand (cm)
+
+abc
+
+Motion energy 
+
+0510 15 
+
+> 10⁻³ rad²/frame
+
+0.0 0.8 1.6 
+
+Time (s) 
+
+020 40 
+
+> Forward lean (°)
+
+abc
+
+22.8 23.4 24.0 
+
+L elbow–chest (cm) 
+
+22.2 22.8 
+
+R elbow–chest (cm) 
+
+0.0 0.4 0.8 
+
+Time (s) 
+
+17.5 20.0 22.5 
+
+L wrist–chest (cm) 
+
+0.0 0.4 0.8 
+
+Time (s) 
+
+15 16 17 
+
+R wrist–chest (cm) 
+
+0.0 
+
+25 50 75 
+
+> Root height (cm)
+
+a
+
+a b c
+
+(a) 
+
+a b c
+
+(b) 
+
+a b c
+
+(c) 
+
+a
+
+(d) 
+
+Reference 
+
+w/o Res. w/ Res. 
+
+w/o Res. w/ Res. 0.0 0.5 1.0 
+
+Time (s) 
+
+−20 020 
+
+> Hand (cm)
+
+abc
+
+Motion energy 
+
+0510 15 
+
+> 10⁻³ rad²/frame
+
+0.0 0.8 1.6 
+
+Time (s) 
+
+020 40 
+
+abc
+
+22.8 23.4 24.0 
+
+L elbow–chest (cm) 
+
+22.2 22.8 
+
+R elbow–chest (cm) 
+
+0.0 0.4 0.8 
+
+Time (s) 
+
+17.5 20.0 22.5 
+
+L wrist–chest (cm) 
+
+0.0 0.4 0.8 
+
+Time (s) 
+
+15 16 17 
+
+R wrist–chest (cm) 
+
+0.0 
+
+25 50 75 
+
+a b c
+
+(a) 
+
+a b c
+
+(b) 
+
+a b c
+
+(c) 
+
+a
+
+(d) 
+
+Reference 
+
+w/o Res. w/ Res. 
+
+w/o Res. w/ Res. 
+
+> Body lean (°) Pelvis height (cm)
+
+0.0 0.5 1.0 
+
+Time (s) 
+
+−20 020 
+
+> Hand (cm)
+
+abc
+
+Motion energy 
+
+0510 15 
+
+> 10⁻³ rad²/frame
+
+0.0 0.8 1.6 
+
+Time (s) 
+
+020 40 
+
+> Forward lean (°)
+
+abc
+
+22.8 23.4 24.0 
+
+L elbow–chest (cm) 
+
+22.2 22.8 
+
+R elbow–chest (cm) 
+
+0.0 0.4 0.8 
+
+Time (s) 
+
+17.5 20.0 22.5 
+
+L wrist–chest (cm) 
+
+0.0 0.4 0.8 
+
+Time (s) 
+
+15 16 17 
+
+R wrist–chest (cm) 
+
+0.0 
+
+25 50 75 
+
+> Root height (cm)
+
+a
+
+a b c
+
+(a) 
+
+a b c
+
+(b) 
+
+a b c
+
+(c) 
+
+a
+
+(d) 
+
+Reference 
+
+w/o Res. w/ Res. 
+
+w/o Res. w/ Res. 0.0 0.5 1.0 
+
+Time (s) 
+
+−20 020 
+
+> Hand (cm)
+
+abc
+
+Motion energy 
+
+0510 15 
+
+> 10⁻³ rad²/frame
+
+0.0 0.8 1.6 
+
+Time (s) 
+
+020 40 
+
+> Forward lean (°)
+
+abc
+
+22.8 23.4 24.0 
+
+L elbow–chest (cm) 
+
+22.2 22.8 
+
+R elbow–chest (cm) 
+
+0.0 0.4 0.8 
+
+Time (s) 
+
+17.5 20.0 22.5 
+
+L wrist–chest (cm) 
+
+0.0 0.4 0.8 
+
+Time (s) 
+
+15 16 17 
+
+R wrist–chest (cm) 
+
+0.0 
+
+25 50 75 
+
+> Root height (cm)
+
+a
+
+a b c
+
+(a) 
+
+a b c
+
+(b) 
+
+a b c
+
+(c) 
+
+a
+
+(d) 
+
+Reference 
+
+w/o Res. w/ Res. 
+
+w/o Res. w/ Res. 0.0 0.5 1.0 
+
+Time (s) 
+
+−20 020 
+
+> Hand (cm)
+
+abc
+
+Motion energy 
+
+0510 15 
+
+> 10⁻³ rad²/frame
+
+0.0 0.8 1.6 
+
+Time (s) 
+
+020 40 
+
+> Forward lean (°)
+
+abc
+
+22.8 23.4 24.0 
+
+L elbow–chest (cm) 
+
+22.2 22.8 
+
+R elbow–chest (cm) 
+
+0.0 0.4 0.8 
+
+Time (s) 
+
+17.5 20.0 22.5 
+
+L wrist–chest (cm) 
+
+0.0 0.4 0.8 
+
+Time (s) 
+
+15 16 17 
+
+R wrist–chest (cm) 
+
+0.0 
+
+25 50 75 
+
+> Root height (cm)
+
+a
+
+a b c
+
+(a) 
+
+a b c
+
+(b) 
+
+a b c
+
+(c) 
+
+a
+
+(d) 
+
+Reference 
+
+w/o Res. w/ Res. 
+
+w/o Res. w/ Res. 0.0 0.5 1.0 
+
+Time (s) 
+
+−20 020 
+
+> Hand (cm)
+
+abc
+
+Motion energy 
+
+0510 15 
+
+> 10⁻³ rad²/frame
+
+0.0 0.8 1.6 
+
+Time (s) 
+
+020 40 
+
+> Forward lean (°)
+
+abc
+
+22.8 23.4 24.0 
+
+L elbow–chest (cm) 
+
+22.2 22.8 
+
+R elbow–chest (cm) 
+
+0.0 0.4 0.8 
+
+Time (s) 
+
+17.5 20.0 22.5 
+
+L wrist–chest (cm) 
+
+0.0 0.4 0.8 
+
+Time (s) 
+
+15 16 17 
+
+R wrist–chest (cm) 
+
+0.0 
+
+25 50 75 
+
+> Root height (cm)
+
+a
+
+a b c
+
+(a) 
+
+a b c
+
+(b) 
+
+a b c
+
+(c) 
+
+a
+
+(d) 
+
+Reference 
+
+w/o Res. w/ Res. 
+
+w/o Res. w/ Res. (c) Fig. 4. Compensation on representative development motions: (a) amplitude/energy, (b) upper-body geometry, (c) body lean, and (d) pelvis height. Blue ghosts show references; solid robots show execution without (w/o Res.) and with (w/ Res.) compensation. Labels a–c link snapshots to times. 
+
+the accumulated dataset, with equal sampling across motion categories. Deployment uses the same actor observations and motion-aware gating. IV. E XPERIMENT 
+
+We evaluate our framework through three questions. 
+
+• Q1. Do lower positional tracking errors imply better preservation of dynamic and postural characteristics? 
+
+• Q2. How effectively does residual compensation preserve these characteristics, and how does it affect tracking accuracy and motion completion? 
+
+• Q3. How does motion-aware gating affect residual inter-vention, tracking accuracy, and characteristic recovery? A. Experimental Setup 
+
+We evaluate our framework in simulation and on the physical Unitree G1 across eight motion categories. We train residual policies in MuJoCo Warp [32] with 1,024 parallel environments on NVIDIA RTX PRO 6000 GPUs. Using the AMASS motions curated in Sec. III-B, we compare SONIC [3], GMT [4], and TWIST2 [21] with shared reference motions, unit boundaries, and evaluation starts. All trackers op-erate at 50 Hz . Labels w/ Res. and w/o Res. denote execution with and without residual compensation. 
+
+Tracking baseline: We include Track-Res, a tracking baseline that trains motion-specific residual policies to min-imize mean pelvis-relative joint-position error. It uses two 256-unit hidden layers, as in our unified policy. We omit characteristic rewards but retain gating, regularization, and all constraints, including those on posture and body expansion. 
+
+Metrics and protocol: For each completed unit u, we measure errors in amplitude, energy, body expansion, body lean, and pelvis height: 
+
+DA,u = X
+
+b aexec 
+
+b,u − aref 
+
+b,u ,DE,u = dexec energy ,u − dref energy ,u ,DX,u = T −1
+
+u
+
+X
+
+t,s,k ℓs, exec 
+
+k,t − ℓs, ref 
+
+k,t ,DL,u = dexec lean ,u − dref lean ,u ,DH,u = T −1
+
+u
+
+X
+
+t hexec 
+
+t − href 
+
+t .
+
+(3) Here, exec and ref denote executed and reference motions. Sums span t = 1 , . . . , T u, b ∈ B , s ∈ S , and k ∈ K .For each tracker and action, we evaluate characteristic errors on units completed by all three methods in Table III or both conditions in Fig. 5, respectively. We use all evaluation starts for the main tracking and completion results. Tracking accuracy is measured by mean per-keypoint position error (MPKPE, cm), with pelvis-local mean per-joint position error (MPJPE) used for gate comparisons. We express DA, DX ,and DH as percentages (%H) of the fixed robot height 
+
+HG1 = 1 .32 m , and DE in 10 −3 rad 2 per transition. Lean uses (180 /π ) arcsin(min {1, D L}), a degree-equivalent sine discrepancy (deg-eq), not angular tracking error. P50, P70, and P90 denote percentiles. We weight the eight actions equally in all tables. Main tables average per-action P70 values from unit errors in simulation and reference-level mean errors in physical experiments. Arrows indicate preferred directions, and bold values identify the best result per tracker. For trained-gate comparisons, we average available correc-tion means over paired completed units within five equal bins of rt,b /r max 
+
+t , then weight motions equally in Fig. 6(a)–(c). In (d)–(f), low-activity groups have duration-weighted unit root-mean-square (RMS) reference joint velocity below half the rollout maximum, fixed across policies; errors average eligible wrists/ankles, then rollouts. MPJPE uses common completed starts and equal motion and tracker weights. 
+
+B. Expressive Preservation and Recovery 
+
+To answer Q1, we compare frozen tracking and Track-Res in Table III. We observe lower positional error with Track-Res DA ↓ DE ↓ DX ↓ DL ↓ DH ↓
+
+16.8→8.77 12.5→5.40 9.30→4.05 15.3→10.0 6.38→5.33 4.41→3.30 6.11→3.61 4.48→2.27 3.62→1.51 8.71→6.33 7.14→3.62 4.43→1.23 0.59→0.53 0.24→0.21 0.21→0.17 32.1→29.6 17.0→15.3 13.3→12.0 7.99→7.68 4.00→4.04 2.17→1.70 7.12→4.55 4.83→1.83 3.42→1.05 7.00→4.67 4.50→1.08 2.99→0.58 0.39→0.28 0.25→0.26 0.22→0.23 31.7→29.8 26.4→16.8 22.1→12.7 8.39→8.52 3.53→4.13 2.32→3.13 6.56→4.44 3.19→1.36 2.19→1.14 23.0→26.4 20.1→24.1 18.7→21.8 4.40→1.86 3.15→0.95 2.03→0.62 31.6→35.5 17.7→19.4 15.7→12.9 3.05→3.00 0.85→0.91 0.49→0.54 3.96→1.86 1.94→0.88 1.20→0.65 21.1→20.8 17.3→18.0 15.0→15.8 0.73→0.25 0.47→0.16 0.32→0.12 31.9→30.6 23.7→21.4 18.7→16.9 28.1→25.2 13.2→11.7 5.76→5.11 6.38→6.08 3.29→2.96 2.01→1.78 18.6→17.8 14.4→13.4 11.9→11.0 2.55→2.08 1.96→1.52 1.60→1.19 30.2→21.7 25.5→16.5 21.1→13.2 57.6→51.4 39.6→33.3 22.2→17.6 10.1→6.35 7.03→4.00 6.14→3.35 16.5→14.7 14.1→12.5 12.3→9.65 1.48→0.94 1.14→0.68 0.85→0.48 16.2→16.8 12.1→12.6 9.72→10.3 7.42→6.50 3.53→3.24 2.13→1.96 2.19→2.15 1.64→1.59 1.36→1.31 14.4→11.8 10.8→7.44 8.38→4.94 1.91→1.62 1.64→1.37 1.44→1.19 26.3→17.3 18.8→11.0 15.0→7.52 61.5→59.0 27.0→22.6 11.3→8.85 3.70→3.17 2.74→2.17 2.22→1.69 9.68→8.07 6.89→5.62 5.50→3.44 1.17→0.87 0.66→0.49 0.31→0.29 
+
+(a) SONIC 
+
+> Clap  P90 P70 P50
+> Cross-arms  P90 P70 P50
+> Crouch  P90 P70 P50
+> Bow  P90 P70 P50
+> Kick  P90 P70 P50
+> Punch  P90 P70 P50
+> Walk  P90 P70 P50
+> Wave  P90 P70 P50
+
+DA ↓ DE ↓ DX ↓ DL ↓ DH ↓
+
+13.5→7.66 8.37→4.63 6.77→3.45 6.19→5.09 3.37→2.90 2.55→2.09 7.60→5.94 4.89→3.46 3.89→2.19 2.33→0.91 1.50→0.54 1.20→0.36 0.61→0.40 0.33→0.17 0.19→0.12 56.7→49.4 46.0→42.8 43.1→38.8 5.89→5.85 4.03→4.09 3.07→2.91 15.4→13.7 11.6→11.0 10.7→9.78 2.25→0.38 1.61→0.29 0.82→0.23 0.41→0.20 0.13→0.08 0.10→0.06 29.7→23.6 20.1→14.6 15.7→11.5 9.87→6.99 4.32→2.91 2.72→1.88 4.75→2.61 3.53→1.78 2.89→1.58 5.14→1.00 3.52→0.58 2.56→0.45 3.77→1.78 3.07→1.10 2.04→0.84 26.6→15.0 12.7→9.38 9.05→7.11 3.20→1.50 0.94→0.60 0.47→0.31 4.84→2.92 3.33→1.98 1.65→1.01 4.84→1.36 3.15→0.97 1.36→0.70 0.72→0.24 0.41→0.18 0.34→0.12 44.7→34.5 31.4→25.4 24.8→19.3 32.9→23.8 19.2→11.7 10.5→7.34 7.44→6.17 4.65→3.76 2.84→2.22 14.4→5.03 5.27→2.15 3.46→1.34 6.47→2.82 3.13→1.81 2.36→1.28 28.0→24.5 19.7→17.8 16.4→14.0 50.8→48.1 31.0→27.9 17.6→14.0 6.52→4.18 4.67→3.10 4.25→2.73 4.95→4.04 3.53→2.20 2.81→1.06 1.58→1.65 1.15→1.16 0.81→0.87 19.5→16.6 15.2→12.2 12.4→9.75 7.76→6.99 4.23→4.10 2.66→2.82 2.16→1.69 1.66→1.27 1.39→1.06 4.07→2.48 2.84→1.63 2.07→1.12 1.29→1.03 1.07→0.79 0.93→0.65 19.4→15.3 12.5→11.1 9.29→8.43 47.3→46.8 18.2→17.9 8.29→7.64 3.66→3.27 2.71→2.47 2.32→2.14 4.13→1.42 2.64→0.82 1.64→0.59 1.07→0.84 0.61→0.47 0.36→0.29 
+
+(b) GMT 
+
+DA ↓ DE ↓ DX ↓ DL ↓ DH ↓
+
+6.92→4.83 4.19→3.21 3.09→2.38 5.33→4.75 2.49→2.36 1.65→1.71 5.16→4.41 3.34→2.61 1.53→0.89 2.86→0.62 1.85→0.41 1.34→0.29 0.42→0.30 0.14→0.13 0.11→0.10 19.7→17.3 9.21→7.61 7.50→5.65 4.38→4.47 2.42→2.65 1.25→1.61 5.49→3.79 3.26→2.93 2.75→1.46 2.22→0.35 1.52→0.27 0.95→0.20 0.18→0.13 0.15→0.07 0.12→0.06 46.4→21.1 22.1→15.7 15.8→11.4 21.2→10.2 6.60→3.59 2.69→1.77 3.92→2.34 3.04→1.70 2.26→1.40 9.81→1.11 3.00→0.39 2.04→0.23 3.95→1.40 2.91→0.88 1.93→0.65 17.0→13.0 9.13→8.66 7.06→6.86 5.00→1.60 0.83→0.64 0.44→0.52 3.02→1.85 1.38→0.82 0.85→0.49 3.05→0.70 1.70→0.44 0.86→0.29 0.48→0.19 0.26→0.12 0.21→0.11 57.1→37.4 40.1→26.9 32.3→22.1 101→51.5 48.6→30.4 30.4→19.4 6.29→5.31 3.87→3.42 2.45→2.11 10.4→4.44 4.91→2.36 3.16→1.43 5.13→2.88 3.47→2.17 2.70→1.64 25.7→24.1 19.9→17.1 15.9→13.6 25.3→22.5 17.1→10.3 11.5→7.32 8.52→5.16 5.04→3.18 4.26→2.77 5.24→2.81 3.62→1.62 2.38→1.02 2.27→1.67 1.73→1.14 1.27→0.87 22.3→18.3 17.5→13.6 14.6→10.9 15.6→10.4 8.38→5.29 5.65→3.25 1.79→1.56 1.33→1.14 1.12→0.93 2.78→1.35 1.77→0.77 1.26→0.50 1.29→1.20 1.02→0.89 0.89→0.76 17.5→14.6 11.1→9.93 8.47→7.57 28.7→24.9 11.1→7.93 5.54→4.08 3.85→3.53 2.84→2.50 2.26→1.96 3.18→1.36 2.01→0.70 1.32→0.46 0.96→0.87 0.55→0.46 0.40→0.31 
+
+(c) TWIST2 
+
+D ↓
+
+D ↑Fig. 5. Characteristic errors for (a) SONIC, (b) GMT, and (c) TWIST2 at P90/P70/P50. Cells show w/o Res. → w/ Res. using the units in Sec. IV-A. Colors encode relative error reduction: blue indicates improvement, gray deterioration, and white changes within ±2% . Color saturation occurs at ±40% .Table III We compare frozen tracking (w/o Res.), tracking residuals (Track-Res), and expressive compensation (w/ Res.). Tracker Method MPKPE ↓
+
+(cm) 
+
+DA ↓
+
+(%H)
+
+DE ↓
+
+(10 −3 rad 2)
+
+DX ↓
+
+(%H)
+
+DL ↓
+
+(deg-eq) 
+
+DH ↓
+
+(%H)SONIC w/o Res. 3.09 19.22 12.26 3.64 11.90 1.19 Track-Res 2.83 17.84 11.62 3.63 11.77 1.01 w/ Res. 3.30 14.79 10.66 2.13 10.72 0.71 
+
+GMT w/o Res. 3.05 20.74 10.67 4.63 3.01 1.24 Track-Res 2.43 18.51 10.63 3.75 3.12 1.02 w/ Res. 3.04 17.22 9.01 3.60 1.15 0.72 
+
+TWIST2 w/o Res. 2.84 16.67 12.19 3.01 2.55 1.28 Track-Res 2.18 14.94 16.09 2.80 2.97 1.09 w/ Res. 2.91 12.84 7.90 2.29 0.87 0.73 
+
+for every backbone, but higher body lean error for GMT and higher energy and body lean errors for TWIST2. The tracker-only results in Fig. 5 also show that characteristic errors vary across motions and backbones. These results show that lower average positional error does not ensure better preservation of every motion characteristic. Training budgets and distillation differ, so this comparison evaluates the resulting systems without isolating reward effects. To answer Q2, we evaluate expressive compensation in Table III and Fig. 5. We observe the lowest action-averaged errors in all five characteristics for each backbone. Positional error remains higher than Track-Res, while GMT slightly improves over frozen tracking. Across all trackers, the heatmap 0 .2 .4 .6 .8 1048 (a) 
+
+0 .2 .4 .6 .8 1
+
+(b) 
+
+0 .2 .4 .6 .8 1
+
+(c) 
+
+050 100 
+
+(d) 
+
+050 100 
+
+(e) 
+
+Walk Kick Punch Crouch Wave Clap Cross arms Bow 050 100 
+
+(f) 
+
+Open gate Motion-aware gate w/o Res. 
+
+Fig. 6. Motion-aware gating across SONIC, GMT, and TWIST2, in order within each group. (a)–(c) Applied correction (deg) versus normalized refer-ence activity. (d)–(f) Low-activity limb endpoint error (mm; lower is better). 
+
+shows lower crouching expansion and height errors and lower waving amplitude errors at P50, P70, and P90. We also examine where recovery remains incomplete. For SONIC crouching, amplitude error decreases but energy error increases at all reported percentiles. For TWIST2 walking, both errors decrease throughout. In the qualitative comparison (a) Punch (b) Walk (c) Wave (d) Clap (e) Kick (f) Crouch (g) Bow (h) Cross arms                
+
+> w/o Res. w/ Res. w/o Res. w/ Res. w/o Res. w/ Res. w/o Res. w/ Res.
+> w/o Res. w/ Res. w/o Res. w/ Res. w/o Res. w/ Res. w/o Res. w/ Res. Fig. 7. Physical executions without (left) and with (right) compensation; blue overlays show references. Arrows in (c) show hand excursion; markers show hand separation in (d) and projected reference deviations in (e)–(g).
+
+in Fig. 4, we observe improved pelvis height at the deepest crouch, while torso deviation persists. We evaluate completion over all starts with equal action weights. Rates remain at 100% for SONIC, change from 
+
+98 .33% to 98 .27% for GMT, and increase from 99 .48% to 
+
+99 .89% for TWIST2, remaining high with compensation. 
+
+C. Ablation 
+
+To answer Q3, we first compare motion-aware and open gates to examine correction allocation and tracking interfer-ence. Since opening the gate also changes the total correction range, we then compare against uniform gates at matched bounds to assess allocation with fixed policies at inference. 
+
+Motion-aware versus open gates. We train both policies across all eight categories with identical dynamics, archi-tecture, budget, objectives, constraints, regularization, and reference-activity observations, using gt,j = 1 for open gates. In Fig. 6(a)–(c), we observe smaller corrections at lower activ-ity and comparable or larger corrections at the highest activity. Figure 6(d)–(f) shows lower low-activity endpoint errors for walking, kicking, crossing arms, and bowing across trackers, while effects on other motions vary. MPJPE decreases from 
+
+3.18 to 3.10 cm , compared with 2.97 cm for frozen tracking. These results show that gating concentrates compensation and reduces tracking interference in several motions. 
+
+Motion-aware versus uniform gates. We replace motion-aware gates at inference with guni  
+
+> t
+
+= (n−1
+
+> a
+
+Pna 
+
+> j=1
+
+g2 
+
+> t,j
+
+)1/2
+
+on each controlled joint, matching squared correction bounds per frame. We keep the motion-aware-trained unified policies, observations, references, initial states, and evaluation seed fixed across all eight categories. For Table IV, group-energy error Dpart  
+
+> E
+
+sums absolute differences between unit-mean group energies. Low-limb error averages next-frame pelvis-local wrist/ankle errors for groups with reference activity at most one third of the frame maxi-mum. Correction RMS measures applied corrections over con-                                      
+
+> Table IV We compare uniform and motion-aware gates (MAG) at inference with matched correction-range budgets and fixed policies. Tracker Gate DA↓
+> (%H)
+> Dpart
+> E↓
+> (10 −3rad 2)MPJPE ↓
+> (cm) Low limb ↓
+> (cm) Corr. RMS (deg) SONIC Uniform 16.56 11.13 3.50 5.45 4.39 MAG 14.04 10.69 3.34 4.43 4.72 GMT Uniform 17.09 9.73 3.31 5.03 4.40 MAG 15.03 9.37 3.01 4.26 4.86 TWIST2 Uniform 14.53 10.50 3.33 5.85 4.25 MAG 11.46 9.75 2.90 4.69 4.56
+
+trolled joints and valid unit frames. Results average common completed units with valid samples within each action. In Table IV, we observe lower amplitude, group-energy, MPJPE, and low-limb errors with motion-aware gating for every tracker. Equal-tracker reductions are 15 .8% , 4.9% , 8.8% ,and 18 .1% , respectively, although walking energy error rises 
+
+3.3% . Applied correction RMS increases from 4.35 ◦ to 4.72 ◦
+
+despite matched bounds. These results support activity-based allocation for the evaluated policies at inference, but do not establish superiority over uniform-gate training. 
+
+D. Real-World Robot Experiments 
+
+To answer Q2 on physical hardware, we evaluate residual compensation on the Unitree G1. We select three references per action and tracker across energy levels, screened in sim-ulation for executability and expressive recovery. References vary across trackers but match between conditions. We run each reference once per condition, giving 48 executions per tracker and 144 in total. Errors use measured joint positions and pelvis orientation, with units averaged within references before aggregation in Sec. IV-A. We compare executions without and with compensation in Table V and Fig. 7. Lower errors in all five characteristics on each tracker’s selected references indicate improved dynamic and postural preservation in these physical motions. 
+
+Table V We compare executions without and with residual compensation on the physical Unitree G1. Tracker Method DA ↓
+
+(%H)
+
+DE ↓
+
+(10 −3 rad 2)
+
+DX ↓
+
+(%H)
+
+DL ↓
+
+(deg-eq) 
+
+DH ↓
+
+(%H)SONIC w/o Res. 19.14 13.40 3.73 12.61 1.27 w/ Res. 15.73 11.46 2.97 11.93 1.05 
+
+GMT w/o Res. 14.55 9.31 4.85 4.07 1.07 w/ Res. 10.53 8.09 4.39 2.54 0.91 
+
+TWIST2 w/o Res. 18.59 8.26 3.10 2.75 1.58 w/ Res. 16.98 7.21 2.96 2.28 1.15 
+
+V. L IMITATIONS 
+
+We use five descriptors to capture complementary aspects of expressive motion, but they do not cover all dynamic and postural characteristics. Agreement on these measures therefore does not imply preservation of every expressive cue. Unit-mean energy and lean errors can mask temporal discrepancies, and total energy can mask redistribution across body groups. Recovery also depends on the underlying tracker. SONIC can exhibit limited waist excursion despite retaining all three waist control channels. Adjusting body lean may then involve compensatory hip and leg motion. Such adjustments can alter limb amplitude, motion energy, and pelvis height, creating conflicts between recovery targets. Improving one characteristic may therefore worsen another. VI. C ONCLUSION 
+
+In this work, we introduce a motion-aware residual learning framework for preserving expressive motion characteristics in humanoid robots. We use motion amplitude, motion energy, body expansion, body lean, and pelvis height as explicit compensation targets for a residual policy that augments a frozen whole-body tracker. Our comparisons show that lower mean positional tracking error alone is insufficient to ensure preservation of these characteristics. In the reported simulation comparison, residual compensation achieves lower aggregate errors in all five characteristics than tracking-oriented resid-uals, with higher positional error. Physical experiments with residual compensation on the Unitree G1 further demonstrate recovery of dynamic and postural characteristics. REFERENCES [1] W. Xie, J. Zheng, J. Han et al. , “TextOp: Real-time interactive text-driven humanoid robot motion generation and control,” arXiv preprint arXiv:2602.07439 , 2026. [2] Z. Qi, X. Chen, D. Liu et al. , “Humanoid-GPT: Scaling data and struc-ture for zero-shot motion tracking,” arXiv preprint arXiv:2606.03985 ,2026. [3] Z. Luo, Y. Yuan, T. Wang et al. , “SONIC: Supersizing motion tracking for natural humanoid whole-body control,” Science Robotics , vol. 11, no. 117, p. eaed4592, 2026. [4] Z. Chen, M. Ji, X. Cheng et al. , “GMT: General motion tracking for humanoid whole-body control,” arXiv:2506.14770 , 2025. [5] Y. Ze, Z. Chen, J. P. Araujo et al. , “TWIST: Teleoperated whole-body imitation system,” in Proceedings of The 9th Conference on Robot Learning , ser. Proceedings of Machine Learning Research, J. Lim, S. Song, and H.-W. Park, Eds., vol. 305. PMLR, 27–30 Sep 2025, pp. 2143–2154. [6] X. Cheng, Y. Ji, J. Chen et al. , “Expressive Whole-Body Control for Humanoid Robots,” in Proceedings of Robotics: Science and Systems ,Delft, Netherlands, July 2024. [7] M. Ji, X. Peng, F. Liu et al. , “Exbody2: Advanced expressive humanoid whole-body control,” arXiv preprint arXiv:2412.13196 , 2024. [8] H. Shibata, J. Takahashi, and J. Gyoba, “Subjective impressions of bowing actions and their appropriateness in specific social contexts,” 
+
+The Japanese Journal of Psychology , vol. 85, no. 6, pp. 571–578, 2015. [9] M. M. Gross, E. A. Crane, and B. L. Fredrickson, “Effort-shape and kinematic assessment of bodily expression of emotion during gait,” 
+
+Human Movement Science , vol. 31, no. 1, pp. 202–221, 2012. [10] K. Yin, W. Zeng, K. Fan et al. , “UniTracker: Learning universal whole-body motion tracker for humanoid robots,” IEEE Robotics and Automation Letters , vol. 11, no. 7, pp. 8124–8131, 2026. [11] S. Zhao, Y. Ze, Y. Wang et al. , “ResMimic: From general motion track-ing to humanoid whole-body loco-manipulation via residual learning,” 
+
+arXiv preprint arXiv:2510.05070 , 2025. [12] Z. Sun, B.-S. Huang, Y. Peng et al. , “MOSAIC: Bridging the sim-to-real gap in generalist humanoid motion tracking and teleoperation with rapid residual adaptation,” arXiv preprint arXiv:2602.08594 , 2026. [13] M. de Meijer, “The contribution of general features of body movement to the attribution of emotions,” Journal of Nonverbal Behavior , vol. 13, 1989. [14] M.-A. Mahfoudi, A. Meyer, T. Gaudin et al. , “Emotion expression in human body posture and movement: A survey on intelligible motion factors, quantification and validation,” IEEE Transactions on Affective Computing , vol. 14, no. 4, pp. 2697–2721, 2023. [15] T. Shafir, R. P. Tsachor, and K. B. Welch, “Emotion regulation through movement: Unique sets of movement characteristics are associated with and enhance basic emotions,” Frontiers in Psychology , vol. 6, 2016. [16] T. Wang, S. Liu, F. He et al. , “Affective body expression recognition framework based on temporal and spatial fusion features,” Knowledge-Based Systems , vol. 308, p. 112744, 2025. [17] P. Presti, D. Ruzzon, G. M. Galasso et al. , “The avatar’s gist: How to transfer affective components from dynamic walking to static body postures,” Frontiers in Neuroscience , vol. 16, 2022. [18] A. Sripathy, A. Bobu, Z. Li et al. , “Teaching robots to span the space of functional expressive motion,” in IEEE/RSJ International Conference on Intelligent Robots and Systems , 2022, pp. 13 406–13 413. [19] T. Huang, M. Zhao, Y. Gao et al. , “Bionic human-motion style transfer for physically executable whole-body control of humanoid robots,” arXiv preprint arXiv:2606.03536 , 2026. [20] L. Bao, J. Humphreys, T. Peng et al. , “Deep reinforcement learning for robotic bipedal locomotion: a brief survey,” Artificial Intelligence Review , vol. 59, no. 1, p. 38, 2025. [21] Y. Ze, S. Zhao, W. Wang et al. , “TWIST2: Scalable, portable, and holis-tic humanoid data collection system,” in IEEE International Conference on Robotics and Automation , 2026. [22] Q. Liao, T. E. Truong, X. Huang et al. , “BeyondMimic: From motion tracking to versatile humanoid control via guided diffusion,” arXiv preprint arXiv:2508.08241 , 2025. [23] Z. Wang, J. Wang, S. Yao et al. , “General humanoid whole-body control via pretraining and fast adaptation,” arXiv preprint arXiv:2602.11929 ,2026. [24] T. Huang, H. Wang, J. Ren et al. , “Towards adaptable humanoid control via adaptive motion tracking,” in IEEE International Conference on Robotics and Automation , 2026. [25] T. He, J. Gao, W. Xiao et al. , “ASAP: Aligning Simulation and Real-World Physics for Learning Agile Humanoid Whole-Body Skills,” in 
+
+Proceedings of Robotics: Science and Systems , LosAngeles, CA, USA, June 2025. [26] J. Schulman, F. Wolski, P. Dhariwal et al. , “Proximal policy optimization algorithms,” arXiv preprint arXiv:1707.06347 , 2017. [27] N. Mahmood, N. Ghorbani, N. F. Troje et al. , “AMASS: Archive of motion capture as surface shapes,” in Proceedings of the IEEE/CVF International Conference on Computer Vision , 2019, pp. 5442–5451. [28] A. R. Punnakkal, A. Chandrasekaran, N. Athanasiou et al. , “BA-BEL: Bodies, action and behavior with english labels,” in Proceedings IEEE/CVF Conf. on Computer Vision and Pattern Recognition , Jun. 2021, pp. 722–731. [29] J. Saito, J. Li, M. de Ruyter et al. , “SOMA: Unifying parametric human body models,” arXiv preprint arXiv:2603.16858 , 2026. [30] Z. Luo, J. Cao, A. W. Winkler et al. , “Perpetual humanoid control for real-time simulated avatars,” in International Conference on Computer Vision , 2023. [31] N. Hogan and D. Sternad, “On rhythmic and discrete movements: reflections, definitions and implications for motor control,” Experimental Brain Research , vol. 181, no. 1, pp. 13–30, 2007. [32] T. Howell, “MuJoCo warp,” NVIDIA GPU Technology Conference, Mar. 2025.

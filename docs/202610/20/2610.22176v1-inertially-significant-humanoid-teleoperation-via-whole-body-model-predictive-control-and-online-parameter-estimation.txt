@@ -1,0 +1,601 @@
+Title: Inertially Significant Humanoid Teleoperation via Whole Body Model Predictive Control and Online Parameter Estimation
+
+URL Source: https://arxiv.org/pdf/2610.22176v1
+
+Published Time: Fri, 16 Oct 2026 01:48:45 GMT
+
+Number of Pages: 8
+
+Markdown Content:
+# Inertially Significant Humanoid Teleoperation via Whole Body Model Predictive Control and Online Parameter Estimation 
+
+James Foster 1,2, Beomyeong Park 1, Luigi Penco 1, Robert Griffin 1,2
+
+Abstract — The effective deployment of humanoid robots in practical tasks of interest will require a capability of sensing and adapting to variations in inertial parameters, as occurs during heavy tool use or when carrying significant payload. Such payloads constitute a significant proportion of the combined payload-robot system, the effects of which cannot be ignored by delegating to feedback control. This paper showcases a general solution to this problem by integrating a whole body model predictive controller (WB-MPC) with an extended Kalman filter (EKF) for online estimation of fully physically consistent time-varying inertial parameters. These estimates are fed through to the WB-MPC’s full rigid body dynamics model, resulting in more accurate feedforward torques for task demands under external load. Additionally, a virtual reality (VR) interface is provided that enables an operator to provide task-specific references without regard to payload while delegating dynamic balance to the WB-MPC. The framework is validated with simulation and hardware experiments on a humanoid system. 
+
+I. I NTRODUCTION 
+
+A key promise of humanoid robots lies in performing tasks that involve exerting significant force to manipulated objects, such as lifting a heavy tool or carrying a payload. In many such tasks, the inertia of the manipulated object is a significant fraction of the robot’s own. A promising candidate solution is whole body model predictive control (WB-MPC), which iteratively solves a trajectory optimization over the robot’s full rigid body dy-namics. It was first demonstrated on a humanoid in [1], and subsequent humanoid implementations have largely targeted locomotion [2]–[4]. Far fewer works apply WB-MPC to manipulation [5], and fewer still to objects whose inertia is significant relative to the robot. The closest is [6], which remains in simulation and estimates a modest payload inertia only after task execution. Other model-based approaches either add the load to a centroidal model explicitly [7], or ab-sorb it implicitly through direct adaptive control laws bound to a reference model [8, 9]. Reinforcement learning (RL), meanwhile, has produced increasingly robust humanoid lo-comotion and manipulation [10, 11], but typically absorbs load variation in one of two ways. The first is domain randomization [12, 13], which trades nominal performance for robustness and tends toward conservative behavior; the second is a learned “extrinsics” estimator, whose abstract signals are tightly coupled to the policy that consumes them [14]. MPC and RL have recently been combined   
+
+> 1Robotics Lab, Florida Institute for Human & Machine Cognition, USA
+> 2Intelligent Systems & Robotics, University of West Florida, USA
+> jf127@students.uwf.edu,
+> {bpark, lpenco, rgriffin }@ihmc.org
+
+Fig. 1: Humanoid teleoperation tasks with a 4.5 kg ( 10 lb) payload fixed to the right forearm link. 
+
+in [15], where a massively parallelized nonlinear centroidal MPC embedded inside policy training yields robust loco-manipulation. A WB-MPC over the full rigid body dynamics can in principle directly command the feedforward effort an added payload demands, but only insofar as its rigid body dynamics model accurately captures the manipulated inertia [16]. A structure that underpins most identification methods for rigid body inertial parameters is that the inverse dynamics are linear with respect to the inertial parameters [17]. The system identification literature usually focuses on offline identification [18]; control-oriented online work has instead tended to focus on estimating gross quantities such as the center of mass and momentum [19], or a payload from previously identified dynamics coefficients [20] or a mo-mentum observer [21]. For an estimate to be safely fed into a downstream controller, it must be fully physically consistent [22], which can be enforced via semidefinite programming [23], smooth nonlinear reparameterizations of the inertial parameters [24], or geometric methods [25, 26]. Model bias is also problematic when operating the robot via a virtual reality (VR) interface. VR provides operators with an intuitive control interface [27], and has become common both as a primary operation method and for data collection of learned control policies [28]. With some ex-ceptions, VR operators typically do not have access to force feedback indicating a payload, and so may compensate to mitigate tracking offset, which is burdensome and deleterious arXiv:2610.22176v1 [cs.RO] 15 Oct 2026 Robot  
+
+> Operator
+> Whole Body
+> Model Predictive Control
+> VR Operator Interface
+> State Estimator
+> Physically-Consistent Inertial
+> Extended Kalman Filter
+> Low-Level
+> Control Fig. 2: Block diagram of the framework, consisting of the physically consistent inertial EKF (Sec. III-A) coupled to the WB-MPC (Sec. III-B) and the VR operator interface (Sec. III-C). The VR operator interface runs on a separate machine.
+
+to task performance. One such exception is the impressive but complex VR/haptic teleoperation suite in [29], where online inertial estimates are used to adjust the posture of a wheeled humanoid modeled as a cart-pole system, allowing the manipulation of heavy payloads relative to robot weight. In this paper we propose a framework coupling three com-ponents to enable intuitive VR teleoperation of humanoids manipulating significant loads via WB-MPC. Firstly, a WB-MPC trades off dynamic balance objectives with tight track-ing of operator-specified taskspace objectives. Secondly, an extended Kalman filter (EKF) coupled in closed-loop with the WB-MPC estimates fully physically consistent inertial parameters online and passes them to the WB-MPC’s rigid body dynamics model, allowing feedforward torque compen-sation of a priori unknown loads. We include EKF extensions that increase numerical robustness and aid interpretation: we regularize the estimate through a fictitious nominal measure-ment that keeps the estimate well-conditioned under the weak excitation of teleoperated motion, and estimate deviations from a well-characterized nominal body using a generalized log-Cholesky parameterization [24, 30]. Lastly, a minimal VR teleoperation interface, combined with the aforemen-tioned WB-MPC and EKF, allows an operator to command desired motion without the burden of compensating for added payload, while dynamic balance control is delegated to the WB-MPC. We validate the framework on loaded trajectory tracking and balance tasks in simulation, and showcase VR teleoperation under load on hardware for a 23 degree of freedom humanoid system (Fig. 1). II. B ACKGROUND 
+
+For both the WB-MPC and the EKF for estimating inertial parameters, we start from the assumption that the robot can be adequately modeled by the equations of motion of a floating base rigid body system: 
+
+M(q) ˙v + c(q, v) = S⊤τ + X
+
+> i∈C
+
+J⊤ 
+
+> i
+
+(q)λi, (1) where q, v are the configuration and velocity of the robot, 
+
+τ are the joint torques, and S is the selection matrix for the actuated degrees of freedom. The pair Ji and λi are the Jacobian and wrench corresponding to the ith contact in the set of external contacts C. M is the mass matrix and c
+
+collects the centripetal, Coriolis, and gravitational terms. 
+
+A. Regressor Formulation of Inverse Dynamics 
+
+There is an equivalent formulation of the inverse dynamics where the inertial parameters enter in a linear fashion [31]: 
+
+Y(q, v, ˙v)π = S⊤τ + X
+
+> i∈C
+
+J⊤ 
+
+> i
+
+(q)λi, (2) where Y is a state-dependent regressor matrix that maps the stacked inertial parameters π = [ π⊤ 
+
+> 1
+
+, π⊤ 
+
+> 2
+
+, . . . , π⊤ 
+
+> N
+
+]⊤ ∈
+
+R10 N into torque, where N is the number of bodies in the rigid body system. The inertial parameters for the jth 
+
+individual body πj ∈ R10 consist of its mass m, first moment of mass μ ∈ R3, and the unique elements of the symmetric rotational inertia matrix I ∈ R3×3:
+
+πj = m, μ⊤, vech (I)⊤⊤ , (3) where we drop the j subscript on the components for clarity. The operation vech (·) vectorizes the lower triangular half of a symmetric matrix. It is this formulation of the dynamics that forms the backbone of the estimation machinery of the extended Kalman filter (EKF) in Section III-A. We use a log-Cholesky parameterization of the inertial parameters [24] that ensures the estimates meet the conditions of full physical consistency ,which is required in order for a given body’s estimate to be physically plausible [25], especially useful as these estimates will be passed to the downstream WB-MPC controller. These conditions are captured compactly by the pseudo-inertia , the symmetric 4 × 4 matrix: 
+
+Γ(πj ) = 
+
+ Σ μμ⊤ m
+
+
+
+, Σ = 12 Tr( I) 13 − I. (4) The pseudo-inertia Γ(πj ) ≻ 0 if and only if πj is fully physically consistent [24], and is equivalent to the mass being positive, a positive definite rotational inertia, and a triangle inequality on the principal moments of rotational inertia. In the log-Cholesky parameterization of [24], each rigid body is described by θj ∈ R10 :
+
+θj = [ α, d 1, d 2, d 3, s 12 , s 13 , s 23 , t 1, t 2, t 3]⊤, (5) where α scales the density of a unit reference body and 
+
+d, s, t apply scaling, shearing, and translation respectively. The parameterization (5) constructs the pseudo-inertia as the decomposition: 
+
+Γ = UU ⊤, (6) with the upper-triangular log-Cholesky factor 
+
+U(θj ) = eα
+
+
+
+ed1 s12 s13 t1
+
+0 ed2 s23 t2
+
+0 0 ed3 t3
+
+0 0 0 1
+
+ , (7) which keeps Γ positive definite for any θj , so every estimate is physically consistent by construction. A smooth, invertible map πj = g(θj ) with closed-form Jacobian makes it simple to switch between the two parameterizations. 
+
+B. Whole Body Model Predictive Control 
+
+Defining the state x = ( q, v) and the control u = τ ,our WB-MPC repeatedly solves, at each control instant and from the current estimated state ˆx, the discrete-time optimal control problem (OCP) 
+
+min   
+
+> x0: K,u0: K−1
+
+ℓK (xK ) + 
+
+> K−1
+
+X
+
+> k=0
+
+ℓk(xk, uk) (8a) s.t. x0 = ˆ x, (8b) 
+
+xk+1 = fdyn (xk, uk; π), (8c) 
+
+fconstr (xk, uk) ≤ 0, (8d) over a horizon of K stages, where ℓk and ℓK are the running and terminal costs and fconstr collects the path constraints. The dynamics model is obtained from by manipulating the equations of motion (1) to obtain the forward dynamics: 
+
+˙v = M(q)−1 S⊤τ + X
+
+> i∈C
+
+J⊤ 
+
+> i
+
+(q) λi − c(q, v)
+
+!
+
+, (9) which can be integrated to yield the discrete transition 
+
+xk+1 = fdyn (xk, uk; π) of (8c). Because M and c depend on the inertial parameters π, it is through fdyn that the online estimates of these parameters enter the controller. III. M ETHOD 
+
+A block diagram of our approach is shown in Fig. 2. Our contributions center around three components: an EKF that estimates fully physically consistent inertial parameters online (Section III-A), a WB-MPC that plans against a full rigid body dynamics updated by the EKF (Section III-B), and a VR teleoperation interface that supplies task references to the WB-MPC (Section III-C). 
+
+A. Extended Kalman Filter 
+
+Our estimator adopts the physically consistent inertial EKF formulation of [30]; we summarize it below, then introduce two extensions that improve robustness under teleoperated motion. We assume a prior offline system identification resolves the majority of the robot’s inertial parameters, and that the task dictates which links vary inertially, so the regressor in (2) can be split into an estimated and a nominal contribution Yπ = Yest πest + Ynom πnom . The latter nominal contribution can be resolved by a single inverse-dynamics call τ nom with the to-be estimated parameters zeroed, giving 
+
+Yπ = Yest πest + τ nom . (10) The measurement model is formed by isolating the estimated contribution when (10) is substituted into (2): replacing S⊤τ
+
+with the observed joint torques τ obs and the measured contact wrenches λi yields the residual torque 
+
+∆τ k = τ obs − τ nom + X
+
+> i∈C
+
+J⊤ 
+
+> i
+
+λi ≈ Yest  
+
+> k
+
+πest  
+
+> k
+
+. (11) By forfeiting the hitherto linear parameterization of π in (3) and moving to the parameterization of θ in (5), a fully physically consistent estimate is guaranteed from the now nonlinear measurement model h at every iteration, enforcing the use of an EKF as opposed to a regular Kalman filter: 
+
+∆τ k = Yest  
+
+> k
+
+g(θest  
+
+> k
+
+)
+
+| {z } 
+
+> h(θest
+> k)
+
++νk, νk ∼ N (0, Rk), (12) abusing notation by reusing ν in a different parameterization. The invertible mapping between parameterizations πest =
+
+g(θest ) [24] and its closed-form Jacobian, denoted G, are used to form the measurement Jacobian H by applying the chain rule: Hk = ∂h 
+
+> ∂θ
+
+= Yest  
+
+> k
+
+Gk.The process model is assumed constant, driven by noise: 
+
+θest  
+
+> k
+
+= θest 
+
+> k−1
+
+| {z }  
+
+> f(θest
+> k−1)
+
++ηk, ηk ∼ N (0, Qk), (13) so the process Jacobian is the identity matrix Fk = ∂f 
+
+> ∂θ
+
+= I.Below we describe two extensions to this framework which greatly assisted teleoperation tasks. 
+
+1) Estimating deviations from a nominal body: Reference work [30] estimated a given link’s parameters “from scratch”, as can be noted by seeing that (7) transforms a unit reference body, implicit in (6) as Γ = UI 4×4U⊤. In our implemen-tation, we found that to cause tuning issues when links of vastly different size are included in the same estimation, as is common with humanoids. Instead, we estimate a physically consistent deviation from a known nominal inertia using the generalized log-Cholesky parameterization of [24]. To anchor at the nominal body instead, we replace that unit reference with the nominal pseudo-inertia Γ(πnom  
+
+> j
+
+),
+
+Γ(θest  
+
+> j
+
+) = U(θest  
+
+> j
+
+) Γ(πnom  
+
+> j
+
+) U(θest  
+
+> j
+
+)⊤, (14) and the standard parameters follow from Γ(θest  
+
+> j
+
+) by the same smooth, invertible map g and closed-form Jacobian G as TABLE I: Cost terms comprising the WB-MPC. Without input, desired quantities ∗des are the “Standard reference” column.                                                                                                     
+
+> Cost Residual rType Activation Standard reference Upper body jointspace tracking Kd(vupper −vupper des ) + Kp(qupper −qupper des )2nd order Weighted Quad. Home config., zero velocity Center of mass tracking Kd( ˙ c−˙cdes ) + Kp(c−cdes )2nd order Weighted Quad. (0 ,0,cz
+> home )
+> Pelvis orientation Kd(ω−ωdes ) + Kplog( R⊤
+> des R)2nd order Weighted Quad. (0 ,0,0,1) (quaternion) Foot placement Kd( ˙ p−˙pdes ) + Kp(p−pdes )2nd order Weighted Quad. Home config. equivalent Angular momentum (˙l−˙ldes ) + α(l−ldes )1st order Weighted Quad. 0
+> Lower body state regularization xlegs ⊖xlegs des Standard Weighted Quad. Home config., zero velocity Acceleration regularization ˙vStandard Weighted Quad. 0
+> Torque regularization τStandard Weighted Quad. 0
+> Wrench regularization λi−λi, des Standard Weighted Quad. (0 ,0,mg
+> dim (C),0,0,0)
+> Center of pressure Acop
+> iλiStandard Weighted Quad. Foot center Wrench cone Awc
+> iλiConstraint Quad. Barrier Wrench cone, 25 N margin
+
+before, but now applied to the composition of the estimated 
+
+θest and nominal θnom log-Cholesky parameter sets: 
+
+πest  
+
+> j
+
+= g(θest  
+
+> j
+
+⊕ θnom  
+
+> j
+
+), (15) where θnom  
+
+> j
+
+= g−1(πnom  
+
+> j
+
+) and ⊕ is the composition defined by U(θest  
+
+> j
+
+⊕ θnom  
+
+> j
+
+) = U(θest  
+
+> j
+
+) U(θnom  
+
+> j
+
+). Setting θest  
+
+> j
+
+= 0
+
+reproduces the nominal body, and the entries of θest  
+
+> j
+
+now measure the change in density, scale, shear and translation of the estimated body from the nominal one. We have found this to be more numerically robust, and a more natural way of describing deviations from a nominal inertia due to payload. 
+
+2) Regularizing weakly-observable parameters: If there are weakly-observable parameters due to lack of excita-tion [22], we can append a fictitious measurement that the parameter deviation is zero (the nominal body), 0 = θest  
+
+> k
+
++
+
+νreg  
+
+> k
+
+with νreg  
+
+> k
+
+∼ N (0, Rreg ), with Rreg weighted only on channels we wish to regularize. Stacked beneath the torque measurement (12), it augments the EKF update as 
+
+∆τ k
+
+0
+
+
+
+=
+
+h(θest  
+
+> k
+
+)
+
+θest 
+
+> k
+
+
+
++
+
+ νk
+
+νreg 
+
+> k
+
+
+
+, (16) with the augmented measurement Jacobian and covariance: 
+
+Haug  
+
+> k
+
+=
+
+Hk
+
+I
+
+
+
+, Raug  
+
+> k
+
+=
+
+Rk
+
+Rreg 
+
+
+
+. (17) This is equivalent to a maximum a posteriori update with a Gaussian prior centered at the nominal body, applied only to the weakly-observable channels. For example, in Section IV-A, we found that mass and center of mass of the loaded forearm links are well-excited under teleoperated motion, but rotational inertia is excited weakly and drifts if left free. 
+
+B. Whole Body Model Predictive Control 
+
+We solve the OCP (8) with the feasibility-driven differential dynamic programming (FDDP) solver of 
+
+crocoddyl [32] which, through its internal use of 
+
+pinocchio [33], furnishes the forward dynamics (9) and their analytical derivatives at each stage. The running cost ℓk of (8) is mostly a weighted sum of least-squares terms: for a generic cost residual r we use a weighted quadratic ∥r∥2 
+
+> W
+
+with positive-definite weight W.Writing e for a generic task error of a tracked quantity minus its reference, a regularization task penalizes the error directly through the standard residual 
+
+rstd = e. (18) Inspired by and similar to [34], we have had success with residuals that penalize deviation from a desired response , be that first or second order: 
+
+r1st = ˙ e + αe, (19) 
+
+r2nd = ¨ e + Kd ˙e + Kp e, (20) where α, Kp, and Kd are appropriate gains for the task. An in-depth study of the effect of these response-based residuals for humanoid locomotion on the WB-MPC solution is un-derway. In agreement with [34], we note that these residuals make tuning easier by decoupling task priority from desired closed-loop bandwidth, leading to more horizon-invariant behavior. These characteristics are particularly useful for tracking the user references from VR, which are uniform over the WB-MPC prediction horizon. The cost terms used in the WB-MPC are collected in Table I, where we partition the configuration by kinematic sub-chain q = ( qbase , qlegs , qspine , qarms ), so that each cost can be appropriately scoped to the sub-chains on which it acts. We also define the collection qupper = ( qspine , qarms ) for convenience. Differences on the state manifold are written 
+
+x ⊖ xdes , reducing to subtraction on the joint variables and to the SE (3) logarithm on the floating base. In the special case of wrench cone constraints, as FDDP cannot natively path constraints in (8d), they are absorbed into the cost as soft penalties through a quadratic barrier activation. We employ no specific alterations to the terminal cost ℓK .We find that the combination of standard regularization costs, coupled with the response-based costs on user VR input, suffice to induce horizon-invariant, stable behavior. 
+
+C. Virtual Reality Teleoperation 
+
+In order to stream references to the WB-MPC, the VR operator’s tracked device poses consisting of the two joy-sticks and the headset are resolved into jointspace targets by an inverse kinematics (IK) routine running on a separate operator-side computer. The WB-MPC consumes only the upper-body portion of this solution: the IK routine’s output TABLE II: VR inputs for streaming to WB-MPC.          
+
+> WB-MPC cost term VR operator input Arm jointspace qarms user Handheld controllers Spine jointspace qspine user Right thumbstick, horizontal Pelvis pitch Rpitch user Right thumbstick, vertical Center of mass height czuser Left thumbstick, vertical
+
+configuration and velocity for the arms become the reference 
+
+(qarms user , varms user ) of the jointspace tracking cost of Section III-B. Although a user study is outside the scope of this work, we specify compact VR joystick controller bindings for streaming pelvis pitch Rpitch user , center of mass (CoM) height 
+
+cz
+
+> user
+
+, and spine yaw qspine user references to the WB-MPC in an attempt to ease the VR operator burden. The set of quantities streamed from the VR interface to the WB-MPC is given in Table II. In contrast to the whole-body VR/haptic interface in [29], we conjecture that a simple joystick-based interface makes operation more intuitive; the operator commands the base pose of a bi-manual manipulation system via the joystick, and then teleoperates the arms. 
+
+D. Practical Implementation Details 
+
+The framework in Fig. 2 is implemented on two machines. The WB-MPC, EKF, and state estimator are deployed inside a single real-time process on an onboard control computer. The state estimator and low-level control run on a 1 kHz thread; the EKF and WB-MPC run on a 100 Hz thread. The VR kinematic streaming toolbox of Section III-C runs on a separate operator desktop computer and streams its references via ROS2 messages at a best-effort rate of 50 Hz, decoupling the operator interface from the real-time loop. The inertial EKF reads q, v, and τ obs from the state estimator and the contact wrenches λi are computed from the leg torques, τ leg ,i = J⊤ 
+
+> i
+
+λi. The joint accelerations ˙v required by the measurement model are reconstructed by a low-pass-filtered finite difference of v. Each tick, the estimate is mapped back to πest , rate-limited to prevent abrupt jumps, and written to the WB-MPC’s dynamics model. The WB-MPC horizon length K = 30 nodes with an Euler discretization of ∆t = 20 ms which resolves to a prediction horizon of 0.6 s. The result of a WB-MPC solve is a tape of feedforward torques and states: τ ⋆ = [ τ ⋆
+
+> 0
+
+, . . . , τ ⋆K−1],
+
+q⋆ = [ q⋆
+
+> 0
+
+, . . . , q⋆K ], and v⋆ = [ v⋆ 
+
+> 0
+
+, . . . , v⋆K ]. The low-level controller closes the loop on the slower WB-MPC solution by interpolating cubic Hermite splines through the planned 
+
+q⋆ and v⋆ setpoints and tracking them with a PD law that supplements the feedforward torque from the WB-MPC. IV. R ESULTS 
+
+To verify the framework, we test on a humanoid system with 23 internal degrees of freedom: six per leg, one spine yaw, four per arm, and two in the neck (the neck is not considered in the EKF/WB-MPC scheme, it is PD-controlled around a default configuration). All simulation and hardware experiments use the EKF configuration given in Table III.                       
+
+> TABLE III: EKF configuration used for experiments. The mass ( α)and center of mass ( t) channels are unregularized (—); only the rotational inertia channels ( d,s) carry a prior.
+> Parameter Value Process Q:α10 −3
+> Process Q:d,s,t10 −2
+> Prior Rreg :d,s10 −2
+> Prior Rreg :α,t—Measurement R: floating base, spine 10 3
+> Measurement R: arms, legs 10 2
+
+A. Simulation 1) Pre-recorded trajectory tracking with/without EKF: 
+
+To isolate the estimator’s effect on tracking from operator variability, we drive the robot with a pre-recorded teleopera-tion trajectory, consisting of a window-washing motion that sweeps both forearms across the frontal plane. Though pre-recorded, it is fed through such that the WB-MPC cannot anticipate the trajectory. At 3 s, the left forearm (nominal mass 0.62 kg) has a 5 kg payload mounted at the forearm tip ( 0.41 m down from the elbow joint), while the right is unloaded and serves as a within-trial reference. We compare taskspace tracking of the loaded forearm with the EKF disabled versus enabled, feeding estimates to the WB-MPC’s dynamics model in Fig. 3 and Table IV. With no adaptation, the loaded left forearm sags significantly from its unloaded path, accumulating a vertical taskspace root mean square error (RMSE) of 389 .2 mm, an over 25 × increase compared to the error with adaptation. The horizontal taskspace error is less severe, though still significant; without adaptation the RMSE is 67 .8 mm while with adaptation it shrinks over 10 ×
+
+to 6.4 mm. The estimated mass and center of mass track the added payload within two seconds of application, (Fig. 4). Table V shows the value of estimating deviations from a known nominal body (Section III-A.1) and regularizing weakly-observable parameters (Section III-A.2). Only the mass ( α) and center of mass down the forearm ( t3) have any significant deviation from nominal. Mapping these devia-tions through the generalized log-Cholesky parameterization recovers the payload: the mass channel α ≈ 1.10 scales the nominal by e2α ≈ 9.1, taking the 0.62 kg forearm to 
+
+5.6 kg, while t3 ≈ − 0.28 moves the center of mass from the nominal −0.10 m down the link to −0.38 m. Regarding adding a fictitious measurement, we see that the mass and center of mass are recovered regardless. The difference is the weakly-observable rotational inertia channels ( d, s). If left free they wander from nominal, whereas the fictitious measurement of inertia induces a prior that holds them near zero, motivating the EKF configuration in Table III for less “slosh” in estimates [30]. 
+
+2) Posture adjustment under load with/without EKF: The second experiment stresses whole-body balance of the WB-MPC, rather than arm tracking. The robot is commanded to extend both arms horizontally in front of the torso to replicate a two-handed load carrying posture. Each forearm is then loaded with 5 kg ( 10 kg in total) mounted at the forearm −0.4−0.20.00.20.40.6
+
+y [m] 
+
+−0.6
+
+−0.4
+
+−0.20.0
+
+> z [m]
+> LEFT unloaded LEFT, estimator LEFT, no estimator RIGHT
+
+Fig. 3: Forearm taskspace paths (chest frame, frontal y–z plane) for pre-recorded trajectory. 2.55.0Mass [kg] 
+
+> Ground truth
+
+5 10 15 Time [s] 
+
+−0.4
+
+−0.2CoM z [m] 
+
+Fig. 4: Estimated forearm mass and CoM vs. ground truth. 
+
+tips, ramped up linearly over two seconds once the arms have reached the forward-hold pose. With the EKF disabled, the center of mass and pelvis drift steadily forward until the centers of pressure (CoP) of the feet leave the support polygon and the robot tips unstable (Fig. 5, top). With the EKF enabled the controller accounts for the added mass by modifying its internal posture: driving the pelvis backward in order to maintain the center of mass within the support polygon and its pelvis upright (Fig. 5, bottom). This counter-balance is emergent from the WB-MPC costs in Table I. 
+
+B. Hardware 
+
+For the hardware experiments, we mount adjustable dumb-bells that extend axially past the end of the link; as we do not have access to heavy duty grippers, we “grasp” a payload by manually mounting weights at runtime. Due to recurring hardware issues on the left arm, we only load the right arm and take this as an opportunity to show how the 
+
+TABLE IV: Taskspace error statistics (frontal y–z plane) for pre-recorded trajectory, loaded vs. unloaded baseline.           
+
+> Condition RMSE y[mm] RMSE z[mm] No estimator 67.8 389.2 With estimator 6.4 14.2
+
+TABLE V: Effects of parameter prior. Each parameter group entry is the RMS of the Euclidean norm of that group’s deviation from nominal: |α|, || d|| 2, || s|| 2, || t|| 2.                
+
+> Elbow RMSE RMS deviation from nominal Prior regime [deg] αdst
+> No prior 1.27 1.11 0.11 0.09 0.28 Inertia-only 1.27 1.11 4×10 −51×10 −50.28
+
+−0.20.00.2
+
+No estimator 
+
+0.00 0.25 0.50 0.75 1.00 
+
+x [m] 
+
+−0.20.00.2
+
+With estimator 
+
+> CoM Pelvis CoP
+> y [m]
+
+Fig. 5: Overhead ( x–y plane) view of robot balance quantities during static hold. 
+
+WB-MPC/EKF can handle challenging asymmetric loads. 
+
+1) Runtime loading: With both arms horizontally ex-tended in front of the torso, we incrementally mount weight plates onto the right forearm cuff at runtime: first a 3.4 kg (7.5 lb) plate, then four 1.1 kg ( 2.5 lb) plates one at a time, before removing the entire load. The estimated forearm mass tracks the ground-truth loading staircase closely (Fig. 6, top): relative to the pre-load estimate, the filter recovers 89% of the initial 3.4 kg plate and, as further plates are added, 88 ,
+
+91 , 94 , and 96% of the cumulative load at 4.5, 5.7, 6.8,and 7.9 kg ( 10 , 12 .5, 15 , and 17 .5 lb). The estimate carries a small positive bias ( 0.6 kg) relative to the CAD nominal, indicating some model mismatch effects. The height of the forearm end-effector sags with each added plate, dropping 94 mm from its unloaded to fully loaded height (Fig. 6, middle). Though modest compared to the complete failure that results without closed-loop estimation, we believe this leaves scope for more thorough identification of joint friction/damping parameters; once the load is removed the tip returns to within 2 mm of its original height. The robot’s total electrical power draw, measured at the power-management board, rises from 108 W unloaded to 318 W at peak load, a 2.9× increase (Fig. 6, bottom). Throughout, the robot center of mass stays tightly regulated in the mid-foot frame (Table VI), moving by at most 32 mm horizontally and 7 mm in height, showing that the EKF estimates allow the WB-MPC to maintain balance objectives. 
+
+2) Teleoperated pick up of asymmetric load: To test the behavior of teleoperation under load, we form a proxy task designed to emulate picking a load from the ground in a 510      
+
+> Mass [kg]  Expected Estimate
+> 1.41.5
+> Height [m]  State estimator artifact
+> 010 20 30 40
+
+Time [s] 
+
+> 100 200 300
+> Power [W]
+
+Fig. 6: Mass estimate, end-effector taskspace height, and whole-robot electrical power draw for the incremental hardware loading of the right forearm held horizontally in front of the robot. The shaded interval marks a state estimator artifact. TABLE VI: Robot CoM in the z-up mid-foot frame over the loading run of Fig. 6.                 
+
+> Dimension Mean [m] Min [m] Max [m] Spread [m]
+> x−0.042 −0.059 −0.032 0.027
+> y−0.023 −0.045 −0.013 0.032
+> z0.862 0.859 0.865 0.007
+
+squatting, pitched forward posture. The VR operator first squats and pitches the robot via the joystick commands in Table II. After loading the right forearm with 4.5 kg ( 10 lb), the robot returns to the home standing posture, where the VR operator commands circular window-washing motions. Tracking of the robot CoM height and pelvis pitch are generally good (Fig. 7, top) aside from a persistent 4 cm offset in the height, which we hypothesize is due to a cost conflict between the CoM tracking, lower body state regularization, and torque regularization in Table I. During the load interval, the estimate first undershoots the nominal mass due to manual handling of the link, but recovers 95% 
+
+of the added 4.5 kg load (Fig. 7, bottom). To isolate the payload’s effect on the loaded forearm, the arm streaming references commanded via VR to the WB-MPC while loaded were recorded and then replayed with the forearm unloaded, so both runs track the same commanded trajectory (Fig. 8). As can be seen in Table VII, the loaded forearm sags 15 .5 mm vertically from its reference and accumulates a vertical RMSE of 22 .4 mm, versus 13 .2 mm unloaded, which we consider a modest degradation given the 4.5 kg payload. The horizontal axis is far less affected: the payload increases the bias by only 4 mm and its RMSE by 5 mm, highlighting that under the benign conditions of teleoperation, the gravitational component of an added load dominates the tracking error. 5 10 15 0.80.9CoM  z [m] 
+
+> Measured Reference
+
+60 65 010 Pitch [deg] 42 44 46 48 50 Time [s] 2468Forearm mass [kg] 
+
+> Estimate Expected (4.5 kg) Nominal
+
+Fig. 7: Top: Robot CoM height and pelvis pitch tracking through the squat/stand. Bottom: estimated forearm mass across the loading interval. −0.3−0.2−0.1
+
+y [m] 
+
+> −0.2
+> −0.10.00.1
+> z [m]
+
+Unloaded 
+
+> Measured Reference
+> −0.3−0.2−0.1
+
+y [m] Loaded (4.5 kg) 
+
+> Measured Reference
+
+Fig. 8: Taskspace paths (chest frame, frontal y–z plane) for un-loaded vs. loaded right forearm. 
+
+V. C ONCLUSIONS AND FUTURE WORK 
+
+In this paper we showcased practical VR teleoperation of unknown payloads with a combination of whole body model predictive control and physically consistent inertial extended Kalman filtering on a humanoid robot. Simulation experiments showed the necessity of online inertial estimation for trajectory tracking via the WB-MPC with significant added payload, and how closed-loop cou-pling of the EKF and WB-MPC allows an emergent ad-justment of posture under load to maintain balance. The framework is further validated on hardware by an operator test of the VR interface; the robot squats down to pick up and manipulate a large asymmetric load. In future work, we would like to incorporate perception techniques for producing inertial priors of objects that are due to be manipulated, to reduce the estimation transient response. We would also like to more thoroughly investigate the limits of robustness while performing more dynamic TABLE VII: Right forearm taskspace error statistics (chest frame, frontal y–z plane), loaded vs. unloaded baseline. 
+
+RMSE [mm] Bias [mm] Condition y z y z
+
+Unloaded 14.2 13.2 −11 .5 0.8
+
+Loaded (4.5 kg) 19.3 22.4 −15 .6 −15 .5
+
+maneuvers with a grasped object. Finally, it would be in-teresting to integrate this framework with state-of-art large behavior models, whose typical output of taskspace poses can naturally be consumed by the WB-MPC controller. REFERENCES [1] J. Koenemann, A. Del Prete, Y. Tassa, E. Todorov, O. Stasse, M. Bennewitz, and N. Mansard, “Whole-body model-predictive con-trol applied to the hrp-2 humanoid,” in 2015 IEEE/RSJ International Conference on Intelligent Robots and Systems (IROS) , 2015. [2] E. Dantec, M. Naveau, P. Fernbach, N. Villa, G. Saurel, O. Stasse, M. Taix, and N. Mansard, “Whole-body model predictive control for biped locomotion on a torque-controlled humanoid robot,” in 
+
+2022 IEEE-RAS 21st International Conference on Humanoid Robots (Humanoids) , 2022. [3] C. Khazoom, S. Hong, M. Chignoli, E. Stanger-Jones, and S. Kim, “Tailoring solution accuracy for fast whole-body model predictive control of legged robots,” IEEE Robotics and Automation Letters ,2024. [4] J. Z. Zhang, T. A. Howell, Z. Yi, C. Pan, G. Shi, G. Qu, T. Erez, Y. Tassa, and Z. Manchester, “Whole-body model-predictive control of legged robots with MuJoCo,” arXiv preprint arXiv:2503.04613 , 2025. [5] C. Perrot and O. Stasse, “Step toward deploying the torque-controlled robot Talos on industrial operations,” in 2023 IEEE/RSJ International Conference on Intelligent Robots and Systems (IROS) , 2023. [6] R. Subburaman and O. Stasse, “A whole-body multi contact large object manipulation and estimation framework for humanoids using skin patches,” in 2025 IEEE-RAS 24th International Conference on Humanoid Robots (Humanoids) , 2025. [7] M. Elobaid, G. Romualdi, G. Nava, L. Rapetti, H. A. Omer Mohamed, and D. Pucci, “Online non-linear centroidal mpc for humanoid robots payload carrying with contact-stable force parametrization,” in 2023 IEEE International Conference on Robotics and Automation (ICRA) ,2023. [8] M. Sombolestan and Q. Nguyen, “Adaptive-force-based control of dynamic legged locomotion over uneven terrain,” IEEE Transactions on Robotics , vol. 40, 2024. [9] M. V. Minniti, R. Grandia, F. Farshidian, and M. Hutter, “Adaptive clf-mpc with application to quadrupedal robots,” IEEE Robotics and Automation Letters , vol. 7, no. 1, 2021. [10] Z. Li, X. B. Peng, P. Abbeel, S. Levine, G. Berseth, and K. Sreenath, “Reinforcement learning for versatile, dynamic, and robust bipedal locomotion control,” The International Journal of Robotics Research ,vol. 44, no. 5, 2025. [11] W. Sun, L. Feng, B. Cao, Y. Liu, Y. Jin, and Z. Xie, “Ulc: A unified and fine-grained controller for humanoid loco-manipulation,” arXiv preprint arXiv:2507.06905 , 2025. [12] R. P. Singh, M. Morisawa, M. Benallegue, Z. Xie, and F. Kanehiro, “Robust humanoid walking on compliant and uneven terrain with deep reinforcement learning,” in 2024 IEEE-RAS 23rd International Conference on Humanoid Robots (Humanoids) , 2024. [13] J. Dao, H. Duan, and A. Fern, “Sim-to-real learning for humanoid box loco-manipulation,” in 2024 IEEE International Conference on Robotics and Automation (ICRA) , 2024. [14] A. Kumar, Z. Li, J. Zeng, D. Pathak, K. Sreenath, and J. Malik, “Adapt-ing rapid motor adaptation for bipedal robots,” in 2022 IEEE/RSJ International Conference on Intelligent Robots and Systems (IROS) ,2022. [15] J. Li, L. Wu, S. A. Esteban, L. Yang, J. Drgoˇ na, and A. D. Ames, “Accelerating and scaling mpc-guided reinforcement learn-ing for humanoid locomotion and manipulation,” arXiv preprint arXiv:2606.05687 , 2026. [16] Q. Leboutet, J. Roux, A. Janot, J. R. Guadarrama-Olvera, and G. Cheng, “Inertial parameter identification in robotics: A survey,” 
+
+Applied Sciences , vol. 11, no. 9, 2021. [17] C. G. Atkeson, C. H. An, and J. M. Hollerbach, “Estimation of inertial parameters of manipulator loads and links,” The International Journal of Robotics Research , vol. 5, no. 3, 1986. [18] A. C.-H. Lee, H.-K. Hsu, and H.-P. Huang, “Optimized system identi-fication of humanoid robots with physical consistency constraints and floating-based exciting motions,” International Journal of Humanoid Robotics , vol. 19, no. 5, 2022. [19] N. Rotella, A. Herzog, S. Schaal, and L. Righetti, “Humanoid momen-tum estimation using sensed contact wrenches,” in 2015 IEEE-RAS 15th International Conference on Humanoid Robots (Humanoids) ,2015. [20] C. Gaz and A. De Luca, “Payload estimation based on identified coef-ficients of robot dynamics—with an application to collision detection,” in 2017 IEEE/RSJ International Conference on Intelligent Robots and Systems (IROS) , 2017. [21] A. Kurdas, M. Hamad, J. Vorndamme, N. Mansfeld, S. Abdolshah, and S. Haddadin, “Online payload identification for tactile robots using the momentum observer,” in 2022 International Conference on Robotics and Automation (ICRA) , 2022. [22] T. Lee, J. Kwon, P. M. Wensing, and F. C. Park, “Robot model identification and learning: A modern perspective,” Annual Review of Control, Robotics, and Autonomous Systems , vol. 7, 2024. [23] P. M. Wensing, S. Kim, and J.-J. E. Slotine, “Linear matrix inequalities for physically consistent inertial parameter identification: A statistical perspective on the mass distribution,” IEEE Robotics and Automation Letters , vol. 3, no. 1, 2017. [24] C. Rucker and P. M. Wensing, “Smooth parameterization of rigid-body inertia,” IEEE Robotics and Automation Letters , vol. 7, no. 2, 2022. [25] S. Traversaro, S. Brossette, A. Escande, and F. Nori, “Identification of fully physical consistent inertial parameters using optimization on manifolds,” in 2016 IEEE/RSJ International Conference on Intelligent Robots and Systems (IROS) , 2016. [26] T. Lee, P. M. Wensing, and F. C. Park, “Geometric robot dynamic identification: A convex programming approach,” IEEE Transactions on Robotics , vol. 36, no. 2, 2019. [27] S. Bertrand, L. Penco, D. Anderson, D. Calvert, V. Roy, S. McCrory, K. Mohammed, S. Sanchez, W. Griffith, S. Morfey et al. , “High-speed and impact resilient teleoperation of humanoid robots,” in 
+
+2024 IEEE-RAS 23rd International Conference on Humanoid Robots (Humanoids) . IEEE, 2024. [28] Boston Dynamics and Toyota Research Institute, “Large behavior models and Atlas find new footing,” https://bostondynamics.com/blog/large-behavior-models-atlas-find-new-footing/, 2025, boston Dynamics blog, accessed 2026-07-16. [29] D. Baek, A. Purushottam, J. J. Choi, and J. Ramos, “Whole-body bilateral teleoperation with multi-stage object parameter es-timation for wheeled humanoid locomanipulation,” arXiv preprint arXiv:2508.09846 , 2025. [30] J. Foster, S. McCrory, C. DeBuys, S. Bertrand, and R. Griffin, “Physically consistent online inertial adaptation for humanoid loco-manipulation,” in 2024 IEEE/RSJ International Conference on Intel-ligent Robots and Systems (IROS) , 2024. [31] M. Mistry, S. Schaal, and K. Yamane, “Inertial parameter estimation of floating base humanoid systems using partial force sensing,” in 
+
+2009 9th IEEE-RAS International Conference on Humanoid Robots (Humanoids) , 2009. [32] C. Mastalli, R. Budhiraja, W. Merkt, G. Saurel, B. Hammoud, M. Naveau, J. Carpentier, L. Righetti, S. Vijayakumar, and N. Mansard, “Crocoddyl: An efficient and versatile framework for multi-contact optimal control,” in 2020 IEEE International Conference on Robotics and Automation (ICRA) , 2020. [33] J. Carpentier, G. Saurel, G. Buondonno, J. Mirabel, F. Lamiraux, O. Stasse, and N. Mansard, “The pinocchio c++ library: A fast and flexible implementation of rigid body dynamics algorithms and their analytical derivatives,” in 2019 IEEE/SICE International Symposium on System Integration (SII) , 2019. [34] J. Ubbink, R. Viljoen, E. Aertbeli¨ en, W. Decr´ e, and J. De Schutter, “From instantaneous to predictive control: A more intuitive and tunable mpc formulation for robot manipulators,” IEEE Robotics and Automation Letters , 2024.

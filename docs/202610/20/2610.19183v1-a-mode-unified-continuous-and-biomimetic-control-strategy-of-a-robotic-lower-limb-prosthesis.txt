@@ -1,0 +1,1065 @@
+Title: 2610.19183v1.pdf
+
+URL Source: https://arxiv.org/pdf/2610.19183v1
+
+Published Time: Thu, 15 Oct 2026 00:18:37 GMT
+
+Number of Pages: 18
+
+Markdown Content:
+1This work has been submitted to the IEEE for possible publication. Copyright may be transferred without notice, after which this version may no longer be accessible. 
+
+# A Mode-Unified, Continuous, and Biomimetic Control Strategy of a Robotic Lower Limb Prosthesis 
+
+Hanjun Kim 1, Sixu Zhou 1,2 , John Shim 1,2 , Xinyuan Guo 1, Kinsey R. Herrin 1,2 , and Aaron J. Young 1,2 , Member, IEEE 
+
+Abstract —Existing biomimetic lower-limb prosthesis controllers are commonly designed for discrete locomotion modes, requiring separate parameterizations for level walking, ramps, and stairs. We present a mode-unified prosthesis control framework that represents knee and ankle biomechanics continuously as functions of terrain slope and gait phase across those locomotion conditions. Locally optimized ascent and descent polynomial models were unified using radial basis function (RBF) interpolation, preserving the accuracy of the partitioned models while outperforming a global polynomial representation. The resulting biomechanics were transformed into continuous and slope-dependent impedance parameters and implemented within a single finite-state-machine (FSM) controller using bilateral sensing for gait-state estimation. Experiments with 10 individuals with transfemoral amputation demonstrated terrain-adaptive locomotion from level walking through ramps and stairs up to ± 35 °, including 13 ° ramp and 15° stair conditions absent from the underlying able-bodied (AB) dataset. Experimental results reproduced the principal slope-dependent biomechanical trends predicted by the unified model, with high agreement for knee-related measures ( 𝒓𝒓 𝟐𝟐 = 0.82 - 0.99) and ankle kinematics ( 𝒓𝒓 𝟐𝟐 =
+
+0.78 - 0.96). These findings demonstrated that unified biomechanical parameterization enables a prosthesis control architecture across diverse terrain conditions while preserving key features of AB biomechanics without requiring independently tuned impedance parameter sets for each locomotion mode. 
+
+Index Terms — Gaussian RBF, locomotion dynamics, lower limb 
+
+prosthesis, unified biomechanics modeling, unified control. 
+
+I. INTRODUCTION 
+
+HE growing availability of open-source human locomotion datasets [1], [2], [3], [4], [5] spanning diverse conditions or environments has provided unprecedented insight into how lower-limb biomechanics adapt to changing terrain and task demands. 
+
+This work was supported by the NIH Health Director New Innovator 
+
+Award #DP2-HD111709, and the DoD CDMRP Award #W81XWH-22-1-
+
+1091. (Corresponding author: Hanjun Kim) 
+
+This work involved human subjects or animals in its research. Approval of 
+
+all ethical and experimental procedures and protocols was granted by the 
+
+Georgia Tech’s Institutional Review Board under Protocol H21117. 
+
+> 1
+
+Hanjun Kim and Xinyuan Guo are with the Woodruff School of 
+
+Mechanical Engineering, Georgia Tech, Atlanta, GA 30332-0405 USA (e-
+
+mail:  hkim910@gatech.edu ; xguo394@gatech.edu ). 
+
+> 2
+
+Sixu Zhou, John Shim, Kinsey R. Herrin and Aaron J. Young are with the 
+
+Woodruff School of Mechanical Engineering, Georgia Tech, Atlanta, GA 
+
+30332-0405 and with the Institute for Robotics and Intelligent Machines, 
+
+Georgia Tech, Atlanta, GA 30332-0405 USA (e-mail:  szhou928@gatech.edu ;
+
+jshim77@gatech.edu ; kinsey.herrin@me.gatech.edu ;
+
+aaron.young@me.gatech.edu ). 
+
+These biomechanical data have been widely utilized in developing lower-limb wearable robots because reproducing human dynamics offers nominal control behaviors without costly user-specific tuning [6], [7], [8], [9]. 
+
+Although available datasets encompass level walking, ramps, and stairs, they remain discrete and finite, so prosthesis controllers inherit that same limitation. Accordingly, extending them to new environments needs extra modeling and may produce substantial kinematic and kinetic errors in unseen conditions [10], [11]. This is especially critical for prostheses because users cannot compensate with missing joints. Prior work interpolated biomechanics across adjacent ramp inclines, [12], [13], stair heights [14], or walking speeds [15] improving scalability within a domain. But discontinuities remain between domains such as overground walking and stairs, which are still commonly modeled as separate tasks. Task-agnostic or unified prosthesis controllers have also been proposed to enable multiple ambulation activities without explicit terrain classification [16], [17]. These approaches improve versatility across locomotion tasks but generally do not prescribe healthy individuals’ joint biomechanics as continuous functions of terrain geometry. Existing methods therefore address either biomechanical fidelity within separate domains or unified control across tasks, leaving the simultaneous achievement of biomimicry and task-unified control largely unaddressed. 
+
+Gait phase estimation is another fundamental component of lower-limb prosthesis control because user-environment interaction dynamics vary continuously throughout the gait cycle. Conventional finite-state-machine (FSM) controllers partition the gait cycle into discrete states and assign corresponding control parameters to each state [18], [19], [20], [21]. Among various strategies, impedance control remains widely adopted because of its simplicity, compliance, and ability to reproduce human-like joint mechanics [22], [23]. To replicate human joint behavior, impedance parameters are typically modulated according to the current gait phase [24], [25]. However, these FSM-based control frameworks are commonly designed in a mode-specific manner, where locomotion tasks such as level walking, ramps, and stairs are separately modeled using different gait-state transition conditions. For example, transitions from early to late stance are often triggered when the ankle reaches a predefined dorsiflexion angle, requiring user-specific tuning of the transition threshold. If the angle threshold is not reached during a stride, the controller may fail to progress to the subsequent state as intended. Such threshold-dependent transitions increase tuning complexity and can limit generalizability across environments and prosthesis users. Recent studies proposed continuous gait phase estimation 
+
+# T2This work has been submitted to the IEEE for possible publication. Copyright may be transferred without notice, after which this version may no longer be accessible.        
+
+> Fig. 1. Overview of the proposed mode-unified prosthesis control framework. (A) Discrete human locomotion data were transformed into continuous biomechanical models parameterized by terrain slope and gait phase. (B) These unified biomechanics were converted into continuous impedance parameters for prosthesis control within a unified FSM architecture. (C) Experimental evaluation was performed across level walking, ramps (0 ° - 13 °), and stairs (15 ° - 35 °). The available healthy human dataset did not contain the intermediate 13 ° ramp and 15 ° stair conditions, allowing assessment of the proposed framework in terrain regions not represented in reference biomechanics.
+
+methods using global thigh orientation directly captured from inertial measurement units (IMUs) [6], [7], [26], [27] or model-based approaches informed by multiple sensors [28], [29], which replace discrete state transitions with continuously evolving phase variables. Nevertheless, these approaches continue to rely on predefined ambulation-mode classifications, particularly for stair locomotion, where distinct control structures or transition conditions remain necessary. Although gait phase evolves continuously, the overall controller remains partitioned across locomotion modes. 
+
+To address these limitations, we propose a mode-unified prosthesis control framework that represents lower-limb biomechanics as continuous functions of terrain slope and gait phase. The proposed framework follows the hierarchical high-, mid-, and low-level control architecture commonly adopted in lower-limb prosthesis control [22], [23], [30]. First, knee and ankle biomechanics spanning level walking, ramps, and stairs were modeled within a continuous terrain slope and gait phase domain (Fig. 1A and Section II). Locally optimized models were developed separately for ascending and descending locomotion and subsequently unified while preserving their local biomechanical characteristics. Stance- and swing-phase representations were also modeled separately to retain phase-dependent locomotion dynamics. These unified biomechanical representations were then transformed into continuously slope-dependent impedance parameters for prosthesis control (Section III). Finally, the proposed framework was experimentally validated in Section IV. The resulting controller employs a bilateral sensing strategy to detect gait events from both-limb forward kinematics while maintaining a single FSM structure across all locomotion conditions. This architecture enables continuous modulation of prosthesis impedance with terrain slope without requiring mode-dependent gait-state definitions or independently tuned parameter sets. The proposed framework was experimentally evaluated across level walking, ramps, and stairs, including intermediate terrain conditions that were not explicitly represented in the underlying able-bodied (AB) biomechanical dataset (Fig. 1C). We tested two main hypotheses: (H1) the unified biomechanics model preserves the fidelity of the local ascent and descent fits and (H2) the proposed unified controller framework preserves the principal slope-dependent trends in healthy individuals’ biomechanics and interpolates these trends to intermediate conditions absent from the reference data. 
+
+II. MODE-UNIFIED LOCOMOTION BIOMECHANICS 
+
+This section develops continuous lower-limb biomechanical models parameterized by terrain slope and gait phase. First, partitioned polynomial models are constructed separately for the ascending and descending terrain domains from open-source locomotion datasets [1], [8]. These locally accurate representations are subsequently unified using radial basis function (RBF) interpolation, a well-established approach for constructing continuous multivariate functions from discrete observations [31], [32]. The resulting biomechanics surfaces 3This work has been submitted to the IEEE for possible publication. Copyright may be transferred without notice, after which this version may no longer be accessible. 
+
+serve as the foundation for the impedance parameterization framework in Section III. 
+
+A. Locomotion Biomechanics Dataset 
+
+We utilized knee and ankle kinematics (joint angles) and kinetics (joint moments) collected from healthy individuals [1], [8]. As illustrated in Fig. 1A, locomotion conditions consisted of level walking (LW, 0 °), ramp ascent/descent (RA / RD, ± 5 °, 7 °, 9 °, and 11 °), and stair ascent/descent (SA / SD, ± 20 °, 24 °, 30 °, 35 °). Four ramp and four stair conditions were selected to balance data distribution across locomotion modes. All kinematic and kinetic trajectories were segmented into stance and swing phases and phase-normalized to 101 samples. The LW trials were selected from the slow-speed condition, up to 0.6 m/s. 
+
+B. Determining the Polynomial Fitting Domain 
+
+Several polynomial fitting configurations were investigated to determine an appropriate polynomial fitting domain prior to model unification (Fig. 2A). These included partitioned polynomial models for full ascent and descent, leave-ramp-out and leave-stair-out partitioning strategies, and a single global polynomial model spanning the entire terrain domain as below. 
+
+(i) Full ascent partition: LW, RA, and SA 
+
+(ii) Full descent partition: LW, RD, and SD 
+
+(iii) Leave-all-ramps-out partition: LW (0 °) and either SA or SD (± 20 °, 24 °, 30 °, 35 °) 
+
+(iv) Leave-all-stairs-out partition: LW (0 °) and either RA or RD (± 5 °, 7 °, 9 °, 11 °) 
+
+(v) Global Polynomial: LW, RA, RD, SA, and SD 
+
+Joint biomechanics 𝐵𝐵 �𝐽𝐽 ,𝐷𝐷 (𝑠𝑠 , 𝑝𝑝 ) were modeled as two-dimensional fourth-order polynomial functions of terrain slope and gait phase 
+
+𝐵𝐵 �𝐽𝐽 ,𝐷𝐷 (𝑠𝑠 , 𝑝𝑝 ) = �� � 𝑐𝑐𝑙𝑙 ,𝑚𝑚 𝑠𝑠 𝑙𝑙 𝑝𝑝 𝑚𝑚 4−𝑙𝑙 𝑚𝑚=0 4𝑙𝑙=0 �𝐽𝐽 ,𝐷𝐷 
+
+(1) 
+
+𝑠𝑠 ∈ 𝑆𝑆𝑠𝑠 ⊆ 𝑆𝑆𝑈𝑈 = { −35, −34, … − 1, 0, 1, … , 34, 35}  (2) 
+
+𝑝𝑝 ∈ 𝑃𝑃 = { 𝑝𝑝1 , 𝑝𝑝2 , … , 𝑝𝑝101 } = {0, 0.01,0.02, … ,0.99,1}  (3) 
+
+where 𝐽𝐽 and 𝐷𝐷 denote the target joint (knee or ankle) and the type of dynamics (angle or moment), respectively. The slope subset 𝑆𝑆𝑠𝑠 
+
+was defined according to configurations (i)-(v); for example, {0, 5, 7, 9, 11} for (iii) leave-all-ramps-out partition (ascending) or {-35, -30, -24, -20, 0} for (iv) leave-all-stairs-out partition (descending). The coefficients 𝑐𝑐𝑙𝑙 ,𝑚𝑚 were estimated for each configuration using unconstrained linear least-squares (LSQ) regression, using the MATLAB R2024b Curve Fitting Toolbox. Based on the reconstruction performance summarized in Section II-D, the configurations (i) and (ii), the full ascent and full descent partitions, were selected as the local polynomial models for subsequent RBF unification. Configurations (iii) and (iv) were retained to evaluate cross-domain extrapolation, whereas configuration (v) served as a global polynomial benchmark. 
+
+C. RBF-Interpolation for Mode Unification 
+
+The selected models from configurations (i) and (ii) were unified using Gaussian RBF interpolation [31], leveraging the 
+
+𝐶𝐶 ∞-continuity of the Gaussian kernel to provide a smooth transition between the two terrain partitions. This formulation reconciles trajectory mismatches at the shared level-walking condition while preserving the local biomechanical characteristics of the ascent and descent partitions. 
+
+Let 𝑓𝑓 𝑎𝑎 (𝑠𝑠𝑎𝑎 , 𝑝𝑝 ), 𝑓𝑓 𝑑𝑑 (𝑠𝑠𝑑𝑑 , 𝑝𝑝 ) ∈ ℝ 36 ×101 denote the local ascent and descent models obtained from Section II-B. Samples generated from both models over the full slope-phase domain were      
+
+> Fig. 2. Determining the polynomial fitting domain. (A) Leave-all-stairs-out fitting fails to reconstruct stair biomechanics, whereas leave-all-ramps-out fitting exhibits moderate degradation, with lower accuracy than full ascent / descent fitting (i and ii). As a result, configurations (i) and (ii) were selected as final candidates. (B) Representative continuous biomechanics surfaces obtained after RBF unification of the partitioned polynomial models. The red dotted lines represent the locomotion data from healthy individuals, and the surfaces represent models across various fitting configurations.
+
+4This work has been submitted to the IEEE for possible publication. Copyright may be transferred without notice, after which this version may no longer be accessible. 
+
+treated as observations in a two-dimensional space defined by terrain slopes 𝑠𝑠𝑎𝑎 ∈ {35, 34, … , 0} and 𝑠𝑠𝑑𝑑 ∈ {0, −1, … , −35} ,and gait phase 𝑝𝑝 . Then, the stacked representation of the local model can be defined as 
+
+𝑀𝑀 = �𝑓𝑓 𝑎𝑎 𝑓𝑓 𝑑𝑑 � ∈ ℝ 72 ×101  (4) 
+
+The stacked representation contains duplicated coordinates at 
+
+𝑠𝑠 = 0 ° , corresponding to the shared level-walking condition from both the ascent and descent models. The objective of RBF interpolation is to derive a unified representation of biomechanics 𝑓𝑓 𝑈𝑈 (𝑠𝑠𝑈𝑈 , 𝑝𝑝 ) ∈ ℝ 71 ×101 for each joint in the slope-phase domain, where 𝑠𝑠𝑈𝑈 ∈ 𝑆𝑆𝑈𝑈 . Let 𝑀𝑀𝑣𝑣 ∈ ℝ (72 ×101 )× 1 denote the vectorized form of 𝑀𝑀 . A Euclidean coordinate matrix 𝑋𝑋 ∈ ℝ(72 ×101 )× 2 containing the slope-phase pair is defined below, over the same domain as the stacked sample matrix 𝑀𝑀𝑣𝑣 .
+
+𝑥𝑥𝑖𝑖 = �𝑠𝑠𝑖𝑖 𝑝𝑝𝑖𝑖 � ∈ ℝ 2
+
+𝑋𝑋 =
+
+⎣⎢⎢⎡ 𝑥𝑥1 𝑇𝑇 𝑥𝑥2 𝑇𝑇 ⋮𝑥𝑥7272 𝑇𝑇 ⎦⎥⎥⎤
+
+=
+
+⎣⎢⎢⎢⎢⎢⎡ +35 +35 
+
+⋮
+
++35 +34 
+
+⋮
+
+−35 00.01 
+
+⋮
+
+10
+
+⋮
+
+1 ⎦⎥⎥⎥⎥⎥⎤∈ ℝ 7272 ×2 (5) 
+
+Then the Gaussian kernel matrix 𝜓𝜓 ∈ ℝ 7272 ×7272 is defined as 
+
+𝜓𝜓𝑖𝑖 ,𝑗𝑗 = exp �−�𝑥𝑥𝑖𝑖 − 𝑥𝑥𝑗𝑗� 22� (6) 
+
+Using (6), the unified biomechanics model is represented as a weighted sum of Gaussian basis functions centered at each slope-phase coordinate. 
+
+𝑓𝑓 (𝑥𝑥 ) = � 𝑎𝑎𝑖𝑖 ∙ exp( −|𝑥𝑥 − 𝑥𝑥𝑖𝑖 |22)
+
+> 7272 𝑖𝑖=1
+
+(7) 
+
+Let 𝐴𝐴 = [ 𝑎𝑎1 𝑎𝑎2 … 𝑎𝑎7272 ]𝑇𝑇 ∈ ℝ 7272 ×1 denote the RBF coefficient vector. The components of 𝐴𝐴 were determined by reconstructing the stacked biomechanics samples 𝑀𝑀𝑣𝑣 from the kernel representation. Evaluating the above expression in (6) and (7) at all sample coordinates yields the kernel system. 
+
+𝑀𝑀𝑣𝑣 = 𝜓𝜓 𝐴𝐴  (8) 
+
+Note that the Gaussian kernel matrix 𝜓𝜓 contains duplicate level-walking coordinate pairs from both the ascent and descent models. Consequently, 𝜓𝜓 contains duplicated rows and columns, resulting in a singular or numerically ill-conditioned system. Hence, a diagonal regularization term with a small number 𝜀𝜀 was introduced to ensure a stable and unique solution, yielding 
+
+𝐴𝐴 = ( 𝜓𝜓 + 𝜀𝜀𝜀𝜀 )−1 𝑀𝑀𝑣𝑣  (9) 
+
+To obtain a mode-unified biomechanics surface, the RBF representation was subsequently evaluated on a unified slope-phase domain defined by equations (2) and (3), without duplication. Similar to (5), a Euclidean coordinate matrix 𝑋𝑋𝑈𝑈 ∈ ℝ7171 ×2 corresponding to the unified slope-phase domain consisting of 𝑆𝑆𝑈𝑈 and 𝑃𝑃 can be defined. 
+
+𝑥𝑥𝑈𝑈 𝑖𝑖 = �𝑠𝑠𝑈𝑈𝑖𝑖 𝑝𝑝𝑖𝑖 � ∈ ℝ 2
+
+𝑋𝑋𝑈𝑈 = �𝑥𝑥𝑈𝑈1 𝑇𝑇 ⋮𝑥𝑥𝑈𝑈 7171 𝑇𝑇 �
+
+(10) 
+
+Then an interpolation kernel matrix 𝜓𝜓𝑈𝑈 was computed between the unified and the original sample coordinates 𝑋𝑋𝑈𝑈 
+
+and 𝑋𝑋 as 
+
+𝜓𝜓𝑈𝑈 𝑖𝑖 ,𝑗𝑗 = exp �−�𝑥𝑥𝑈𝑈 𝑖𝑖 − 𝑥𝑥𝑗𝑗� 22� (11) 
+
+where 𝑥𝑥𝑈𝑈 𝑖𝑖 and 𝑥𝑥𝑗𝑗 denote the i-th and j-th coordinate of 𝑋𝑋𝑈𝑈 and 𝑋𝑋 ,respectively. Since the unified slope-phase domain contains 7171 query points and the original domain contains 7272 samples, each row of 𝜓𝜓𝑈𝑈 corresponds to a query coordinate in the unified slope-phase domain, while each column corresponds to an original sample coordinate used in equation (8). Therefore, 
+
+𝜓𝜓𝑈𝑈 ∈ ℝ 7171 ×7272 . The samples in the slope-phase domain were then obtained by evaluating the RBF representation using the coefficient vector 𝐴𝐴 ∈ ℝ 7272 ×1,
+
+𝑀𝑀𝑈𝑈 = 𝜓𝜓𝑈𝑈𝐴𝐴  (12) 
+
+Finally, a unified model 𝑀𝑀𝑈𝑈 ∈ ℝ 7171 ×1 was reshaped into the slope-phase representation 𝑓𝑓 𝑈𝑈 (𝑠𝑠 , 𝑝𝑝 ) ∈ ℝ 71 ×101 , yielding a          
+
+> Fig. 3. Validation of the unified biomechanics. Proposed RBF-unified models were compared with the partitioned polynomial and global polynomials for (A) kinematics and (B) kinetics. The RBF-unified representation maintained the reconstruction accuracy of the partitioned polynomial models while consistently outperforming the global polynomial representation. Bars represent the mean ± 1 SD of the MAE across all evaluated terrain slope conditions. Statistical significance was evaluated using paired t-test ( *𝑝𝑝 < 0.05 ,** 𝑝𝑝 < 0.01 ,*** 𝑝𝑝 <0.001 ).
+
+5This work has been submitted to the IEEE for possible publication. Copyright may be transferred without notice, after which this version may no longer be accessible. 
+
+continuous and mode-unified biomechanics surface over the full slope domain, with no duplicated coordinate pair. 
+
+D. Validation of the Unified Biomechanics Representation 
+
+As illustrated in Fig. 2A, the leave-ramp-out models exhibited moderate degradation but retained reasonable reconstruction of the omitted ramp conditions, whereas the leave-stair-out models failed to extrapolate to stair locomotion. These leave-one-domain analyses were conducted to characterize cross-domain extrapolation rather than to construct the final unified model. The full-ascent and full-descent models, configurations (i) and (ii), achieved the best reconstruction performance across the evaluated configurations and were therefore selected for RBF unification, as described in Section II-C. 
+
+The quantitative comparison focused on the partitioned polynomial, global polynomial, and proposed RBF-unified models using polynomials from (i) and (ii). As shown in Fig. 3, the RBF-unified models consistently achieved lower mean-absolute errors (MAEs) than the global polynomials, while preserving the accuracy of the partitioned polynomials. The only significant difference between the RBF-unified and partitioned models occurred for the ankle swing angle during descent locomotion, where the RBF-unified model achieved a lower MAE. 
+
+The resulting RBF-unified models are shown in Fig. 2B, demonstrating continuous slope-phase trajectories that closely reproduce the underlying AB biomechanics. These unified biomechanics subsequently serve as the foundation for the impedance parameterization in Section III. 
+
+III. MODE-UNIFIED IMPEDANCE PARAMETERS 
+
+The RBF-unified biomechanics models derived in Section II 
+
+provide continuous representations of joint kinematics and 
+
+kinetics over terrain slope and gait phase. This section transforms 
+
+these biomechanical surfaces into a continuous impedance 
+
+parameter space for mode-unified prosthesis control. Consistent 
+
+with the proposed FSM framework, stance and swing phase 
+
+parameters were identified separately. The following sections 
+
+focus on the stance phase parameterization, which governs the 
+
+primary load-bearing dynamics of locomotion. 
+
+At each terrain slope, 𝐾𝐾 , 𝐵𝐵 , and 𝜃𝜃𝑒𝑒𝑒𝑒 were defined according 
+
+to the impedance relationship between joint moment 𝜏𝜏 , joint 
+
+angle 𝜃𝜃 , angular velocity 𝜃𝜃̇ ,
+
+𝜏𝜏 = −𝐾𝐾�𝜃𝜃 − 𝜃𝜃𝑒𝑒𝑒𝑒� − 𝐵𝐵𝜃𝜃̇  (13) 
+
+where 𝐾𝐾 , 𝐵𝐵 , and 𝜃𝜃𝑒𝑒𝑒𝑒 denote stiffness, damping, and 
+
+equilibrium angle, respectively. The unified biomechanics 
+
+models provide the target kinematic and kinetic behaviors to 
+
+be reproduced by the controller. However, the impedance 
+
+parameters were not directly identified from the 
+
+biomechanical models. Instead, additional design constraints 
+
+were incorporated during the parameterization process to 
+
+ensure compatibility with the unified FSM framework. 
+
+A. Biomechanically Inspired Equilibrium Angle Trajectory 
+
+Previous studies identified stiffness, damping, and equilibrium 
+
+angle simultaneously through optimization frameworks [6], [7]. 
+
+In contrast, the proposed controller prescribes biomechanically 
+
+inspired equilibrium angle trajectories and subsequently identifies 
+
+stiffness and damping through constrained optimization. This 
+
+design follows established bio-inspired prosthesis controllers 
+
+[19], [22], [23], [25] while extending their parameterization to 
+
+a continuous terrain slope domain. 
+
+To construct the unified equilibrium angle trajectories, a 
+
+slope-dependent support angle ( 𝜃𝜃𝑠𝑠𝑠𝑠𝑠𝑠 ) was extracted from the 
+
+stance phase angle-moment relationship (Fig. 4A). The 𝜃𝜃𝑠𝑠𝑠𝑠𝑠𝑠 is 
+
+defined as the joint angle corresponding to the mid-to-late 
+
+stance minimum of the biological joint moment profile. Two 
+
+representative cases are observed. In Case I, the biological 
+
+moment does not exhibit a late stance (LS) moment peak, and 
+
+the mid-to-late stance minimum occurs after the primary 
+
+stance peak. This behavior is typically observed in the knee 
+
+during level walking and ascending locomotion. In Case II, the 
+
+biological moment exhibits a LS moment peak, and the 
+
+minimum occurs before the LS peak, separating the weight-
+
+acceptance and support phase. This pattern is observed in the 
+
+knee during descending locomotion and in the ankle across all 
+
+evaluated environments. Based on these observations, the 
+
+proposed controller uses 𝜃𝜃𝑠𝑠𝑠𝑠𝑠𝑠 as a common biomechanical              
+
+> Fig. 4. Selection of the support equilibrium angle and resulting slope-dependent trajectories. (A) The support angle 𝜃𝜃𝑠𝑠𝑠𝑠𝑠𝑠 is selected as the joint angle corresponding to the mid-to-late stance minimum of the biological joint moment. For Case I where there is no LS moment peak, this minimum occurs after the stance phase peak. On the other hand, for Case II with LS moment peak, the minimum takes place before the LS moment peak. (B) Continuous
+> 𝜃𝜃𝑠𝑠𝑠𝑠𝑠𝑠 trajectories across terrain slope. The ankle support angle is limited to 10 ° dorsiflexion to accommodate prosthesis constraints.
+
+6This work has been submitted to the IEEE for possible publication. Copyright may be transferred without notice, after which this version may no longer be accessible. 
+
+reference to initiate the support phase under both cases. In 
+
+Case II specifically, rather than reproducing the initial weight-
+
+acceptance peak, the controller is designed to reproduce the 
+
+support-related moment behavior following 𝜃𝜃𝑠𝑠𝑠𝑠𝑠𝑠 . This is 
+
+because accurately reproducing both moment peaks would 
+
+require additional modeling complexity [7], [23], [33]. 
+
+Using 𝜃𝜃𝑠𝑠𝑠𝑠𝑠𝑠 as the primary biomechanical reference, the 
+
+stance equilibrium angle trajectory was organized into three 
+
+functional regions (Fig. 5A). During the weight acceptance 
+
+(R1), 𝜃𝜃𝑒𝑒𝑒𝑒 transitions from the heel-contact angle ( 𝜃𝜃𝐻𝐻𝐻𝐻 ) toward 
+
+𝜃𝜃𝑠𝑠𝑠𝑠𝑠𝑠 near the 25% stance, which corresponds to the first peak 
+
+of the vertical ground reaction force (vGRF). During the 
+
+single support (R2), 𝜃𝜃𝑒𝑒𝑒𝑒 remains at 𝜃𝜃𝑠𝑠𝑠𝑠𝑠𝑠 so that increasing 
+
+joint flexion produces support through impedance. Finally, 
+
+during the unloading (R3) around 75% stance, 𝜃𝜃𝑒𝑒𝑒𝑒 transitions 
+
+from 𝜃𝜃𝑠𝑠𝑠𝑠𝑠𝑠 toward the toe-off angle ( 𝜃𝜃𝑇𝑇𝑇𝑇 ) in preparation for 
+
+swing. 
+
+For the knee, ascending locomotion directly follows the 
+
+three-region structure described above. During descending 
+
+locomotion, however, the transition in R1 is realized using a 
+
+P-value strategy similar to previous prosthesis controllers [25], 
+
+𝜃𝜃𝑒𝑒𝑒𝑒 = 𝜃𝜃 𝑃𝑃 (𝑠𝑠 )
+
+𝑃𝑃 (𝑠𝑠 ) = �0.70 − 0.29 35  𝑠𝑠 , 𝑠𝑠 ≤ 00, 𝑠𝑠 > 0 
+
+(14) 
+
+As the descent becomes steeper, increasing 𝑃𝑃 (𝑠𝑠 ) causes 𝜃𝜃𝑒𝑒𝑒𝑒 to 
+
+follow the measured knee angle more closely during R1, 
+
+permitting greater controlled knee flexion before converging to 
+
+𝜃𝜃𝑠𝑠𝑠𝑠𝑠𝑠 . Once 𝜃𝜃𝑒𝑒𝑒𝑒 reaches 𝜃𝜃𝑠𝑠𝑠𝑠𝑠𝑠 , it remains fixed throughout R2 so 
+
+that additional knee flexion generates higher torque under the 
+
+impedance relationship. During R3, 𝜃𝜃𝑒𝑒𝑒𝑒 transitions toward 𝜃𝜃𝑇𝑇𝑇𝑇 
+
+for swing. 
+
+The ankle follows the same three-region framework but 
+
+incorporates two prosthesis-specific modifications. First, 𝜃𝜃𝑠𝑠𝑠𝑠𝑠𝑠 
+
+was bounded to a maximum dorsiflexion angle of 10 ° (Fig. 
+
+4B) to accommodate the prosthetic ankle range of motion (± 
+
+30 °) and preserve sufficient plantarflexion torque. This limit 
+
+also accounts for the reduced forward progression commonly 
+
+observed by prosthesis users during stair ascent [24], [34]. 
+
+Consequently, the bounded 𝜃𝜃𝑠𝑠𝑠𝑠𝑠𝑠 preserves the slope-
+
+dependent trend while remaining suitable for prosthesis 
+
+control. During descending locomotion, the transition in R1 is 
+
+similarly implemented using the P-value strategy, 
+
+𝜃𝜃𝑒𝑒𝑒𝑒 = �𝜃𝜃 − 𝜃𝜃𝑠𝑠𝑠𝑠𝑠𝑠�𝑃𝑃 + 𝜃𝜃𝑠𝑠𝑠𝑠𝑠𝑠  (15) 
+
+𝑃𝑃 = 1.1 was selected, causing 𝜃𝜃𝑒𝑒𝑒𝑒 to follow the measured 
+
+ankle angle while converging toward 𝜃𝜃𝑠𝑠𝑠𝑠𝑠𝑠 , thereby providing 
+
+controlled plantarflexion yielding during weight acceptance. 
+
+Once 𝜃𝜃𝑒𝑒𝑒𝑒 reaches 𝜃𝜃𝑠𝑠𝑠𝑠𝑠𝑠 , it remains fixed throughout R2, 
+
+allowing the ankle to provide stable support during single 
+
+support. During R3, 𝜃𝜃𝑒𝑒𝑒𝑒 transitions from 𝜃𝜃𝑠𝑠𝑠𝑠𝑠𝑠 toward 𝜃𝜃𝑇𝑇𝑇𝑇 to 
+
+facilitate prosthetic push-off. Applying the above design 
+
+principles across the continuous terrain slope domain yields 
+
+the unified equilibrium angle trajectories for the stance phase 
+
+(𝜃𝜃𝑒𝑒𝑒𝑒 (𝑠𝑠 , 𝑝𝑝 )) shown in Fig. 5B. 
+
+For the swing phase, equilibrium angles were defined from two 
+
+reference points of the RBF-unified kinematic models. The swing 
+
+flexion state used the maximum flexion angle to promote 
+
+sufficient limb shortening and ground clearance, whereas the 
+
+swing extension state used the heel-contact angle (𝜃𝜃𝐻𝐻𝐻𝐻 ) to           
+
+> Fig. 5. Three-region impedance design strategy. (A) Schematic construction of the stance equilibrium angle trajectory. (B) Resulting continuous equilibrium angle surfaces across terrain slope and stance phase. (C) Flowchart of LSQ-optimization for Kand B.
+
+7This work has been submitted to the IEEE for possible publication. Copyright may be transferred without notice, after which this version may no longer be accessible. 
+
+prepare the limb for stable ground contact. Extending these 
+
+references across the continuous terrain slope domain yielded 
+
+unified swing phase equilibrium trajectories consistent with the 
+
+stance phase design philosophy. 
+
+B. Stance Phase Parameterization 
+
+The stance-phase stiffness and damping trajectories were 
+
+parameterized using the same three-region structure introduced 
+
+for the equilibrium angle (Fig. 5A). Both parameters increase 
+
+during weight acceptance (R1), remain approximately constant 
+
+throughout single support (R2), and remain constant or decrease 
+
+during unloading (R3). This structure translates the 
+
+biomechanical design principles into continuous impedance 
+
+trajectories compatible with the proposed unified FSM 
+
+framework. 
+
+To obtain compact impedance representations suitable for 
+
+optimization and real-time implementation, both stiffness ( K) and 
+
+damping ( B) were represented as fourth-order polynomials of 
+
+normalized stance phase for each terrain slope ( s), 
+
+𝐾𝐾 (𝑠𝑠 , 𝑝𝑝 ) = � 𝑘𝑘𝑠𝑠𝑖𝑖 𝑝𝑝 𝑖𝑖 4𝑖𝑖=0 
+
+, 𝐵𝐵 (𝑠𝑠 , 𝑝𝑝 ) = � 𝑏𝑏𝑠𝑠𝑖𝑖 𝑝𝑝 𝑖𝑖 4𝑖𝑖=0 
+
+(16) 
+
+Substituting (16) into the impedance relationship (13) yields a 
+
+linear least-squares problem, 
+
+min  
+
+> 𝐱𝐱
+
+|𝜏𝜏 − 𝑪𝑪𝐱𝐱 |22 (17) 
+
+where 𝐱𝐱 = �𝑘𝑘𝑠𝑠𝑜𝑜 … 𝑘𝑘𝑠𝑠4 𝑏𝑏𝑠𝑠𝑜𝑜 … 𝑏𝑏𝑠𝑠4 �T ∈ ℝ 10 ×1, 𝑪𝑪 ∈ ℝ 101 ×10 is 
+
+constructed from the RBF-unified joint kinematics and 
+
+equilibrium angle trajectories, and 𝜏𝜏 is the RBF-unified 
+
+moment. The j-th row 𝑪𝑪𝑗𝑗 ,: ∈ ℝ 1×10 corresponds to the impedance 
+
+equation evaluated at a stance phase sample 𝑝𝑝𝑗𝑗 ,
+
+𝑪𝑪𝑗𝑗 ,: = �∆𝜃𝜃𝑗𝑗𝑝𝑝𝑗𝑗 0 … ∆𝜃𝜃𝑗𝑗𝑝𝑝𝑗𝑗 4 𝜃𝜃̇�𝑠𝑠 , 𝑝𝑝𝑗𝑗�𝑝𝑝𝑗𝑗 0 … 𝜃𝜃̇�𝑠𝑠 , 𝑝𝑝𝑗𝑗�𝑝𝑝𝑗𝑗 4� (18) 
+
+𝑗𝑗 ∈ {0, 1, … , 100} 
+
+where ∆𝜃𝜃𝑗𝑗 = 𝜃𝜃�𝑠𝑠 , 𝑝𝑝𝑗𝑗� − 𝜃𝜃𝑒𝑒𝑒𝑒�𝑠𝑠 , 𝑝𝑝𝑗𝑗� and 𝜃𝜃̇�𝑠𝑠 , 𝑝𝑝𝑗𝑗� is RBF-unified 
+
+kinematics derived in Section II. 
+
+The overall optimization procedure is summarized in Fig. 5C. 
+
+First, the unified biomechanics �𝜏𝜏 , 𝜃𝜃 , 𝜃𝜃̇� together with the 
+
+equilibrium angle trajectories are separated into early-stance (ES) 
+
+and late-stance (LS) regions. ES governs the loading response 
+
+from heel-contact to p = 0.49, whereas LS is initialized from the 
+
+terminal ES solution and governs the subsequent support and 
+
+unloading phases. The corresponding parameters are then 
+
+identified sequentially through constrained least-squares 
+
+optimization before being combined into continuous stiffness and 
+
+damping surfaces over the terrain slope domain. 
+
+Increasing terrain steepness requires greater joint support 
+
+during ascent and greater energy dissipation during descent. 
+
+Therefore, slope-dependent upper envelopes, 𝐾𝐾max (𝑠𝑠 )and 
+
+𝐵𝐵max (𝑠𝑠 ), were defined using arctangent functions connecting 
+
+experimentally validated impedance parameters from 35° stair-
+
+ascent and stair-descent controllers [22], [23]. Constant lower 
+
+bounds, 𝐾𝐾min and 𝐵𝐵min , were selected as empirical safety limits, 
+
+yielding 
+
+𝐾𝐾min ≤ 𝐾𝐾 (𝑠𝑠 , 𝑝𝑝 ) ≤ 𝐾𝐾max (𝑠𝑠 )
+
+𝐵𝐵min ≤ 𝐵𝐵 (𝑠𝑠 , 𝑝𝑝 ) ≤ 𝐵𝐵max (𝑠𝑠 ) (19) 
+
+To facilitate implementation within the unified FSM, the 
+
+optimization was solved separately for ES and LS. 
+
+Equality constraints were set to anchor the impedance 
+
+trajectories at key transition points, 
+
+𝑨𝑨eq𝐱𝐱 = 𝜷𝜷eq  (20) 
+
+ES begins with the minimum impedance values at heel-contact, whereas LS is initialized using the terminal ES solution and constrained to preserve the support-level impedance until the onset of unloading. Therefore, the impedances at the heel-contact were constrained by           
+
+> Fig. 6. Continuous impedance parameterization. (A) Identified stiffness and (B) damping surfaces. Green dashed curves denote slope-dependent upper bounds 𝐾𝐾𝑚𝑚 𝑎𝑎 𝑚𝑚 (𝑠𝑠 )and 𝐵𝐵𝑚𝑚 𝑎𝑎 𝑚𝑚 (𝑠𝑠 ).(C) Moments reconstructed from the impedance model closely match the AB reference (red dotted lines).
+
+8This work has been submitted to the IEEE for possible publication. Copyright may be transferred without notice, after which this version may no longer be accessible. 
+
+𝑨𝑨eq ES = �𝜙𝜙 𝑇𝑇 (0) 𝟎𝟎 𝟎𝟎 𝜙𝜙 𝑇𝑇 (0) �, 𝜷𝜷eq ES = �𝐾𝐾min 𝐵𝐵min � (21) 
+
+where 𝜙𝜙 (𝑝𝑝 ) = [1 𝑝𝑝 𝑝𝑝 2 𝑝𝑝 3 𝑝𝑝 4]𝑇𝑇 . Subsequently, the LS 
+
+optimization marked the terminal ES values on p = 0.50 and 0.75. 
+
+𝑨𝑨eq LS =
+
+⎣⎢⎢⎢⎡𝜙𝜙 𝑇𝑇 (0.50) 𝟎𝟎 𝜙𝜙 𝑇𝑇 (0.75) 𝟎𝟎 𝟎𝟎 𝜙𝜙 𝑇𝑇 (0.50) 
+
+𝟎𝟎 𝜙𝜙 𝑇𝑇 (0.75) ⎦⎥⎥⎥⎤
+
+, 𝜷𝜷eq LS = �𝐾𝐾ES (0.49) 
+
+𝐾𝐾ES (0.49) 
+
+𝐵𝐵ES (0.49) 
+
+𝐵𝐵ES (0.49) 
+
+� (22) 
+
+And the finalized equality constraints were obtained as 
+
+𝑨𝑨eq = �𝑨𝑨eq ES 𝑨𝑨eq LS �, 𝜷𝜷eq = �𝜷𝜷eq ES 𝜷𝜷eq LS � (23) 
+
+The remaining portions of the optimization were formulated as 
+
+inequality constraints with bound and shape components, 
+
+𝑨𝑨ineq𝐱𝐱 ≤ 𝜷𝜷ineq  (24) 
+
+𝑨𝑨ineq =
+
+⎣⎢⎢⎢⎡𝑨𝑨bound ES 𝑨𝑨bound LS 𝑨𝑨shape ES 𝑨𝑨shape LS ⎦⎥⎥⎥⎤
+
+, 𝜷𝜷ineq =
+
+⎣⎢⎢⎢⎡𝜷𝜷bound ES 𝜷𝜷bound LS 𝜷𝜷shape ES 𝜷𝜷shape LS ⎦⎥⎥⎥⎤
+
+(25) 
+
+The bound constraints enforce the admissible stiffness and 
+
+damping envelopes in (19) throughout the corresponding 
+
+optimization interval. Defining 𝒫𝒫𝐸𝐸𝐸𝐸 = [ 𝜙𝜙 (0) … 𝜙𝜙 (0.49)] 𝑇𝑇 ,
+
+𝒫𝒫𝐿𝐿 𝐸𝐸  = [ 𝜙𝜙 (0.50) … 𝜙𝜙 (1)] 𝑇𝑇 , and 𝒍𝒍𝑗𝑗 = [1 … 1] 𝑇𝑇 ∈ ℝ 𝑗𝑗 ×1 , the 
+
+corresponding bound matrices are 
+
+𝑨𝑨bound ES = �𝒫𝒫ES 𝟎𝟎 −𝒫𝒫ES 𝟎𝟎 𝟎𝟎 𝒫𝒫ES 𝟎𝟎 −𝒫𝒫ES �, 𝜷𝜷bound ES =
+
+⎣⎢⎢⎡𝐾𝐾max (𝑠𝑠 )𝒍𝒍50 −𝐾𝐾min𝒍𝒍50 𝐵𝐵max (𝑠𝑠 )𝒍𝒍50 −𝐵𝐵min𝒍𝒍50 ⎦ ⎥⎥⎤
+
+(26) 
+
+𝑨𝑨bound LS = �𝒫𝒫LS 𝟎𝟎 −𝒫𝒫LS 𝟎𝟎 𝟎𝟎 𝒫𝒫LS 𝟎𝟎 −𝒫𝒫LS �, 𝜷𝜷bound LS =
+
+⎣⎢⎢⎡𝐾𝐾𝐸𝐸𝐸𝐸 (0.49) 𝒍𝒍51 −𝐾𝐾min𝒍𝒍51 𝐵𝐵𝐸𝐸𝐸𝐸 (0.49) 𝒍𝒍51 −𝐵𝐵min𝒍𝒍51 ⎦⎥⎥⎤
+
+(27) 
+
+These bound constraints prevent the LS solution from exceeding 
+
+the support-level impedance established during ES and preserves 
+
+the intended plateau-to-unloading structure. 
+
+The shape constraints are then constructed from the derivative 
+
+polynomial basis 𝜙𝜙̇ (𝑝𝑝 ) = [0 1 2𝑝𝑝 3𝑝𝑝 2 4𝑝𝑝 3] to regulate 
+
+the impedance progression within the envelopes. Since partial 
+
+derivatives of 𝐾𝐾 (𝑠𝑠 , 𝑝𝑝 ) and 𝐵𝐵 (𝑠𝑠 , 𝑝𝑝 ) are represented as 
+
+∂𝐾𝐾 (𝑠𝑠 , 𝑝𝑝 )
+
+∂𝑝𝑝  = � 𝑖𝑖𝑘𝑘𝑠𝑠𝑖𝑖 𝑝𝑝 𝑖𝑖−1 4𝑖𝑖=1 
+
+, ∂𝐵𝐵 (𝑠𝑠 , 𝑝𝑝 )
+
+∂𝑝𝑝  = � 𝑖𝑖𝑏𝑏𝑠𝑠 𝑖𝑖 𝑝𝑝 𝑖𝑖−1 4𝑖𝑖=1 
+
+(28) 
+
+Defining derivative terms 𝒫𝒫̇𝐸𝐸 𝐸𝐸 1 = �𝜙𝜙̇ (0) … 𝜙𝜙̇ (0.24) �𝑇𝑇 , 𝒫𝒫̇𝐸𝐸 𝐸𝐸 2 =
+
+�𝜙𝜙̇ (0.25) … 𝜙𝜙̇ (0.49) �𝑇𝑇 , 𝒫𝒫̇𝐿𝐿 𝐸𝐸 1 = �𝜙𝜙̇ (0.50) … 𝜙𝜙̇ (0.74) �𝑇𝑇 , and 
+
+𝒫𝒫̇𝐿𝐿 𝐸𝐸 2 = �𝜙𝜙̇ (0.75) … 𝜙𝜙̇ (1) �𝑇𝑇 yields 
+
+𝑨𝑨shape ES =
+
+⎣⎢⎢⎢⎢⎢⎢⎡−𝒫𝒫̇ES1 𝟎𝟎 𝟎𝟎 −𝒫𝒫̇ES1 𝒫𝒫̇ES2 𝟎𝟎 −𝒫𝒫̇ES2 𝟎𝟎 𝟎𝟎 𝒫𝒫̇ES2 𝟎𝟎 −𝒫𝒫̇ES2 ⎦ ⎥⎥⎥⎥⎥⎥⎤
+
+, 𝜷𝜷shape ES =
+
+⎣⎢⎢⎢⎢⎢⎡𝜖𝜖𝐸𝐸 𝐸𝐸 1,𝐾𝐾 𝒍𝒍25 𝜖𝜖𝐸𝐸 𝐸𝐸 1,𝐵𝐵 𝒍𝒍25 𝜖𝜖𝐸𝐸 𝐸𝐸 2,𝐾𝐾 𝒍𝒍25 𝜖𝜖𝐸𝐸 𝐸𝐸 2,𝐾𝐾 𝒍𝒍25 𝜖𝜖𝐸𝐸 𝐸𝐸 2,𝐵𝐵 𝒍𝒍25 𝜖𝜖𝐸𝐸 𝐸𝐸 2,𝐵𝐵 𝒍𝒍25⎦ ⎥⎥⎥⎥⎥⎤
+
+(29) 
+
+𝑨𝑨shape LS =
+
+⎣⎢⎢⎢⎢⎢⎢⎡ 𝒫𝒫̇LS1 𝟎𝟎 −𝒫𝒫̇LS1 𝟎𝟎 𝟎𝟎 𝒫𝒫̇LS1 𝟎𝟎 −𝒫𝒫̇LS1 𝒫𝒫̇LS2 𝟎𝟎 𝟎𝟎 𝒫𝒫̇LS2⎦ ⎥⎥⎥⎥⎥⎥⎤
+
+, 𝜷𝜷shape LS =
+
+⎣⎢⎢⎢⎢⎢⎡𝜖𝜖𝐿𝐿 𝐸𝐸 1,𝐾𝐾 𝒍𝒍25 𝜖𝜖𝐿𝐿 𝐸𝐸 1,𝐾𝐾 𝒍𝒍25 𝜖𝜖𝐿𝐿 𝐸𝐸 1,𝐵𝐵 𝒍𝒍25 𝜖𝜖𝐿𝐿 𝐸𝐸 1,𝐵𝐵 𝒍𝒍25 𝜖𝜖𝐿𝐿 𝐸𝐸 2,𝐾𝐾 𝒍𝒍25 𝜖𝜖𝐿𝐿 𝐸𝐸 2,𝐵𝐵 𝒍𝒍25⎦ ⎥⎥⎥⎥⎥⎤
+
+(30) 
+
+Note that the small positive values 𝜖𝜖 for stiffness and damping 
+
+were 1e-5 and 1e-6, respectively. 
+
+The identified impedance parameters were finally validated by 
+
+reconstructing the target joint moments. Figure 6 shows the 
+
+resulting stiffness and damping surfaces together with the 
+
+reconstructed moments, while quantitative reconstruction 
+
+performance is summarized in Table I. For the LW and ascent 
+
+models, the reconstructed moments closely matched the target 
+
+AB trajectories, yielding a high overall squared Pearson 
+
+correlation coefficient 𝑟𝑟 2 values for both the knee (0.94 ± 0.04) 
+
+and ankle (0.76 ± 0.15). High ES and LS accuracies indicate that 
+
+the proposed parameterization preserves the primary 
+
+biomechanical characteristics of the target moments. The 
+
+descending models exhibited lower overall 𝑟𝑟 2 values, primarily 
+
+due to reduced ES reconstruction accuracy. This behavior was 
+
+expected because the proposed 𝜃𝜃𝑠𝑠𝑠𝑠𝑠𝑠 -based yielding strategy 
+
+intentionally does not reproduce the initial stance phase moment 
+
+peak during weight acceptance. As a result, the knee and ankle 
+
+ES models achieved 𝑟𝑟 2 values of 0.41 ± 0.37 and 0.26 ± 0.17, 
+
+respectively. In contrast, the LS models maintained substantially 
+
+higher accuracies (0.75 ± 0.21 for the knee and 0.91 ± 0.05 for the 
+
+ankle), demonstrating that the proposed parameterization 
+
+accurately reproduces the support and unloading dynamics 
+
+prioritized by the controller despite the reduction in early stance 
+
+reconstruction performance. 
+
+IV. EXPERIMENTAL METHODS 
+
+A. Prosthetic System with Bilateral Sensing 
+
+The proposed controller was implemented on the second-generation Open-Source Leg (OSL), a powered knee-ankle prosthesis platform developed by the University of Michigan 
+
+TABLE I. 
+
+𝑟𝑟 2 VALUES OF RECONSTRUCTED MOMENT MODELS 9This work has been submitted to the IEEE for possible publication. Copyright may be transferred without notice, after which this version may no longer be accessible. 
+
+[35], [36]. The system incorporated bilateral sensing from both limbs [11], [37], [38], onboard computation, and impedance-controlled actuation for continuous terrain-adaptive locomotion, as illustrated in Fig. 7A. 
+
+The prosthesis incorporated powered knee and ankle actuators (Actpack 4.1, Dephy, MA, USA) with embedded joint encoders and a six-axis load cell (M3564F, Sunrise Instrument, MI, USA) mounted between the knee and ankle modules. Four 9-axis IMUs (3DM-GX5-25, HBK, Darmstadt, Germany) were mounted on the prosthetic-side thigh and foot and the intact-side thigh and shank. The intact limb was additionally instrumented with an XSENSOR X4 module (X4, XSENSOR, Calgary, Canada), comprising a foot-mounted IMU and a pressure-sensitive insole. All onboard sensing and control algorithms were executed on a Jetson Orin Nano under ROS 2 Jazzy at 100 Hz. Motion capture measurements were synchronized with the ROS 2 data stream for post-hoc analysis. 
+
+B. Controller Implementation 
+
+Our mode-unified framework employs a four-state FSM that is shared across all locomotion modes (Fig. 7B), similar to other studies [18], [22], [23], [25]. Transition conditions (T1-T4) are also summarized in Fig. 7B. T1 was defined from bilateral limb progression, corresponding to the instant when the intact foot advances beyond the prosthetic foot during stance with prosthetic load beyond a threshold. The remaining transitions (T2-T4) followed conventional prosthesis control logic.            
+
+> Fig. 7. Experimental setups are illustrated. (A) The proposed wearable system incorporates prosthetic and intact side sensing system to capture both limb dynamics simultaneously. (B) The proposed FSM was enhanced with the relative geometry of limbs, enabling slope-independent T1 condition. (C) The relative geometry between both ankles 𝑑𝑑ℎ was computed through forward kinematics using the bilateral sensing system. (D) A representative time series of computed ankle geometry, impedance parameters, and the load cell signal are illustrated. Green arrows indicate computed ankle geometry values, where (+) stands for the intact ankle forward.
+
+10 This work has been submitted to the IEEE for possible publication. Copyright may be transferred without notice, after which this version may no longer be accessible. 
+
+The intact and prosthetic limb geometries were reconstructed from wearable IMU orientations and subject-specific segment lengths, as illustrated in Fig. 7C. Let 𝐩𝐩ℎ 𝐺𝐺 denote the hip joint position in the global frame. The segment direction vectors 𝑑𝑑𝑡𝑡 ,𝑖𝑖 ,
+
+𝑑𝑑𝑠𝑠 ,𝑖𝑖 , 𝑑𝑑𝑡𝑡 ,𝑠𝑠 , and 𝑑𝑑𝑠𝑠 ,𝑠𝑠 , together with the corresponding segment lengths 𝐿𝐿𝑡𝑡 ,𝑖𝑖 , 𝐿𝐿𝑠𝑠 ,𝑖𝑖 , 𝐿𝐿𝑡𝑡 ,𝑠𝑠 , and 𝐿𝐿𝑠𝑠 ,𝑠𝑠  were used to reconstruct the intact and prosthetic ankle positions 𝐩𝐩 𝐺𝐺 𝑎𝑎 ,𝑖𝑖 and 𝐩𝐩 𝐺𝐺 𝑎𝑎 ,𝑠𝑠  through the forward kinematic relationships, 
+
+𝐩𝐩 𝐺𝐺 𝑎𝑎 ,𝑖𝑖 = 𝐩𝐩 𝐺𝐺 ℎ + 𝐿𝐿𝑡𝑡 ,𝑖𝑖 𝑑𝑑𝑡𝑡 ,𝑖𝑖 + 𝐿𝐿𝑠𝑠 ,𝑖𝑖 𝑑𝑑𝑠𝑠 ,𝑖𝑖 
+
+𝐩𝐩 𝐺𝐺 𝑎𝑎 ,𝑠𝑠  = 𝐩𝐩 𝐺𝐺 ℎ + 𝐿𝐿𝑡𝑡 ,𝑠𝑠 𝑑𝑑𝑡𝑡 ,𝑠𝑠  + 𝐿𝐿𝑠𝑠 ,𝑠𝑠 𝑑𝑑𝑠𝑠 ,𝑠𝑠 
+
+(31) 
+
+The relative ankle position was then computed as 
+
+Δ𝐩𝐩𝑎𝑎 = 𝐩𝐩 𝐺𝐺 𝑎𝑎 ,𝑖𝑖 − 𝐩𝐩 𝐺𝐺 𝑎𝑎 ,𝑠𝑠  (32) 
+
+The prosthetic forward direction 𝐟𝐟𝑡𝑡 ,𝑠𝑠 ,ℎ was obtained by projecting the prosthetic thigh IMU local positive 𝑧𝑧 -axis onto the horizontal plane and normalizing the resulting vector. The limb-crossing metric was subsequently computed by projecting the inter-ankle vector onto this forward direction, 
+
+𝑑𝑑ℎ = Δ𝐩𝐩𝑎𝑎 𝑇𝑇 𝐟𝐟𝑡𝑡 ,𝑠𝑠 ,ℎ (33) 
+
+where 𝑑𝑑ℎ ≥ 0 indicate that the intact ankle has advanced beyond the prosthetic ankle in the prosthesis-referenced walking direction and was used to trigger the T1 transition (Fig. 7C). 
+
+Within the unified FSM, the slope-dependent impedance parameters derived in Section III were executed using the load-reactive impedance strategy proposed by Simon et al. [25]. During level walking and ascending locomotion, stance phase stiffness and damping were continuously interpolated according to the normalized prosthetic side vertical load, while the equilibrium angle followed the prescribed trajectory shown in Fig. 5B. During descending locomotion, the same load-reactive interpolation was applied to stiffness and damping, whereas the equilibrium angle followed the proportional yielding strategy described in Section III. During swing flexion and extension, constant stiffness and damping values were used, while the equilibrium angles were assigned to the slope-dependent maximum swing-flexion and heel-contact angles, respectively. To improve robustness against variations in user loading and gait-state transition timing, the normalized vertical load at the ES-to-LS transition was stored and subsequently used as the reference during the unloading phase. A representative implementation of the unified controller is illustrated in Fig. 7D, showing the synchronized evolution of the FSM states, prosthetic side vertical load, and continuously varying impedance parameters throughout the gait cycle. 
+
+C. Experimental Protocol 
+
+Ten individuals with unilateral transfemoral amputation (eight male and two female; 5 right and 5 left amputations or limb difference; age: 39.7 ± 11 years; body mass: 85.9 ± 13.9 kg; height: 1.74 ± 0.13 m; years since amputation: 17.9 ± 11.7 years) participated in this study. All participants provided written informed consent in accordance with the approval by the Georgia Institute of Technology Institutional Review Board (H21117). 
+
+Before testing, the prosthesis was fit and aligned by acertified prosthetist during quiet standing. Participants then completed a static calibration trial to initialize the wearable IMUs and establish a common global reference frame, followed by an acclimation period consisting of level walking (0 °), ramps (± 9 °), and stairs (± 24 °). After acclimation, swing-phase stiffness and damping were adjusted by up to 10% from their nominal values to achieve comfortable limb advancement. In addition, constant heel-contact angle offsets of up to 10° were introduced during descending locomotion to promote a more extended knee and reduced ankle plantarflexion at initial contact, improving heel-contact stability while preserving the continuous slope-dependent trajectories. This adjustment was introduced because direct reproduction of the AB heel-contact resulted in excessive knee flexion and ankle plantarflexion which was destabilizing in prosthesis users. 
+
+The proposed controller was subsequently evaluated during level walking, ramp walking, and stair ambulation, as illustrated in Fig. 1C. Level walking and ramps (0 ° - 13 °) were performed on an instrumented incline/decline treadmill at 0.4 - 0.5 m/s, whereas stair ascent and descent were evaluated over slopes ranging from 15 ° to 35 °. The intermediate 13 ° ramp and 15 ° stair conditions were not represented in the underlying AB biomechanics dataset and were included to evaluate controller performance in terrain regions absent from the reference data. Due to experimental time constraints, the 13 ° ramp and 15 ° stair conditions were completed by 9 and 6 of the 10 participants, respectively. Participant inclusion in these conditions was determined by available testing time rather than K-level or task performance. Whole-body kinematics and ground reaction forces were recorded using a motion-capture system synchronized with an instrumented treadmill and stair force plates for post-hoc analysis. During stair ascent, participants initiated the first step with the intact limb, whereas the prosthetic limb served as the leading limb during descent in accordance with how stair negotiation is commonly trained in clinical practice. 
+
+D. Statistical Analysis 
+
+The weighted squared Pearson correlation coefficient ( 𝑟𝑟 2)was used to quantify how closely the experimentally measured prosthetic outcomes followed the slope-dependent trends of the corresponding model predictions and AB reference data. To account for the non-uniform spacing of terrain slopes, each slope was weighed according to the interval it represented within the slope domain, based on the spacing to adjacent slope values. 
+
+V. RESULTS 
+
+The experimentally measured prosthesis kinematics and kinetics are compared with the target RBF-unified biomechanics across the continuous terrain slope domain in Fig. 8. Notably, the proposed controller generated smooth biomechanical trajectories at the intermediate 13° ramp and 15° stair conditions ( ★), although neither terrain was represented in the underlying AB biomechanics dataset. The measured trajectories remained consistent with the continuous slope progression predicted by the RBF-unified model, demonstrating successful interpolation to terrain regions absent from the reference dataset. 
+
+Overall, the proposed controller reproduced the intended slope-dependent joint behaviors across both the knee and ankle. During ascending locomotion, knee flexion and ankle dorsiflexion increased progressively with terrain slope 11 This work has been submitted to the IEEE for possible publication. Copyright may be transferred without notice, after which this version may no longer be accessible. 
+
+throughout stance, while larger swing-phase flexion and clearance angles were observed on steeper terrains. During descending locomotion, the controller generated progressively greater knee yielding together with increased ankle dorsiflexion during late stance. Although subject-dependent timing differences were present, the experimental trajectories preserved the continuous slope-dependent progression predicted by the RBF-unified biomechanics. 
+
+An additional quantitative evaluation was performed using representative kinematic landmarks and peak moments (Fig. 9). The experimentally measured quantities closely followed both the RBF-unified model and the underlying AB reference across the terrain domain. During ascent, heel-contact knee flexion, heel-contact ankle dorsiflexion, swing clearance angles, and peak knee support moments increased monotonically with terrain slope. During descent, increasing terrain steepness produced progressively greater knee toe-off angles and yielding behavior while maintaining relatively constant ankle toe-off, consistent with the proportional-yielding strategy introduced in Section III. For the ankle, the controller also preserved the continuous slope-dependent progression of heel-contact dorsiflexion, swing clearance, and toe-off angle, demonstrating that the unified parameterization successfully reproduced the intended kinematic adaptation across both ascending and descending locomotion. 
+
+Figs. 9A and 9B summarize the slope-dependent scaling 
+
+performance using 𝑟𝑟 2 for each kinematic landmark and peak 
+
+torque. Here, kinematic landmarks refer to joint angles at 
+
+specific gait events, including heel contact during both 
+
+ascending and descending locomotion, swing clearance during 
+
+ascent, and toe-off during descent. Knee-related metrics showed 
+
+high agreement between the proposed unified controller and the 
+
+RBF-unified model ( 𝑟𝑟 2 = 0.82 - 0.99), while ankle kinematic 
+
+metrics ranged from 0.78 to 0.96. In contrast, ankle stance 
+
+moment peaks showed rather low agreement ( 𝑟𝑟 2 = 0.08 during 
+
+ascent and 0.25 during descent). High agreement was also 
+
+observed between the unified controller and the AB reference, 
+
+with knee-related metrics ranging from 0.75 to 0.99 and ankle 
+
+kinematic metrics from 0.85 to 0.97, indicating that the 
+
+proposed controller successfully reproduced the AB 
+
+biomechanical characteristics encoded by the unified model. 
+
+The ankle stance torque peaks likewise exhibited a medium 
+
+level of agreement with the AB reference ( 𝑟𝑟 2 = 0.47 during 
+
+ascent and 0.51 during descent).      
+
+> Fig. 8. Experimental results on inter-participant average (n = 10) (A) kinematics and (B) kinetics are illustrated, by comparing with the RBF-unified biomechanics models derived in Section II. The enlarged panels on the left highlight representative early stance knee angle and torque to illustrate the observed slope-dependent scaling. Red star ( ★) in the legend indicates the intermediate 13 ° ramp (lines with circles, n = 9) and 15 ° stair (lines with squares, n = 6) conditions, which were not included in the AB dataset used to construct the partitioned polynomial models.
+
+12 This work has been submitted to the IEEE for possible publication. Copyright may be transferred without notice, after which this version may no longer be accessible. 
+
+Fig. 9. Representative (A) kinematic landmarks (B) peak torques, and (C) torque-relevant kinematic peaks across terrain slope. Experimental results from the proposed unified controller are compared with the RBF-unified biomechanics model and the underlying AB reference. The left and right 𝑟𝑟 2 values in each subplot denote squared Pearson correlation coefficients between the experimental results and the RBF-unified model and AB data, respectively. Bars represent mean ± 1 SD. Red star ( ★) in each subplot indicates the intermediate 13 ° ramp and 15 ° stair conditions, which were not included in the AB biomechanics dataset. In the posture schematics, orange arrows in (A) indicate prosthetic limb progression, whereas red arrows in (C) indicate the direction of joint torque. 13 This work has been submitted to the IEEE for possible publication. Copyright may be transferred without notice, after which this version may no longer be accessible. 
+
+Further inspection of the torque-relevant kinematic peaks in 
+
+Fig. 9C was conducted to examine how the realized joint 
+
+kinematics contributed to the stance-torque outcomes. Under the 
+
+impedance relationship in (13), the stiffness-generated joint 
+
+torque depends on the angular displacement from the modeled 
+
+equilibrium angle �𝜃𝜃 − 𝜃𝜃𝑒𝑒𝑒𝑒� ; therefore, insufficient realization 
+
+of the corresponding joint excursion can reduce the achievable 
+
+stance torque. Averaged across terrain slopes, the 
+
+experimentally realized knee peak stance torques reached 
+
+101.4% and 79.3% of the RBF-model values during ascent and 
+
+descent, respectively, while peak knee flexion reached 80.0% 
+
+and 85.6% of the corresponding model values. In comparison, 
+
+ankle peak stance torques reached only 74.8% and 56.2% of the 
+
+RBF-model values during ascent and descent, respectively, 
+
+accompanied by late-stance (LS) peak dorsiflexion reaching 
+
+only 73.7% and 66.2% of the model values. Thus, the greater 
+
+under-realization of ankle torque coincided with insufficient LS 
+
+dorsiflexion relative to the RBF-unified biomechanics, 
+
+providing a mechanical explanation for the lower ankle stance-
+
+torque agreement observed in Fig. 9B. 
+
+VI. DISCUSSION 
+
+The primary contribution of this work is the demonstration that lower-limb prosthesis control can be formulated using a continuous biomechanical representation spanning level walking, ramps, and stairs, rather than as a collection of independently designed locomotion modes. Existing biomimetic prosthesis controllers generally derive impedance parameters from discrete AB locomotion datasets and therefore inherit the same mode-specific structure, requiring separate controller designs and transition logic for each ambulation task. In contrast, the proposed framework represents joint biomechanics as continuous functions of terrain slope and gait phase, enabling both biomechanical modeling and controller parameterization within a unified domain. This formulation shifts controller design from defining discrete locomotion modes to parameterizing a continuous environmental variable, providing a more scalable foundation for future terrain-adaptive prosthesis control and real-world mobility. The results support two hypotheses introduced in Section I. First, the RBF-unified biomechanics preserved the reconstruction accuracy of the locally optimized ascent and descent models while outperforming the global polynomial representation, supporting 
+
+H1 . Second, experiments with ten individuals with transfemoral amputation demonstrated that the unified controller reproduced the principal slope-dependent biomechanical trends of healthy individuals, including intermediate terrain conditions absent from the reference dataset, supporting H2 . However, H2 was only partially supported for ankle stance kinetics, where the experimental torque trends exhibited lower agreement both with the unified model and AB reference. 
+
+The proposed continuous formulation provides two advantages. First, it enables direct interpolation to intermediate terrain conditions not present in the reference dataset, as demonstrated experimentally for the 13 ° ramp and 15 ° stair conditions. Second, because the controller is parameterized continuously with respect to terrain slope, a single controller architecture can span the entire modeled terrain domain without introducing separate mode-specific parameter sets or additional FSM-based transitions. This reduces controller complexity while preserving continuous scaling in biomechanical behavior across the modeled terrain domain. 
+
+The proposed RBF-unified biomechanics addresses afundamental limitation of polynomial-based locomotion models by reconciling local biomechanical fidelity with global continuity. While partitioned polynomial models accurately reconstructed each locomotion subset, directly concatenating them introduced discontinuities near the shared level-walking condition, whereas a single global polynomial excessively smoothed the local biomechanical characteristics. The RBF blending preserved the locally optimized biomechanics while providing a continuous representation suitable for real-time controller parameterization. Importantly, the objective of the continuous biomechanical representation is not to reconstruct unknown AB biomechanics exactly, but to provide a continuous biomimetic prior for controller design. This distinction is particularly relevant within the transition region between steep ramps and shallow stairs, where changes in foot-ground contact geometry may produce substantially different ankle biomechanics despite similar terrain inclinations. Therefore, the successful implementation at the 13 ° ramp and 15 ° stair conditions should be interpreted as validation of the continuous controller parameterization rather than confirmation of the interpolated AB biomechanics themselves. 
+
+Although unified biomechanics provide continuous reference trajectories, directly reproducing AB joint kinematics and kinetics is neither feasible nor necessarily desirable for powered prostheses. The unified biomechanics served as a design prior rather than a direct control objective, requiring transformation into impedance parameters that balance biomimetic behavior with practical implementation. Rather than optimizing all three impedance parameters simultaneously [6], [7], [39], the proposed framework derived stiffness and damping after designing equilibrium angles (Fig. 5B) based on the bio-inspired support angle �𝜃𝜃𝑠𝑠𝑠𝑠𝑠𝑠� definition (Fig. 4). The 𝜃𝜃𝑠𝑠𝑠𝑠𝑠𝑠 
+
+formulation, constrained optimization, and proportional yielding strategy [22], [23], [25] collectively reduced the controller dimensionality while preserving the biomechanical behaviors most relevant to prosthesis function, including limb support, controlled yielding, and swing clearance. 
+
+Interestingly, the constrained LSQ optimization consistently converged to trapezoid-like stiffness and damping profiles throughout stance (Figs. 6A and 6B). These profiles emerged naturally from the optimization while closely following the prescribed arctangent upper-bound envelopes, indicating that the constraints actively regulated the resulting impedance parameters. An exception was observed for knee stiffness during ascending locomotion, where the optimized values remained below the allowable upper bound despite accurate moment reconstruction (Fig. 6C). This behavior suggests that slope-dependent knee support was achieved primarily through modulation of the equilibrium angle trajectory rather than increasing joint stiffness, highlighting the complementary roles of stiffness and equilibrium angle within the proposed parameterization. 
+
+The transformation from AB biomechanics to prosthesis impedance control required deliberate departures from reference 14 This work has been submitted to the IEEE for possible publication. Copyright may be transferred without notice, after which this version may no longer be accessible. 
+
+joint dynamics. This was particularly important during descending locomotion, where the initial knee moment peak obtained from inverse dynamics represents the net mechanical moment at the biological joint rather than a direct actuator torque requirement. Such net moments reflect the combined effects of active muscle forces and passive musculoskeletal structures [40] and therefore cannot be interpreted as one-to-one motor commands. Specifically, during stair descent, the biological knee extensors dissipate energy eccentrically while the knee flexes to lower the body [41]. Therefore, directly reproducing the initial moment peak with a large prosthetic support torque would oppose the controlled knee yielding required to “ride” the prosthesis during descent [25]. Beyond this departure from the AB knee moment during descent, several additional design choices intentionally prioritized prosthesis functionality over one-to-one reproduction of natural biomechanics. The ankle support equilibrium angle was bounded to 10 ° dorsiflexion to remain within the prosthesis operating range and preserve sufficient plantarflexion torque. Stance biomechanics were represented through a three-region equilibrium angle structure, with stiffness and damping constrained to physically realizable bounds and progression patterns rather than directly reproducing the full AB moment trajectory. During swing, the controller similarly targeted functional landmarks (e.g. maximum flexion for limb clearance and heel-contact angle for preparation for loading) rather than tracking the complete continuous AB kinematic trajectory. Collectively, these design choices preserved the biomechanical functions considered most relevant to prosthesis control while intentionally relaxing exact replication of natural joint behavior. 
+
+Remaining discrepancies primarily reflect implementation choices rather than limitations of the underlying biomechanics. The largest kinematic differences occurred at heel-contact for both joints, consistent with the constant heel-contact angle offsets introduced to improve prosthetic stability during initial contact (Section IV-C). The ankle kinetic discrepancy highlights a tradeoff introduced by the mode-unified state transition strategy. In conventional mode-specific control, the ES-to-LS transition can incorporate an ankle angle threshold, ensuring that sufficient dorsiflexion develops before entering late stance and thereby preserving the angular displacement �𝜃𝜃 − 𝜃𝜃𝑒𝑒𝑒𝑒� 
+
+required for modeled torque. Such thresholds, however, vary substantially across different modes and are difficult to retain within a single mode-independent transition rule. The proposed bilateral limb-progression criterion removes this dependence but decouples the ES-to-LS transition from the desired peak dorsiflexion angle. Consequently, LS may be initiated before sufficient dorsiflexion develops, limiting the angular displacement and the resulting ankle torque. This consideration is particularly relevant during steep stair descent, where the RBF-unified ankle dorsiflexion trajectory can exceed the mechanical range of the current prosthesis (Fig. 9C, Ankle LS Peak Dorsiflexion for -20 °, -24 °, -30 °, and -35 °), making direct reproduction of the reference kinematics infeasible. Accordingly, strategies such as prescribing a more plantarflexed equilibrium angle or accelerating the progression of impedance parameters may help generate greater stance ankle torque without requiring full reproduction of the modeled dorsiflexion. Such modifications may be particularly important during late stance, consistent with prior findings highlighting the biomechanical importance of push-off timing and power generation [42], [43], [44]. 
+
+A further difference was observed during the swing extension, where the experimental trajectories exhibited plateau regions immediately before initial contact (Fig. 8A). This behavior is consistent with terminal-swing stabilization strategies previously reported in unilateral prosthesis users. Prior studies have identified a prolonged latency between full prosthetic knee extension and initial contact, interpreted as a period during which users ensure a stable position before loading [45], and have reported corresponding adaptations in terminal-swing muscle activation [46]. More recent work further demonstrated that when prosthetic knee extension was completed earlier, users tended to preserve or increase this latency rather than initiate ground contact earlier [47]. Thus, the observed plateau may reflect user-selected preparation for stable initial contact rather than a limitation of the continuous biomechanical representation. 
+
+Beyond the impedance parameter formulation, successful controller implementation also relied on the proposed bilateral sensing architecture (Fig. 7). Compared with conventional mode-specific controllers, this architecture eliminates mode-dependent gait state definitions while preserving a single FSM across all modeled terrain conditions. The relative limb geometry was estimated using a simplified sagittal-plane forward kinematics model based on wearable IMUs, without explicitly accounting for out-of-plane pelvic motion or hip tilt. Consequently, the computed geometry should be interpreted as a robust gait state variable rather than an anatomically exact estimate of bilateral limb configuration. Despite this simplification, the experimental results demonstrated reliable gait state transitions across all evaluated terrain conditions, suggesting that the proposed geometry provides sufficient information for unified controller implementation. 
+
+For additional reference, the biomechanical replication results of the proposed controller were examined alongside previously reported results using a mode-specific, hand-tuned controller [24], as detailed in Appendix and Fig. 10. Although both studies evaluated common terrain conditions (± 5 ° ramps and ± 24 ° stairs), they involved different participant groups, experimental protocols, and hardware capabilities. In specific, the previous study employed the first-generation OSL [35], with ± 15 ° of ankle motion, whereas the proposed study used the second-generation OSL [36], with an expanded range of ± 30 °. This hardware difference is particularly relevant to stair locomotion, where the AB-referenced ankle heel-contact and swing clearance angles exceeded the physical limit of the earlier OSL. Therefore, the observed differences in biomechanical replication cannot be attributed solely to the control strategies, and the comparison should be interpreted as descriptive rather than a direct assessment of controller superiority. Detailed comparison methods and numerical results are provided in Appendix. 15 This work has been submitted to the IEEE for possible publication. Copyright may be transferred without notice, after which this version may no longer be accessible. 
+
+Nevertheless, the proposed framework offers a distinct advantage in controller parameterization. A conventional two-joint, four-state impedance FSM requires at least 24 independently specified stiffness, damping, and equilibrium-angle parameters per locomotion mode [24], [25]. In contrast, the proposed framework derives these parameters continuously from terrain slope and gait phase using a unified biomechanical representation, without independently hand-tuning a complete parameter set for each mode. This formulation reduces the reliance on mode-specific controller design while retaining the principal slope-dependent biomechanical characteristics demonstrated in proposed framework. 
+
+Beyond the AB-replication analysis, Fig. 10B provides additional insight into how participants loaded the prosthesis 
+
+Fig. 10. Descriptive comparison of biomechanical outcomes from the previous reported mode-specific controller [24] and the proposed mode-unified controller relative to the AB reference. (A) Knee and ankle kinematic landmarks and peak stance torques across common terrain conditions (± 5 ° ramps and ± 24 ° stairs). Bars and error bars denote cross-subject mean ± 1 SD for the previous study (blue, n=9) and the proposed unified controller (red, n = 10), while dashed black lines indicate the corresponding AB reference values. Green circles indicate lower MAEs with the proposed controller, whereas red circles indicate no improvement. Green-boxed annotations and arrows highlight the six statistically significant between-study differences favoring the proposed controller, along with the corresponding MAE reductions relative to the AB reference. Significance was assessed using Welch’s two-sample t-tests ( *𝑝𝑝 < 0.05 , ** 𝑝𝑝 < 0.01 , *** 𝑝𝑝 < 0.001 , **** 𝑝𝑝 < 0.0001 ). 
+
+(B) Weight- and stance phase-normalized vertical ground reaction force (vGRF) profiles of the prosthetic and intact sides during 24 ° stair ascent and descent. Solid lines and shaded regions denote cross-subject mean ± 1 SD. 16 This work has been submitted to the IEEE for possible publication. Copyright may be transferred without notice, after which this version may no longer be accessible. 
+
+during the matched overground stair conditions. During stair ascent, the proposed controller was associated with greater prosthetic-side vGRF throughout stance while intact-side loading remained comparatively similar between controller groups. This pattern suggests greater weight acceptance through the prosthetic limb rather than a compensatory increase in intact-side loading. Stair descent loading profiles were comparatively similar between controllers. Because the present analysis was limited to stance-phase vGRF profiles and did not include complementary measures such as vertical impulse or loading symmetry, these findings should be interpreted as evidence of altered limb-loading behavior rather than a direct measure of functional improvement [48], [49]. 
+
+The present study has several limitations that motivate future research. First, the proposed controller assumed continuous terrain slope information as a high-level input. Although the controller architecture is independent of how this information is obtained, integrating onboard slope estimation methods based on wearable sensing [6], [9], [10] or environment perception [26], [50], [51] will be necessary for fully autonomous operation. 
+
+Second, the proposed continuous biomechanics were derived from AB datasets collected under self-selected or relatively slow walking speeds (up to 0.6m/s). Walking speed was not explicitly included as a model parameter, and the resulting impedance representation is expected to be most applicable within similar speed ranges. Extending the framework to incorporate continuous speed adaptation represents an important direction for future work and could enable unified control across both terrain and walking speed variations [6], [15], [52]. 
+
+Third, the unified biomechanics were constructed by blending independently modeled ramp and stair datasets. The interpolated biomechanics within the transition region between steep ramps and shallow stairs should be interpreted as controller parameterization rather than true AB biomechanics. 
+
+Despite these limitations, the proposed framework establishes 
+
+a continuous biomimetic foundation for terrain-adaptive 
+
+prosthesis control that unifies biomechanical modeling, 
+
+impedance parameterization, and controller implementation 
+
+within a single representation. Future integration of autonomous 
+
+terrain estimation, continuous speed adaptation, and user-
+
+specific optimization has the potential to further extend this 
+
+framework toward practical daily-life prosthesis control. 
+
+VII. CONCLUSION 
+
+This paper presented a mode-unified biomimetic control framework that represents lower-limb biomechanics continuously as functions of terrain slope and gait phase. The RBF-unified models preserved the accuracy of locally optimized biomechanics while enabling continuous impedance parameterization across level walking, ramps, and stairs. Experiments with ten prosthesis users demonstrated continuous terrain adaptation, including 13 ° ramp and 15 ° stair conditions absent from the reference AB dataset. The proposed controller reproduced the principal slope-dependent trends ( 𝑟𝑟 2 = 0.82 -0.99 for all knee-related measures and 0.78 - 0.96 for ankle kinematics), while ankle stance torque remained less accurately reproduced. Together, these findings support our unified biomimetic control framework that reduces mode-specific tuning while enabling users to address varied terrain without relying on separately parameterized controllers for each locomotion modes. 
+
+APPENDIX – COMPARISON WITH PREVIOUS STUDY 
+
+The comparison in Fig. 10 examined biomechanical outcomes from the previously reported mode-specific controller (n = 9) [24] and the proposed unified controller (n = 10) across four common terrain conditions (± 5 ° ramps and ± 24 ° stairs). The same biomechanical landmarks evaluated in Figs. 9A and 9B, including heel-contact, swing-clearance, and toe-off angles, together with peak stance torque, were extracted from both datasets. Subject-level errors relative to the AB references were calculated, and between-study differences in these errors were assessed using Welch’s two-sample t-tests to account for unequal size and potentially unequal variances ( *𝑝𝑝 < 0.05 ,
+
+** 𝑝𝑝 < 0.01 , *** 𝑝𝑝 < 0.001 , **** 𝑝𝑝 < 0.0001 ). 
+
+Figure 10 presents the corresponding experimental outcomes alongside the AB reference, with annotations highlighting the differences in mean absolute error (MAE) between studies. Among the 24 evaluated comparisons, six exhibited significantly lower MAEs in the present study. Knee swing clearance MAE during ramp ascent decreased from 27.1 ° to 6.6 ° (𝑝𝑝 < 0.0001) . Ankle heel-contact MAE decreased from 14.2 ° to 2.2 ° during stair ascent (𝑝𝑝 < 0.01) and from 19.3 ° to 5.8 ° during stair descent (𝑝𝑝 < 0.0001) . Ankle swing-clearance MAE during stair ascent decreased from 12.6 ° to 2.4 ° (𝑝𝑝 <0.01) , while ankle toe-off MAE during ramp descent decreased from 16.3 ° to 2.5 ° (𝑝𝑝 < 0.0001) . Knee peak stance-torque MAE during stair descent decreased from 0.52 to 0.28 Nm/kg 
+
+(𝑝𝑝 < 0.05) .
+
+Several additional outcomes showed lower mean MAEs with the proposed controller, although the between-group differences did not reach statistical significance. For example, knee toe-off angle MAE decreased from 8.81 ° to 4.38 ° during ramp descent and from 11.60 ° to 6.28 ° during stair descent, while ankle heel-contact angle MAE during ramp ascent decreased from 5.08 ° to 2.55 °. Knee peak stance-torque MAE also decreased from 0.33 to 0.18 Nm/kg during ramp descent. Lower errors were additionally observed for knee swing clearance angle and knee peak stance torque during stair ascent. In contrast, ankle peak stance torque did not show a consistent improvement across terrain conditions, consistent with the comparatively weaker reproduction of ankle kinetics identified for the proposed controller in Fig. 9B. 
+
+To further examine whether differences in prosthetic joint behavior were accompanied by changes in limb loading, weight-normalized vGRF profiles were visually compared during the matched overground stair conditions (Fig. 10B). These comparisons were restricted to stairs, for which both controller groups were tested overground, to characterize differences in limb loading. During stair descent, prosthetic- and intact-side loading remained comparable between controllers. During stair ascent, however, the proposed controller produced a higher prosthetic-side vGRF than the previously reported controller, whereas intact-side loading remained comparable. 17 This work has been submitted to the IEEE for possible publication. Copyright may be transferred without notice, after which this version may no longer be accessible. 
+
+REFERENCES 
+
+[1] J. Camargo, A. Ramanathan, W. Flanagan, and A. Young, “A comprehensive, open-source dataset of lower limb biomechanics in multiple conditions of stairs, ramps, and level-ground ambulation and transitions,” Journal of Biomechanics , vol. 119, p. 110320, Apr. 2021, doi: 10.1016/j.jbiomech.2021.110320. 
+
+[2] E. Reznick, K. R. Embry, R. Neuman, E. Bolívar-Nieto, N. P. Fey, and R. D. Gregg, “Lower-limb kinematics and kinetics during continuously varying human locomotion,” Sci Data , vol. 8, no. 1, p. 282, Oct. 2021, doi: 10.1038/s41597-021-01057-9. 
+
+[3] K. Scherpereel, D. Molinaro, O. Inan, M. Shepherd, and A. Young, “A human lower-limb biomechanics and wearable sensors dataset during cyclic and non-cyclic activities,” Sci Data , vol. 10, no. 1, p. 924, Dec. 2023, doi: 10.1038/s41597-023-02840-6. 
+
+[4] W. Wei et al. , “Surface electromyogram, kinematic, and kinetic dataset of lower limb walking for movement intent recognition,” Sci Data , vol. 10, no. 1, p. 358, Jun. 2023, doi: 10.1038/s41597-023-02263-3. 
+
+[5] S. Hood, M. K. Ishmael, A. Gunnell, K. B. Foreman, and T. Lenzi, “A kinematic and kinetic dataset of 18 above-knee amputees walking at various speeds,” Sci Data , vol. 7, no. 1, p. 150, May 2020, doi: 10.1038/s41597-020-0494-7. 
+
+[6] T. K. Best, C. G. Welker, E. J. Rouse, and R. D. Gregg, “Data-Driven Variable Impedance Control of a Powered Knee–Ankle Prosthesis for Adaptive Speed and Incline Walking,” IEEE Trans. Robot. , vol. 39, no. 3, pp. 2151–2169, Jun. 2023, doi: 10.1109/TRO.2022.3226887. 
+
+[7] R. J. Cortino, T. K. Best, and R. D. Gregg, “Data-Driven Phase-Based Control of a Powered Knee-Ankle Prosthesis for Variable-Incline Stair Ascent and Descent,” IEEE Trans. Med. Robot. Bionics , vol. 6, no. 1, pp. 175–188, Feb. 2024, doi: 10.1109/TMRB.2023.3328656. 
+
+[8] D. D. Molinaro, I. Kang, and A. J. Young, “Estimating human joint moments unifies exoskeleton control, reducing user effort,” Sci. Robot. , vol. 9, no. 88, p. eadi8852, Mar. 2024, doi: 10.1126/scirobotics.adi8852. 
+
+[9] D. Lee, S. Lee, and A. J. Young, “AI-driven universal lower-limb exoskeleton system for community ambulation,” Sci. Adv. , vol. 10, no. 51, p. eadq0288, Dec. 2024, doi: 10.1126/sciadv.adq0288. 
+
+[10] H. Kim, D. Lee, J. Y. Maldonado-Contreras, S. Zhou, K. R. Herrin, and A. J. Young, “Mode-Unified Intent Estimation of a Robotic Prosthesis Using Deep-Learning,” IEEE Robot. Autom. Lett. , vol. 10, no. 4, pp. 3206–3213, Apr. 2025, doi: 10.1109/LRA.2025.3535186. 
+
+[11] B.-Y. Su, J. Wang, S.-Q. Liu, M. Sheng, J. Jiang, and K. Xiang, “A CNN-Based Method for Intent Recognition Using Inertial Measurement Units and Intelligent Lower Limb Prosthesis,” IEEE Trans. Neural Syst. Rehabil. Eng. , vol. 27, no. 5, pp. 1032–1042, May 2019, doi: 10.1109/TNSRE.2019.2909585. 
+
+[12] K. R. Embry, D. J. Villarreal, and R. D. Gregg, “A unified parameterization of human gait across ambulation modes,” in 2016 38th Annual International Conference of the IEEE Engineering in Medicine and Biology Society (EMBC) , Orlando, FL, USA: IEEE, Aug. 2016, pp. 2179–2183. doi: 10.1109/EMBC.2016.7591161. 
+
+[13] K. R. Embry, D. J. Villarreal, R. L. Macaluso, and R. D. Gregg, “Modeling the Kinematics of Human Locomotion Over Continuously Varying Speeds and Inclines,” IEEE Trans. Neural Syst. Rehabil. Eng. , vol. 26, no. 12, pp. 2342–2350, Dec. 2018, doi: 10.1109/TNSRE.2018.2879570. 
+
+[14] S. Cheng, E. Bolivar-Nieto, C. G. Welker, and R. D. Gregg, “Modeling the Transitional Kinematics Between Variable-Incline Walking and Stair Climbing,” IEEE Trans. Med. Robot. Bionics , vol. 4, no. 3, pp. 840–851, Aug. 2022, doi: 10.1109/TMRB.2022.3185405. 
+
+[15] T. Lenzi, L. Hargrove, and J. Sensinger, “Speed-Adaptation Mechanism: Robotic Prostheses Can Actively Regulate Joint Torque,” 
+
+IEEE Robot. Automat. Mag. , vol. 21, no. 4, pp. 94–107, Dec. 2014, doi: 10.1109/MRA.2014.2360305. 
+
+[16] L. M. Sullivan, M. Cowan, L. Gabert, and T. Lenzi, “Unified Control of a Powered Knee-Ankle Prosthesis Enables Walking, Stairs, Transitions, and Other Daily Ambulation Activities,” IEEE Trans. Neural Syst. Rehabil. Eng. , vol. 33, pp. 3024–3039, 2025, doi: 10.1109/TNSRE.2025.3595496. 
+
+[17] M. Cowan, S. Creveling, L. M. Sullivan, L. Gabert, and T. Lenzi, “A Unified Controller for Natural Ambulation on Stairs and Level Ground with a Powered Robotic Knee Prosthesis,” in 2023 IEEE/RSJ International Conference on Intelligent Robots and Systems (IROS) ,Detroit, MI, USA: IEEE, Oct. 2023, pp. 2146–2151. doi: 10.1109/IROS55552.2023.10341691. 
+
+[18] F. Sup, A. Bohara, and M. Goldfarb, “Design and Control of a Powered Transfemoral Prosthesis,” The International Journal of Robotics Research , vol. 27, no. 2, pp. 263–273, Feb. 2008, doi: 10.1177/0278364907084588. 
+
+[19] S. Culver, H. Bartlett, A. Shultz, and M. Goldfarb, “A Stair Ascent and Descent Controller for a Powered Ankle Prosthesis,” IEEE Trans. Neural Syst. Rehabil. Eng. , vol. 26, no. 5, pp. 993–1002, May 2018, doi: 10.1109/TNSRE.2018.2819508. 
+
+[20] E. D. Ledoux and M. Goldfarb, “Control and Evaluation of a Powered Transfemoral Prosthesis for Stair Ascent,” IEEE Trans. Neural Syst. Rehabil. Eng. , vol. 25, no. 7, pp. 917–924, Jul. 2017, doi: 10.1109/TNSRE.2017.2656467. 
+
+[21] A. M. Simon, A. J. Ikeda, S. B. Finucane, S. Anarwala, K. Abdou, and L. J. Hargrove, “Ambulation With a Transfemoral Bone-Anchored Powered Knee-Ankle Prosthesis: a Case Study,” in 2025 International Conference On Rehabilitation Robotics (ICORR) , Chicago, IL, USA: IEEE, May 2025, pp. 1–5. doi: 10.1109/ICORR66766.2025.11063207. 
+
+[22] K. Bhakta, J. Camargo, P. Kunapuli, L. Childers, and A. Young, “Impedance Control Strategies for Enhancing Sloped and Level Walking Capabilities for Individuals with Transfemoral Amputation Using a Powered Multi-Joint Prosthesis,” Military Medicine , vol. 185, no. Supplement_1, pp. 490–499, Jan. 2020, doi: 10.1093/milmed/usz229. 
+
+[23] J. Camargo, K. Bhakta, K. Herrin, and A. Young, “Biomechanical Evaluation of Stair Ambulation Using Impedance Control on an Active Prosthesis,” Journal of Biomechanical Engineering , vol. 145, no. 2, p. 021007, Feb. 2023, doi: 10.1115/1.4055759. 
+
+[24] S. Zhou, S. Kestur, J. Maldonado, K. Herrin, N. Fey, and A. Young, “‘Comparing the biomechanical response of users of an open-source powered knee and ankle prosthesis versus a passive prosthesis during ramp and stair ambulation,’” Journal of Biomechanics , vol. 186, p. 112732, Jun. 2025, doi: 10.1016/j.jbiomech.2025.112732. 
+
+[25] A. M. Simon et al. , “Configuring a Powered Knee and Ankle Prosthesis for Transfemoral Amputees within Five Specific Ambulation Modes,” PLoS ONE , vol. 9, no. 6, p. e99387, Jun. 2014, doi: 10.1371/journal.pone.0099387. 
+
+[26] S. Cheng, C. A. Laubscher, T. K. Best, and R. D. Gregg, “Ambilateral Activity Recognition and Continuous Adaptation With a Powered Knee-Ankle Prosthesis,” IEEE Trans. Robot. , vol. 41, pp. 2251–2267, 2025, doi: 10.1109/TRO.2025.3539206. 
+
+[27] W. Hong, N. Anil Kumar, and P. Hur, “A Phase-Shifting Based Human Gait Phase Estimation for Powered Transfemoral Prostheses,” 
+
+IEEE Robot. Autom. Lett. , vol. 6, no. 3, pp. 5113–5120, Jul. 2021, doi: 10.1109/LRA.2021.3068907. 
+
+[28] N. Thatte, T. Shah, and H. Geyer, “Robust and Adaptive Lower Limb Prosthesis Stance Control via Extended Kalman Filter-Based Gait Phase Estimation,” IEEE Robot. Autom. Lett. , vol. 4, no. 4, pp. 3129– 3136, Oct. 2019, doi: 10.1109/LRA.2019.2924841. 
+
+[29] J. Lee, W. Hong, and P. Hur, “Continuous Gait Phase Estimation Using LSTM for Robotic Transfemoral Prosthesis Across Walking Speeds,” IEEE Trans. Neural Syst. Rehabil. Eng. , vol. 29, pp. 1470– 1477, 2021, doi: 10.1109/TNSRE.2021.3098689. 
+
+[30] F. Sup, H. A. Varol, and M. Goldfarb, “Upslope Walking With a Powered Knee and Ankle Prosthesis: Initial Results With an Amputee Subject,” IEEE Trans. Neural Syst. Rehabil. Eng. , vol. 19, no. 1, pp. 71–78, Feb. 2011, doi: 10.1109/TNSRE.2010.2087360. 
+
+[31] M. D. Buhmann, “Radial basis functions,” Acta Numerica , vol. 9, pp. 1–38, Jan. 2000, doi: 10.1017/S0962492900000015. 
+
+[32] C. A. Micchelli, “Interpolation of scattered data: Distance matrices and conditionally positive definite functions,” Constructive approximation , vol. 2, no. 1, pp. 11–22, 1986. 
+
+[33] T. Schmalz, S. Blumentritt, and B. Marx, “Biomechanical analysis of stair ambulation in lower limb amputees,” Gait & Posture , vol. 25, no. 2, pp. 267–278, Feb. 2007, doi: 10.1016/j.gaitpost.2006.04.008. 
+
+[34] J. M. Aldridge, J. T. Sturdy, and J. M. Wilken, “Stair ascent kinematics and kinetics with a powered lower leg system following transtibial amputation,” Gait & Posture , vol. 36, no. 2, pp. 291–295, Jun. 2012, doi: 10.1016/j.gaitpost.2012.03.013. 
+
+[35] A. F. Azocar, L. M. Mooney, J.-F. Duval, A. M. Simon, L. J. Hargrove, and E. J. Rouse, “Design and clinical implementation of an 18 This work has been submitted to the IEEE for possible publication. Copyright may be transferred without notice, after which this version may no longer be accessible. 
+
+open-source bionic leg,” Nat Biomed Eng , vol. 4, no. 10, pp. 941–953, Oct. 2020, doi: 10.1038/s41551-020-00619-3. 
+
+[36] T. K. Best, G. C. Thomas, S. R. Ayyappan, R. D. Gregg, and E. J. Rouse, “A Compensated Open-Loop Impedance Controller Evaluated on the Second-Generation Open-Source Leg Prosthesis,” IEEE/ASME Trans. Mechatron. , vol. 30, no. 6, pp. 4732–4744, Dec. 2025, doi: 10.1109/TMECH.2024.3508469. 
+
+[37] R. R. Posh and R. D. Gregg, “A Task-Agnostic Approach to Unified Multi-Activity Gait Phase Estimation via Bilateral Sensing,” in 2025 International Conference On Rehabilitation Robotics (ICORR) ,Chicago, IL, USA: IEEE, May 2025, pp. 1–8. doi: 10.1109/ICORR66766.2025.11062952. 
+
+[38] B. Hu, E. Rouse, and L. Hargrove, “Fusion of Bilateral Lower-Limb Neuromechanical Signals Improves Prediction of Locomotor Activities,” Front. Robot. AI , vol. 5, p. 78, Jun. 2018, doi: 10.3389/frobt.2018.00078. 
+
+[39] W. Hong, A. Naseri, and H. Huang, “Efficient and Scalable Tuning of Continuous Impedance Control for Powered Knee Prostheses,” IEEE Robot. Autom. Lett. , vol. 11, no. 4, pp. 5017–5024, Apr. 2026, doi: 10.1109/LRA.2026.3668449. 
+
+[40] F. E. Zajac, R. R. Neptune, and S. A. Kautz, “Biomechanics and muscle coordination of human walking Part I: Introduction to concepts, power transfer, dynamics and simulations,” Gait & Posture ,vol. 16, pp. 215–232, 2002. 
+
+[41] T. Cluff and D. G. E. Robertson, “Kinetic analysis of stair descent: Part 1. Forwards step-over-step descent,” Gait & Posture , vol. 33, no. 3, pp. 423–428, Mar. 2011, doi: 10.1016/j.gaitpost.2010.12.016. 
+
+[42] K. E. Zelik and P. G. Adamczyk, “A unified perspective on ankle push-off in human walking,” Journal of Experimental Biology , vol. 219, no. 23, pp. 3676–3683, Dec. 2016, doi: 10.1242/jeb.140376. 
+
+[43] B. L. Fylstra, I.-C. Lee, S. Huang, A. Brandt, M. D. Lewek, and H. (Helen) Huang, “Human-prosthesis coordination: A preliminary study exploring coordination with a powered ankle-foot prosthesis,” Clinical Biomechanics , vol. 80, p. 105171, Dec. 2020, doi: 10.1016/j.clinbiomech.2020.105171. 
+
+[44] P. Malcolm, R. E. Quesada, J. M. Caputo, and S. H. Collins, “The influence of push-off timing in a robotic ankle-foot prosthesis on the energetics and mechanics of walking,” J NeuroEngineering Rehabil ,vol. 12, no. 1, p. 21, Dec. 2015, doi: 10.1186/s12984-015-0014-8. 
+
+[45] K. Mâaref, N. Martinet, C. Grumillier, S. Ghannouchi, J. M. André, and J. Paysant, “Kinematics in the Terminal Swing Phase of Unilateral Transfemoral Amputees: Microprocessor-Controlled Versus Swing-Phase Control Prosthetic Knees,” Archives of Physical Medicine and Rehabilitation , vol. 91, no. 6, pp. 919–925, Jun. 2010, doi: 10.1016/j.apmr.2010.01.025. 
+
+[46] E. C. Wentink, E. C. Prinsen, J. S. Rietman, and P. H. Veltink, “Comparison of muscle activity patterns of transfemoral amputees and control subjects during walking,” J NeuroEngineering Rehabil , vol. 10, no. 1, p. 87, 2013, doi: 10.1186/1743-0003-10-87. 
+
+[47] D. M. Marsh, A. Haake, and M. Goldfarb, “Fast walking with swing extension assistance in a nominally passive semi-powered prosthetic knee,” Front. Robot. AI , vol. 13, p. 1747721, Mar. 2026, doi: 10.3389/frobt.2026.1747721. 
+
+[48] T. Kobayashi et al. , “Effects of walking speed on magnitude and symmetry of ground reaction forces in individuals with transfemoral prosthesis,” Journal of Biomechanics , vol. 130, p. 110845, Jan. 2022, doi: 10.1016/j.jbiomech.2021.110845. 
+
+[49] A. G. Cutti, G. Verni, G. L. Migliore, A. Amoresano, and M. Raggi, “Reference values for gait temporal and loading symmetry of lower-limb amputees can help in refocusing rehabilitation targets,” JNeuroEngineering Rehabil , vol. 15, no. S1, p. 61, Sep. 2018, doi: 10.1186/s12984-018-0403-x. 
+
+[50] F. Gao, G. Liu, F. Liang, and W.-H. Liao, “IMU-Based Locomotion Mode Identification for Transtibial Prostheses, Orthoses, and Exoskeletons,” IEEE Trans. Neural Syst. Rehabil. Eng. , vol. 28, no. 6, pp. 1334–1343, Jun. 2020, doi: 10.1109/TNSRE.2020.2987155. 
+
+[51] E. Anselmino, A. M. Simon, and L. J. Hargrove, “A Deep Learning Framework With Domain Generalization and Few-Shot Learning for Locomotion Mode Classification Across Users, Sessions, and Prostheses,” IEEE Trans. Med. Robot. Bionics , vol. 8, no. 1, pp. 77– 83, Feb. 2026, doi: 10.1109/TMRB.2025.3606364. 
+
+[52] N. P. Fey, A. M. Simon, A. J. Young, and L. J. Hargrove, “Controlling Knee Swing Initiation and Ankle Plantarflexion With an Active Prosthesis on Level and Inclined Surfaces at Variable Walking Speeds,” IEEE J. Transl. Eng. Health Med. , vol. 2, pp. 1–12, 2014, doi: 10.1109/JTEHM.2014.2343228.

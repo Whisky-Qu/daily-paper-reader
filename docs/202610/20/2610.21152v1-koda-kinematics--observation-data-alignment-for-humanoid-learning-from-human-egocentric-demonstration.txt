@@ -1,0 +1,2488 @@
+KODA: Kinematics–Observation Data Alignment for
+Humanoid Learning from Human Egocentric
+Demonstration
+Zibo Zhou1,2,3,†, Yueru Chen2,3,†, Junsong Wu2,3, Weiji Xie2,3, Qingyao Xu3, Sheng Yin3,
+Shiqing Wang2,4, Jiyuan Shi1,2, Siheng Chen3, Chenjia Bai1,2,∗, Xuelong Li2,∗
+1Gamma Robotics, 2Institute of Artificial Intelligence (TeleAI), China Telecom , 3Shanghai Jiao Tong
+University, 4Zhejiang University, †Equal contribution (co-first authors), ∗Corresponding authors
+Training humanoid whole-body vision–language–action (VLA) policies requires costly robot demonstra-
+tions with aligned robot-view observations and controller-compatible whole-body state–action labels.
+Egocentric human demonstrations offer scalable supervision but have misaligned views and sparse
+motion cues. Existing approaches either pretrain policies that still require robot data for adaptation
+or generate controller-specific commands that limit reuse. Conversion also requires robot-view obser-
+vations aligned with the generated whole-body motion. We present KODA (Kinematics–Observation
+Data Alignment), which converts egocentric RGB demonstrations into whole-body VLA training data
+using a reusable canonical trajectory to guide robot-view synthesis and generate controller-specific
+whole-body state–action supervision. KODA first generates a simulator-checked whole-body trajectory
+using a sparse tracker with sampling-based command optimization. This generated trajectory directly
+determines the onboard camera poses used to synthesize corresponding robot-view observations. The
+motion, observations, and task instruction form a canonical record. For each deployment controller,
+KODA optimizes commands to track the stored motion and records the corresponding action labels
+and proprioceptive states. When switching controllers, KODA retains this canonical record and
+regenerates whole-body state–action supervision for co-training with matching robot demonstrations.
+We evaluate KODA on four Unitree G1 loco-manipulation tasks using two whole-body controllers,
+SONIC and HEFT. With robot data held fixed, macro-average success on conditions covered by human
+demonstrations but absent from robot data improves by 45.0 and 46.25 percentage points, respectively.
+Under both controllers, this metric shows an upward trend across the evaluated human-data budgets,
+suggesting potential for further scaling.
+Keywords: Egocentric Human Data, Humanoid Loco-Manipulation
+Date: October 16, 2026
+Project: https://koda-humanoid.github.io/koda/
+Correspondence to: Chenjia Bai (baicj@chinatelecom.cn)
+1
+Introduction
+Humanoid robots combine locomotion and dexterous manipulation in a versatile platform for operating in
+environments designed for people. Realizing this potential requires policies that coordinate body posture,
+mobility, and bimanual manipulation across the whole body. Whole-body vision–language–action (VLA)
+models aim to learn such coordination from onboard observations and task instructions (Jiang et al., 2026; Hu
+et al., 2026). Training requires corresponding robot observations, whole-body states, and action supervision
+compatible with the deployment whole-body controller (WBC) interface. Collecting these demonstrations on
+the target humanoid is costly, limiting coverage across tasks, objects, and environments.
+Human demonstration interfaces and egocentric datasets provide RGB images, camera poses, and sparse
+bilateral hand-position references at scale (Chi et al., 2024; Hoque et al., 2026; Punamiya et al., 2026).
+1
+arXiv:2610.21152v1  [cs.RO]  15 Oct 2026
+
+
+KODA
+Egocentric human data
+Whole-Body Motion Generation
+Simulation-feasible whole-body motion
+Robot Onboard View Generation
+Motion-aligned robot onboard views
+1
+2
+Reusable record
+Motion
++
+Views
++ task instruction
+3
+Control Command Generation
+Controller A
+Controller B
+Other
+Controller-specific states + actions
+Whole-body humanoid
+training data
+Real robot data
+Co-training for each controller
+Image
+Language
+instruction
+State
+Vision-language-
+action policy
+...
+Whole-body controller
+action chunk
+“Put the cup into the basket.”
+“Put the basket on the shelf.”
+“Put the parcel on the shelf.”
+“Put the cup into the drawer.”
+Figure 1 Overview of KODA. Whole-Body Motion Generation produces simulation-feasible whole-body motion from
+human egocentric demonstrations, and Robot Onboard View Generation synthesizes motion-aligned onboard views.
+The motion, views, and task instruction form a reusable canonical record. Control Command Generation uses this
+record to generate controller-specific states and actions. The resulting data are combined with matching real-robot
+demonstrations to co-train a controller-specific vision–language–action (VLA) policy for language-guided humanoid
+loco-manipulation.
+Their success on fixed-base arms (Chi et al., 2024) and in dexterous manipulation (Zheng et al., 2026b;
+Liu et al., 2026b) motivates extending human-data supervision to whole-body VLAs. Approaches such as
+EgoVLA, WholeBodyVLA, and MotionWAM learn human-derived priors for humanoid policies but still
+depend on target-humanoid demonstrations for adaptation (Yang et al., 2025b; Jiang et al., 2026; Zheng
+et al., 2026a). Target-humanoid data collection therefore remains a bottleneck. Other work converts human
+demonstrations into robot-oriented supervision. EgoHumanoid uses whole-body human measurements and a
+shared end-effector-and-navigation action space for co-training (Shi et al., 2026). HALOMI trains policies
+on human demonstrations using head–hand command labels tied to a dedicated controller (Zhao et al.,
+2026). These methods produce supervision tied to particular action interfaces, creating data silos that
+limit reuse across whole-body controllers; their outputs do not directly provide the whole-body states and
+compatible actions needed for other WBC interfaces. Their converted episodes also require observations
+corresponding to the generated robot motion. Fixed-offset reprojection (Shi et al., 2026) shifts the human
+camera without following the generated robot trajectory, leaving this observation–motion correspondence
+unresolved. Moreover, retaining only controller-tuned commands limits reuse to that controller’s command
+space and tracking behavior. A reusable record must support adaptation to different deployment controllers.
+We target a distinct data-conversion setting: augmenting an existing controller-specific humanoid whole-body
+dataset from egocentric RGB, camera poses, and hand references. This setting requires three capabilities: (i)
+generating simulator-checked whole-body trajectories from sparse human references; (ii) synthesizing onboard
+observations aligned with the generated robot motion; and (iii) instantiating the same converted record as
+compatible state–action supervision for different deployment controllers.
+To address these three challenges, we present KODA (Kinematics–Observation Data Alignment), a framework
+2
+
+
+SCO + Arm Refinement
+Whole-Body Motion Generation
+Raw Hand 
+References
+Robot Onboard View Generation
+Arm Segmentation
+Point Cloud Reprojection
+ Robot Rendering
+ Depth Compositing
+Inpainting
+Position Retargeting
+Contact-Aware Refinement
+Hand Pose Estimation
+Camera Pose
+Hand Pose
+Depth Image
+RGB Image
+Whole-Body
+Motion Generation
+Robot Onboard
+View Generation
+Refined Hand
+References
+Human
+Data
+Whole-Body Motion
+Inputs
+Robot Onboard View
+Control Command
+Generation
+Sampling-based
+Command Optimization
+Humanoid VLA
+Dataset
+Robot Onboard
+View
+Robot States & Actions
+Language
+Instructions
+Figure 2 KODA pipeline. Middle: Human demonstrations become aligned whole-body motion and onboard observations,
+then controller-specific state–action data for VLA training (Control Command Generation). Top: Whole-Body Motion
+Generation combines hand estimation and contact-aware retargeting, sampling-based command optimization (SCO),
+and arm refinement. Bottom: Robot Onboard View Generation combines arm removal, scene reprojection, robot
+rendering, depth compositing, and inpainting. Input depth is observed or estimated from RGB.
+that converts egocentric RGB demonstrations into whole-body VLA training data. The conversion proceeds
+in three stages, as shown in Fig. 1. First, KODA generates a whole-body trajectory from sparse human
+references using a fine-tuned tracker. Sampling-based command optimization improves reference tracking
+while maintaining trajectory feasibility in simulation. Second, KODA derives camera poses from the generated
+trajectory and synthesizes corresponding onboard observations. The aligned motion and observations, together
+with the task instruction, form a canonical record for the target humanoid. Third, KODA optimizes the
+selected deployment controller’s commands to track the fixed canonical trajectory, producing compatible
+state–action supervision for co-training with matching real-robot demonstrations. Changing controllers
+regenerates the state–action supervision while retaining the canonical motion and robot-view observations.
+Our contributions are: (a) A data-conversion framework that constructs whole-body robot motion and
+corresponding onboard observations from egocentric human demonstrations. (b) A canonical representation and
+controller-specific control command generation procedure for generating compatible state–action supervision
+from the same converted records across deployment interfaces. (c) Real-world evidence of the training value
+and scaling potential of converted human demonstrations on four G1 loco-manipulation tasks. With 50 robot
+demonstrations per task fixed, adding 100 converted human demonstrations per task increases macro-average
+success by 45.0 and 46.25 percentage points under SONIC and HEFT, respectively, on object conditions
+covered by human training clips but absent from robot demonstrations. This metric shows an upward trend
+across the evaluated data budgets under both interfaces.
+2
+Related Work
+2.1
+Humanoid Loco-Manipulation
+Humanoid data collection methods use direct teleoperation, human imitation, or whole-body tracking to
+obtain robot demonstrations. OmniH2O, HOMIE, HumanPlus, and TWIST2 provide interfaces for whole-
+3
+
+
+body teleoperation or imitation learning (He et al., 2024; Ben et al., 2025; Fu et al., 2024; Ze et al., 2025).
+OmniRetarget preserves human–object and human–environment interactions during retargeting, while SONIC
+tracks whole-body motion for physically grounded control (Yang et al., 2025a; Luo et al., 2026; Xie et al., 2025;
+Han et al., 2026). WholeBodyVLA learns loco-manipulation from vision and instructions, while OpenHLM
+and MotionWAM study whole-body humanoid policy and action-model training (Jiang et al., 2026; Hu et al.,
+2026; Zheng et al., 2026a; Xie et al., 2026b). These approaches establish the control and learning foundation
+for humanoid loco-manipulation, but their supervision is collected or represented in a target-robot interface.
+2.2
+Egocentric Data and Cross-Embodiment Alignment
+Egocentric interfaces and datasets provide a scalable source of visual and motion supervision. UMI records
+robot-compatible gripper trajectories and images, while EgoDex and EgoVerse provide large-scale RGB data
+with camera and hand-motion annotations (Chi et al., 2024; Hoque et al., 2026; Punamiya et al., 2026). Ψ0
+and EgoVLA use human data for embodied pretraining, and EMMA, EgoEngine, and Ego2Robot combine
+human video with robot learning or robot-data synthesis (Wei et al., 2026; Yang et al., 2025b; Zhu et al., 2026;
+Liu et al., 2026b; Wang et al., 2026). Related cross-embodiment methods address appearance and viewpoint
+transfer through cross-painting or robot-view augmentation (Chen et al., 2024a,b).
+For humanoids, EgoHumanoid uses whole-body measurements, fixed-offset view alignment, and training-time
+perturbations (Shi et al., 2026). HALOMI adopts this view alignment and reference adaptation based on
+the cross-entropy method (CEM) for a dedicated controller (Zhao et al., 2026). KODA also uses command
+optimization, but derives onboard views from generated whole-body motion. Its canonical motion–observation
+records can be reused to augment manipulation datasets for compatible WBCs through controller-specific
+command generation and state recording.
+3
+System Framework
+KODA converts egocentric human episodes into robot-view observations, canonical whole-body motion, and
+controller-compatible state–action data for VLA training as shown in Fig. 2. The conversion has three stages:
+Whole-Body Motion Generation in Sec. 3.2 produces a simulator-checked trajectory from sparse human
+references; Robot Onboard View Generation in Sec. 3.3 uses the corresponding body–camera trajectory to
+synthesize aligned observations, forming a controller-independent canonical record; and Control Command
+Generation in Sec. 3.4 tracks this motion with the selected controller to derive its state–action supervision. The
+canonical motion and observations are reused across interfaces, while controller-specific states and commands
+enable co-training with matching real-robot demonstrations. Qualitative demonstration timelines are provided
+in Appendix E.
+3.1
+Problem Setup
+Let R denote the target humanoid and κ a deployment controller with its action interface. All sequences use
+the target control clock t = 1, . . . , T.
+After geometry recovery, an RGB episode is represented as eh = ({Ih
+t , Dh
+t , Ch
+t , Jh
+t }T
+t=1, ℓ), where Ih
+t is the
+egocentric RGB image, Dh
+t is observed or estimated depth, Ch
+t is the source-camera pose, Jh
+t contains the
+bilateral 3-D hand keypoints, and ℓis the task instruction. Camera poses and hand keypoints come from
+source annotations or offline recovery. When source depth is unavailable, KODA estimates it from RGB using
+the metric-depth model of Depth Anything 3 (Lin et al., 2025). Depth, camera poses, and hand references
+must share a consistent metric coordinate system. Human episodes form Dhuman. Real-robot episodes in
+Dκ
+robot contain robot-view observations IR
+t , controller-specific state features sκ
+t , actions aκ
+t , and instructions ℓ.
+CR constructs a canonical record in R’s observation and kinematic spaces, without controller-specific states
+or actions: ecan
+R
+= CR(eh) =
+
+IR
+t , qR
+t
+	T
+t=1 , ℓ
+
+. Here qR
+t
+is the whole-body configuration corresponding to
+IR
+t , including the floating-base pose and body and hand joint positions. The canonical trajectory provides a
+common motion reference for robot-view synthesis and controller-specific tracking.
+4
+
+
+The mappings CR and Gκ act episode-wise on datasets:
+eκ
+R = Gκ(ecan
+R ) =
+
+IR
+t , sκ
+t , aκ
+t
+	T
+t=1 , ℓ
+
+,
+Dκ
+KODA = Gκ(CR(Dhuman)) ,
+Dκ
+train = Dκ
+robot ∪Dκ
+KODA.
+(1)
+The mapping Gκ retains the canonical observations and instruction, adding state features and optimized
+command labels in κ’s interface as described in Sec. 3.4. Converted and real-robot episodes share a format
+and jointly train the VLA policy with parameters θ to predict baκ
+t = πθ(IR
+t , sκ
+t , ℓ).
+3.2
+Whole-Body Motion Generation
+Given the camera poses and hand references in eh, Whole-Body Motion Generation outputs the simulator-
+checked canonical whole-body motion {qR
+t }T
+t=1.
+Contact-Aware Hand Retargeting
+HAWOR (Zhang et al., 2025) estimates world-space MANO hand poses
+from egocentric RGB. Following AnyTeleop (Qin et al., 2023), KODA retargets them to obtain initial robot
+wrist poses and active finger-joint values using MANO palm geometry and a calibrated wrist-to-palm transform;
+distal mimic joints follow a fixed coupling map (Qin et al., 2023). Contact-aware refinement then adjusts this
+initialization on reliable contact frames. To identify these frames, EfficientSAM3 (Zeng et al., 2025) segments
+hand/forearm pixels, while nearby valid non-hand depths provide object-surface samples. Reliable contact
+frames are identified from multi-finger proximity, depth, and local surface consistency, then temporally filtered;
+without reliable contact, the initialization is retained.
+At contact frames, wrist and finger poses are refined to preserve hand–object geometry. Following OmniRetar-
+get (Yang et al., 2025a), selected human landmarks and corresponding robot-hand points are paired with
+the same nearby object samples to form connected world-frame interaction meshes. Each vertex descriptor
+is its offset from the uniformly weighted mean of its neighbors. We optimize wrist poses and finger joints
+to minimize differences between corresponding human and robot descriptors, preserving the demonstrated
+hand–object geometry. During optimization, object samples remain fixed, robot points are recomputed by
+forward kinematics, wrist translations, local rotations, and finger corrections are bounded, and deviations from
+initialization are penalized. Corrections are interpolated between contact frames and held constant outside
+their range. The optimized bilateral-wrist and finger trajectories are denoted by wret
+1:T and f ret
+1:T , respectively;
+the tracking stage uses Ch
+t and wret
+1:T as sparse inputs. See Appendix A.1 for details.
+Whole-body tracking via command optimization
+The source-camera poses are converted to torso poses using
+the camera-to-torso transform from the target robot’s URDF, ptorso
+t
+= Tcam→torso(Ch
+t ). Combining ptorso
+t
+with
+wret
+t , concatenating the tracks in a fixed order, and applying a Savitzky–Golay filter (Schafer, 2011) yields
+rref
+1:T .
+Kimodo (Rempe et al., 2026) generates the initial whole-body configuration qR
+init from the first reference frame.
+After kinematic and physics checks, this configuration initializes the simulated rollout.
+We add a three-point torso-and-bilateral-wrist tracking mode to ScaleBFM (Zeng et al., 2026) and fine-tune
+the pretrained whole-body controller ϕR for the target embodiment. Its whole-body joint targets are applied
+by PD control in MuJoCo/MJX, but direct tracking can accumulate reference-tracking errors, as shown in
+TABLE 4. KODA therefore uses the cross-entropy method (CEM) (Pinneri et al., 2021) to optimize the sparse
+pose commands so that the realized motion tracks rref
+1:T more accurately while remaining simulation-feasible.
+Candidate commands are evaluated by simulated rollouts in a receding-horizon procedure detailed next and
+illustrated in Fig. 3; settings are reported in Sec. 4.1.
+At each replan, rref spans H steps from simulated state xcur.
+The latent vector z ∈Rd contains 18
+translation/rotation-vector coordinates per knot for torso and bilateral-wrist SE(3) residuals. CEM initializes
+diagonal-Gaussian parameters (µ, σ) = (0, σ0) and samples one residual for each of the N parallel MJX
+environments per iteration:
+z(n) = µ + σ ⊙ε(n),
+ε(n)
+i
+i.i.d.
+∼N(0, 1),
+er(n) = Decode(rref, z(n)),
+(2)
+5
+
+
+(a) Receding-horizon command correction
+Target state
+Corrected command
+State with SCO
+State w/o SCO
+State
+Past
+Future
+Time
+Planning Horizon H
+Execute Δ steps (Δ < H)
+knot 0
+knot 1
+knot 2
+knot 3
+Control residual
+(b) CEM optimization within the planning horizon
+Sample residuals
+z(1)
+z(2)
+z(N)
+⋮
+Rollout
+Ref. + z(1)
+Ref. + z(2)
+Ref. + z(N)
+⋮
+Evaluate
+J(1)
+J(2)
+J(N)
+⋮
+Update
+Select top-E
+zℰ: elite residuals
+lowest cost
+Update distribution
+μ ← mean(zℰ)
+σ ← std(zℰ)
+σ ← max(σ, σmin)
+z = μ + σ ⊙ ε
+Figure 3 Sampling-based command optimization (SCO) uses CEM to optimize sparse pose residuals through sampling,
+rollout, evaluation, and proposal updates. (a) Receding-horizon correction with a planning horizon and executed prefix.
+(b) The CEM loop proceeds from sampling to rollout, evaluation, and distribution update; the feedback arrow returns
+to sampling.
+where ⊙denotes element-wise multiplication, i = 1, . . . , d indexes latent coordinates, and n = 1, . . . , N indexes
+candidates and environments. The operator Decode applies the sampled residuals at the reference knots, clips
+them to bounded physical ranges, and interpolates the translation and rotation corrections between knots to
+form the complete candidate pose-command trajectory er(n). We roll out the N candidates in parallel MJX
+environments:
+bq(n) = RolloutMJX(xcur, ϕR,er(n)),
+br(n) = ΠB(bq(n)),
+(3)
+Here bq(n) is the whole-body configuration trajectory realized by the n-th candidate command in MJX, and
+br(n) = ΠB(bq(n)) is the corresponding torso-and-wrist pose trajectory. The set B contains these torso and wrist
+bodies, and ΠB extracts their poses. Each realized trajectory is scored against the unperturbed reference by
+J(n) = dB(br(n), rref), a position/orientation tracking cost over these three links with receding-horizon time
+weights. Kinematic or physics violations are rejected. For the E valid lowest-cost samples indexed by E, we
+update each dimension with µ+
+i = meann∈E
+h
+z(n)
+i
+i
+and σ+
+i = max{σmin,i, stdn∈E
+h
+z(n)
+i
+i
+}, where the standard
+deviation uses divisor E and is bounded below by σmin,i. After I updates (µ, σ) ←(µ+, σ+), we select the
+lowest-cost valid rollout among the nominal, best sampled, and final-mean candidates. Only the first ∆
+steps are retained; the resulting simulator state initializes the next replan, whose horizon advances by ∆.
+Concatenated prefixes form qR,SCO
+1:T
+for constrained refinement. See Appendix A.2 for implementation details.
+Constrained Arm Motion Refinement
+To reduce residual wrist-tracking error, temporal Mink IK (Zakka,
+2024) refines only the arm chain, including wrists. Contact-aware finger trajectories are retained; the optimized
+floating base, torso, and lower body remain fixed to preserve locomotion and balance motion. Refinement
+enforces joint limits, per-step displacement and velocity bounds, and self-collision constraints, while penalizing
+deviations from qR,SCO
+1:T
+. Combining the refined arms and contact-aware fingers with the fixed non-arm
+6
+
+
+Real-Robot
+Deployment
+KODA
+Data
+Robot
+Data
+Figure 4 Qualitative example of the task “Put the cup into the drawer.” The rows show real-robot demonstrations
+(top), converted KODA data with aligned robot onboard observations (middle), and real-robot deployment of the
+learned VLA policy in the Robot-OOD setting (bottom). In the middle row, the main panels show the generated
+whole-body motion; the upper-left and upper-right insets show the source human view and the synthesized robot
+onboard view, respectively.
+motion yields qR
+1:T for Robot Onboard View Generation. Replay shows comparable controller trackability
+after refinement, as quantified in Sec. 4.5. Further details are in Appendix A.3.
+3.3
+Robot Onboard View Generation
+The optimized whole-body motion qR
+1:T from the previous section determines the robot camera trajectory.
+Because camera poses map camera coordinates to the world frame, the calibrated rigid torso–camera transform
+gives CR
+t
+= Tcam(qR
+t ). KODA then synthesizes IR
+t
+from the source RGB frame Ih
+t , associated depth Dh
+t ,
+source-camera pose Ch
+t , and target configuration qR
+t ; all stages use this target camera pose and timestamp.
+EfficientSAM3 (Zeng et al., 2025) predicts an arm/hand mask M arm
+t
+; depth inside it is invalidated to obtain
+eDh
+t . KODA back-projects remaining valid pixels using eDh
+t , calibrated camera intrinsics, and Ch
+t , transforms
+them to the target camera CR
+t , and splats samples with a metric z-buffer, producing (Igeo
+t
+, Dgeo
+t
+, Hgeo
+t
+):
+the reprojected image, depth map, and hole mask. MuJoCo renders (Irob
+t
+, Drob
+t
+) from the same qR
+t
+and
+camera. At pixels where both depth maps are valid, the nearer surface with smaller depth is retained:
+for pixel u, M rob
+t
+(u) = 1 if and only if Drob
+t
+(u) < Dgeo
+t
+(u). If only one depth is valid, its corresponding
+pixel is retained; neighboring valid depths are used only inside geometric holes. The composite image is
+therefore Icomp
+t
+= M rob
+t
+Irob
+t
++ (1 −M rob
+t
+)Igeo
+t
+. DiffuEraser (Li et al., 2025) is applied only to residual holes
+Hrem
+t
+= Hgeo
+t
+\M rob
+t
+, namely, pixels left uncovered by both the reprojected scene and the rendered robot. Valid
+scene and robot pixels are frozen. The completed IR
+t
+is indexed on the target control clock and paired with
+qR
+t . Together, the aligned observations IR
+1:T , the whole-body motion qR
+1:T generated above, and the instruction
+ℓform the canonical record ecan
+R , which the next section instantiates into controller-specific supervision. See
+Appendix B for details.
+3.4
+Control Command Generation and VLA Training
+Given ecan
+R , KODA generates controller-specific command sequences for SONIC (Luo et al., 2026) and
+HEFT (Liu et al., 2026a) on the Unitree G1 with BrainCo hands. Our command generation is related to
+test-time command optimization (Xie et al., 2026a), which searches for controller-specific input commands
+through closed-loop simulation to improve motion tracking. At 50 Hz, SCO optimizes a shared pelvis-pose
+and 29-body-joint residual space (hands excluded) against fixed qR
+1:T . The G1 reference contains world-frame
+pelvis position and quaternion, 29 body-joint positions and velocities, and world-frame link poses from forward
+kinematics. Each candidate is decoded by the selected controller and rolled out in simulation with the same
+cost for both controllers—joint-position MSE, 14-link pose error, reference deformation, PD-target change,
+and terminal tracking penalties—and the same Control Command Generation settings reported in Sec. 4.1.
+7
+
+
+Table 1 Real-robot task success (%) with increasing KODA data. Each controller uses 50 robot demonstrations per
+task. KODA demos denotes the number of converted human demonstrations per task; zero denotes robot-only training.
+Avg. is the macro-average over four tasks. Bold marks the best result within each controller, including ties.
+Controller
+KODA demos
+Cup-to-basket
+Parcel-to-shelf
+Basket-to-shelf
+Cup-to-drawer
+Avg.
+Robot-ID
+Robot-OOD
+Robot-ID
+Robot-OOD
+Robot-ID
+Robot-OOD
+Robot-ID
+Robot-OOD
+Robot-ID
+Robot-OOD
+SONIC
+0
+55.00
+0.00
+90.00
+15.00
+55.00
+0.00
+50.00
+0.00
+62.50
+3.75
+25
+55.00
+10.00
+100.00
+25.00
+50.00
+15.00
+70.00
+15.00
+68.75
+16.25
+50
+65.00
+20.00
+90.00
+65.00
+60.00
+10.00
+65.00
+0.00
+70.00
+23.75
+75
+70.00
+35.00
+90.00
+70.00
+65.00
+30.00
+60.00
+30.00
+71.25
+41.25
+100
+70.00
+40.00
+90.00
+75.00
+65.00
+45.00
+65.00
+35.00
+72.50
+48.75
+HEFT
+0
+65.00
+0.00
+85.00
+20.00
+65.00
+0.00
+60.00
+0.00
+68.75
+5.00
+25
+65.00
+5.00
+90.00
+35.00
+45.00
+20.00
+65.00
+20.00
+66.25
+20.00
+50
+60.00
+30.00
+80.00
+55.00
+65.00
+25.00
+70.00
+15.00
+68.75
+31.25
+75
+70.00
+40.00
+95.00
+65.00
+60.00
+35.00
+65.00
+40.00
+72.50
+45.00
+100
+80.00
+50.00
+90.00
+75.00
+70.00
+40.00
+65.00
+40.00
+76.25
+51.25
+The full search and objective are specified in Appendices C.1 and C.2.
+The resulting actions aκ
+t use different controller interfaces. SONIC’s motion encoder maps the optimized motion
+references to 64-dimensional motion tokens (Luo et al., 2026). HEFT uses 29 absolute body-joint targets and
+a 9-dimensional pelvis code, giving 38 body-reference dimensions. The HEFT pelvis code represents roll r and
+pitch p as (sin r, cos r −1, sin p, cos p −1), together with a wrapped next-step yaw change, three translation
+increments in the yaw-aligned frame, and absolute height. Planar position and heading accumulate from an
+anchor, whereas height is read directly. Both controllers append 12 hand-joint targets, giving 76-dimensional
+SONIC and 50-dimensional HEFT actions. Pose retargeting alone does not specify grasp force. KODA
+thresholds each retargeted robot hand’s mean finger curvature following EgoHumanoid (Shi et al., 2026). For
+grasp, hand-joint targets are set to a calibrated BrainCo grasp pose to encourage active closure; for release,
+targets equal the current retargeted joint angles. The 12 targets are sent separately to hand control.
+Each converted episode records a 44-dimensional state vector sκ
+t in a format shared by both controllers: 29
+body-joint angles, three-dimensional rollout gravity rotated to the robot base frame by the base quaternion,
+and 12 continuous BrainCo hand-joint angles from contact-aware retargeting as geometric hand-state estimates.
+Canonical images and the instruction are retained; TABLE 4 reports wrist/camera pose residuals, and TABLE 1
+reports co-training utility. GR00T N1.7 predicts 40-step chunks of aκ
+t from (IR
+t , sκ
+t , ℓ) using converted and
+real-robot episodes in the selected format. Changing the deployment interface reruns control command
+generation and state recording while reusing the canonical motion, observations, and instruction. Interface
+and export details are in Appendices C.3–C.5.
+4
+Evaluation
+We evaluate whether KODA improves real-robot task success by augmenting fixed robot datasets with human
+demonstrations, reusing the same canonical records across SONIC and HEFT. EgoHumanoid (Shi et al.,
+2026) and HALOMI (Zhao et al., 2026) use different control interfaces and do not directly provide compatible
+whole-body state–action data. SONIC ablations assess the training benefits of observation alignment and
+controller-specific supervision; tracking diagnostics characterize motion fidelity and controller realization.
+4.1
+Experimental Setup
+Platform, data, and evaluation. We use a Unitree G1 with BrainCo dexterous hands on four whole-body tasks:
+cup-to-basket, parcel-to-shelf, basket-to-shelf, and cup-to-drawer. Each task has 50 real-robot demonstrations
+from the corresponding SONIC or HEFT PICO teleoperation pipeline and 100 human egocentric demonstrations
+captured with a chest-mounted iPhone using MobileEgo Anywhere (Palanisamy et al., 2026). All 400 human
+clips include iPhone-recorded depth. Both sources use 50 Hz. The scaling study evaluates SONIC (Luo et al.,
+2026) and HEFT (Liu et al., 2026a); component ablations use SONIC with 50 robot and 100 converted-human
+demonstrations per task. Per controller configuration, GR00T N1.7 (Bjorck et al., 2025) trains on all four tasks
+for 20,000 iterations with batch size 160. Within each task, robot/human sampling is proportional to episode
+counts; other sampling settings follow GR00T defaults. We report one training run per configuration and 20
+8
+
+
+real-robot trials per task and condition. This trial count matches EgoHumanoid’s 20 trials per setting (Shi
+et al., 2026) and exceeds the 10 trials per task and model reported in Ψ0 (Wei et al., 2026). Success requires
+completing the placement without a fall or unrecovered manipulation failure. Reported averages weight the
+four tasks equally.
+Conditions covered by human demonstrations. Robot-ID uses object appearance and pose conditions present
+in the robot demonstrations. Robot-OOD uses conditions absent from those demonstrations: a green bottle is
+replaced by a brown bottle in cup-to-basket and cup-to-drawer, a purple parcel by a white parcel in parcel-
+to-shelf, and the basket handle is tilted by approximately 30◦in basket-to-shelf. The human training pool
+contains 80 shifted and 20 robot-matched clips per task. Robot-OOD tests whether human demonstrations
+supply coverage missing from the robot dataset, rather than zero-shot generalization to conditions absent
+from all training data. Data and evaluation details are in Appendices D.1 and D.2.
+CEM settings. Both stages run at 50 Hz and use CEM with 80 candidates per iteration, 8 iterations per replan,
+and a 40-step horizon. Whole-Body Motion Generation uses 10 elites and executes 10 steps before replanning.
+Control Command Generation with SONIC and HEFT uses 9 elites and executes 20 steps before replanning.
+4.2
+Extending Robot Demonstration Coverage
+Each task combines 50 fixed robot demonstrations with 0, 25, 50, 75, or 100 converted human demonstrations,
+randomly sampled independently at each budget from its 100-clip pool without nesting. Policy architecture,
+training budget, and evaluation protocol remain fixed. TABLE 1 shows that KODA provides its largest gains
+on conditions missing from robot demonstrations. With 100 converted demonstrations, SONIC Robot-OOD
+success rises from 3.75% to 48.75% (+45 percentage points), and HEFT rises from 5.00% to 51.25% (+46.25
+points). Robot-ID success also improves, from 62.5% to 72.5% for SONIC and from 68.75% to 76.25% for
+HEFT. Robot-OOD macro-average trends upward over tested budgets for both controllers. Individual-task and
+Robot-ID results vary at intermediate data sizes, so we focus on overall gains at the full data budget. KODA
+thus supplies useful supervision for additional conditions covered by human demonstrations without adding
+robot demonstrations. Fig. 4 illustrates converted data and real-robot execution in the Robot-OOD setting
+for cup-to-drawer. See Appendix F for the other three tasks. The same converted human demonstrations
+yield large Robot-OOD gains under both SONIC and HEFT, demonstrating cross-controller reuse, as shown
+in TABLE 1. The following ablations isolate observation alignment and control command generation.
+4.3
+Observation Alignment
+We hold the converted demonstrations, state–action supervision, policy architecture, training budget, and
+evaluation protocol fixed across four tasks. No alignment retains the original human images. Fixed offset uses
+a 0.10 m vertical camera shift with ±0.05 m training-time perturbations, adapting the fixed-offset strategy
+of (Shi et al., 2026) to chest-mounted capture. Fixed offset and Motion-based reprojection use only reprojection
+and hole inpainting; Motion-based reprojection derives the target camera poses from the canonical robot
+motion. Full alignment additionally removes human arms and renders and composites the target robot. See
+Appendix D.3 for details.
+Full alignment reaches 48.75% Robot-OOD success versus 23.75% with the adapted EgoHumanoid fixed-
+offset baseline (Shi et al., 2026) and 18.75% without alignment (TABLE 2). Motion-based reprojection
+reaches 37.5%. Fixed offset, Motion-based reprojection, and Full alignment yield Robot-ID point estimates of
+63.75%/66.25%/72.5%, respectively.
+4.4
+Controller-Consistent State–Action Supervision
+The variant without SCO directly uses the generated canonical whole-body motion as the tracking controller’s
+reference, omitting optimization during control command generation while retaining Whole-Body Motion
+Generation and Robot Onboard View Generation. Both variants use identical canonical trajectories, observa-
+tions, demonstrations, policy architecture, training budget, and evaluation protocol. Since body states come
+from controller rollouts, the comparison evaluates state–action supervision as a whole. See Appendix D.3 for
+details.
+9
+
+
+Table 2 Effect of observation alignment on SONIC policy success (%). The four variants use the same demonstrations,
+state–action supervision, policy architecture, training budget, and evaluation protocol. Robot-ID and Robot-OOD are
+reported separately for each variant. Bold marks the highest success rate for each task and condition, including ties.
+Task
+No alignment
+Fixed offset
+Motion-based
+reprojection
+Full alignment
+Robot-ID
+Robot-OOD
+Robot-ID
+Robot-OOD
+Robot-ID
+Robot-OOD
+Robot-ID
+Robot-OOD
+Cup-to-basket
+50
+15
+60
+15
+65
+25
+70
+40
+Parcel-to-shelf
+85
+35
+80
+45
+85
+65
+90
+75
+Basket-to-shelf
+65
+20
+60
+25
+60
+35
+65
+45
+Cup-to-drawer
+50
+5
+55
+10
+55
+25
+65
+35
+Macro-average
+62.5
+18.75
+63.75
+23.75
+66.25
+37.5
+72.5
+48.75
+Table 3 Effect of controller-specific command optimization on SONIC policy success (%). Both variants use 50 robot
+and 100 converted-human demonstrations per task, with identical canonical trajectories and synthesized observations.
+Without SCO omits optimization only during Control Command Generation; With SCO uses optimized commands.
+Policy architecture, training budget, and evaluation protocol are held fixed. Bold marks the higher success rate for
+each task and condition.
+Task
+Robot-ID
+Robot-OOD
+Without SCO
+With SCO
+Without SCO
+With SCO
+Cup-to-basket
+25
+70
+0
+40
+Parcel-to-shelf
+70
+90
+10
+75
+Basket-to-shelf
+50
+65
+0
+45
+Cup-to-drawer
+50
+65
+20
+35
+Macro-average
+48.75
+72.5
+7.5
+48.75
+SCO: sampling-based command optimization. Macro-average weights the four tasks equally.
+TABLE 3 shows that optimized control command generation raises macro-average success from 48.75% to
+72.5% Robot-ID and from 7.5% to 48.75% Robot-OOD, gains of 23.75 and 41.25 percentage points. Both
+metrics improve on all four tasks. Thus, controller-command generation also affects real-robot Robot-ID
+performance. Without this optimization, Robot-ID success falls below the 62.5% robot-only baseline in
+TABLE 1; the complete pipeline reaches 72.5%. Controller-consistent supervision thus matters to whether the
+added data benefits the policy. Together, the ablations support aligning both observations and state–action
+supervision with deployment.
+4.5
+Motion Fidelity and Controller Trackability
+Motion-generation entries in TABLE 4 average aggregate errors from LAFAN (Harvey et al., 2020) and
+400 egocentric training clips. LAFAN provides a check on highly dynamic motions; both controllers share
+evaluation data.
+Wrist errors decrease to 3.03 cm/0.1106 rad with SCO and 0.33 cm/0.0296 rad after Mink refinement. Controller-
+specific SCO improves wrist/camera tracking except SONIC camera orientation (+0.0024 rad). Replaying the
+motions before and after Mink refinement with the same SONIC tracker on both sources yields comparable
+errors: pelvis-relative non-arm/wrist positions 2.60/1.59→2.73/1.75 cm, torso orientation 0.0588→0.0579 rad,
+and non-arm joint RMSE 0.0750→0.0784 rad. Metric and replay details are in Appendix D.4. TABLES 2
+and 3 show task benefits from observation alignment and controller-specific supervision. TABLE 1 supports
+the reusable records’ training utility across both controllers despite residual tracking mismatch.
+10
+
+
+Table 4 Tracking errors for whole-body motion generation and controller rollouts. Position and orientation are reported
+separately in centimeters and radians; lower is better. Generation errors use the source motion as the reference, while
+rollout errors use the fixed canonical motion. Bold marks the smallest reported value for each target and error type,
+including ties.
+Stage
+Target
+Direct
+SCO
+SCO+IK
+Position
+(cm)
+Orientation
+(rad)
+Position
+(cm)
+Orientation
+(rad)
+Position
+(cm)
+Orientation
+(rad)
+Whole-body motion
+generation
+Wrist
+15.02
+0.2046
+3.03
+0.1106
+0.33
+0.0296
+Torso
+16.27
+0.1302
+5.39
+0.0930
+5.39
+0.0930
+SONIC rollout
+Wrist
+61.50
+0.1777
+2.88
+0.1292
+–
+–
+Camera
+60.90
+0.0784
+3.20
+0.0808
+–
+–
+HEFT rollout
+Wrist
+19.61
+0.0677
+2.94
+0.0552
+–
+–
+Camera
+19.51
+0.0426
+2.84
+0.0337
+–
+–
+Direct uses unoptimized references. SCO uses CEM-optimized commands; SCO+IK adds Mink arm refinement during
+whole-body motion generation. A dash (–) denotes an unreported metric or variant.
+5
+Limitations
+KODA does not yet fully reproduce fine-grained hand–object interactions, limiting their fidelity and physical
+feasibility. In the future, we plan to incorporate real-to-sim scene reconstruction and contact modeling
+to better recover object geometry and interaction dynamics. We will also broaden human data sources
+beyond egocentric recordings, including third-person videos and motion capture, converting diverse human
+demonstrations into canonical whole-body records for controller-specific state–action generation and policy
+training.
+6
+Conclusion
+KODA converts egocentric human demonstrations into canonical whole-body motion and onboard observations,
+then generates controller-specific state–action supervision for VLA training. Reusing these records with fixed
+robot data improves VLA task success under SONIC and HEFT on four G1 tasks, especially on conditions
+covered only by human demonstrations. Reduced tracking errors and co-training gains despite residual
+mismatch support expanding robot-policy coverage.
+11
+
+
+References
+Qingwei Ben, Feiyu Jia, Jia Zeng, Junting Dong, Dahua Lin, and Jiangmiao Pang. Homie: Humanoid loco-manipulation
+with isomorphic exoskeleton cockpit. arXiv preprint arXiv:2502.13013, 2025.
+Johan Bjorck, Fernando Castañeda, Nikita Cherniadev, Xingye Da, Runyu Ding, Linxi Fan, Yu Fang, Dieter Fox,
+Fengyuan Hu, Spencer Huang, et al. Gr00t n1: An open foundation model for generalist humanoid robots. arXiv
+preprint arXiv:2503.14734, 2025.
+Lawrence Yunliang Chen, Kush Hari, Karthik Dharmarajan, Chenfeng Xu, Quan Vuong, and Ken Goldberg. Mirage:
+Cross-embodiment zero-shot policy transfer with cross-painting. arXiv preprint arXiv:2402.19249, 2024a.
+Lawrence Yunliang Chen, Chenfeng Xu, Karthik Dharmarajan, Muhammad Zubair Irshad, Richard Cheng, Kurt
+Keutzer, Masayoshi Tomizuka, Quan Vuong, and Ken Goldberg. Rovi-aug: Robot and viewpoint augmentation for
+cross-embodiment robot learning. arXiv preprint arXiv:2409.03403, 2024b.
+Cheng Chi, Zhenjia Xu, Chuer Pan, Eric Cousineau, Benjamin Burchfiel, Siyuan Feng, Russ Tedrake, and Shuran
+Song. Universal manipulation interface: In-the-wild robot teaching without in-the-wild robots. arXiv preprint
+arXiv:2402.10329, 2024.
+Zipeng Fu, Qingqing Zhao, Qi Wu, Gordon Wetzstein, and Chelsea Finn. Humanplus: Humanoid shadowing and
+imitation from humans. arXiv preprint arXiv:2406.10454, 2024.
+Jinrui Han, Weiji Xie, Jiakun Zheng, Jiyuan Shi, Weinan Zhang, Ting Xiao, and Chenjia Bai. KungfuBot2: Learning
+versatile motion skills for humanoid whole-body control. In 2026 IEEE International Conference on Robotics and
+Automation (ICRA), 2026.
+Félix G Harvey, Mike Yurick, Derek Nowrouzezahrai, and Christopher Pal. Robust motion in-betweening. ACM Trans.
+Graph., 39(4):60:1–60:12, 2020. doi: 10.1145/3386569.3392480.
+Tairan He, Zhengyi Luo, Xialin He, Wenli Xiao, Chong Zhang, Weinan Zhang, Kris Kitani, Changliu Liu, and Guanya
+Shi. Omnih2o: Universal and dexterous human-to-humanoid whole-body teleoperation and learning. arXiv preprint
+arXiv:2406.08858, 2024.
+Ryan Hoque, Peide Huang, David J. Yoon, Mouli Sivapurapu, and Jian Zhang.
+EgoDex: Learning dexterous
+manipulation from large-scale egocentric video. In Proc. Int. Conf. Learn. Represent. (ICLR), volume 2026, pages
+4218–4237, 2026.
+Yingdong Hu, Haodong Zhu, Boyuan Zheng, Yihang Hu, Tong Zhang, Zunhao Chen, Junming Zhao, Ruiqian Nai,
+and Yang Gao.
+Openhlm: An empirical recipe for whole-body humanoid loco-manipulation.
+arXiv preprint
+arXiv:2606.22174, 2026.
+Haoran Jiang, Jin Chen, Qingwen Bu, Li Chen, Modi Shi, Yanjie Zhang, Delong Li, Chuanzhe Suo, Chuang Wang,
+Zhihui Peng, and Hongyang Li. WholeBodyVLA: Towards unified latent VLA for whole-body loco-manipulation
+control. In Proc. Int. Conf. Learn. Represent. (ICLR), volume 2026, pages 157438–157461, 2026.
+Xiaowen Li, Haolan Xue, Peiran Ren, and Liefeng Bo. Diffueraser: A diffusion model for video inpainting. arXiv
+preprint arXiv:2501.10018, 2025.
+Haotong Lin, Sili Chen, Jun Hao Liew, Donny Y. Chen, Zhenyu Li, Guang Shi, Jiashi Feng, and Bingyi Kang. Depth
+Anything 3: Recovering the visual space from any views. arXiv preprint arXiv:2511.10647, 2025.
+Chenxin Liu, Qingzhou Lu, Guangxiao Yang, Xuanyang Shi, Chenghan Yang, Yanjiang Guo, and Jianyu Chen. HEFT:
+Heavy-payload full-size humanoid teleoperation with privileged motion guidance and windowed payload curriculum.
+arXiv preprint arXiv:2607.02332, 2026a.
+Yangcen Liu, Shuo Cheng, Xinchen Yin, Woo Chul Shin, Alfred Cueva, Yiran Yang, Zhenyang Chen, Chuye Zhang,
+and Danfei Xu. Egoengine: From egocentric human videos to high-fidelity dexterous robot demonstrations. arXiv
+preprint arXiv:2606.12604, 2026b.
+Zhengyi Luo, Ye Yuan, Tingwu Wang, Chenran Li, Fernando Castañeda, Sirui Chen, Zi-Ang Cao, Jiefeng Li, David
+Minor, Qingwei Ben, et al. Sonic: Supersizing motion tracking for natural humanoid whole-body control. Science
+Robotics, 11(117):eaed4592, 2026.
+Senthil Palanisamy, Abhishek Anand, Satpal Singh Rathore, Pratyush Patnaik, Shubhanshu Khatana, and Ekaksh
+Janweja. Mobileego anywhere: Open infrastructure for long horizon egocentric data on commodity hardware. arXiv
+preprint arXiv:2605.05945, 2026.
+12
+
+
+Cristina Pinneri, Shambhuraj Sawant, Sebastian Blaes, Jan Achterhold, Joerg Stueckler, Michal Rolinek, and Georg
+Martius. Sample-efficient cross-entropy method for real-time planning. In Conference on Robot Learning, pages
+1049–1065. PMLR, 2021.
+Ryan Punamiya, Simar Kareer, Zeyi Liu, Josh Citron, Ri-Zhao Qiu, Xiongyi Cai, Alexey Gavryushin, Jiaqi Chen,
+Davide Liconti, Lawrence Y Zhu, et al. Egoverse: An egocentric human dataset for robot learning from around the
+world. arXiv preprint arXiv:2604.07607, 2026.
+Yuzhe Qin, Wei Yang, Binghao Huang, Karl Van Wyk, Hao Su, Xiaolong Wang, Yu-Wei Chao, and Dieter Fox.
+Anyteleop: A general vision-based dexterous robot arm-hand teleoperation system. arXiv preprint arXiv:2307.04577,
+2023.
+Davis Rempe, Mathis Petrovich, Ye Yuan, Haotian Zhang, Xue Bin Peng, Yifeng Jiang, Tingwu Wang, Umar Iqbal,
+David Minor, Michael de Ruyter, et al. Kimodo: Scaling controllable human motion generation. arXiv preprint
+arXiv:2603.15546, 2026.
+Ronald W Schafer. What is a savitzky-golay filter?[lecture notes]. IEEE Signal processing magazine, 28(4):111–117,
+2011.
+Modi Shi, Shijia Peng, Jin Chen, Haoran Jiang, Tianyu Li, Di Huang, Ping Luo, Hongyang Li, and Li Chen.
+Egohumanoid: Unlocking in-the-wild loco-manipulation with robot-free egocentric demonstration. arXiv preprint
+arXiv:2602.10106, 2026.
+Ye Wang, Pei Lin, Xiong-Hui Chen, Haoqi Yuan, Zhixuan Liang, Yiyang Huang, Anzhe Chen, Zixing Lei, Jie
+Zhang, Tao Zhang, et al. Ego2robot: Scalable robot data synthesis from egocentric human data. arXiv preprint
+arXiv:2608.02580, 2026.
+Songlin Wei, Hongyi Jing, Boqian Li, Zhenyu Zhao, Jiageng Mao, Zhenhao Ni, Sicheng He, Jie Liu, Xiawei Liu,
+Kaidi Kang, et al. Ψ0: An open foundation model towards universal humanoid loco-manipulation. arXiv preprint
+arXiv:2603.12263, 2026.
+Weiji Xie, Jinrui Han, Jiakun Zheng, Huanyu Li, Xinzhe Liu, Jiyuan Shi, Weinan Zhang, Chenjia Bai, and Xuelong Li.
+KungfuBot: Physics-based humanoid whole-body control for learning highly-dynamic skills. In Advances in Neural
+Information Processing Systems, 2025.
+Weiji Xie, Junsong Wu, Zibo Zhou, Yueru Chen, Xingyi Wang, Zhenhua Xiong, Weinan Zhang, and Chenjia Bai.
+Test-time compute for humanoid behavior foundation models, 2026a. URL https://arxiv.org/abs/2610.14896.
+Weiji Xie, Jiakun Zheng, Jinrui Han, Jiyuan Shi, Weinan Zhang, Chenjia Bai, and Xuelong Li. TextOp: Real-time
+interactive text-driven humanoid robot motion generation and control. In Conference on Robot Learning, 2026b.
+Lujie Yang, Xiaoyu Huang, Zhen Wu, Angjoo Kanazawa, Pieter Abbeel, Carmelo Sferrazza, C Karen Liu, Rocky Duan,
+and Guanya Shi. Omniretarget: Interaction-preserving data generation for humanoid whole-body loco-manipulation
+and scene interaction. arXiv preprint arXiv:2509.26633, 2025a.
+Ruihan Yang, Qinxi Yu, Yecheng Wu, Rui Yan, Borui Li, An-Chieh Cheng, Xueyan Zou, Yunhao Fang, Xuxin Cheng,
+Ri-Zhao Qiu, et al. Egovla: Learning vision-language-action models from egocentric human videos. arXiv preprint
+arXiv:2507.12440, 2025b.
+Kevin Zakka. Mink: Python inverse kinematics based on mujoco, 2024. URL https://github.com/kevinzakka/mink.
+Yanjie Ze, Siheng Zhao, Weizhuo Wang, Angjoo Kanazawa, Rocky Duan, Pieter Abbeel, Guanya Shi, Jiajun Wu,
+and C Karen Liu. Twist2: Scalable, portable, and holistic humanoid data collection system. arXiv preprint
+arXiv:2511.02832, 2025.
+Chengxi Zeng, Yuxuan Jiang, and Aaron Zhang. Efficientsam3: Progressive hierarchical distillation for video concept
+segmentation from sam1, 2, and 3. arXiv preprint arXiv:2511.15833, 2025.
+Weishuai Zeng, Kangning Yin, Xiaojie Niu, Shunlin Lu, Weixiang Zhong, Jiahe Chen, Feiyu Jia, Xiao Chen, Zirui
+Wang, Furui Xu, et al. Scaling behavior foundation model for humanoid robots. arXiv preprint arXiv:2607.15163,
+2026.
+Jinglei Zhang, Jiankang Deng, Chao Ma, and Rolandos Alexandros Potamias. Hawor: World-space hand motion
+reconstruction from egocentric videos. In 2025 IEEE/CVF Conference on Computer Vision and Pattern Recognition
+(CVPR), pages 1805–1815. IEEE, 2025.
+Zehui Zhao, Yuxuan Zhao, Gaojing Zhang, Chenxi Liu, Maolin Zheng, and Wenzhao Lian. Halomi: Learning humanoid
+loco-manipulation with active perception from human demonstrations. arXiv preprint arXiv:2606.18772, 2026.
+13
+
+
+Jia Zheng, Teli Ma, Yudong Fan, Zifan Wang, Shuo Yang, and Junwei Liang. Motionwam: Towards foundation world
+action models for real-time humanoid loco-manipulation. arXiv preprint arXiv:2606.09215, 2026a.
+Ruijie Zheng, Dantong Niu, Yuqi Xie, Jing Wang, Mengda Xu, Yunfan Jiang, Fernando Castañeda, Fengyuan Hu,
+You Liang Tan, Letian Fu, et al. Egoscale: Scaling dexterous manipulation with diverse egocentric human data.
+arXiv preprint arXiv:2602.16710, 2026b.
+Lawrence Y Zhu, Pranav Kuppili, Ryan Punamiya, Patcharapong Aphiwetsa, Dhruv Patel, Simar Kareer, Sehoon Ha,
+and Danfei Xu. EMMA: Scaling mobile manipulation via egocentric human data. IEEE Robot. Autom. Lett., 11(3):
+3087–3094, March 2026. doi: 10.1109/LRA.2026.3653320.
+14
+
+
+Appendix
+Appendix A expands contact-aware retargeting, sparse command optimization, and arm refinement. Ap-
+pendix B specifies coordinate and visibility conventions. Appendix C details controller-specific search, action
+encoding, and state construction. Appendix D clarifies experimental conditions, comparisons, and metric
+references. Appendix E presents complete-clip demonstration timelines. Appendix F provides Robot-ID,
+KODA, and Robot-OOD comparisons for the remaining three tasks.
+A
+Whole-Body Motion Generation Details
+This appendix expands Sec. 3.2. Source-camera and bilateral hand references share a metric world frame.
+Retargeted wrist and finger tracks wret
+1:T , f ret
+1:T supply the hand references; rref
+1:T denotes the desired torso
+and wrist poses. SCO produces realized whole-body motion qR,SCO
+1:T
+. Arm refinement yields the canonical
+floating-base, body, and hand sequence qR
+1:T while retaining the hand references and non-arm motion.
+A.1
+Contact-aware hand retargeting
+Initialization and contact evidence.
+HAWOR (Zhang et al., 2025) supplies world-space MANO hand estimates.
+Retargeting following AnyTeleop (Qin et al., 2023) uses palm geometry and a calibrated wrist-to-palm transform
+to initialize each robot wrist and its active finger joints. Distal mimic joints are determined by the coupling
+map, so they are not independent optimization variables. A correspondence between selected human landmarks
+and robot-hand points provides the geometric basis for refinement. The correspondences express analogous
+locations on the two hands; they do not require their shapes or articulation ranges to coincide.
+The hand/forearm segmentation removes human-hand pixels from the depth samples used as object evidence.
+Nearby valid non-hand depths provide local object surface points. Multi-finger proximity, depth validity,
+and local surface consistency identify candidate contact frames, which are temporally filtered. These checks
+determine where geometric refinement is supported by the observation. When an entire sequence has no
+reliable contact, the initialized hand trajectory is retained. Contact evidence is used to recover spatial
+hand–object relationships; it is not a measurement of contact force.
+Local wrist and finger corrections.
+At one contact frame, let (p0, R0) be the initialized wrist pose and f 0
+the active finger-joint vector for one hand. In the implemented six-active-joint hand model, δp, δω ∈R3 and
+δf ∈R6. We optimize ξ = (δp, δω, δf) ∈R12 using
+p(ξ) = p0 + R0δp,
+R(ξ) = R0 Exp([δω]×),
+f(ξ) = clip(f 0 + δf, fmin, fmax).
+(A.1)
+The initialized position p0 is in the world frame, and R0 maps wrist coordinates to world coordinates. Both
+wrist corrections are expressed relative to the initialized wrist frame. Translations are in meters; rotation
+vectors and finger-joint angles are in radians. The clip is componentwise, and fmin, fmax ∈R6 are the
+active-joint limits in the robot’s MJCF model. Here [δω]× is the skew-symmetric matrix associated with
+the rotation vector, and Exp maps it to a valid rotation. Forward kinematics evaluates the robot landmarks
+under the corrected wrist and finger configuration, including the fixed mimic-joint relationships. Thus wrist
+placement and finger articulation affect the same geometric objective.
+Shared interaction geometry.
+Let P h be the selected human landmarks, P R(ξ) their robot counterparts, and
+O the object samples for this frame. Following the interaction-mesh construction of OmniRetarget (Yang
+et al., 2025a), the ordered vertex arrays V h = [P h; O] and V R(ξ) = [P R(ξ); O] share vertex correspondences
+and connectivity. The implementation constructs adjacency from a Delaunay tetrahedralization of the human
+landmarks and object samples, with a nearest- neighbor fallback when tetrahedralization fails. Connectivity
+is then held fixed throughout the frame’s optimization and reused for the robot vertices.
+15
+
+
+Let vi ∈R3 be the world-frame position of the ith vertex of V . For each vertex with a nonempty neighbor set
+N(i), its descriptor is
+Li(V ) = vi −
+1
+|N(i)|
+X
+j∈N (i)
+vj.
+(A.2)
+The uniform weights sum to one. Consequently, adding a common translation to the vertices leaves their
+descriptors unchanged. Hand–object relationships still constrain the wrist because the observed object vertices
+remain fixed while the robot-hand vertices move. Object descriptors can also change when their neighbors
+include hand vertices, even though the object positions themselves are constant. The descriptor discrepancy
+therefore includes both hand and object rows:
+ξ∗= arg min
+ξ∈A λL
+X
+i∈V
+Li(V R(ξ)) −Li(V h)
+2
+2 + Lreg(ξ).
+(A.3)
+Here V indexes corresponding vertices and λL weights descriptor matching.
+Let ξ−= (δp−, δω−, δf −)
+denote the preceding solved contact-frame correction, with ξ−= 0 for the first contact frame, and define
+[a]+ = max(a, 0). The regularizer is
+Lreg(ξ) = α2
+w
+ ∥δp∥2
+2 + ∥δω∥2
+2
+
++ α2
+f∥δf∥2
+2
++ β2
+w
+ ∥δp −δp−∥2
+2 + ∥δω −δω−∥2
+2
+
++ β2
+f∥δf −δf −∥2
+2
++ γ2 [∥δp∥2 −bt]2
++ + [∥δω∥2 −rmax]2
++
+
+.
+The coefficients αw, αf weight wrist and finger anchoring; βw, βf weight temporal changes in those corrections;
+and γ weights the soft magnitude limits. These coefficients multiply residuals, so their squares appear in the
+objective. The first two terms anchor the correction to its initialization, the next two penalize changes from
+the preceding contact solution, and the last term softly limits translation and rotation magnitudes. We use
+the following default weights:
+Term
+Parameter
+Value
+Laplacian descriptor loss
+λL
+10
+Wrist anchor residual
+αw
+0.10
+Finger anchor residual
+αf
+0.018
+Wrist temporal residual
+βw
+12
+Finger temporal residual
+βf
+2
+Soft-limit residual
+γ
+40
+The correction box at frame t is
+A = {ξ : |δpi| ≤bt,
+|δωi| ≤rmax
+(i = 1, 2, 3),
+|δfj| ≤δfmax
+(j = 1, . . . , 6)}.
+Here bt is the frame’s translation bound in meters, rmax is the rotation-vector coordinate bound in radians, and
+δfmax is the finger-correction coordinate bound in radians. The default angular bounds are rmax = π/15 rad
+(12◦) and δfmax = 0.28 rad. These are componentwise box bounds; the rotation-vector norm also enters the
+soft magnitude penalty above. Active-joint limits are applied separately by the clipping in Eq. (A.1). Let d0,t
+be the world-frame distance from the initialized palm center to the centroid of the object samples used in the
+Laplacian graph, with d0,t = 0 for an empty sample set. The default translation bound is
+bt =
+(
+min(d0,t, 0.040 m),
+d0,t is finite and d0,t ≥0.025 m,
+0.015 m,
+otherwise.
+These coordinate bounds and soft magnitude penalties restrict displacement when local depth evidence is
+incomplete.
+16
+
+
+Numerical refinement and temporal propagation.
+The contact solver stacks the descriptor, anchor, temporal,
+and soft-limit residuals into a vector ρ(ξ) so that ∥ρ(ξ)∥2
+2 equals the objective in Eq. (A.3). In particular,
+descriptor differences are multiplied by √λL; the remaining residual blocks use αw, αf, βw, βf, γ as defined
+above. Let Jρ denote the Jacobian of this weighted residual vector with respect to ξ. The fixed Laplacian
+matrix L satisfies (LV )i = Li(V ), and I3 is the 3 × 3 identity. The unweighted descriptor Jacobian follows
+by applying L ⊗I3 to the robot-vertex Jacobian; object-vertex derivatives are zero. Translation derivatives
+follow the wrist transform analytically. Rotation and finger-joint derivatives use forward finite differences
+with an increment of 10−4 rad. Each iteration computes a damped linearized step,
+δξ = −(J⊤
+ρ Jρ + λdI)−1J⊤
+ρ ρ,
+(A.4)
+where I is the 12 × 12 identity and λd is the damping coefficient, set to 10−4. The solver first clips the step
+against the remaining coordinate bounds, then rescales it if its Euclidean norm exceeds the default trust-region
+radius of 0.2. This norm uses the correction coordinates in meters and radians without additional coordinate
+normalization. The corrected pose is re-evaluated before the next iteration. The default iteration limits are
+20 for the first contact frame and 10 for subsequent contact frames. Iterations stop earlier when successive
+squared-residual costs satisfy NumPy’s default isclose test or when the clipped and rescaled step has norm
+below 2 × 10−4; in the latter case, the small step is applied before termination. The preceding contact solution
+initializes the next contact-frame solve.
+Within the contact optimizer, correction candidates are propagated to the target clock by linear interpolation
+of translation and finger offsets and shortest-path interpolation of the correction rotations on SO(3) between
+contact intervals. Before the first contact, the correction ramps from zero at the sequence start to the first
+contact correction; after the last contact it ramps to zero at the sequence end. These ramps apply when the
+corresponding non-contact frames exist. With no contact frames, all corrections are zero. The propagated
+correction coordinates are then smoothed with a separate Savitzky–Golay filter whose default window contains
+nine frames and whose polynomial degree is two, using polynomial edge evaluation (interp mode). Sequences
+shorter than nine frames are left unchanged by this filter. Filtering does not impose the prefilter endpoint
+values as equality constraints. This correction filter is distinct from the sparse-reference filter described in
+Sec. A.3. The resulting f ret
+1:T is retained as a continuous geometric hand reference; the grasp and release
+command construction is a separate operation described in Sec. 3.4.
+For the tracking pipeline, the wrist reference is assembled from the candidate wrist poses over the interval
+between the first and last contact frames. Outside this interval, the first-contact residual is held before contact,
+and the last-contact residual is held after contact. The held quantities are the world-frame translation offset
+and the local rotation offset composed on the right of the nominal wrist orientation. They are applied relative
+to the nominal wrist pose at each frame, so holding these residuals does not fix the absolute wrist pose. This
+boundary rule applies to the injected wrist reference and does not replace the interpolated and smoothed
+finger trajectory. The assembled three-point reference is subsequently filtered as described in Sec. A.3.
+A.2
+Sparse pose-command optimization
+Search space and decoding.
+The source-camera poses are mapped to torso poses using the target robot’s
+URDF camera-to-torso transform. Together with the retargeted wrists, these produce three ordered reference
+tracks: torso, left wrist, and right wrist. We extend ScaleBFM (Zeng et al., 2026) with a three-point tracking
+mode conditioned on the torso and bilateral wrist poses, and fine-tune the pretrained controller for this mode
+using ScaleBFM’s training data. The resulting tracker receives these sparse pose commands and produces
+whole-body joint targets for PD control. SCO changes the sparse commands and evaluates their realized
+motion in simulation; it does not directly search all robot joint configurations.
+At each replanning instant, K = 10 knots span a horizon of H = 40 control steps. For each tracked body b
+and knot k, the latent contains translation and rotation-vector residuals (zp
+kb, zR
+kb) ∈R6. The three bodies
+therefore contribute 18 coordinates per knot and 180 coordinates in total. Normalized coordinates are clipped
+to [−1, 1] before physical scaling:
+δpkb = 0.055 clip(zp
+kb, −1, 1),
+δωkb = 0.0825 clip(zR
+kb, −1, 1).
+(A.5)
+17
+
+
+Table A.1 SCO settings for Whole-Body Motion Generation. The residual and proposal scales apply to this stage’s
+three-point pose-command space.
+Quantity
+Value
+Control frequency
+50 Hz
+Planning horizon H / executed prefix ∆
+40 / 10 steps
+Temporal knots K / latent dimension d
+10 / 180
+Candidates N / CEM updates I / elites E
+80 / 8 / 10
+Initial standard deviation / floor
+1.6 / 0.075
+Translation / rotation scale
+0.055 m / 0.0825 rad
+Position / orientation cost weight
+1.0 / 0.1
+Torso / left wrist / right wrist weight
+0.25 / 1.0 / 1.0
+Translation is in meters and rotation is in radians. Both residuals are expressed in the world frame. Let
+(pref
+τb , Rref
+τb ) denote the unmodified reference pose of tracked body b at horizon step τ ∈{1, . . . , H}, where pref
+τb
+is its world-frame position and Rref
+τb maps body-frame vectors to the world frame.
+The knots are uniformly spaced at τk = 1 + (k −1)(H −1)/(K −1) for k = 1, . . . , K. Let Aτk be the
+piecewise-linear interpolation weight from knot k to horizon step τ. For τj ≤τ ≤τj+1, the only potentially
+nonzero weights are
+Aτj = τj+1 −τ
+τj+1 −τj
+,
+Aτ,j+1 =
+τ −τj
+τj+1 −τj
+.
+The decoder interpolates the knot residuals and constructs the sparse pose commands as
+δpτb =
+K
+X
+k=1
+Aτk δpkb,
+δωτb =
+K
+X
+k=1
+Aτk δωkb,
+pcmd
+τb
+= pref
+τb + δpτb,
+Rcmd
+τb
+= Exp([δωτb]×) Rref
+τb .
+(A.6)
+Here [·]× is the skew-symmetric matrix operator satisfying [v]×x = v × x, and Exp is the matrix exponential.
+The rotation-vector residuals are interpolated before conversion to rotation matrices; left multiplication applies
+the resulting rotation correction in the world frame.
+The decoded poses (pcmd
+τb , Rcmd
+τb ) are supplied to the three-point tracker. Their realized link poses are denoted
+by (bpτb, bRτb) in the tracking objective below and are evaluated against the unchanged reference poses. Joint
+references, pelvis guidance, and other body references are not independently perturbed by this search. Their
+realized motion is determined by the tracker and simulator.
+Tracking objective.
+All candidates start from the same current simulator state and are scored against the
+unmodified reference rref. Let (bpτb, bRτb) denote a candidate’s realized link pose at horizon step τ, and let
+(pref
+τb , Rref
+τb ) be the corresponding desired pose. The objective is
+J =
+H
+X
+τ=1
+ωτ
+X
+b∈B
+ηb
+h
+∥bpτb −pref
+τb ∥2
+2 + 0.1 angle
+
+bR⊤
+τbRref
+τb
+2i
+,
+ωτ =
+H −τ + 1
+PH
+j=1(H −j + 1)
+.
+(A.7)
+The body set B contains the torso and bilateral wrists. angle gives the relative rotation angle in radians. Link
+weights are ηtorso = 0.25 and ηleft wrist = ηright wrist = 1, without normalization across links. The pelvis has
+zero weight; joint, velocity, reference-deformation, and terminal penalties are inactive for this stage. The
+decreasing time weights prioritize the prefix that will be executed next. Scoring the realized motion against the
+unchanged target ensures that changing the input command alone cannot be counted as improved tracking.
+18
+
+
+Diagonal CEM and simulator failures.
+CEM (Pinneri et al., 2021) maintains a mean µ and a coordinate-wise
+standard deviation σ, initialized to zero and 1.6, respectively. Each iteration samples N latent vectors,
+z(n) = µ + σ ⊙ε(n),
+ε(n) ∼N(0, Id),
+(A.8)
+then decodes and evaluates the corresponding commands in parallel rollouts. For the E lowest-cost candidates
+indexed by E, the proposal update is
+µ+
+i = 1
+E
+X
+n∈E
+z(n)
+i
+,
+σ+
+i = max
+(
+0.075,
+s
+1
+E
+X
+n∈E
+
+z(n)
+i
+−µ+
+i
+2
+)
+.
+(A.9)
+The divisor is E, giving the population standard deviation of the elite coordinates. The proposal is diagonal,
+so the update does not estimate a full covariance from a small elite set. Sampling operates in normalized
+latent coordinates; physical clipping is applied by the decoder.
+Non-finite simulator measurements or objective values are handled by assigning a large finite failure cost
+before candidate ranking. CEM selects the E lowest-cost samples from all N candidates without a separate
+candidate-validity filter. The same failure-cost convention is used when comparing the nominal command, the
+best sampled candidate, and the final proposal mean. Tracking-error-based rejection is applied to complete
+episodes after SCO, as described below.
+Receding-horizon execution.
+One replanning update proceeds as follows:
+1. Construct the next reference horizon and initialize the diagonal proposal. All candidates share the
+current simulated starting state.
+2. Sample, decode, and roll out N sparse-command candidates. Score them against the fixed target using
+the failure-cost convention above, and update the proposal using the E lowest-cost samples. Repeat for
+I updates.
+3. Compare the nominal command, the best sampled candidate, and the final proposal mean using their
+rollout costs, and retain the lowest-cost choice.
+4. Execute its first ∆= 10 steps, record the realized configurations, and continue planning from the
+resulting simulator state.
+At 50 Hz, the horizon covers 0.80 s and each retained prefix covers 0.20 s. The candidate count N denotes
+sampled proposals per iteration; nominal and final-mean evaluations are distinct comparison candidates.
+Concatenating executed prefixes yields qR,SCO
+1:T
+. Advancing from the realized state carries tracking deviations
+into the next optimization instead of restarting each horizon at an ideal reference pose.
+Episode acceptance before arm refinement.
+After SCO has generated the complete trajectory qR,SCO
+1:T
+, we
+evaluate its mean wrist-position tracking error before applying Mink arm refinement. Let Bwrist contain
+the left and right wrist links. For each wrist b, let pSCO
+tb
+be its world-frame position obtained by forward
+kinematics from qR,SCO
+t
+, and let pref
+tb be the corresponding unchanged wrist-position target used during SCO.
+The episode-level error is
+¯ewrist = 1
+2T
+T
+X
+t=1
+X
+b∈Bwrist
+pSCO
+tb
+−pref
+tb
+
+2 .
+(A.10)
+This is the arithmetic mean of the Euclidean position errors over both wrists and all frames of the complete
+episode. Episodes with ¯ewrist > 0.075 m are discarded; retained episodes proceed to Mink arm refinement.
+This acceptance criterion uses wrist-position error only and is separate from the receding-horizon optimization
+objective in Eq. A.7.
+19
+
+
+A.3
+Temporal smoothing and constrained arm refinement
+Filtering on the rotation manifold.
+Savitzky–Golay filtering (Schafer, 2011) smooths the three-point reference
+positions in the common Z-up world frame, using a five-frame window and a quadratic polynomial under
+the default settings. Orientation filtering uses local tangent coordinates so that smoothing does not produce
+invalid rotation matrices. For a window around frame t, the neighboring rotations Rj are represented relative
+to Rt as Log(R⊤
+t Rj)∨, using the principal rotation vector with norm at most π. A local polynomial fit using
+the actual timestamps is evaluated at the timestamp of frame t to obtain δωSG
+t
+, and the filtered orientation is
+RSG
+t
+= Rt Exp
+ [δωSG
+t
+]×
+
+.
+(A.11)
+The superscript ∨converts a skew-symmetric matrix to its rotation vector. Near a segment boundary, the full
+window shifts inside the segment and the fitted polynomial is still evaluated at the target frame’s timestamp.
+The implementation splits the sequence where an adjacent timestamp gap exceeds three times the median
+sampling interval of the full sequence; segments shorter than five frames are left unchanged. Position filtering
+uses the same actual-time polynomial fit and boundary handling. Position and orientation filtering therefore
+use the same temporal reference while respecting their different geometry. Kimodo (Rempe et al., 2026)
+provides an initial whole-body configuration from the first sparse reference frame; the checked configuration
+initializes whole-body simulation.
+Arm-only refinement and final assembly.
+SCO reduces sparse-reference error through the controller’s dynamics,
+but its realized wrists can still deviate from the retargeted manipulation reference. Temporal Mink IK (Zakka,
+2024) addresses this residual by adjusting the arm chain, including the wrists. The optimized floating base,
+torso, and lower-body trajectory are held fixed, and the contact-aware finger trajectory is retained. Joint
+limits, per-step displacement and velocity bounds, and self-collision constraints restrict the arm updates. A
+posture penalty discourages unnecessary departures from the SCO configuration. Temporal restrictions are
+applied across successive refined states so that reducing a frame’s wrist error does not permit an unconstrained
+joint jump.
+The final configuration combines the refined arms, retargeted fingers, and fixed non-arm motion. It supplies
+both the canonical motion reference and the body trajectory used for robot-view rendering. Holding the
+non-arm configuration fixed preserves those kinematic tracks; changes to the arms can still affect the response
+of a whole-body controller. The replay comparison in Sec. 4.5 therefore evaluates trackability before and after
+refinement. These measurements assess the demonstrated trajectories under the evaluated controller, without
+assuming that inverse kinematics alone establishes dynamic feasibility for arbitrary motions or deployment
+interfaces.
+B
+Coordinate Conventions and Observation Synthesis
+This appendix expands the geometric operations in Sec. 3.3. The recovered human scene and the rendered
+robot must be expressed in the same target-camera frame before their depths can be compared. The target
+camera is obtained from the canonical whole-body motion, so scene reprojection and robot rendering use one
+pose at each time index.
+B.1
+Reference frames and the canonical record
+Let TA←B ∈SE(3) map homogeneous coordinates in frame B into frame A. The world frame is denoted by
+W, the robot torso frame by B, and its camera frame by C. A camera-to-world pose has the form
+Ct =
+Rt
+pt
+0⊤
+1
+
+,
+C−1
+t
+=
+
+R⊤
+t
+−R⊤
+t pt
+0⊤
+1
+
+.
+(B.1)
+Here Rt ∈SO(3) maps camera-frame vectors to the world frame, and pt ∈R3 is the camera origin expressed in
+world coordinates. Thus Ct maps camera-frame points to world coordinates, whereas C−1
+t
+maps world points
+into the camera frame for projection. All depths and translations in the geometric stages use a consistent
+metric scale. Image coordinates and calibrated intrinsics must refer to the same image size. The control clock
+20
+
+
+provides the common time index for source observations, recovered geometry, canonical configurations, and
+the synthesized observations stored with them.
+Write TB←C for the fixed camera-to-torso transform from the target robot’s calibration and URDF. We
+express the source and robot camera poses in a common world frame and use a consistent optical-frame
+convention. To construct the torso reference, we take the source camera pose Ch
+t as the desired robot camera
+pose. The torso reference and the camera pose derived from canonical robot motion are then given by
+T ref
+W ←B(t) = Ch
+t T −1
+B←C,
+CR
+t = TW ←B(qR
+t )TB←C.
+(B.2)
+Here TW ←B(qR
+t ) is the torso-to-world transform obtained by forward kinematics at the canonical robot
+configuration. The first line expresses the torso target ptorso
+t
+from Sec. 3.2 as a homogeneous transform; the
+second uses the generated configuration to define the rendering camera. The resulting robot camera trajectory
+can differ from the source camera trajectory because whole-body tracking may not exactly realize the torso
+reference under the robot’s kinematic and control constraints. Arm refinement changes the rendered arm
+geometry while leaving the torso and camera trajectory fixed. In particular, the observation stage uses the
+second line rather than substituting the source camera path or a constant vertical displacement.
+The canonical record retains (IR
+t , qR
+t , ℓ) for a fixed target embodiment and camera convention. Its inde-
+pendence from the deployment interface means that these quantities are retained when the subsequent
+state–action mapping changes between SONIC and HEFT. A tracking controller is still used to construct the
+canonical motion. The body state recorded during deployment-controller replay can differ from the canonical
+configuration; the interface appendix specifies this distinction in detail.
+B.2
+Metric back-projection and target-camera visibility
+Let Kh and KR denote the source and target intrinsics. The following equations assume distortion-free pinhole
+image coordinates and zero-skew intrinsics, with source RGB and depth registered to the same pixel grid. A
+source pixel is written as u = (ux, uy), with homogeneous coordinate ¯u = (ux, uy, 1)⊤. EfficientSAM3 (Zeng
+et al., 2025) provides the source arm/hand mask. Invalidating the masked depth before projection prevents
+the source limbs from entering the reconstructed scene. Only unmasked source pixels with finite, positive
+optical-axis depth are back-projected. For each such sample,
+ph(u) = eDh
+t (u)K−1
+h ¯u,
+pR(u)
+1
+
+= (CR
+t )−1Ch
+t
+ph(u)
+1
+
+,
+vx(u) = f R
+x
+[pR(u)]x
+[pR(u)]z
++ cR
+x ,
+vy(u) = f R
+y
+[pR(u)]y
+[pR(u)]z
++ cR
+y .
+(B.3)
+Here eDh
+t is the source depth after invalidating the human arm/hand mask. The points ph(u) and pR(u)
+are expressed in the source-camera and target-camera frames, respectively; v(u) = (vx(u), vy(u)) is the
+projected target-image location. The quantities fx, fy are focal lengths in pixels and cx, cy are principal-point
+coordinates. The source depth is a z coordinate, rather than the Euclidean distance from the camera center.
+After transformation, the target depth used for visibility is [pR(u)]z, rather than the original source depth.
+Valid projected samples have finite coordinates and positive target z and contribute only inside the target
+image.
+Forward splatting maps source colors into the target grid. Under the default settings, each projected location
+is rounded to the nearest integer pixel center and splatted over its 3 × 3 neighborhood, clipped to the target
+image. Let St(v) denote the valid source samples whose projected splats cover target pixel v. The metric
+z-buffer selects the smallest target-camera depth among the valid reprojected samples covering each target
+pixel,
+Dgeo
+t
+(v) =
+min
+u∈St(v)[pR(u)]z,
+V geo
+t
+(v) = 1[St(v)̸ = ∅].
+(B.4)
+Thus, V geo
+t
+indicates valid reprojected scene support; visibility is resolved among the available source samples.
+The minimum is used only where V geo
+t
+= 1; elsewhere the depth is invalid. Color is taken from a sample
+21
+
+
+at the nearest surface, with numerical ties resolved consistently. This visibility ordering prevents a farther
+surface from overwriting a nearer one merely because it is processed later. The geometric hole mask is
+Hgeo
+t
+= 1 −V geo
+t
+. It includes areas exposed by source-arm removal and areas that were not observed from
+the original viewpoint. Reprojection changes where visible source evidence is placed; it does not supply the
+appearance of these newly exposed regions.
+B.3
+Robot rendering, compositing, and restricted completion
+MuJoCo renders robot color and depth from qR
+t
+with the same CR
+t
+used in Eq. B.3. The rendered depth
+is represented in the same metric target-camera convention before visibility comparison. Write V rob
+t
+for its
+binary validity mask. The visible-robot mask is defined at every target pixel by
+M rob
+t
+(v) =
+
+
+
+
+
+
+
+
+
+1[Drob
+t
+(v) < Dgeo
+t
+(v)],
+(V rob
+t
+(v), V geo
+t
+(v)) = (1, 1),
+1,
+(V rob
+t
+(v), V geo
+t
+(v)) = (1, 0),
+0,
+(V rob
+t
+(v), V geo
+t
+(v)) = (0, 1),
+0,
+(V rob
+t
+(v), V geo
+t
+(v)) = (0, 0).
+(B.5)
+If only one surface is valid, that surface supplies the pixel. When neither is available, the pixel remains a
+hole. Neighboring valid scene depths may supply local depth context inside geometric holes, as described in
+the main pipeline; they do not replace the depth comparison at pixels with measured scene support. The
+visible-robot mask, rather than the rendered silhouette alone, controls the composite:
+Icomp
+t
+= M rob
+t
+Irob
+t
++ (1 −M rob
+t
+)Igeo
+t
+,
+Hrem
+t
+= Hgeo
+t
+(1 −M rob
+t
+).
+(B.6)
+Products here are pixel-wise, with binary masks broadcast over color channels. The color arrays Irob
+t
+and
+Igeo
+t
+use finite zero placeholders wherever their respective validity masks are zero, so masked arithmetic is
+defined even at holes. A branch-based selection of the valid color gives the same composite. In particular,
+Hrem
+t
+= (1 −V geo
+t
+)(1 −V rob
+t
+): neither source supplies a pixel precisely when both validity masks are zero.
+A foreground scene object can occlude the robot, and a nearer robot surface can occlude the reprojected
+scene. The residual-hole formula is equivalent to the set difference in the main text when each binary mask is
+identified with its support: only pixels uncovered by both sources remain to be completed.
+DiffuEraser (Li et al., 2025) supplies appearance in Hrem
+t
+. Denoting its completed prediction by Ifill
+t , the final
+observation can be expressed as
+IR
+t = (1 −Hrem
+t
+)Icomp
+t
++ Hrem
+t
+Ifill
+t .
+(B.7)
+Thus, valid scene and rendered-robot pixels remain fixed. Completion has a restricted appearance role after
+geometric visibility has been established; it does not change the canonical configuration, target camera pose,
+or action labels. The completed observation is stored with the same qR
+t
+and instruction to form the canonical
+episode.
+For the reported 400 egocentric training clips, source depth is recorded by the iPhone. The RGB-only route in
+the framework instead uses metric depth from Depth Anything 3 (Lin et al., 2025) before the same geometric
+operations. These are alternative sources for Dh
+t , rather than two separately evaluated training-data conditions.
+The observation ablation in Sec. 4.3 compares how views are aligned while keeping the converted motion and
+state–action supervision fixed.
+C
+Controller-Specific Command and State Interfaces
+This appendix expands Sec. 3.4. For each deployment controller, KODA optimizes a body reference against
+the fixed canonical trajectory, evaluates the realized motion, and records state–action supervision. Table C.1
+distinguishes the search representations from the quantities exported for VLA training.
+C.1
+Shared Body-Reference Search
+Let mcan
+t
+contain the canonical pelvis pose, the 29-dimensional body-joint vector bcan
+t
+, and the associated link
+poses. The reference is represented on the 50 Hz control clock; joint velocities and link quantities are available
+22
+
+
+Table C.1 Representations used in control-command generation. Dimensions refer to one knot or one time-indexed
+record, as indicated. The search coordinates are shared, while body-action labels depend on the controller.
+Quantity
+Dimension
+Contents and role
+Search residual
+35 per knot
+Pelvis translation and rotation-vector corrections, plus 29 body-
+joint corrections.
+Horizon search
+350
+Ten residual knots interpolated over the horizon.
+SONIC body label
+64
+Motion token from the optimized motion reference.
+HEFT body label
+38 = 29 + 9
+Absolute body-joint targets and pelvis code.
+Hand action
+12
+Bilateral BrainCo targets, with grasp and release handled sepa-
+rately.
+Complete action
+76 / 50
+SONIC / HEFT body label with 12 hand targets.
+Policy state
+44 = 29 + 3 + 12
+Rollout body joints, base-frame gravity, and retargeted hand
+angles.
+with the motion record. We use emt for a candidate command reference and bmκ
+t for the motion realized by
+controller κ. These three quantities serve different roles: the canonical motion specifies the desired behavior,
+the candidate is supplied through the controller’s reference interface, and the rollout determines its tracking
+cost.
+For knot index k = 1, . . . , K, each temporal knot contains normalized residuals
+zk =
+ zp
+k, zω
+k , zb
+k
+
+∈R3+3+29,
+z = (z1, . . . , zK),
+K = 10.
+(C.1)
+Here zp
+k, zω
+k ∈R3 and zb
+k ∈R29 are dimensionless pelvis-translation, rotation-vector, and body-joint corrections,
+respectively. The resulting search vector z ∈R350 is the variable sampled by CEM for either controller. At
+each iteration, CEM draws N candidate vectors z(n), n = 1, . . . , N, from a diagonal Gaussian distribution
+in this normalized knot space. Each sample is deterministically decoded into physical corrections δ(n)
+τ
+at
+every control step through clipping, scaling, and temporal interpolation in Eq. C.2. Hands are excluded
+from this body-reference search and retain the retargeted geometric trajectory used for the hand-state
+and hand-command construction below. Let Sκ ∈R35×35 denote the diagonal conversion from normalized
+coordinates to physical translation, rotation, and joint corrections. Both controllers use the same scales:
+SSONIC = SHEFT = diag(0.055I2, 0.0275, 0.0825I3, 0.1375I29) ,
+where Id is the d-dimensional identity matrix. The first three scale entries are in meters; the rotation and
+joint entries are in radians. For control-step index τ within the current horizon, let δτ = (δpτ, δωτ, δbτ) ∈R35
+collect the dense physical corrections. With interpolation weights Aτk, they are
+δτ =
+K
+X
+k=1
+AτkSκ clip(zk, −1, 1),
+X
+k
+Aτk = 1.
+(C.2)
+The knots are uniformly spaced over the horizon, and the nonnegative weights Aτk linearly interpolate
+neighboring knots. The clipping operation acts elementwise. Let pcan
+τ
+and Rcan
+τ
+be the canonical pelvis position
+and pelvis-to-world rotation. Translation and rotation-vector corrections are expressed in the world frame
+and applied as
+epτ = pcan
+τ
++ δpτ,
+eRτ = Exp([δωτ]×)Rcan
+τ
+,
+ebτ = bcan
+τ
++ δbτ,
+where [v]×w = v × w and Exp maps a skew-symmetric matrix to a rotation. Body-joint corrections are
+followed by elementwise clipping to joint limits when those limits are configured. Forward kinematics then
+recomputes the link poses from the perturbed pelvis and body joints, maintaining a single connected robot
+configuration.
+The controller adapter encodes each candidate for simulation using SONIC motion encoding or the HEFT
+representation below. CEM searches the common physical reference space and evaluates each candidate
+through the selected controller. Its 350 search coordinates differ from the 64-dimensional SONIC token and
+38-dimensional HEFT body label.
+23
+
+
+C.2
+Tracking Cost and Receding-Horizon Settings
+The shared objective evaluates 29 body joints and 14 links: the pelvis, torso, and bilateral hip, knee, ankle,
+shoulder, elbow, and wrist links. For two motion states m, m′, let b, b′ ∈R29 be their body-joint angle vectors.
+Let pj, p′
+j ∈R3 be the world-frame positions of link j, and Rj, R′
+j ∈SO(3) its link-to-world rotations, for
+j = 1, . . . , 14. Define
+eq(m, m′) = 1
+29∥b −b′∥2
+2,
+ep(m, m′) = 1
+14
+14
+X
+j=1
+∥pj −p′
+j∥2
+2,
+eR(m, m′) = 1
+14
+14
+X
+j=1
+θ(R⊤
+j R′
+j)2,
+θ(Q) = arccos
+
+clip
+tr(Q) −1
+2
+, −1, 1
+
+.
+(C.3)
+Here Q ∈SO(3) denotes a relative rotation and θ(Q) ∈[0, π] its geodesic angle. Positions are in meters
+and angular quantities are in radians. Each link contributes equally to the link averages; joint error is
+averaged over the 29 joint coordinates. The orientation term is the squared geodesic angle of the relative
+rotation. Its quaternion implementation uses the absolute quaternion inner product, so the two quaternion
+signs representing the same rotation produce the same error.
+For a horizon of H steps, the per-scenario rollout cost is
+Jκ =
+H
+X
+τ=1
+h
+eq( bmκ
+τ, mcan
+τ
+) + ep( bmκ
+τ, mcan
+τ
+) + 0.5eR( bmκ
+τ, mcan
+τ
+)
+i
++ Ldef + 0.01
+H
+X
+τ=2
+∥uPD
+τ
+−uPD
+τ−1∥2
+2 + Lterminal,
+Ldef =
+H
+X
+τ=1
+h
+0.1eq( emτ, mcan
+τ
+) + 0.1ep( emτ, mcan
+τ
+) + 0.05eR( emτ, mcan
+τ
+)
+i
+,
+Lterminal = 5eq( bmκ
+H, mcan
+H ) + 5ep( bmκ
+H, mcan
+H ).
+(C.4)
+The tracking terms compare realized motion with the fixed canonical target. The deformation terms instead
+compare the candidate reference with that target, penalizing unnecessary changes to the commands. The
+action-rate term uses uPD
+τ
+∈R29, the low-level PD position targets produced during rollout for the 29 body
+joints, in radians. Hand targets are excluded. This term sums squared changes across joints and has zero
+contribution at the first horizon step. It does not measure changes between motion tokens or between the
+normalized search vectors.
+All running terms use uniform time weights of one. The horizon reduction is a sum, while the joint and link
+reductions in Eq. C.3 are averages. The terminal penalties add weight to joint and link-position errors at the
+last step; no terminal orientation term is included in this objective.
+Control Command Generation uses N = 80 candidates per CEM iteration, I = 8 iterations per replan, and
+E = 9 elites. The planning horizon is H = 40 steps, or 0.80 s, and the retained prefix is ∆= 20 steps, or
+0.40 s. After executing that prefix in simulation, the next search continues from its resulting state against the
+subsequent canonical reference window. Candidate rollouts with non-finite joint, link, or action values receive
+the failure cost 1012. The objective otherwise scores the realized motion through the stated tracking terms; it
+does not add a separate fall or contact heuristic. These settings apply to the second optimization stage for
+both evaluated deployment controllers.
+At the end of a sequence, the reference window is padded by repeating its last frame to retain the full planning
+horizon. If nrem control steps remain, only min(∆, nrem) steps are executed.
+24
+
+
+Table C.2 Dynamics randomization for Control Command Generation. Multipliers scale the corresponding nominal
+parameters and remain fixed within each scenario rollout. Velocity offsets are additive and sampled independently for
+each component; N(0, σ2) denotes a zero-mean Gaussian distribution with standard deviation σ.
+Parameter
+Distribution
+Unit
+Contact friction multiplier
+U(0.8, 1.2)
+–
+Joint armature multiplier
+U(0.8, 1.2)
+–
+Joint friction loss multiplier
+U(0.8, 1.2)
+–
+Actuation strength multiplier
+U(0.9, 1.1)
+–
+Root linear velocity offset
+N(0, 0.022)
+m/s
+Root angular velocity offset
+N(0, 0.052)
+rad/s
+Joint velocity offset
+N(0, 0.052)
+rad/s
+Dynamics randomization during command optimization.
+Following (Xie et al., 2026a), we evaluate each
+command candidate in four randomized physics scenarios during Control Command Generation. At each
+replanning update, we sample dynamics multipliers and initial-velocity offsets from Table C.2 to construct the
+four scenarios. The same scenario set is shared by all candidates and CEM iterations within that update; a
+new set is sampled at the next update. Each scenario rollout starts from the current execution state with the
+sampled velocity offsets added. The candidate reference and canonical target are shared across scenarios.
+We evaluate Eq. C.4 separately in each scenario, using its realized motion and PD targets. For candidates
+with finite costs in all four scenarios, the CEM score is the arithmetic mean of the four scenario costs. The
+failure cost specified above is applied at the candidate level: if any scenario produces a non-finite cost, the
+candidate score is set to 1012. The count N = 80 denotes distinct command candidates, each evaluated in all
+four scenarios.
+After optimization, the selected prefix is executed under nominal simulation dynamics. This execution provides
+the recorded body states and the starting state for the next planning update. SONIC and HEFT use the
+same randomization distributions, scenario count, resampling rule, and cost aggregation.
+C.3
+SONIC and HEFT Body-Action Labels
+SONIC’s motion encoder maps the optimized reference to a 64-dimensional motion token (Luo et al., 2026).
+This token is recorded as the body-action label associated with the selected reference, whereas rollout
+body-joint angles describe the resulting motion.
+HEFT uses 29 absolute body-joint targets together with a nine-dimensional pelvis code (Liu et al., 2026a). Let
+pt ∈R3 and (αt, βt, ψt) denote the optimized pelvis position and roll, pitch, and yaw, with position expressed
+in the world frame. Let Rz(ψ) be the rotation about the world z axis that maps vectors from the yaw-aligned
+frame into the world frame. Define
+ct =
+ sin αt, cos αt −1, sin βt, cos βt −1, δψt, δp⊤
+t , pt,z
+⊤,
+δψt = wrap(ψt+1 −ψt),
+δpt = Rz(ψt)⊤(pt+1 −pt).
+(C.5)
+Here wrap returns the principal signed angle modulo 2π. The row combines the current pose’s roll, pitch, and
+absolute height with the transition to the next pose. The translation increment is expressed in the current
+yaw frame and contains three coordinates. A valid row therefore needs a successor pelvis pose; this is part of
+the motion-code definition rather than an extra body degree of freedom. Encoding L + 1 consecutive pelvis
+poses produces L code rows; the final input pose supplies the successor needed by the last row.
+During decoding, planar position and heading accumulate from an anchor (¯p0,xy, ¯ψ0). Let L be the number of
+code rows and use local row indices i = 0, . . . , L −1, independent of the episode time index t. With code
+25
+
+
+components numbered from one, set δψi = ci,5 and δpi = (ci,6, ci,7, ci,8)⊤. Then
+¯ψi = ¯ψ0 +
+i−1
+X
+j=0
+δψj,
+¯pi,xy = ¯p0,xy +
+i−1
+X
+j=0
+
+Rz( ¯ψj)δpj
+
+xy,
+¯pi,z = ci,9,
+¯αi = atan2(ci,1, 1 + ci,2),
+¯βi = atan2(ci,3, 1 + ci,4).
+(C.6)
+Empty sums are zero, and code components are numbered from one. Absolute height directly defines the
+decoded vertical position; it is not obtained by cumulatively adding the vertical increment. The final row’s
+transition leads beyond the returned sequence of current poses. This explains how the code can contain both
+vertical displacement and absolute height without integrating both into the same position. The decoded
+position ¯pi and roll–pitch–yaw angles (¯αi, ¯βi, ¯ψi) specify the pelvis pose represented by code row i. Together
+with the corresponding 29 absolute body-joint targets, they recover the physical body reference encoded by
+the HEFT body-action label. HEFT uses pelvis-and-joint references together with the robot state to generate
+tracking actions, which are mapped to body-joint PD targets. The barred quantities describe reference poses,
+while the realized motion is obtained from the controller rollout.
+C.4
+Hand Targets and Recorded State
+Both body-action formats append 12 BrainCo hand-joint targets, six per hand, yielding 76-dimensional SONIC
+actions and 50-dimensional HEFT actions. The hand command is constructed from the retargeted robot hand
+geometry. Following EgoHumanoid (Shi et al., 2026), the mean finger curvature is thresholded separately
+for each hand to distinguish grasp from release. For grasp, the command uses the calibrated BrainCo grasp
+pose to encourage active closure. For release, it uses the current retargeted joint angles. These targets are
+delivered separately to hand control. This construction specifies the closure command without interpreting a
+retargeted geometric pose as a measured grasp force.
+The policy state has the same 44-dimensional format for both controllers:
+sκ
+t =
+
+broll,κ
+t
+, (Rbase,κ
+t
+)⊤gW , f ret
+t
+
+.
+(C.7)
+Here broll,κ
+t
+∈R29 contains rollout body-joint angles and f ret
+t
+∈R12 contains continuous retargeted hand
+angles, both in radians. The rotation Rbase,κ
+t
+∈SO(3) maps base-frame vectors to the world frame, and
+gW = (0, 0, −1)⊤is the dimensionless unit gravity direction. Thus (Rbase,κ
+t
+)⊤gW gives the three-dimensional
+projected-gravity observation in the rollout base frame. The state records the estimated hand geometry even
+when a grasp action requests the calibrated closure target. Replacing the state hand angles with that target
+would change the meaning of the observation. Body-state values depend on the selected controller’s rollout,
+although the state format and retained hand estimates are shared.
+C.5
+Episode Export and Observation Reuse
+The procedure below summarizes the conversion from a canonical episode to controller-specific supervision.
+Controller-specific episode export
+1. Read the canonical motion, synthesized images, retargeted hand trajectory, and instruction on their
+common temporal index.
+2. For each receding-horizon window, decode CEM residuals into candidate body references, encode
+them for controller κ, simulate, and evaluate Eq. C.4 against the fixed canonical target.
+3. Retain the selected prefix of up to 20 steps, shortened when fewer steps remain, and continue from
+its resulting simulated state. Collect the optimized reference and realized body motion.
+4. Record the selected reference as SONIC tokens or HEFT body labels; append the 12 grasp/release
+hand targets.
+26
+
+
+Table D.1 Task goals and the changes defining Robot-OOD. Robot-ID uses the appearance and pose conditions
+represented in the robot demonstrations.
+Task
+Placement goal
+Robot-ID to Robot-OOD change
+Cup-to-basket
+Place the object in a basket
+Green bottle replaced by a brown bottle
+Parcel-to-shelf
+Place the parcel on a shelf
+Purple parcel replaced by a white parcel
+Basket-to-shelf
+Place the basket on a shelf
+Basket handle tilted by approximately 30◦
+Cup-to-drawer
+Place the object in a drawer
+Green bottle replaced by a brown bottle
+5. Assemble the 44-dimensional state from rollout body joints, projected gravity, and retargeted hand
+angles.
+6. Associate these states and actions with the retained canonical images and instruction to obtain the
+controller-specific training episode.
+Canonical-image reuse follows the fixed reference trajectory, while the recorded body state follows the selected
+controller’s realized motion. Their correspondence is therefore approximate when tracking is imperfect. The
+wrist and camera deviations in TABLE 4 measure this residual mismatch for the evaluated controllers, and
+TABLE 1 evaluates the utility of the resulting episodes for co-training. Changing from SONIC to HEFT
+repeats command optimization, encoding, and state recording while retaining canonical motion generation
+and view synthesis. The reuse rests on tracking the shared reference sufficiently well for the evaluated setting;
+it does not assert identical camera poses across controller rollouts.
+D
+Experimental Protocol and Metric Definitions
+This appendix specifies the data composition, controlled comparisons, and interpretation of the evaluation
+metrics used in Sec. 4.1. The task-success results remain in TABLES 1–3; the motion and rollout errors
+remain in TABLE 4.
+D.1
+Demonstration Sources and Evaluation Conditions
+The experimental platform is a Unitree G1 with BrainCo dexterous hands. For each task and deployment
+controller, the robot dataset contains 50 demonstrations collected through the corresponding SONIC or
+HEFT PICO teleoperation pipeline. The human pool contains 100 demonstrations per task, recorded with a
+chest-mounted iPhone using MobileEgo Anywhere (Palanisamy et al., 2026). All 400 human clips include
+phone-recorded depth, and both demonstration sources use 50 Hz sequences. The same human canonical
+records supply the motion, synthesized observations, and instructions for both controllers; command generation
+and state recording produce the controller-specific training fields.
+TABLE D.1 specifies the task goals and condition changes. Robot-ID is defined relative to object appearance
+and pose conditions in the robot demonstrations. Robot-OOD changes these conditions beyond that robot
+dataset. Each task’s human pool contains 80 shifted and 20 robot-matched clips, so the shifted test conditions
+are represented in the human training pool. This evaluates whether converted human data supplies coverage
+absent from the robot demonstrations. It does not test conditions excluded from both training sources. The
+80:20 composition describes the complete human pool; the independently sampled smaller budgets are not
+specified as having that same proportion.
+D.2
+Training Budgets and Success-Rate Aggregation
+For each controller configuration, GR00T N1.7 (Bjorck et al., 2025) is trained jointly on all four tasks for
+20,000 iterations with batch size 160. Within each task, robot and converted-human sources are sampled in
+proportion to their episode counts; other sampling settings follow GR00T defaults.
+The scaling study combines 50 fixed robot demonstrations with 0, 25, 50, 75, or 100 converted-human
+demonstrations per task. Human subsets are sampled randomly and independently at each budget without
+27
+
+
+nesting. Policy architecture and training budget remain fixed. All component ablations use SONIC with 50
+robot and 100 converted-human demonstrations per task.
+Each configuration is trained once and evaluated in 20 real-robot trials per task under each of the Robot-ID
+and Robot-OOD conditions. A trial succeeds when the placement is completed without a fall or unrecovered
+manipulation failure. We report the percentage of successful trials for each task and the unweighted mean
+across the four tasks, separately for each condition.
+D.3
+Controlled Component Comparisons
+TABLE D.2 separates the observation variants from the control-command variants. In the observation
+study, the demonstration set, state–action supervision, policy architecture, training budget, and real-robot
+evaluation protocol are fixed. Only the human-derived observation construction changes. Fixed offset adapts
+the view-alignment strategy of EgoHumanoid (Shi et al., 2026) to chest-mounted capture, using a 0.10 m
+vertical shift and ±0.05 m training-time perturbations. Both reprojection-only variants include hole inpainting.
+Table D.2 Definitions of the component variants. All comparisons use SONIC and the full human-data budget. The
+table describes changed components; quantitative policy results are in TABLES 2 and 3.
+Variant
+Observation or command construction
+Observation alignment
+No alignment
+Original human images.
+Fixed offset
+Scene reprojection with a fixed vertical camera shift, training-time perturbations,
+and hole inpainting.
+Motion-based reprojection
+Scene reprojection and hole inpainting using camera poses derived from the canonical
+robot motion.
+Full alignment
+Motion-derived onboard views, additionally removing human arms and rendering
+and compositing the target robot.
+Control Command Generation
+Without SCO
+Canonical whole-body motion used directly as the tracking controller’s reference;
+command optimization omitted only at this stage.
+With SCO
+Controller-specific commands optimized to track the same canonical motion.
+Full alignment changes human-arm removal and robot rendering/compositing together relative to motion-based
+reprojection. Consequently, this comparison does not separately identify the effect of each image-processing
+operation. The main interpretation concerns the complete alignment pipeline relative to original human
+observations and the adapted fixed-offset baseline. The intermediate variant describes a partial pipeline under
+the same training setup.
+In the command-generation study, both variants retain Whole-Body Motion Generation and Robot Onboard
+View Generation. They use identical canonical trajectories, observations, demonstrations, and policy-training
+settings. The optimized commands are evaluated through the deployment controller, and body-state features
+are recorded from the resulting rollouts. Changing command generation can therefore change both action
+labels and body-state features. This is a comparison of state–action supervision as a whole, not an action-only
+intervention with all state inputs held fixed. These component comparisons use SONIC; the data-scaling
+study evaluates reuse of the complete converted records under both SONIC and HEFT.
+D.4
+Motion References, Units, and Refinement Replay
+The blocks of TABLE 4 use different references. Whole-body motion-generation errors compare the generated
+robot motion with the source-derived motion references. Controller-rollout errors compare the realized motion
+with the fixed canonical trajectory. The former measures source-reference fidelity, while the latter measures
+how closely a particular controller realizes the canonical motion. Direct denotes references without command
+optimization at the evaluated stage, SCO denotes CEM-optimized commands, and SCO+IK adds Mink arm
+refinement during whole-body motion generation.
+28
+
+
+Position errors are reported in centimeters, and orientation errors and joint-angle RMSE are reported in radians.
+The motion-generation block reports wrist and torso position and orientation errors. The controller-rollout
+blocks report wrist and camera position and orientation. The smallest reported values are identified separately
+for each target and error type. Improved position tracking does not necessarily imply improved orientation
+tracking: SONIC’s camera-orientation error is 0.0784 rad for Direct and 0.0808 rad for SCO. Dashes denote
+unreported metrics or variants.
+Motion-generation entries average aggregate errors from LAFAN (Harvey et al., 2020) and the 400 egocentric
+training clips. LAFAN provides an auxiliary check on highly dynamic motion, while the egocentric clips
+connect the diagnostics to the converted policy-training data. Both controllers share evaluation data. The
+reported aggregate entries do not provide separate results for the two data sources.
+TABLE D.3 expands the before/after-Mink replay diagnostics described in Sec. 4.5. The same SONIC tracker
+replays the pre-refinement and refined trajectories on both data sources. For each replay, tracking errors
+are measured against the corresponding input reference trajectory. The diagnostics include pelvis-relative
+non-arm and wrist-position errors, torso-orientation error, and non-arm joint-angle RMSE. These replay
+errors measure controller trackability and are distinct from motion-generation errors measured against the
+source-derived references. Although refinement preserves the non-arm reference trajectory, changes to the arm
+reference can affect the realized whole-body motion and hence the non-arm replay errors. The small changes
+indicate comparable SONIC trackability on the evaluated trajectories; they do not constitute a downstream
+policy-success ablation of Mink refinement.
+Table D.3 SONIC replay before and after Mink arm refinement on LAFAN and the 400 egocentric clips. Each replay is
+evaluated against its corresponding input reference trajectory.
+Replay metric
+Unit
+Before refinement
+After refinement
+Pelvis-relative non-arm position error
+cm
+2.60
+2.73
+Pelvis-relative wrist-position error
+cm
+1.59
+1.75
+Torso-orientation error
+rad
+0.0588
+0.0579
+Non-arm joint RMSE
+rad
+0.0750
+0.0784
+29
+
+
+E
+Qualitative Demonstration Timelines
+Each timeline spans one complete source clip through eight selected keyframes, including its first and last
+frames. Read left to right, then top to bottom; timestamps refer to the original 50 Hz overlay video. Each
+frame retains the human view (upper left), synthesized robot view (upper right), and offline MuJoCo kinematic
+replay (main panel). These illustrate converted demonstrations; they are not additional real-robot evaluation
+trials.
+01   |   0.00 s
+Start
+02   |   2.00 s
+Reach
+03   |   3.60 s
+Grasp
+04   |   5.20 s
+Lift
+05   |   6.56 s
+Approach table
+06   |   8.80 s
+Set down
+07   |   12.00 s
+Release
+08   |   13.26 s
+End
+Figure E.1 Complete-clip timeline: bimanual box transfer. Selected moments from a 13.28 s clip show reaching toward a
+box, lifting and carrying it, and setting it on a table before withdrawing the hands. Frames 1–8 preserve chronological
+order and the paired human, robot-view, and whole-body-motion displays.
+30
+
+
+01   |   0.00 s
+Start
+02   |   4.50 s
+Cup transfer
+03   |   9.00 s
+Parcel pickup
+04   |   11.00 s
+Parcel placement
+05   |   17.00 s
+Bottle pickup
+06   |   23.50 s
+Door opening
+07   |   26.50 s
+Release bottle
+08   |   30.74 s
+End
+Figure E.2 Complete-clip timeline: sequential object manipulation. Eight selected moments span a 30.76 s clip: a cup is
+moved toward a basket, a parcel is transferred to a shelf, and a bottle is carried to a refrigerator and placed inside
+before the door is closed. The first and last video frames are included. Time advances left to right and then top to
+bottom; the three synchronized displays have the same meanings as in Fig. E.1.
+31
+
+
+F
+Additional Task Demonstrations and Deployments
+Figures F.1–F.3 complement Fig. 4 with the other three evaluated tasks. Each figure follows the same row
+order: Robot Data in the Robot-ID condition, converted KODA Data, and successful SONIC deployment in
+the Robot-OOD condition. Four keyframes show the action progression within each row. Timestamps are
+relative to the corresponding source clip; different rows are independent recordings and are not temporally
+synchronized. The KODA row retains the human view, synthesized robot view, and offline kinematic replay
+described in Appendix E. Bystanders are cropped out or pixelated.
+Robot Data
+(ID)
+01  |  4.53 s
+02  |  6.33 s
+03  |  8.15 s
+04  |  9.50 s
+KODA Data
+01  |  3.82 s
+02  |  5.34 s
+03  |  6.12 s
+04  |  6.88 s
+Deployment
+(OOD success)
+01  |  7.70 s
+02  |  15.41 s
+03  |  16.01 s
+04  |  17.34 s
+Figure F.1 Cup-to-basket. Robot Data shows the green bottle used in Robot-ID. KODA Data covers the brown-bottle
+condition, and the deployment row shows a successful Robot-OOD placement into the basket. Each row progresses
+from grasping through transfer to placement.
+Robot Data
+(ID)
+01  |  3.60 s
+02  |  4.34 s
+03  |  6.99 s
+04  |  10.00 s
+KODA Data
+01  |  1.36 s
+02  |  2.72 s
+03  |  4.76 s
+04  |  6.12 s
+Deployment
+(OOD success)
+01  |  1.27 s
+02  |  2.52 s
+03  |  3.77 s
+04  |  5.04 s
+Figure F.2 Parcel-to-shelf. The purple parcel in Robot Data is replaced by a white parcel in the KODA and Robot-OOD
+deployment examples. The keyframes show reaching, lifting and transferring the parcel, followed by placement on the
+shelf.
+32
+
+
+Robot Data
+(ID)
+01  |  6.38 s
+02  |  7.98 s
+03  |  12.77 s
+04  |  15.96 s
+KODA Data
+01  |  2.04 s
+02  |  5.10 s
+03  |  7.14 s
+04  |  10.20 s
+Deployment
+(OOD success)
+01  |  2.45 s
+02  |  4.91 s
+03  |  8.56 s
+04  |  12.25 s
+Figure F.3 Basket-to-shelf. The Robot-OOD change is an approximately 30◦tilt of the basket handle relative to the
+Robot-ID condition. KODA Data supplies a corresponding converted demonstration; the deployment row shows
+grasping the handle, lifting the basket, and placing it on the shelf.
+33

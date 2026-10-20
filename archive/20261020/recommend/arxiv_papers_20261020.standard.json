@@ -1,0 +1,677 @@
+{
+  "mode": "standard",
+  "generated_at": "2026-10-20T06:29:35.056799+00:00",
+  "stats": {
+    "mode": "standard",
+    "tag_count": 3,
+    "deep_divecandidates": 2,
+    "deep_cap": 8,
+    "deep_selected": 2,
+    "quick_candidates": 21,
+    "quick_skim_target": 13,
+    "quick_selected": 13
+  },
+  "deep_dive": [
+    {
+      "id": "2610.15833v1",
+      "source": "arxiv",
+      "title": "P-BFM: Perceptive Behavioral Foundation Models for Humanoid Control via Unsupervised Reinforcement Learning",
+      "abstract": "Behavioral foundation models (BFMs) provide humanoids with reusable repertoires of whole-body behaviors; in real-world humanoid control, the same behavioral intent may require fundamentally different motions under different terrain constraints. Covering such variation with terrain-matched demonstrations requires enumerating a combinatorial space of behaviors and terrain geometries. We introduce P-BFM, a perceptive behavioral foundation model that factorizes humanoid control into terrain-invariant intent and terrain-conditioned realization. A forward-backward representation maps motion references, target states, and reward functions into a shared intent space without terrain information, while a perceptive policy learns how to realize each intent under the surrounding terrain geometry. We further identify a complementary limitation of purely latent control: behavioral latents can preserve local motion patterns while losing precise global progress. We therefore introduce Explicit Root Instructions (ERI), which separates global transport (e.g., heading and planar velocity) from behavioral intent, while leaving local whole-body adaptation to the perceptive policy. This decomposition leads to a characteristic capability absent from conventional BFMs: one fixed intent induces different, terrain-appropriate behaviors, including changes in step height, stride, posture, foothold placement, and contacts, without terrain-specific demonstrations. Across challenging terrains, P-BFM improves motion fidelity, root-control precision, and perturbation recovery over strong baselines. A single frozen policy further supports motion tracking, goal reaching, reward inference, teleoperation, and terrain-aware recovery, and transfers zero-shot to a Unitree G1 using onboard depth sensing.",
+      "authors": [
+        "Xue Wang",
+        "Yitang Li",
+        "Yiming Zhang",
+        "Siqin Wang",
+        "Junhan Sun",
+        "Zhihao Liu",
+        "Yaojie Shen",
+        "Jingbo Yuan",
+        "Hao Zhao",
+        "Qingdu Li"
+      ],
+      "primary_category": "cs.RO",
+      "categories": [
+        "cs.RO"
+      ],
+      "published": "2026-10-11T18:35:50+00:00",
+      "link": "https://arxiv.org/pdf/2610.15833v1",
+      "tags": [
+        "keyword:exo-vision",
+        "keyword:hip-exo",
+        "keyword:humanoid",
+        "query:exo-vision",
+        "query:hip-exo",
+        "query:humanoid"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "Perceptive behavioral foundation model for terrain-conditioned humanoid whole-body control via unsupervised RL",
+      "llm_evidence_cn": "基于无监督强化学习的感知行为基础模型用于地形条件人形全身控制",
+      "llm_evidence": "基于无监督强化学习的感知行为基础模型用于地形条件人形全身控制",
+      "canonical_evidence": "基于无监督强化学习的感知行为基础模型用于地形条件人形全身控制",
+      "llm_tldr_en": "Introduces a perceptive behavioral foundation model that factorizes humanoid whole-body control into terrain-invariant intent and terrain-conditioned realization, enabling reusable behaviors across varied terrains via unsupervised RL.",
+      "llm_tldr_cn": "人形机器人需要在不同地形约束下复用全身行为，但为每种行为与地形组合采集示范代价高昂。本文提出感知行为基础模型P-BFM，将控制分解为与地形无关的意图和随地形条件化的实现，并用前向-后向表示与感知策略学习共享意图空间。方法在无监督强化学习框架下获得可复用的全身行为库。该分解为复杂地形上的人形机器人全身控制提供了可扩展范式。",
+      "llm_tldr": "人形机器人需要在不同地形约束下复用全身行为，但为每种行为与地形组合采集示范代价高昂。本文提出感知行为基础模型P-BFM，将控制分解为与地形无关的意图和随地形条件化的实现，并用前向-后向表示与感知策略学习共享意图空间。方法在无监督强化学习框架下获得可复用的全身行为库。该分解为复杂地形上的人形机器人全身控制提供了可扩展范式。",
+      "llm_tags": [
+        "query:humanoid:composite"
+      ],
+      "matched_query_tag": "query:humanoid:composite",
+      "matched_query_text": "Papers central to 人形机器人运动控制与识别：全身控制、强化学习、运动模仿、视觉运动控制及状态估计, especially work that connects or combines: Robust humanoid locomotion using reinforcement learning model predictive control and sim to real transfer; Whole body motion control balance and coordination for humanoid robots; Visual perception object recognition and state estimation for humanoid robot motion and loco manipulation; Humanoid motion imitation and reinforcement learning for robust whole body control on uneven terrain; Vision based humanoid motion control combining terrain object and human action recognition with state estimation.",
+      "matched_requirement_id": "req-composite-humanoid",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2610.19067v1",
+      "source": "arxiv",
+      "title": "Tread: A Visuo-Inertial Framework for Terrain and Locomotion Context-Aware Gait-Phase and Speed Estimation in Wearable Robotics",
+      "abstract": "A wearable assistive robot must continuously estimate terrain, locomotion mode, gait phase, and walking speed. These quantities are commonly addressed by separate, terrain-specific models, with datasets rarely collected under a common protocol. This paper presents a visuo-inertial framework that connects these estimates through a causal pipeline using a chest-mounted camera and four lower-limb inertial measurement units (IMUs). Anticipatory Terrain Perception (ATP) classifies incoming terrain with 96.3% accuracy and anticipates terrain transitions by 1.46 s on average. Terrain-Aware Locomotion Mode Identification (TALMI) achieves 93.7% and 98.8% accuracy for its level-ground and stairs experts respectively, with mean transition latencies being below 200 ms. The relevant TALMI posterior is retained as a Probabilistic Locomotion Context (PLC) vector and provided to a shared Gait Kinematic Encoder (GKE), which supports 50-Hz bilateral gait-phase estimation and 2-Hz walking-speed estimation. Leave-one-subject-out evaluation yields gait-phase RMSEs of 1.75%, 2.97%, and 4.55% for level walking, stair ascent, and stair descent respectively while estimating speed over 3.5-5.5 km/h with a RMSE of 0.218 km/h. All inertial sensing based models use sensor-fused Euler angles as input rather than raw accelerometer and gyroscope signals, reducing dependence on sensor mounting variation.",
+      "authors": [
+        "Debadrata Sarkar",
+        "Akash Bachhar",
+        "Aman Arora"
+      ],
+      "primary_category": "cs.RO",
+      "categories": [
+        "cs.RO"
+      ],
+      "published": "2026-10-13T19:02:50+00:00",
+      "link": "https://arxiv.org/pdf/2610.19067v1",
+      "tags": [
+        "keyword:exo-vision",
+        "keyword:hip-exo",
+        "keyword:humanoid",
+        "query:exo-vision",
+        "query:hip-exo",
+        "query:humanoid"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "Visuo-inertial terrain perception and gait-phase/speed estimation for wearable assistive robots",
+      "llm_evidence_cn": "面向可穿戴辅助机器人的视惯地形感知与步态相位速度估计",
+      "llm_evidence": "面向可穿戴辅助机器人的视惯地形感知与步态相位速度估计",
+      "canonical_evidence": "面向可穿戴辅助机器人的视惯地形感知与步态相位速度估计",
+      "llm_tldr_en": "Proposes a causal visuo-inertial pipeline with chest camera and four IMUs to jointly anticipate terrain, identify locomotion mode, and estimate gait phase and speed for wearable assistive robots, reporting high accuracy and early terrain-transition anticipation.",
+      "llm_tldr_cn": "可穿戴辅助机器人需要连续估计地形、运动模式、步态相位和速度，但现有方法多依赖分离的地形专用模型。本文提出基于胸挂相机与四个下肢IMU的视惯融合因果流水线，先预测地形并识别运动模式，再估计步态相位与速度。实验表明地形分类和模式识别准确率较高，并能提前约1.46秒预测地形转换。该框架为外骨骼等可穿戴机器人的感知与助力控制提供了统一上下文估计基础。",
+      "llm_tldr": "可穿戴辅助机器人需要连续估计地形、运动模式、步态相位和速度，但现有方法多依赖分离的地形专用模型。本文提出基于胸挂相机与四个下肢IMU的视惯融合因果流水线，先预测地形并识别运动模式，再估计步态相位与速度。实验表明地形分类和模式识别准确率较高，并能提前约1.46秒预测地形转换。该框架为外骨骼等可穿戴机器人的感知与助力控制提供了统一上下文估计基础。",
+      "llm_tags": [
+        "query:exo-vision:composite"
+      ],
+      "matched_query_tag": "query:exo-vision:composite",
+      "matched_query_text": "Papers central to 外骨骼视觉：地形与障碍识别、视觉步态意图预测、感知与助力控制融合, especially work that connects or combines: Vision based environmental perception for lower limb exoskeleton locomotion assistance; Terrain and stair recognition using wearable cameras and depth sensors for exoskeleton control; Visual anticipation of locomotion transitions and user intent for wearable assistive robots; Fusion of depth camera vision and inertial sensors for terrain aware adaptive exoskeleton control; Egocentric visual perception of stairs slopes and obstacles for anticipatory control of lower limb exoskeletons.",
+      "matched_requirement_id": "req-composite-exo-vision",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "quick_skim": [
+    {
+      "id": "2610.19393v1",
+      "source": "arxiv",
+      "title": "Beyond Kinematic Tracking: Preserving Expressive Characteristics in Humanoid Whole-Body Control",
+      "abstract": "Whole-body control plays a crucial role in enabling humanoid robots to execute expressive motions. Faithful execution requires preserving both the intended action and its expressive characteristics. Existing whole-body trackers typically balance joint and keypoint tracking with physical stability across diverse motions, but these objectives do not necessarily prioritize the expressive characteristics of each action. Our analysis shows that lower average positional tracking error does not guarantee better preservation of dynamic and postural motion characteristics. To address this gap, we propose a residual learning framework with compensation objectives targeting amplitude, energy, body expansion, body lean, and pelvis height. To concentrate compensation while limiting interference with the underlying tracking behavior, motion-aware gating allocates correction capacity according to body-part activity, preserving larger correction ranges in more active parts and restricting them elsewhere. For each frozen tracker, we train motion-specific residual policies and distill them into a unified policy shared across motion categories. Simulation and physical experiments on the Unitree G1 across eight motion categories demonstrate superior preservation of dynamic and postural motion characteristics compared with the corresponding baselines.",
+      "authors": [
+        "Lingfan Bao",
+        "Hanshang Zhu",
+        "Yan Pan",
+        "Jincheng Wang",
+        "Jingyang Yu",
+        "Tianhu Peng",
+        "Yiyang Jia",
+        "Dimitrios Kanoulas",
+        "Chengxu Zhou"
+      ],
+      "primary_category": "cs.RO",
+      "categories": [
+        "cs.RO"
+      ],
+      "published": "2026-10-14T01:39:14+00:00",
+      "link": "https://arxiv.org/pdf/2610.19393v1",
+      "tags": [
+        "keyword:exo-vision",
+        "keyword:hip-exo",
+        "keyword:humanoid",
+        "query:exo-vision",
+        "query:hip-exo",
+        "query:humanoid"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "humanoid whole-body control preserving expressive motion characteristics via residual learning",
+      "llm_evidence_cn": "通过残差学习实现保留表现性动作特征的人形全身控制",
+      "llm_evidence": "通过残差学习实现保留表现性动作特征的人形全身控制",
+      "canonical_evidence": "通过残差学习实现保留表现性动作特征的人形全身控制",
+      "llm_tldr_en": "Shows that lower kinematic tracking error does not preserve expressive motion qualities, and proposes a residual learning framework with amplitude, energy, body-lean and pelvis-height compensation objectives for humanoid whole-body control.",
+      "llm_tldr_cn": "针对现有人形全身跟踪器只平衡关节与关键点误差及物理稳定性、未必保留动作表现性特征的问题，论文分析了平均位置误差更低并不等于动态与姿态特征保持更好。为此提出残差学习框架，引入针对动作幅度、能量、身体扩张、身体倾斜与骨盆高度的补偿目标，在保持稳定性的同时强化表现性特征复现。该工作为富有表现力的人形全身运动控制提供了新的训练目标与评价视角。",
+      "llm_tldr": "针对现有人形全身跟踪器只平衡关节与关键点误差及物理稳定性、未必保留动作表现性特征的问题，论文分析了平均位置误差更低并不等于动态与姿态特征保持更好。为此提出残差学习框架，引入针对动作幅度、能量、身体扩张、身体倾斜与骨盆高度的补偿目标，在保持稳定性的同时强化表现性特征复现。该工作为富有表现力的人形全身运动控制提供了新的训练目标与评价视角。",
+      "llm_tags": [
+        "query:humanoid"
+      ],
+      "matched_query_tag": "query:humanoid",
+      "matched_query_text": "Whole body motion control balance and coordination for humanoid robots",
+      "matched_requirement_id": "req-12",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2610.17232v1",
+      "source": "arxiv",
+      "title": "LiDAR-based Humanoid Navigation in Dynamic, Non-Convex Environments via Spatio-Temporal Safe Corridors",
+      "abstract": "Navigating humanoid robots through dynamic, non-convex environments requires tightly coupling onboard perception with footstep planning and dynamic locomotion control. Existing methods frequently discard complex free space through simplified convex obstacle bounds and fail to account for real-time dynamic occupancy predictions. This paper presents a real-time framework for humanoid navigation that directly constructs spatio-temporal safe corridors from LiDAR-based particle representations and couples them with Linear Inverted Pendulum (LIP)-based planning and Whole Body Control (WBC) to enable navigation around and within moving non-convex structures without restrictive geometric assumptions. Simulations on the Digit humanoid yield a 96% success rate in navigating around and inside moving non-convex obstacles in a 24 by 24 m^2 arena. Ablation studies confirm that the proposed iterative polytope generation significantly outperforms single-iteration baselines in narrow corridors, while evaluations demonstrate robustness to clutter, sensor noise, control delays, and force perturbations.",
+      "authors": [
+        "Shubham S. Kumbhar",
+        "Panagiotis Artemiadis"
+      ],
+      "primary_category": "cs.RO",
+      "categories": [
+        "cs.RO"
+      ],
+      "published": "2026-10-12T18:02:07+00:00",
+      "link": "https://arxiv.org/pdf/2610.17232v1",
+      "tags": [
+        "keyword:exo-vision",
+        "keyword:hip-exo",
+        "keyword:humanoid",
+        "query:exo-vision",
+        "query:hip-exo",
+        "query:humanoid"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "LiDAR perception coupled with footstep planning and whole body control for humanoid navigation",
+      "llm_evidence_cn": "激光雷达感知与落脚规划及全身控制耦合的人形导航",
+      "llm_evidence": "激光雷达感知与落脚规划及全身控制耦合的人形导航",
+      "canonical_evidence": "激光雷达感知与落脚规划及全身控制耦合的人形导航",
+      "llm_tldr_en": "Constructs spatio-temporal safe corridors directly from LiDAR particle representations and couples them with LIP-based footstep planning and whole-body control, enabling humanoid navigation around and within moving non-convex structures.",
+      "llm_tldr_cn": "针对人形机器人在动态非凸环境中导航时，现有方法用简化凸包丢弃复杂自由空间且缺乏实时动态占据预测的问题，本文提出从激光雷达粒子表示直接构建时空安全走廊的实时框架，并与线性倒立摆落脚规划及全身控制紧耦合。在Digit人形机器人仿真中，该方法无需限制性几何假设即可绕行并穿越移动的非凸结构。",
+      "llm_tldr": "针对人形机器人在动态非凸环境中导航时，现有方法用简化凸包丢弃复杂自由空间且缺乏实时动态占据预测的问题，本文提出从激光雷达粒子表示直接构建时空安全走廊的实时框架，并与线性倒立摆落脚规划及全身控制紧耦合。在Digit人形机器人仿真中，该方法无需限制性几何假设即可绕行并穿越移动的非凸结构。",
+      "llm_tags": [
+        "query:humanoid"
+      ],
+      "matched_query_tag": "query:humanoid",
+      "matched_query_text": "Whole body motion control balance and coordination for humanoid robots",
+      "matched_requirement_id": "req-12",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2610.21152v1",
+      "source": "arxiv",
+      "title": "KODA: Kinematics--Observation Data Alignment for Humanoid Learning from Human Egocentric Demonstration",
+      "abstract": "Training humanoid whole-body vision-language-action (VLA) policies requires costly robot demonstrations with aligned robot-view observations and controller-compatible whole-body state-action labels. Egocentric human demonstrations offer scalable supervision but have misaligned views and sparse motion cues. Existing approaches either pretrain policies that still require robot data for adaptation or generate controller-specific commands that limit reuse. Conversion also requires robot-view observations aligned with the generated whole-body motion. We present KODA (Kinematics-Observation Data Alignment), which converts egocentric RGB demonstrations into whole-body VLA training data using a reusable canonical trajectory to guide robot-view synthesis and generate controller-specific whole-body state-action supervision. KODA first generates a simulator-checked whole-body trajectory using a sparse tracker with sampling-based command optimization. This generated trajectory directly determines the onboard camera poses used to synthesize corresponding robot-view observations. The motion, observations, and task instruction form a canonical record. For each deployment controller, KODA optimizes commands to track the stored motion and records the corresponding action labels and proprioceptive states. When switching controllers, KODA retains this canonical record and regenerates whole-body state-action supervision for co-training with matching robot demonstrations. We evaluate KODA on four Unitree G1 loco-manipulation tasks using two whole-body controllers, SONIC and HEFT. With robot data held fixed, macro-average success on conditions covered by human demonstrations but absent from robot data improves by 45.0 and 46.25 percentage points, respectively. Under both controllers, this metric shows an upward trend across the evaluated human-data budgets, suggesting potential for further scaling.",
+      "authors": [
+        "Zibo Zhou",
+        "Yueru Chen",
+        "Junsong Wu",
+        "Weiji Xie",
+        "Qingyao Xu",
+        "Sheng Yin",
+        "Shiqing Wang",
+        "Jiyuan Shi",
+        "Siheng Chen",
+        "Chenjia Bai",
+        "Xuelong Li"
+      ],
+      "primary_category": "cs.RO",
+      "categories": [
+        "cs.RO"
+      ],
+      "published": "2026-10-15T03:08:17+00:00",
+      "link": "https://arxiv.org/pdf/2610.21152v1",
+      "tags": [
+        "keyword:exo-vision",
+        "keyword:hip-exo",
+        "keyword:humanoid",
+        "query:exo-vision",
+        "query:hip-exo",
+        "query:humanoid"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "Aligns egocentric human demonstrations for humanoid whole-body vision-language-action training",
+      "llm_evidence_cn": "对齐人类自我中心演示以训练人形机器人全身视觉-语言-动作策略",
+      "llm_evidence": "对齐人类自我中心演示以训练人形机器人全身视觉-语言-动作策略",
+      "canonical_evidence": "对齐人类自我中心演示以训练人形机器人全身视觉-语言-动作策略",
+      "llm_tldr_en": "Converts egocentric RGB human demonstrations into aligned humanoid whole-body VLA training data using a reusable canonical trajectory, avoiding costly robot-view demonstrations and controller-specific commands.",
+      "llm_tldr_cn": "训练人形机器人全身视觉-语言-动作策略需要昂贵的机器人演示及对齐的机器人视角观测，而人类自我中心视频虽易获取却存在视角错位和动作稀疏问题。本文提出KODA数据对齐方法，利用可复用规范轨迹把自我中心RGB演示转换为全身VLA训练数据。该方法无需大量机器人数据即可生成与控制器兼容的全身状态-动作标签和机器人视角观测。这为人形机器人从人类演示中规模化学习全身运动与操作提供了数据基础。",
+      "llm_tldr": "训练人形机器人全身视觉-语言-动作策略需要昂贵的机器人演示及对齐的机器人视角观测，而人类自我中心视频虽易获取却存在视角错位和动作稀疏问题。本文提出KODA数据对齐方法，利用可复用规范轨迹把自我中心RGB演示转换为全身VLA训练数据。该方法无需大量机器人数据即可生成与控制器兼容的全身状态-动作标签和机器人视角观测。这为人形机器人从人类演示中规模化学习全身运动与操作提供了数据基础。",
+      "llm_tags": [
+        "query:humanoid"
+      ],
+      "matched_query_tag": "query:humanoid",
+      "matched_query_text": "Humanoid motion imitation and reinforcement learning for robust whole body control on uneven terrain",
+      "matched_requirement_id": "req-14",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2610.17930v1",
+      "source": "arxiv",
+      "title": "Locomotion with Online Awareness of Dynamics for Precision Footholds",
+      "abstract": "Unknown payloads alter robot dynamics and make precise contact execution difficult when foothold margins are small. We present LOAD, a perceptive locomotion framework that combines explicit inertial estimates with implicit dynamics features for narrow-beam traversal. Separate recurrent modules infer torso inertial changes and task-relevant history from proprioception, while a height-map teacher is distilled into a depth-based student. We extensively evaluate LOAD and its variants in simulation and on hardware across beam widths and payload configurations. The results show that implicit dynamics features accelerate training, while explicit inertial estimation further improves traversal success; combining both enables LOAD to approach the performance of a privileged policy supplied with ground-truth inertial parameters. Hardware experiments demonstrate traversal with unilateral payloads of 6 kg on a 10 cm beam and 9 kg on a 15 cm beam, and an evenly distributed 11 kg payload on a 15 cm beam. These results support combining physical estimates and history features for precision locomotion under unknown loads.",
+      "authors": [
+        "Kunzhao Ren",
+        "Zhishuo Zhu",
+        "Xiaobin Xiong"
+      ],
+      "primary_category": "cs.RO",
+      "categories": [
+        "cs.RO"
+      ],
+      "published": "2026-10-13T08:16:56+00:00",
+      "link": "https://arxiv.org/pdf/2610.17930v1",
+      "tags": [
+        "keyword:exo-vision",
+        "keyword:hip-exo",
+        "keyword:humanoid",
+        "query:exo-vision",
+        "query:hip-exo",
+        "query:humanoid"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "perceptive legged locomotion with depth-based student policy and sim-to-real hardware tests",
+      "llm_evidence_cn": "基于深度感知的足式运动策略与真机迁移",
+      "llm_evidence": "基于深度感知的足式运动策略与真机迁移",
+      "canonical_evidence": "基于深度感知的足式运动策略与真机迁移",
+      "llm_tldr_en": "LOAD addresses payload-induced dynamics uncertainty in narrow-beam foothold traversal by fusing explicit inertial estimation with implicit dynamics features, distilling a height-map teacher into a depth student, validated in sim and hardware.",
+      "llm_tldr_cn": "针对未知负载改变机器人动力学、在狭窄落脚裕度下难以精确接触的问题，该文提出LOAD感知式运动框架，将显式惯性估计与隐式动力学特征结合用于窄梁行走。方法上用独立循环模块从本体感受推断躯干惯性变化与任务相关历史，并将高度图教师策略蒸馏为基于深度的学生策略。仿真与真机在多种梁宽和负载配置下的实验表明，隐式动力学特征加速训练、显式惯性估计进一步提升通过成功率。该工作为感知驱动的鲁棒足式/人形运动控制提供了可迁移方案。",
+      "llm_tldr": "针对未知负载改变机器人动力学、在狭窄落脚裕度下难以精确接触的问题，该文提出LOAD感知式运动框架，将显式惯性估计与隐式动力学特征结合用于窄梁行走。方法上用独立循环模块从本体感受推断躯干惯性变化与任务相关历史，并将高度图教师策略蒸馏为基于深度的学生策略。仿真与真机在多种梁宽和负载配置下的实验表明，隐式动力学特征加速训练、显式惯性估计进一步提升通过成功率。该工作为感知驱动的鲁棒足式/人形运动控制提供了可迁移方案。",
+      "llm_tags": [
+        "query:humanoid"
+      ],
+      "matched_query_tag": "query:humanoid",
+      "matched_query_text": "Robust humanoid locomotion using reinforcement learning model predictive control and sim to real transfer",
+      "matched_requirement_id": "req-11",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2610.22176v1",
+      "source": "arxiv",
+      "title": "Inertially Significant Humanoid Teleoperation via Whole Body Model Predictive Control and Online Parameter Estimation",
+      "abstract": "The effective deployment of humanoid robots in practical tasks of interest will require a capability of sensing and adapting to variations in inertial parameters, as occurs during heavy tool use or when carrying significant payload. Such payloads constitute a significant proportion of the combined payload-robot system, the effects of which cannot be ignored by delegating to feedback control. This paper showcases a general solution to this problem by integrating a whole body model predictive controller (WB-MPC) with an extended Kalman filter (EKF) for online estimation of fully physically consistent time-varying inertial parameters. These estimates are fed through to the WB-MPC's full rigid body dynamics model, resulting in more accurate feedforward torques for task demands under external load. Additionally, a virtual reality (VR) interface is provided that enables an operator to provide task-specific references without regard to payload while delegating dynamic balance to the WB-MPC. The framework is validated with simulation and hardware experiments on a humanoid system.",
+      "authors": [
+        "James Foster",
+        "Beomyeong Park",
+        "Luigi Penco",
+        "Robert Griffin"
+      ],
+      "primary_category": "cs.RO",
+      "categories": [
+        "cs.RO"
+      ],
+      "published": "2026-10-15T16:32:58+00:00",
+      "link": "https://arxiv.org/pdf/2610.22176v1",
+      "tags": [
+        "keyword:exo-vision",
+        "keyword:hip-exo",
+        "keyword:humanoid",
+        "query:exo-vision",
+        "query:hip-exo",
+        "query:humanoid"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "whole-body model predictive control for humanoid with online inertial parameter estimation",
+      "llm_evidence_cn": "结合在线惯性参数估计的人形全身模型预测控制",
+      "llm_evidence": "结合在线惯性参数估计的人形全身模型预测控制",
+      "canonical_evidence": "结合在线惯性参数估计的人形全身模型预测控制",
+      "llm_tldr_en": "Integrates whole-body MPC with an EKF that estimates time-varying inertial parameters online, letting a humanoid teleoperation controller adapt to heavy payloads and tools instead of relying on feedback alone.",
+      "llm_tldr_cn": "针对人形机器人搬运重载或使用重型工具时惯性参数显著时变、仅靠反馈控制难以补偿的问题，论文将全身模型预测控制与扩展卡尔曼滤波结合。滤波器在线估计物理一致且时变的惯性参数，并把估计结果送入全身MPC的完整刚体动力学模型，从而在遥操作中适应载荷变化。该工作展示了感知—估计—控制一体化的人形全身控制方案，对鲁棒人形运动与全身协调控制具有直接参考价值。",
+      "llm_tldr": "针对人形机器人搬运重载或使用重型工具时惯性参数显著时变、仅靠反馈控制难以补偿的问题，论文将全身模型预测控制与扩展卡尔曼滤波结合。滤波器在线估计物理一致且时变的惯性参数，并把估计结果送入全身MPC的完整刚体动力学模型，从而在遥操作中适应载荷变化。该工作展示了感知—估计—控制一体化的人形全身控制方案，对鲁棒人形运动与全身协调控制具有直接参考价值。",
+      "llm_tags": [
+        "query:humanoid"
+      ],
+      "matched_query_tag": "query:humanoid",
+      "matched_query_text": "Robust humanoid locomotion using reinforcement learning model predictive control and sim to real transfer",
+      "matched_requirement_id": "req-11",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2610.18872v1",
+      "source": "arxiv",
+      "title": "EgoExplorer: A Vision-Motion-Touch Observatory for Human Loco-Manipulation In Situ",
+      "abstract": "Learning humanoid loco-manipulation from human demonstrations rests on observing how locomotion, posture, and object interaction evolve together as tasks unfold. Scaling collection across diverse environments, in turn, favors lightweight, portable capture systems. Yet, existing datasets provide only partial views of this coordination. Thus, we introduce EgoExplorer, a 100-hour vision-motion-touch observatory of human loco-manipulation built with a wearable system. With an emphasis on professional activities, its continuous recordings align egocentric video with reconstructed whole-body motion, fine-grained finger articulation, and tactile observations, accompanied by step-level descriptions. To achieve this coverage with sparse body sensing, we develop the Calibrate-Complete-Constrain pipeline. Concretely, reusable calibration fixes participant geometry and sensor attachments before motion inference to disentangle mounting offsets from articulation. A temporal prior then completes unobserved joint motion, while layered constraints promote measurement agreement, temporal continuity, and geometric consistency, properties that motion plausibility alone does not guarantee. Against tracker-fitted references, the method reduces body-point error by 71.9% relative to the strongest baseline; matched evaluations also show gains in hand stability and contact estimation. Preliminary studies explore multimodal generation and conditioning alongside humanoid retargeting with whole-body control in simulation.",
+      "authors": [
+        "Yunsong Zhou",
+        "Xuekun Jiang",
+        "Haiqi Shen",
+        "Hangxu Liu",
+        "Chaojian Shi",
+        "Yujie Liu",
+        "Jingyuan Li",
+        "Haoran Yang",
+        "Jiafei Cao",
+        "Dongzhan Zhou",
+        "Dong Wang",
+        "Yao Mu",
+        "Chunhua Shen",
+        "Weinan Zhang"
+      ],
+      "primary_category": "cs.RO",
+      "categories": [
+        "cs.RO",
+        "cs.CV"
+      ],
+      "published": "2026-10-13T17:59:55+00:00",
+      "link": "https://arxiv.org/pdf/2610.18872v1",
+      "tags": [
+        "keyword:exo-vision",
+        "keyword:hip-exo",
+        "keyword:humanoid",
+        "query:exo-vision",
+        "query:hip-exo",
+        "query:humanoid"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "Egocentric vision-motion-touch dataset for human loco-manipulation learning",
+      "llm_evidence_cn": "面向人体移动操作学习的自我中心视觉-运动-触觉数据集",
+      "llm_evidence": "面向人体移动操作学习的自我中心视觉-运动-触觉数据集",
+      "canonical_evidence": "面向人体移动操作学习的自我中心视觉-运动-触觉数据集",
+      "llm_tldr_en": "EgoExplorer is a 100-hour wearable observatory aligning egocentric video with whole-body motion, finger articulation, and tactile data for human loco-manipulation, enabling scalable demonstration collection for humanoid learning.",
+      "llm_tldr_cn": "针对人体移动操作演示数据难以同时覆盖视觉、全身运动与接触信息的问题，本文构建自我探索者可穿戴观测平台，采集100小时连续记录并将自我中心视频与重建全身运动、手指关节和触觉观测对齐。数据带有步骤级描述，可在稀疏身体传感条件下扩展采集场景，并强调专业活动场景。该平台支持从人类演示中学习运动、姿态与物体交互的协同演化，为人形机器人移动操作与模仿学习提供多模态基础。",
+      "llm_tldr": "针对人体移动操作演示数据难以同时覆盖视觉、全身运动与接触信息的问题，本文构建自我探索者可穿戴观测平台，采集100小时连续记录并将自我中心视频与重建全身运动、手指关节和触觉观测对齐。数据带有步骤级描述，可在稀疏身体传感条件下扩展采集场景，并强调专业活动场景。该平台支持从人类演示中学习运动、姿态与物体交互的协同演化，为人形机器人移动操作与模仿学习提供多模态基础。",
+      "llm_tags": [
+        "query:humanoid:composite"
+      ],
+      "matched_query_tag": "query:humanoid:composite",
+      "matched_query_text": "Papers central to 人形机器人运动控制与识别：全身控制、强化学习、运动模仿、视觉运动控制及状态估计, especially work that connects or combines: Robust humanoid locomotion using reinforcement learning model predictive control and sim to real transfer; Whole body motion control balance and coordination for humanoid robots; Visual perception object recognition and state estimation for humanoid robot motion and loco manipulation; Humanoid motion imitation and reinforcement learning for robust whole body control on uneven terrain; Vision based humanoid motion control combining terrain object and human action recognition with state estimation.",
+      "matched_requirement_id": "req-composite-humanoid",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2610.24235v1",
+      "source": "arxiv",
+      "title": "Multimodal Interaction Estimation for Contact-Aware Adaptive Impedance Control",
+      "abstract": "With advancements in learning-based policies, robots are increasingly being deployed in human-centric environments, such as manufacturing floors and homes, where safe and precise operation requires compensating for unknown loads while remaining compliant during human interactions. Reliably distinguishing between these interaction types is challenging with a single sensing modality, as force signals cannot separate payloads from human pushes, and vision is susceptible to occlusions. We propose a task-agnostic interaction estimation and adaptive control framework that addresses this challenge by fusing force history and 3D point cloud through a transformer-based classifier. Trained with modality dropout for occlusion resilience and fine-tuned from simulation to hardware, the classifier achieves 91.89% accuracy and maintains above 90% under complete occlusion of one modality. The classifier drives a system identification framework that selectively compensates for unknown payloads and a variable-impedance controller that switches between adaptive and reactive modes, while simultaneously estimating interaction forces for downstream tasks, such as human intent estimation. We validate the framework under external perturbations and unknown loads across single-arm manipulation, deployment with an imitation-learning-based policy, intent-driven target switching, and zero-shot bimanual deployment on two Franka arms lifting a box of unknown mass, demonstrating generalization to closed kinematic chains and unseen setups, enabling safe and precise deployment.",
+      "authors": [
+        "Mateusz Jaszczuk",
+        "Paris Perdikaris",
+        "Nadia Figueroa"
+      ],
+      "primary_category": "cs.RO",
+      "categories": [
+        "cs.RO"
+      ],
+      "published": "2026-10-16T21:00:39+00:00",
+      "link": "https://arxiv.org/pdf/2610.24235v1",
+      "tags": [
+        "keyword:exo-vision",
+        "keyword:hip-exo",
+        "keyword:humanoid",
+        "query:exo-vision",
+        "query:hip-exo",
+        "query:humanoid"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "Multimodal interaction estimation and adaptive impedance control for safe human-robot contact",
+      "llm_evidence_cn": "面向安全人机接触的多模态交互估计与自适应阻抗控制",
+      "llm_evidence": "面向安全人机接触的多模态交互估计与自适应阻抗控制",
+      "canonical_evidence": "面向安全人机接触的多模态交互估计与自适应阻抗控制",
+      "llm_tldr_en": "Fuses force history and 3D point clouds via a transformer classifier to distinguish payloads from human pushes, enabling contact-aware adaptive impedance control resilient to occlusion in human-centric robot operation.",
+      "llm_tldr_cn": "在人机共融环境中，机器人需在补偿负载的同时保持对人接触的柔顺安全，但单一力觉难以区分负载与推碰，视觉又易受遮挡。本文提出任务无关的多模态交互估计与自适应控制框架，用Transformer融合力历史与三维点云进行交互分类。方法通过模态随机丢弃训练提升遮挡鲁棒性，并据此调整阻抗控制。该框架为可穿戴外骨骼等接触密集型人机协作系统的安全阻抗控制提供了可迁移方法。",
+      "llm_tldr": "在人机共融环境中，机器人需在补偿负载的同时保持对人接触的柔顺安全，但单一力觉难以区分负载与推碰，视觉又易受遮挡。本文提出任务无关的多模态交互估计与自适应控制框架，用Transformer融合力历史与三维点云进行交互分类。方法通过模态随机丢弃训练提升遮挡鲁棒性，并据此调整阻抗控制。该框架为可穿戴外骨骼等接触密集型人机协作系统的安全阻抗控制提供了可迁移方法。",
+      "llm_tags": [
+        "query:hip-exo"
+      ],
+      "matched_query_tag": "query:hip-exo",
+      "matched_query_text": "Human robot interaction and safe impedance control for wearable hip exoskeletons during walking and transitions",
+      "matched_requirement_id": "req-5",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2610.18950v1",
+      "source": "arxiv",
+      "title": "$λ_0$: Scaling Open-World Egocentric Human Data for Humanoid Loco-Manipulation",
+      "abstract": "Humanoid loco-manipulation requires coordinated whole-body interaction with the physical world, yet collecting robot demonstrations at scale remains costly. Human demonstrations offer a scalable alternative, but existing egocentric human supervision often omits locomotion and posture, while embodiment differences and controller dynamics hinder accurate end-effector execution. We introduce HumanVerse, a 500-hour dataset of open-world human loco-manipulation pairing egocentric video with synchronized body and hand motion. Our human-to-humanoid pipeline aligns camera viewpoints and arm appearance, and refines motion references and controller inputs offline to reduce end-effector errors while preserving whole-body coordination. We validate the pipeline through zero-shot transfer to Unitree G1 on representative whole-body manipulation and long-range loco-manipulation tasks, without target-task robot demonstrations. Building on this pipeline, we develop $λ_0$, a humanoid foundation model for whole-body loco-manipulation, with robot-aligned human demonstrations providing supervision for mid-training. Increasing whole-body human data consistently improves downstream task progress. $λ_0$ achieves 90.0% success on SIMPLE and 62.5% across real-world loco-manipulation tasks. We expect this study to guide scalable whole-body human data collection toward humanoid foundation models for richer interaction with the physical world. Homepage: https://lambdahumanoid.github.io/",
+      "authors": [
+        "Lambda-humanoid Team"
+      ],
+      "primary_category": "cs.RO",
+      "categories": [
+        "cs.RO",
+        "cs.CV"
+      ],
+      "published": "2026-10-13T17:40:58+00:00",
+      "link": "https://arxiv.org/pdf/2610.18950v1",
+      "tags": [
+        "keyword:exo-vision",
+        "keyword:hip-exo",
+        "keyword:humanoid",
+        "query:exo-vision",
+        "query:hip-exo",
+        "query:humanoid"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "human-to-humanoid motion data pipeline for egocentric loco-manipulation learning",
+      "llm_evidence_cn": "人到人形机器人的第一人称运动数据迁移用于移动操作学习",
+      "llm_evidence": "人到人形机器人的第一人称运动数据迁移用于移动操作学习",
+      "canonical_evidence": "人到人形机器人的第一人称运动数据迁移用于移动操作学习",
+      "llm_tldr_en": "Introduces HumanVerse, a 500-hour egocentric human loco-manipulation dataset and a human-to-humanoid pipeline aligning viewpoints and refining motion references to reduce end-effector error.",
+      "llm_tldr_cn": "人形机器人移动操作需要全身协调地与物理世界交互，但大规模采集机器人示教代价高昂，而现有第一人称人类数据常缺失移动与姿态信息，且存在具身差异。本文提出HumanVerse，一个500小时、配对第一人称视频与同步身体及手部运动的开放世界移动操作数据集，并设计人到人形机器人迁移管线。该管线对齐相机视角与手臂外观，并离线精修运动参考与控制器输入以降低末端误差，同时保持全身协调，为规模化学习提供支撑。",
+      "llm_tldr": "人形机器人移动操作需要全身协调地与物理世界交互，但大规模采集机器人示教代价高昂，而现有第一人称人类数据常缺失移动与姿态信息，且存在具身差异。本文提出HumanVerse，一个500小时、配对第一人称视频与同步身体及手部运动的开放世界移动操作数据集，并设计人到人形机器人迁移管线。该管线对齐相机视角与手臂外观，并离线精修运动参考与控制器输入以降低末端误差，同时保持全身协调，为规模化学习提供支撑。",
+      "llm_tags": [
+        "query:humanoid"
+      ],
+      "matched_query_tag": "query:humanoid",
+      "matched_query_text": "Humanoid motion imitation and reinforcement learning for robust whole body control on uneven terrain",
+      "matched_requirement_id": "req-14",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2610.24847v1",
+      "source": "arxiv",
+      "title": "DiPLO: Self-distilled Diffusion Planning for Loco-manipulation",
+      "abstract": "Humanoid loco-manipulation is particularly challenging because it requires coordinating locomotion, balance, and object interaction, making it difficult to learn from limited demonstrations or from scratch through Reinforcement Learning (RL). We introduce DiPLO (self-distilled Diffusion Planning for Loco-manipulation), a framework that combines a self-distilled diffusion planner with a low-level whole-body tracking policy. Our planner is pretrained via supervised learning on motions derived from human-to-humanoid retargeting, while the tracker is trained via RL to execute them. DiPLO centers around two complementary post-training stages. First, we introduce Self-Distillation Diffusion Policy Optimisation (SD:DPO) to remove the planner's dependence on strong task conditioning, which we identify as a crucial ingredient for effective pretraining, as downstream fine-tuning does not recover comparable performance when it is omitted.. We then fine-tune this distilled model with Diffusion-Augmented Proximal Policy Optimization (DA:PPO), a maximum-entropy RL method for diffusion models, to improve task success and align generated plans with the frozen tracker's execution capabilities. Together, these stages enable motion generation through state-history and goal conditioning alone, enabling 99% task success in pick-carry-place tasks, compared to just 45% for the pretrained model. The resulting planner also generates motions for unseen object goals, with further evaluations on kicking and pushing/pulling tasks. Finally, we deploy our pipeline on the hardware, using our DA:PPO planner-tracker on a Unitree G1, achieving repeated successful executions without any real-world fine-tuning.",
+      "authors": [
+        "Shafeef Omar",
+        "Sebastian Sanokowski",
+        "Elham Daneshmand",
+        "Dian Yu",
+        "Daniel Cremers",
+        "Cordelia Schmid",
+        "Majid Khadiv"
+      ],
+      "primary_category": "cs.RO",
+      "categories": [
+        "cs.RO"
+      ],
+      "published": "2026-10-17T19:51:59+00:00",
+      "link": "https://arxiv.org/pdf/2610.24847v1",
+      "tags": [
+        "keyword:exo-vision",
+        "keyword:hip-exo",
+        "keyword:humanoid",
+        "query:exo-vision",
+        "query:hip-exo",
+        "query:humanoid"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "human-to-humanoid motion retargeting plus RL whole-body tracking policy for loco-manipulation",
+      "llm_evidence_cn": "人到人形动作重定向加强化学习全身跟踪策略，用于移动操作",
+      "llm_evidence": "人到人形动作重定向加强化学习全身跟踪策略，用于移动操作",
+      "canonical_evidence": "人到人形动作重定向加强化学习全身跟踪策略，用于移动操作",
+      "llm_tldr_en": "DiPLO combines a self-distilled diffusion planner pretrained on retargeted human motions with an RL-trained whole-body tracker, enabling humanoid loco-manipulation from limited demonstrations.",
+      "llm_tldr_cn": "针对人形机器人移动操作需同时协调行走、平衡与物体交互、难以从少量示范或从零强化学习获得的问题，论文提出DiPLO框架，将自蒸馏扩散规划器与低层全身跟踪策略结合。规划器先用由人到人形重定向得到的动作做监督预训练，跟踪器再用强化学习训练执行，并通过自蒸馏扩散策略优化等后训练阶段降低对强跟踪器的依赖。该分层框架提升了长程移动操作的可行性，也为人形全身运动模仿与强化学习控制提供了可扩展范式。",
+      "llm_tldr": "针对人形机器人移动操作需同时协调行走、平衡与物体交互、难以从少量示范或从零强化学习获得的问题，论文提出DiPLO框架，将自蒸馏扩散规划器与低层全身跟踪策略结合。规划器先用由人到人形重定向得到的动作做监督预训练，跟踪器再用强化学习训练执行，并通过自蒸馏扩散策略优化等后训练阶段降低对强跟踪器的依赖。该分层框架提升了长程移动操作的可行性，也为人形全身运动模仿与强化学习控制提供了可扩展范式。",
+      "llm_tags": [
+        "query:humanoid"
+      ],
+      "matched_query_tag": "query:humanoid",
+      "matched_query_text": "Humanoid motion imitation and reinforcement learning for robust whole body control on uneven terrain",
+      "matched_requirement_id": "req-14",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2610.19183v1",
+      "source": "arxiv",
+      "title": "A Mode-Unified, Continuous, and Biomimetic Control Strategy of a Robotic Lower Limb Prosthesis",
+      "abstract": "Existing biomimetic lower-limb prosthesis controllers are commonly designed for discrete locomotion modes, requiring separate parameterizations for level walking, ramps, and stairs. We present a mode-unified prosthesis control framework that represents knee and ankle biomechanics continuously as functions of terrain slope and gait phase across those locomotion conditions. Locally optimized ascent and descent polynomial models were unified using radial basis function (RBF) interpolation, preserving the accuracy of the partitioned models while outperforming a global polynomial representation. The resulting biomechanics were transformed into continuous and slope-dependent impedance parameters and implemented within a single finite-state-machine (FSM) controller using bilateral sensing for gait-state estimation. Experiments with 10 individuals with transfemoral amputation demonstrated terrain-adaptive locomotion from level walking through ramps and stairs up to 35 degrees, including 13 degree ramp and 15 degree stair conditions absent from the underlying able-bodied (AB) dataset. Experimental results reproduced the principal slope-dependent biomechanical trends predicted by the unified model, with high agreement for knee-related measures (r-square = 0.82 - 0.99) and ankle kinematics (r-square= 0.78 - 0.96). These findings demonstrated that unified biomechanical parameterization enables a prosthesis control architecture across diverse terrain conditions while preserving key features of AB biomechanics without requiring independently tuned impedance parameter sets for each locomotion mode.",
+      "authors": [
+        "Hanjun Kim",
+        "Sixu Zhou",
+        "John Shim",
+        "Xinyuan Guo",
+        "Kinsey R. Herrin",
+        "Aaron J. Young"
+      ],
+      "primary_category": "cs.RO",
+      "categories": [
+        "cs.RO"
+      ],
+      "published": "2026-10-13T20:48:46+00:00",
+      "link": "https://arxiv.org/pdf/2610.19183v1",
+      "tags": [
+        "keyword:exo-vision",
+        "keyword:hip-exo",
+        "keyword:humanoid",
+        "query:exo-vision",
+        "query:hip-exo",
+        "query:humanoid"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "gait-phase and terrain-slope dependent continuous impedance control for lower limb assistive device",
+      "llm_evidence_cn": "依赖步态相位与地形坡度的连续阻抗控制",
+      "llm_evidence": "依赖步态相位与地形坡度的连续阻抗控制",
+      "canonical_evidence": "依赖步态相位与地形坡度的连续阻抗控制",
+      "llm_tldr_en": "A mode-unified prosthesis controller represents knee and ankle biomechanics continuously as functions of terrain slope and gait phase, yielding continuous slope-dependent impedance parameters within a single finite-state framework.",
+      "llm_tldr_cn": "现有仿生下肢体假肢控制器按平地、上下坡与楼梯等离散运动模式分别设计参数，导致模式切换不连续。作者提出模式统一控制框架，把膝踝生物力学表示为地形坡度与步态相位的连续函数，并用径向基函数插值统一局部多项式模型。结果转化为连续且随坡度变化的阻抗参数并在单一有限状态框架中实现，为跨地形的连续步态相位驱动助力控制提供了可迁移方法。",
+      "llm_tldr": "现有仿生下肢体假肢控制器按平地、上下坡与楼梯等离散运动模式分别设计参数，导致模式切换不连续。作者提出模式统一控制框架，把膝踝生物力学表示为地形坡度与步态相位的连续函数，并用径向基函数插值统一局部多项式模型。结果转化为连续且随坡度变化的阻抗参数并在单一有限状态框架中实现，为跨地形的连续步态相位驱动助力控制提供了可迁移方法。",
+      "llm_tags": [
+        "query:hip-exo"
+      ],
+      "matched_query_tag": "query:hip-exo",
+      "matched_query_text": "Hip exoskeleton assistance control for walking including gait phase estimation and adaptive torque profiles",
+      "matched_requirement_id": "req-1",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2610.25711v1",
+      "source": "arxiv",
+      "title": "SWAP: Test-Time Steerable Humanoid Whole-Body Collision Avoidance",
+      "abstract": "Humanoid robots operating in human-centric environments must coordinate the entire body to traverse tight, cluttered spaces while maintaining balance. Existing methods often struggle to jointly consider dynamic stability and collision avoidance from high-dimensional perceptual inputs. Moreover, for humanoids, safe behavior is inherently multimodal: the same obstacle may admit multiple valid traversals, which is difficult to represent with a single deterministic policy. To address these challenges, we propose SWAP (Steerable Whole-body Avoidance Policy), a hierarchical framework that separates collision-aware decision making from stabilization. A high-level, perception-conditioned diffusion policy generates multimodal, collision-aware motion proposals, while a low-level whole-body RL controller tracks these proposals and maintains dynamic balance. To efficiently train the high-level policy, we obtain scalable supervision via hindsight labeling: we roll out the low-level policy under randomized commands, place obstacles only in the space that each executed motion did not sweep, so the motion is collision-free by construction, and re-render the perception the robot would have seen. At deployment, Monte Carlo sampling with simple cost signals steers the diffusion model toward safe, task-aligned behaviors without heavy reward tuning.   Experiments in simulation and on a real Unitree G1 humanoid show reliable avoidance with static and dynamic obstacles. Test-time steering further enables customization, improving targeted rewards (e.g., speed, orientation, or posture) by 34% on average while maintaining a high collision avoidance rate. Together, these results support a practical solution to humanoid whole-body collision avoidance with test-time steerability. Project website: https://iscoyizj.github.io/SWAP-steerable-humanoid-oa-website/",
+      "authors": [
+        "Zeji Yi",
+        "Guanqi He",
+        "Xiaofeng Guo",
+        "Guannan Qu",
+        "Pieter Abbeel",
+        "Yan Duan",
+        "Karen Liu",
+        "Guanya Shi"
+      ],
+      "primary_category": "cs.RO",
+      "categories": [
+        "cs.RO"
+      ],
+      "published": "2026-10-19T03:00:50+00:00",
+      "link": "https://arxiv.org/pdf/2610.25711v1",
+      "tags": [
+        "keyword:exo-vision",
+        "keyword:hip-exo",
+        "keyword:humanoid",
+        "query:exo-vision",
+        "query:hip-exo",
+        "query:humanoid"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "perception-conditioned whole-body collision avoidance with balance for humanoids",
+      "llm_evidence_cn": "基于感知的人形全身避障与平衡控制",
+      "llm_evidence": "基于感知的人形全身避障与平衡控制",
+      "canonical_evidence": "基于感知的人形全身避障与平衡控制",
+      "llm_tldr_en": "SWAP is a hierarchical framework that separates collision-aware decision making from stabilization, using a perception-conditioned diffusion policy to generate multimodal whole-body motion proposals for balanced humanoid traversal of cluttered spaces.",
+      "llm_tldr_cn": "人形机器人在狭窄杂乱的人居环境中需要全身协调并保持平衡，但现有方法难以从高维感知输入同时兼顾动态稳定与避障，且安全行为本身具有多模态性。作者提出SWAP分层框架，把碰撞感知决策与稳定控制分离，高层用感知条件扩散策略生成多模态避障运动提案。该设计使机器人能在保持平衡的前提下穿越狭窄空间，为带视觉感知的人形全身运动控制提供了可行思路。",
+      "llm_tldr": "人形机器人在狭窄杂乱的人居环境中需要全身协调并保持平衡，但现有方法难以从高维感知输入同时兼顾动态稳定与避障，且安全行为本身具有多模态性。作者提出SWAP分层框架，把碰撞感知决策与稳定控制分离，高层用感知条件扩散策略生成多模态避障运动提案。该设计使机器人能在保持平衡的前提下穿越狭窄空间，为带视觉感知的人形全身运动控制提供了可行思路。",
+      "llm_tags": [
+        "query:humanoid"
+      ],
+      "matched_query_tag": "query:humanoid",
+      "matched_query_text": "Whole body motion control balance and coordination for humanoid robots",
+      "matched_requirement_id": "req-12",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2610.20255v1",
+      "source": "arxiv",
+      "title": "Safe Reinforcement Learning with Receding-Horizon Safety Critic and Differentiable Action Shields",
+      "abstract": "Despite the Markov assumption, safety failures in robot reinforcement learning rarely occur instantaneously; they typically emerge over several steps as the policy enters unfamiliar states under disturbances and domain shift. We address this limitation by learning a receding-horizon safety critic that predicts whether a state will remain non-terminating over the next receding horizon, enabling anticipatory detection of impending locomotion failures. The critic is trained from rollout-derived horizon labels with a composite objective that combines horizon classification, control-barrier-function-inspired temporal consistency, and smoothness regularization, and we aggregate an ensemble of critics with a conservative Conditional Value at Risk estimate to account for uncertainty. Building on the learned critic, we derive a closed-form, differentiable CBF-style safety filter that minimally modifies the policy action to improve predicted safety, and integrate it into PPO with an anticipation loss to reduce policy-filter mismatch during training. In simulated quadruped locomotion, our method improves robustness under action noise, external perturbations, and terrain shifts, reducing catastrophic failures while maintaining competitive returns.",
+      "authors": [
+        "Siwei Ju",
+        "Jan Peters",
+        "Oleg Arenz"
+      ],
+      "primary_category": "cs.RO",
+      "categories": [
+        "cs.RO"
+      ],
+      "published": "2026-10-14T14:25:46+00:00",
+      "link": "https://arxiv.org/pdf/2610.20255v1",
+      "tags": [
+        "keyword:exo-vision",
+        "keyword:hip-exo",
+        "keyword:humanoid",
+        "query:exo-vision",
+        "query:hip-exo",
+        "query:humanoid"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "receding-horizon safety critic anticipating locomotion failures in RL",
+      "llm_evidence_cn": "预测运动失效的滚动时域安全评论家",
+      "llm_evidence": "预测运动失效的滚动时域安全评论家",
+      "canonical_evidence": "预测运动失效的滚动时域安全评论家",
+      "llm_tldr_en": "Learns a receding-horizon safety critic that anticipates impending locomotion failures several steps ahead, trained with horizon labels, CBF-inspired temporal consistency and smoothness, paired with differentiable action shields.",
+      "llm_tldr_cn": "针对机器人强化学习中安全失效往往在多步内逐步累积、难以被瞬时约束捕获的问题，本文提出滚动时域安全评论家，用轨迹生成的时域标签结合控制屏障函数式时序一致性与平滑正则进行训练，并集成保守聚合的评论家与可微动作盾。实验表明该方法能在策略进入陌生状态时提前数步预测运动失效，为腿足机器人强化学习提供了前瞻性安全保障。",
+      "llm_tldr": "针对机器人强化学习中安全失效往往在多步内逐步累积、难以被瞬时约束捕获的问题，本文提出滚动时域安全评论家，用轨迹生成的时域标签结合控制屏障函数式时序一致性与平滑正则进行训练，并集成保守聚合的评论家与可微动作盾。实验表明该方法能在策略进入陌生状态时提前数步预测运动失效，为腿足机器人强化学习提供了前瞻性安全保障。",
+      "llm_tags": [
+        "query:humanoid"
+      ],
+      "matched_query_tag": "query:humanoid",
+      "matched_query_text": "Robust humanoid locomotion using reinforcement learning model predictive control and sim to real transfer",
+      "matched_requirement_id": "req-11",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2610.21534v1",
+      "source": "arxiv",
+      "title": "Attribution-Gated Joint Estimation of Intention and Capability for Assist-as-Needed Upper-Limb Robots",
+      "abstract": "Assist-as-needed (AAN) control must distinguish between changes in intended motion and changes in effective voluntary torque capability, even though both can produce similar kinematic and interaction responses. A dual-measurand multimodal MHE-MPC architecture is developed as the base framework, in which the intended trajectory and the task-dependent effective voluntary torque capability are estimated online as distinct quantities, and both estimates are used to adapt robotic assistance. Building on this architecture, the ambiguity between the two update channels is formulated as a continuous credit-assignment problem and resolved by an attribution gate. A trajectory-change indicator is obtained from persistent corrective interaction, whereas a capability-change indicator is derived from the residual between normalized muscle activation and dynamics-reconstructed voluntary torque. Nine healthy participants completed factorial target-height-load trials and a pre-post fatigue cup-transport task. Without target-height input, the gated method generated correctly ordered Low-Middle-High references under every load: target changes were preferentially assigned to trajectory adaptation, whereas added load shifted adaptation toward the capability channel. It achieved the lowest RMSE in all nine conditions (0.017 rad versus 0.041 rad for ungated dual estimation and 0.127 rad for fixed-reference error-based AAN). Post-fatigue capability estimates decreased and assistance increased at all heights, supporting functional feasibility.",
+      "authors": [
+        "Pengcheng Li",
+        "Shuxiang Guo",
+        "Hanze Wang",
+        "Jun Leng",
+        "Bin Wang",
+        "Mingchao Ding"
+      ],
+      "primary_category": "cs.RO",
+      "categories": [
+        "cs.RO"
+      ],
+      "published": "2026-10-15T09:02:02+00:00",
+      "link": "https://arxiv.org/pdf/2610.21534v1",
+      "tags": [
+        "keyword:exo-vision",
+        "keyword:hip-exo",
+        "keyword:humanoid",
+        "query:exo-vision",
+        "query:hip-exo"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "MHE-MPC estimates human intention and torque capability online to adapt assistance",
+      "llm_evidence_cn": "移动时域估计与模型预测控制在线估计意图与力矩能力以自适应助力",
+      "llm_evidence": "移动时域估计与模型预测控制在线估计意图与力矩能力以自适应助力",
+      "canonical_evidence": "移动时域估计与模型预测控制在线估计意图与力矩能力以自适应助力",
+      "llm_tldr_en": "Develops a dual-measurand MHE-MPC architecture with an attribution gate to disentangle intended motion from voluntary torque capability, enabling adaptive assist-as-needed robot control.",
+      "llm_tldr_cn": "按需辅助控制需要区分用户意图变化与有效自主力矩能力变化，但二者会产生相似的关节运动与交互响应。为此作者提出双测量多模态移动时域估计与模型预测控制架构，在线分别估计意图轨迹与任务相关有效力矩能力，并把两更新通道的歧义建模为连续信用分配问题，由归因门加以消解。该框架借助轨迹变化指标区分两类变化并据此自适应调整辅助，为个性化助力控制提供了可迁移思路。",
+      "llm_tldr": "按需辅助控制需要区分用户意图变化与有效自主力矩能力变化，但二者会产生相似的关节运动与交互响应。为此作者提出双测量多模态移动时域估计与模型预测控制架构，在线分别估计意图轨迹与任务相关有效力矩能力，并把两更新通道的歧义建模为连续信用分配问题，由归因门加以消解。该框架借助轨迹变化指标区分两类变化并据此自适应调整辅助，为个性化助力控制提供了可迁移思路。",
+      "llm_tags": [
+        "query:hip-exo"
+      ],
+      "matched_query_tag": "query:hip-exo",
+      "matched_query_text": "Personalized adaptive hip exoskeleton control with gait phase estimation human intention prediction and assistance torque optimization",
+      "matched_requirement_id": "req-4",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    }
+  ]
+}

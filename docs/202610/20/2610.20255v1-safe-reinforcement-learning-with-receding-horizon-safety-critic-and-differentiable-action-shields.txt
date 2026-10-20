@@ -1,0 +1,943 @@
+Title: Safe Reinforcement Learning with Receding-Horizon Safety Critic and Differentiable Action Shields
+
+URL Source: https://arxiv.org/pdf/2610.20255v1
+
+Published Time: Thu, 15 Oct 2026 01:42:16 GMT
+
+Number of Pages: 15
+
+Markdown Content:
+# Safe Reinforcement Learning with Receding-Horizon Safety Critic and Differentiable Action Shields 
+
+Siwei Ju 1,∗, Jan Peters 1,2,3,4, and Oleg Arenz 1
+
+Abstract —Despite the Markov assumption, safety failures in robot reinforcement learning rarely occur instantaneously; they typically emerge over several steps as the policy enters unfamiliar states under disturbances and domain shift. We address this limitation by learning a receding-horizon safety critic 
+
+that predicts whether a state will remain non-terminating over the next receding horizon, enabling anticipatory detection of impending locomotion failures. The critic is trained from rollout-derived horizon labels with a composite objective that combines horizon classification, control-barrier-function-inspired temporal consistency, and smoothness regularization, and we aggregate an ensemble of critics with a conservative Conditional Value at Risk estimate to account for uncertainty. Building on the learned critic, we derive a closed-form, differentiable CBF-style safety filter that minimally modifies the policy action to improve predicted safety, and integrate it into PPO with an anticipation loss to reduce policy–filter mismatch during training. In simulated quadruped locomotion, our method improves robustness under action noise, external perturbations, and terrain shifts, reducing catastrophic failures while maintaining competitive returns. 
+
+I. I NTRODUCTION 
+
+Reinforcement learning (RL) has enabled increasingly agile legged locomotion, yet safety remains a central obstacle to de-ploying learned controllers beyond narrow training conditions. In practice, many locomotion failures are delayed: a destabi-lizing contact, a slight foot scuff, or a suboptimal recovery step may not cause an immediate violation, but can drive the robot into an unrecoverable state several steps later. This makes safety inherently horizon-dependent in locomotion, especially under disturbances and terrain-induced contact variability. A common approach to safety in continuous control is to enforce state constraints using control barrier functions (CBFs) [3] and differentiable safety layers that project actions through constrained optimization [1, 31]. Data-driven CBF variants often learn uncertainty or residual terms to com-pensate modeling error [27, 9], while neural CBFs (NCBFs) parameterize the certificate itself to reduce manual design effort [37, 24, 20, 25, 36, 17, 2]. In safe RL, CBF-style shields are frequently combined with actor–critic training [10, 7, 8, 32, 34] or treated as part of the environment dynamics [6]. Despite 
+
+> 1
+
+Department of Computer Science, Technical University of Darmstadt, Ger-many. 
+
+> 2
+
+Hessian.AI. 
+
+> 3
+
+German Research Center for AI (DFKI), Research Department: Systems AI for Robot Learning. 
+
+> 4
+
+Robotics Institute Germany (RIG).  
+
+> ∗
+
+Corresponding author: siwei@robot-learning.de 
+
+their success, these methods face persistent challenges in loco-motion: (i) computational overhead from per-step optimization and the associated training-time scalability limits, (ii) myopia 
+
+from one-step constraints on the safety layer that may not anticipate multi-step failures, and (iii) policy–filter mismatch ,where the executed (filtered) actions induce a distribution shift that is not always accounted for during policy optimization. Predictive safety filters address myopia by enforcing safety over a horizon, typically relying on known or nominal dynam-ics models and uncertainty representations [28, 29, 30]. In par-allel, safe RL has explored learning feasibility or long-horizon safety signals that resemble critics/value functions [13, 26] and structured safety enforcement that avoids generic QPs when dynamics are known [15]. For robot control, complementary approaches predict failure and switch to recovery behaviors (e.g., safe-fall policies) [19, 14], or deploy CBF shields on complex platforms such as humanoids [33, 34]. These strands collectively indicate the need for safety mechanisms that are horizon-aware, computationally lightweight, and compatible with end-to-end policy learning under distribution shift. We propose a receding-horizon safety critic that directly predicts whether the system will remain non-terminated over the next H steps from a state. The critic is trained from rollouts using horizon-wise binary labels, shaped by a temporal consistency prior inspired by discrete-time CBF conditions, and regularized for smoothness to improve robustness under distribution shift. To make the safety signal actionable for control, we derive a differentiable safety layer that minimally corrects the policy action via a single-constraint projection with a closed-form solution, and we use a slack variable scaled by the ensemble uncertainty. Because the safety layer is differentiable, we integrate it into PPO and introduce a safety anticipation loss so the policy learns to reduce interventions and align with the horizon-safety objective. We evaluate the approach on quadruped locomotion under controlled domain shifts, including stochastic action noise and external perturbations on both flat and heightfield terrains. Across disturbance intensities, the proposed method substan-tially improves success rates while maintaining competitive returns compared to PPO with domain randomization and PPO augmented with an NCBF-style safety layer. An ablation on the horizon length reveals a clear trade-off: longer horizons better mitigate myopic failures but are harder to train and can become over-conservative under shift. We summarize our contribution as follows: arXiv:2610.20255v1 [cs.RO] 14 Oct 2026 • Receding-horizon safety critic. We learn a safety critic that predicts whether the system remains safe over the next H steps from horizon-labeled rollouts.  
+
+> •
+
+Structured horizon-safety training. We propose a train-ing objective combining horizon classification, temporal consistency, and smoothness regularization with balanced sampling of rare failures.  
+
+> •
+
+Closed-form differentiable safety shield. We derive a one-constraint projection that minimally corrects the policy action to prevent decreases in predicted safety, enabling end-to-end optimization.  
+
+> •
+
+Robust safe locomotion under shift. Integrated with PPO via a safety-anticipation loss, our method reduces catas-trophic failures and improves robustness under domain shift, outperforming PPO baselines and an NCBF safety layer without hand-designed CBFs. II. R ELATED WORK 
+
+This work intersects barrier-function-based safety, predic-tive safety filtering, and safe reinforcement learning for legged robots. We review these areas and highlight the gap our approach targets: horizon-aware safety enforcement that is differentiable, model-free at deployment, and compatible with end-to-end policy optimization under distribution shift. 
+
+A. Control Barrier Functions, Predictive Safety Layers, and Neural CBFs 
+
+Control Barrier Function (CBF)s enforce forward invariance of a safe set by constraining control inputs and are a standard tool for safety-critical control [3]. To handle uncertainty and disturbances, data-driven CBF methods often assume a nom-inal model and learn learn the residual and uncertainty from data, e.g., reducing model error in the CBF derivative [27] or enabling long-term safe operation under unknown distur-bances [9]. For neural policies and end-to-end training, CBF constraints are frequently implemented as differentiable optimization lay-ers (typically QPs) so gradients can pass through the safety filter [3, 1, 31]. In safe RL, such filters are sometimes treated as part of the environment dynamics [6]; examples include CBF layers added to SAC [10], model-based filtering with learned uncertainty (e.g., GP) combined with RL [7], and methods that integrate CBF/CLF constraints into actor–critic updates or reward design [8, 32, 34]. A recurring issue is policy–filter mismatch : the executed (filtered) action can deviate from the policy output, yet many approaches do not explicitly optimize under the induced distribution shift. Beyond one-step constraints, predictive safety filters enforce safety over a future horizon, typically requiring nominal or learned dynamics and optional uncertainty models [28, 29, 30]. Finally, Neural Control Barrier Function (NCBF)s param-eterize certificates with neural networks to avoid manual barrier design; recent work studies verification and training of NCBFs [37, 24], learning certificates from demonstrations [20, 25, 36, 17], incorporating physics/PDE structure [2], and appli-cations under input limits or from sensory predictors [16, 12]. These tools are increasingly used in robotics, including legged locomotion and manipulation [4, 11, 21, 34, 18], motivating safety mechanisms that remain effective under domain shifts. 
+
+B. Relationship to Safe Reinforcement Learning 
+
+Safe RL methods can be broadly grouped into approaches that (i) learn a safety/feasibility signal analogous to a value function, and (ii) enforce constraints via projection or struc-tured action correction. The former methods learns a scalar signal predictive of future constraint satisfaction to guide exploration or policy improvement. [13] explicitly targets long-horizon safety under uncertainty, emphasizing that safety is a temporally extended property rather than a purely local certificate. In parallel, [26] connects RL value functions to the barrier-function viewpoint, bridging critics and formal safety reasoning. These perspec-tives motivate learning safety critics that encode horizon-aware feasibility. Another line avoids per-step QPs by exploiting constraint structure. ATACOM provides a closed-form mechanism to enforce multiple constraints for known dynamics by operating on the constraint manifold, reducing computational overhead relative to generic QP-based filters [15]. Such methods are efficient when modeling assumptions hold, but do not directly address end-to-end integration with policy learning under domain shift, which is central in robotics. 
+
+C. Safe Reinforcement Learning for Robot Control 
+
+In robot control, safe RL commonly follows two directions. (i) Risk prediction with recovery policies. These approaches train predictors for failure events and switch to a recovery behavior when risk is high. SafeFall trains a falling predictor paired with a safe-fall policy to mitigate catastrophic failures at deployment [19]. Related work emphasizes high-performance locomotion with safety-aware objectives (e.g., collision-free high-speed behaviors) [14]. While effective, recovery pipelines introduce additional controllers and switching logic, and typi-cally do not provide a single differentiable safety mechanism jointly optimized with the primary policy. (ii) Safety layers / shields based on barrier functions. A second family uses CBF-based filtering to minimally mod-ify policy actions to satisfy constraints. Robot-focused work demonstrates CBF-based shields on complex platforms such as humanoids [33] and shows that incorporating CBF structure can also benefit learning via reward shaping or auxiliary objec-tives [34]. Nevertheless, three practical limitations remain: (1) 
+
+training–deployment mismatch when applying the filter only at deployment, it may result in distribution shift; instead using safety filtering also during training can be important [5, 34]; (2) computational overhead from solving optimization prob-lems online, which hinders real-time deployment and large-scale RL training [33]; and (3) local (one-step) constraints and delayed failures: standard CBF/NCBF conditions constrain the instantaneous change of a barrier value, which can be too local in domains where failures emerge over multiple steps (e.g., loss of balance after a disturbance). Predictive safety filters address this by enforcing constraints over a horizon, but they typically lead to more involved multi-step optimization and stronger modeling assumptions. We address these issues by learning a receding-horizon safety critic and using it as a differentiable safety layer that does not require an explicit dynamics model. This enables end-to-end safety-shielded training to reduce distribution mis-match, avoids per-step QP solves through learned differen-tiable action correction, and mitigates myopia by optimizing multi-step safety through the horizon-aware critic. III. M ETHOD 
+
+A. Safe Reinforcement Learning with a Predictive Safety Critic 
+
+We consider a standard continuous-control reinforcement learning problem with state st ∈ Rn and action ut ∈ U ⊂ Rm.A stochastic policy πθ (ut | st) with parameters θ generates a nominal action u0 
+
+> t
+
+= πθ (st). We apply a safety shield that minimally modifies the raw action to a safe action 
+
+˜ut = T (xt, u 0 
+
+> t
+
+), and the environment evolves according to system dynamics st+1 ∼ p(st+1 | st, ˜ut). Here, we distinguish the policy state st from the safety critic input xt used by the critic and the safety filter. The vector xt consists of safety-relevant inputs (typically a subset or transformation of st). This notation allows us to present both a state-based safety critic and a state–action safety critic under a unified interface, and introduce them separately later. The RL objective is to maximize the expected discounted return under safety constraints. 
+
+max  
+
+> θ
+
+Eπθ
+
+h T −1X
+
+> t=0
+
+γtr(st, u t)
+
+i
+
+s.t. st+i ∈ C , ∀ t = 0 , . . . , T − 1, ∀ i = 0 , . . . , H, 
+
+(1) where C ⊂ Rn denotes the safe set, and H denotes the length of the horizon. To get the safety shield T , instead of hand-designing con-straints in the state space, we introduce a predictive safety critic hϕ(xt), parameterized by ϕ. We may omit ϕ later for brevity. This scalar function maps a state xt to a safety value whose sign and magnitude encode whether the system is expected to remain safe over the horizon of length H. We interpret the safe set as 
+
+Cγc = {xt | hϕ(xt) ≥ γc},
+
+where γc > 0 is a conservative safety margin. The overall goal is therefore to learn  
+
+> •
+
+a policy πθ that optimizes (1),  
+
+> •
+
+a parameterized safety critic hϕ that predicts horizon-wise safety and admits a barrier-like interpretation,  
+
+> •
+
+a differentiable safety filter T based on hϕ that modifies 
+
+u0 
+
+> t
+
+into a safe action ˜ut consistent with the safety critic. 
+
+B. Predictive Receding-Horizon Safety Critic 
+
+We now describe how the predictive safety critic hϕ(x) is trained from data and how its training objective is structured. 
+
+a) Data and horizon-wise labeling.: During interaction, we collect trajectories τ = {(st, u t, r t, s t+1 )}T −1 
+
+> t=0
+
+under an exploratory or partially trained policy. From these trajectories we derive binary labels yt ∈ { 0, 1} that indicate whether the system remains non-terminated over the next H steps: 
+
+yt =
+
+(1, if there is no terminal event in (t, t + H],
+
+0, otherwise .
+
+All such samples are stored in off-policy replay buffer D used for training hϕ.
+
+b) Horizon-safety classification loss.: We interpret the safety critic as predicting the probability of remaining safe over the next H steps. Specifically, we model 
+
+p(yt = 1 | st) ≈ σ hϕ(xt),
+
+where σ(·) is the sigmoid function. To account for the fact that negative labels induced by an eventual constraint violation are typically more reliable when the violation is temporally closer, we introduce an exponentially decaying discount weight for unsafe samples. Let nt ∈ { 0, 1, . . . , H } denote the number of steps from time t until the first constraint violation within the horizon (only relevant when yt = 0 ), and let γlabel ∈ (0 , 1] be a discount factor. We define 
+
+wlabel ,t =
+
+(1, yt = 1 ,γ nt
+
+> label
+
+, yt = 0 ,
+
+so that unsafe samples with imminent violations receive higher weight, while unsafe samples whose violations occur far in the future are down-weighted due to increased uncertainty. For horizon-safe samples ( yt = 1 ), no analogous time-to-event notion is required because the label corresponds to remaining safe over the entire horizon. The resulting weighted binary cross-entropy loss is 
+
+Llabel (ϕ) = − E
+
+h
+
+wlabel ,t 
+
+ yt log σ(hϕ(xt)) +(1 − yt) log(1 − σ(hϕ(xt))) i
+
+.
+
+(2) 
+
+c) Temporal safety-consistency loss.: To further struc-ture hϕ(x) beyond pure classification, we impose a tempo-ral consistency regularizer inspired by discrete-time control barrier functions (DT-CBFs). For safe transitions, a forward-invariance-style condition encourages the safety value not to decrease, up to a class-K term ˜α (e.g., ˜α(s) = ηCBF s): 
+
+h(xt+1 ) − h(xt) + ˜ α h(xt) − γc
+
+ ≥ 0. (3) For unsafe states ( yt = 0 ), it is often more meaningful to encourage progress away from the decision boundary: when a state is known to be unsafe, the next-step safety value should not increase and should decrease by a margin that scales with the current violation γc − h(xt). We encode these two directional constraints with hinge penalties. Denoting 
+
+∆ht := h(xt+1 ) − h(xt) and ReLU( z) = max(0 , z ), we define the safe-transition loss 
+
+L+temp (ϕ) = E
+
+h
+
+I[yt = 1] ReLU 
+
+
+
+− ∆ht − ˜α hϕ(xt) − γc
+
+i 
+
+,
+
+(4) Rollout and Data Collection  
+
+> H
+> safe buffer unsafe buffer
+> discounting weights
+
+Safety Critic Training  
+
+> safety critic
+> labeling loss temporal consistency smoothness
+> CVaR Ensemble Safety Critic q
+> raw action safe action
+
+Differentiable Closed-From Safety Layer 
+
+Policy Training 
+
+Deployment with Safety Layer 
+
+rollout with safe policy  
+
+> PPO loss anticipation loss
+
+Fig. 1: Overview of the training pipeline. Rollouts are collected in simulation under domain randomization and disturbances, and states are labeled by horizon-H safety to populate separate safe/unsafe buffers (with discounted weighting for delayed violations). A predictive safety critic is trained with a composite objective (labeling, temporal consistency, and smoothness), and an ensemble is aggregated via CVaR to obtain a conservative safety estimate and uncertainty σt. At each step, a differentiable closed-form safety layer projects the raw policy action to a minimally modified safe action, which is used both during PPO training (with an anticipation loss to reduce interventions) and at deployment for safety-shielded control. 
+
+and the unsafe-transition loss 
+
+L−
+
+> temp
+
+(ϕ) = E
+
+h
+
+I[yt = 0] ReLU 
+
+
+
+∆ht − ˜α γc − hϕ(xt)i 
+
+.
+
+(5) The overall temporal consistency regularizer is then 
+
+Ltemp (ϕ) = L+temp (ϕ) + L−
+
+> temp
+
+(ϕ). (6) 
+
+d) Regularization: gradient and weight penalties.: To improve smoothness and robustness of the safety critic, we add two regularizers. First, we penalize large input gradients to control the local Lipschitz constant: Llip (ϕ) = Ext∼D 
+
+∥∇ xhϕ(xt)∥22
+
+. This term stabilizes the critic and reduces sensitivity to small state perturbations. Second, we apply standard weight decay to discourage overly complex models: Lwd (ϕ) = ∥ϕ∥22.Combining all components, the safety critic is trained by optimizing 
+
+L(ϕ) = wlabel Llabel + wtemp Ltemp + wlip Llip + wwd Lwd , (7) where wlabel , w temp , w lip , w wd weight each term correspond-ingly. 
+
+e) Uncertainty-aware conservative safety prediction.: 
+
+A single deterministic classifier can be overconfident under distribution shift or in sparsely covered regions of the state space. To capture uncertainty induced by finite data, function approximation, and the randomized domain parameters, we train an ensemble of M independently initialized predictors 
+
+{h}Mi=1 on D. Each member produces a probabilistic horizon-safety prediction hi(xt). We then aggregate ensemble predic-tions using a Conditional Value-at-Risk (CVaR) operator to obtain a conservative yet probabilistic safety estimate. This aggregation emphasizes the lower tail (pessimistic members), thereby discounting overconfident predictions. We report ˆpCVaR (xt) as the safety critic’s conservative probability of remaining safe over the next H steps, and use it at deploy-ment as a conservative safety score for filtering. Furthermore, by estimating the epistemic uncertainty, the standard deviation 
+
+σ(xt) can be used to control the strength of the safety filter, which we will discuss in Section III-C. 
+
+f) Data buffer and sampling.: To stabilize safety-critic learning under a non-stationary policy and severe class imbal-ance, we maintain two separate replay buffers: a safe buffer 
+
+D+ that stores horizon-safe transitions and an unsafe buffer 
+
+D− that stores transitions that lead to (or contain) safety violations. Using two buffers, rather than a single mixed replay, follows common practice in safety learning and risk-aware RL when negative events can be rare and their frequency changes over training [13, 35]. This design is motivated by the fact that as the policy improves, unsafe events become increasingly infrequent. With-out explicit control of negative replay, the training distribu-tion for the safety predictor can drift toward predominantly safe samples, causing the predictor to overfit to the current training stage, forget previously observed failure modes, and degrade generalization under distribution shift. By preserving a dedicated set of unsafe samples and continuing to replay them, D− acts as a long-term memory of rare but safety-critical behaviors, helping maintain calibration and reduce false negatives. During training, each minibatch is constructed by sampling a fixed ratio from the two buffers. Concretely, given minibatch size B and positive sampling ratio ρ+ ∈ [0 , 1] , we draw 
+
+B+ = ⌊ρ+B⌋ samples from D+ and B− = B − B+ samples from D−, and then merge them into a single minibatch. The ratio ρ+ provides direct control over the effective class balance seen by the safety predictor, allowing us to maintain sufficient exposure to unsafe samples throughout training even when violations become rare. Optimizing (7) by combining from all components ex-plained in this section yields a predictive safety critic hϕ(x)
+
+that (i) predicts the probability of remaining safe over the next 
+
+H steps conservativey and being aware of the uncertainty, and (ii) is shaped to behave like a scalar barrier, which we can exploit to design a safety filter. 
+
+C. Differentiable Safety Shield via Closed-Form Projection 
+
+We now describe how to use hϕ to construct a differentiable safety filter that maps the nominal action u0 
+
+> t
+
+to a corrected action ˜ut that satisfies barrier-like constraints derived from the DT-CBF condition in (3): 
+
+h(xt+1 (ut)) − h(xt) + ˜ α h(xt) − γc
+
+ ≥ 0. (8) The key design choice is how to represent the next-step safety term h(xt+1 ) inside (8). We consider two variants: (i) a state 
+
+critic hϕ(x) with state-only input xt = f (st) combined with a differentiable one-step transition model, and (ii) a state–action 
+
+critic hqϕ(st, u t) with state and action inputs that directly predicts the next-step safety effect of an action. The difference is analogous to the value function and the state action value function in reinforcement learning. Both lead to an affine constraint of the form a⊤u ≥ c, enabling the subsequent unified closed-form projection. 
+
+a) State Safety Critic: In the state-critic variant, we obtain the next-step safety value hϕ(xt+1 (u)) by composing a differentiable one-step model 
+
+xt+1 (u) = ˆfψ (xt, u ),
+
+with the safety critic. In our experiments, we directly use the differentiable nominal MJX simulator dynamics ˆfnom .To formulate a per-step safety projection, we linearize 
+
+hϕ(xt+1 (u)) with respect to u around the nominal action u0 
+
+> t
+
+:
+
+hϕ
+
+ xt+1 (u) ≈ hϕ
+
+ xt+1 (u0 
+
+> t
+
+) + ∇uhϕ
+
+ xt+1 (u) ⊤
+
+> u0
+> t
+
+(u − u0 
+
+> t
+
+).
+
+(9) We define aht ≜ ∇uhϕ
+
+ xt+1 (u)
+
+> u0
+> t
+
+, which is obtained by automatic differentiation through ˆfψ (in MJX) and hϕ.
+
+Constraint formulation. Substituting (9) into (8) yields an affine constraint in u:
+
+(aht )⊤u ≥ cht , with 
+
+cht ≜ (aht )⊤u0 
+
+> t
+
++ hϕ(xt) − ˜α hϕ(xt) − γc
+
+ − hϕ
+
+ xt+1 (u0 
+
+> t
+
+).A key advantage of this framework is that a can be computed directly via automatic differentiation through the nominal system dynamics model. In simulation, this nominal model is already available: the MuJoCo/MJX physics engine provides a differentiable mapping with no additional modeling assumptions. Leveraging this native differentiable transition model requires no extra learning, no auxiliary networks, and no system-identification phase. It injects known physics into the otherwise model-free RL pipeline, yielding two major benefits:  
+
+> •
+
+Accurate action gradients. The term ∇uhϕ(xt+1 ) is com-puted through the true simulated dynamics, providing more reliable sensitivity information than finite differ-ences or black-box estimators.  
+
+> •
+
+Zero additional computational burden. Since MJX already supports end-to-end differentiation, the linearization is obtained “for free” during backpropagation, without re-quiring a learned control-affine approximation. But this method is prone to nominal model mismatch, which is crucial because of sim2real gaps. Under domain randomization or unmodeled effects, the executed dynamics ftrue can deviate from ˆfnom , yielding biased rollouts ˆxt+1 ̸ = xt+1 and therefore biased estimates of both hϕ(xt+1 ) and its action sensitivity. This mismatch can lead the safety projection to correct actions in an inconsistent direction. 
+
+b) State–Action Safety Critic: To mitigate unavoidable model mismatch, we introduce a state–action safety critic 
+
+hqϕ(x) with inputs st, u t and interpret it as the one-step safety value induced by applying u at st, then we can infer the state safety critic value from the state-action safety value: 
+
+h(xt+1 (ut)) ← hqϕ(st, u t), xt+1 ∼ ftrue (st, u ). (10) In practice, hqϕ is trained from replayed transitions and horizon-safety labels, thereby absorbing the effective dynamics (including randomization) into the predictor. Similar to (9), the linearization now becomes: 
+
+h(xt+1 (u)) ≈ hqϕ
+
+ st, u 0
+
+> t
+
+ + ∇uhqϕ
+
+ st, u  ⊤
+
+> u0
+> t
+
+(u − u0 
+
+> t
+
+). (11) We define aqt ≜ ∇uhqϕ
+
+ f (st, u )
+
+> u0
+> t
+
+, which is obtained by differentiating through hqϕ alone. 
+
+Constraint formulation. For the state–action critic, the safety condition can be then directly written in terms of the executed action: 
+
+hqϕ(st, u ) − hqϕ(st−1, u t−1) + ˜ α hqϕ(st−1, u t−1) − γc
+
+ ≥ 0,
+
+Substituting the linearization (11) yields an affine constraint 
+
+(aqt )⊤u ≥ cqt ,
+
+with cqt ≜ (aqt )⊤u0 
+
+> t
+
++ (1 − ˜α) hqϕ(xt−1) − hqϕ
+
+ st, u 0
+
+> t
+
+ + ˜ αγ c.
+
+This construction avoids differentiating through a poten-tially mismatched dynamics model: the gradient a is obtained by automatic differentiation through qϕ alone, while the train-ing target for qϕ is grounded in the realized transition data. As a result, the safety layer becomes more computationally effi-cient and less sensitive to nominal-model errors introduced by domain randomization, but it can inherit uncertainty induced by randomization. 
+
+c) Quadratic program with uncertainty-scaled slack: 
+
+Both variants above yield an affine constraint (a·
+
+> t
+
+)⊤u ≥ c·
+
+> t
+
+.We enforce either constraint with the same one-constraint QP, differing only in whether (at, c t) = ( aht , c ht ) or (at, c t) = (aqt , c qt ).Firstly, to allow controlled relaxation when uncertainty is high, we introduce a standard-deviation–scaled slack variable ξt ≥ 0 and enforce the relaxed constraint in standardized units: 
+
+a⊤ 
+
+> t
+
+u + σtξt ≥ ct,
+
+so that the relaxation in the original units is εt ≜ σtξt. As defined in Section III-B0e, σt refers to the standard deviation of the safety critic ensemble. We then unify both formulations and compute a minimally modified action by solving the one-constraint QP 
+
+min 
+
+> u,ξ t
+
+∥u − u0 
+
+> t
+
+∥22 + λsξ2
+
+> t
+
+s.t. a⊤u + σtξt ≥ c, ξt ≥ 0,
+
+(12) where λs > 0 penalizes the slack variable ξt. This scal-ing makes the relaxation uncertainty-relevant: larger absolute constraint violation (in the original units) is permitted only when the critic is more uncertain, while the penalty remains comparable across states in standardized units. Because Eq. (12) has a single linear constraint, the KKT conditions yield a closed-form solution: 
+
+u⋆t = u0 
+
+> t
+
++
+
+c − a⊤u0
+
+> t
+
+
+
+> +
+
+∥a∥22 + σ2 
+
+> t
+
+/λ s
+
+a, ξ⋆t = σt
+
+c − a⊤u0
+
+> t
+
+
+
+> +
+
+λs∥a∥22 + σ2
+
+> t
+
+, [z]+ ≜ max {z, 0}.
+
+(13) If a⊤u0 
+
+> t
+
+≥ c, the constraint is inactive and the action is left unchanged, u⋆t = u0 
+
+> t
+
+. Otherwise, the safety filter moves the action along the steepest-ascent direction a by the smallest amount needed to satisfy the constraint, while ξ⋆t provides controlled relaxation when strict feasibility is not possible. We define the safety-filtered action as 
+
+˜ut = Tϕ(xt, u 0 
+
+> t
+
+).
+
+The mapping Tϕ(xt, u 0 
+
+> t
+
+) is end-to-end differentiable with respect to the policy parameters θ via u0 
+
+> t
+
+and the differen-tiable closed form solution of the QP, and does not require differentiating through a dynamics model at deployment. 
+
+D. Safe Policy Learning with Anticipation Loss 
+
+We now describe how we integrate the safety critic and safety filter into policy optimization. During rollouts, we generate nominal actions u0 
+
+> t
+
+∼ πθ (· | 
+
+st) and then apply the safety filter to obtain ˜ut = Tϕ(xt, u 0 
+
+> t
+
+).If the policy naively ignores safety, the filter will frequently intervene, leading to a mismatch between the actions used to compute policy gradients and those actually executed. Mean-while, if the safe action deviates a lot from the raw action, the linearization error in Eq.9 or 11 becomes larger which might lead in inaccurate safety modifications. To mitigate this, we introduce an anticipation loss that explicitly encourages the policy to output actions close to the safety-filtered actions: 
+
+Lanticipate (θ) = E
+
+h
+
+μθ (st) − Tϕ(xt, u 0 
+
+> t
+
+) 22
+
+i
+
+. (14) 
+
+Algorithm 1 Safe RL with Predictive Safety Critic and PPO  
+
+> 1:
+
+Initialize policy πθ , value function Vψ , predictive safety critic qϕ. 
+
+> 2:
+
+Initialize RL replay buffer and safety-critic buffer D. 
+
+> 3:
+
+while not converged do  
+
+> 4:
+
+Rollout with safety filter:  
+
+> 5:
+
+for environment step t = 0 , . . . , T − 1 do  
+
+> 6:
+
+Sample nominal action u0 
+
+> t
+
+∼ πθ (· | st). 
+
+> 7:
+
+˜ut = Tϕ(xt, u 0 
+
+> t
+
+) via (13) and execute.  
+
+> 8:
+
+Store (st, u 0 
+
+> t
+
+, ˜ut, r t, s t+1 , done t) in RL buffer.  
+
+> 9:
+
+Construct horizon labels yt from rollouts and append 
+
+(st, s t+1 , y t) to D+ and D+. 
+
+> 10:
+
+Update safety critic qϕ using (7).  
+
+> 11:
+
+Update πθ and Vψ using (15). coefficient. Gradients of (14) are backpropagated through Tϕ,thereby aligning the policy with the safety filter and reducing the frequency and magnitude of interventions. We employ Proximal Policy Optimization (PPO) [23] as the base RL algorithm. Let ˆAt denote generalized advantage estimates. The PPO surrogate objective is 
+
+LPPO (θ) = Et
+
+h
+
+min 
+
+
+
+rt(θ) ˆAt, clip  rt(θ), 1 − ϵ, 1 + ϵ ˆAt
+
+i 
+
+,rt(θ) = πθ (ut | st)
+
+πθold (ut | st) ,
+
+(15) where ϵ is the PPO clipping parameter. We jointly optimize the policy πθ and value function Vψ via the total loss 
+
+Ltotal (θ, ψ ) = − L PPO (θ) + λv Et
+
+(Vψ (st) − ˆRt)2
+
+− λH Et
+
+H(πθ (· | st)) 
+
++ λanticipate Lanticipate (θ),
+
+(16) where H(πθ ) is the policy entropy and λv , λ H , λ anticipate are scalar weights. The training procedure alternates between rollout with shielded policy, updating the safety critic and update the policy, as presented in Algorithm 1. IV. E XPERIMENTS AND RESULTS 
+
+We evaluate our predictive safety critic and differentiable safety shield through a sequence of experiments that isolate (i) safety prediction quality, (ii) closed-loop safety and perfor-mance under distribution shift, and (iii) key design choices. All policies are trained in simulation using MJX with GPU acceleration on a Unitree Go2 model. As baselines, we compare against state-of-the-art PPO-style locomotion pipelines equipped with standard domain randomization and common stabilization tricks (details in the appendix), and with a neural control barrier function. To test safety generalization beyond the training distribution, we introduce controlled sim-to-sim shifts between training and evaluation distributions, including terrain changes (flat 
+
+→ uneven), action noise, observation noise, and external perturbations. This suite is designed to emulate the failure 0.0 0.5 1.0                      
+
+> Success rate
+> Action Noise - Flat Terrain Action Noise - Heightfield Terrain Perturbation - Flat Terrain Perturbation - Heightfield Terrain
+> 00.2 0.4 0.6 0.8 1
+> sampling probability
+> 05
+> Avg. return
+> 00.2 0.4 0.6 0.8 1
+> sampling probability
+> 0.002 0.005 0.01 0.015 0.02
+> sampling probability
+> 0.002 0.005 0.01 0.015 0.02
+> sampling probability
+> PPO-RL PPO-RL-NCBF ours
+
+Fig. 2: Top row: success rate; bottom row: average return. Columns correspond to four evaluation suites (action-noise and external-perturbation, each on flat terrain and heightfield terrain). Curves show mean performance over independent runs for PPO-RL, PPO-RL-NCBF, and our method, with shaded bands indicating standard error across different seeds. The x-axis denotes the perturbation/noise sampling probability. 
+
+modes that dominate legged locomotion and to expose cases where myopic, single-step safety heuristics break down. We organize the results as follows. First, we validate the safety critic under the above shifts, demonstrating that it anticipates imminent failures over a receding horizon and that the ensemble uncertainty increases in out-of-distribution regimes. Second, we evaluate the full system (critic + closed-form projection) and report success/failure rates and returns under increasing shift and perturbation strength, comparing to baselines with and without safety mechanisms, and over base-lines with neural control barrier functions. Finally, we perform an ablation over the prediction horizon H to quantify the trade-off between early risk detection, intervention frequency, and locomotion performance. 
+
+A. Safety prediction 
+
+In this section, we validate the predictive safety critic using the state–action formulation, which is less sensitive to transition-model mismatch and empirically generalizes better under domain shifts; results for the state-only formulation are deferred to Appendix B. The critic is trained on flat terrain with domain randomization, and evaluated under a shifted test distribution with randomly generated uneven ter-rains and enlarged external perturbations. As intended, the ensemble produces conservative safety estimates, with the CVaR aggregate dropping ahead of failures and uncertainty increasing in out-of-distribution regions. We further visualize a representative rollout to show when the safety condition becomes active and how the closed-form shield modifies the policy actions in response. 
+
+B. General Performance 
+
+We next evaluate closed-loop robustness under controlled sim-to-sim distribution shifts, focusing on two failure modes that commonly break legged locomotion controllers: stochastic action noise, which simulates a suboptimal policy, and impul-sive external disturbances. We test each shift on two terrain families (flat and heightfield), resulting in four evaluation settings. For each setting, we evaluate different rates at which 0.0 0.5 1.0       
+
+> safety prediction  single prediction CVaR safety prediction standard deviation 050 100 150 200 250
+> timestep
+> 0246
+> action
+> u0
+> t
+> ut
+> utu0
+> t
+> 0.0 0.1 0.2 0.3
+> std  t
+
+Fig. 3: Example rollout diagnostics of the predictive safety shield. 
+
+Top: ensemble safety predictions (gray, “single prediction”), their CVaR-aggregated safety estimate ˆpCVaR (xt) (black), and the en-semble standard deviation σt (red, right axis). Peaks in σt indicate increased epistemic uncertainty and coincide with sharp drops in the predicted safety. Bottom: action magnitudes before and after shielding, showing the raw action norm ∥u0 
+
+> t
+
+∥ (orange), the shielded action norm ∥˜ut∥ (blue), and the correction magnitude ∥˜ut − u0 
+
+> t
+
+∥
+
+(green). Non-zero corrections occur primarily during high-uncertainty and low-safety intervals, illustrating successful interventions. 
+
+the noise and perturbations occur, and report both success rate and average return (Fig. 2). More detailed explanations are presented in Appendix D We compare three methods: (i) PPO-RL, a PPO locomotion baseline trained with standard domain randomization[22]; (ii) PPO-RL-NCBF, the same baseline augmented with a neural CBF safety shield; and (iii) ours, our predictive safety critic with a differentiable closed-form safety projection. 
+
+Action noise. PPO-RL is highly brittle under action noise: success collapses rapidly even at low noise rates and returns drop to near-zero across both terrains. In contrast, both safety-equipped methods maintain substantially higher success, with our approach consistently exhibiting the strongest robustness as the noise becomes more frequent. The improvement is most pronounced at moderate-to-high noise probabilities, where the baseline fails almost deterministically while our method still completes a large fraction of episodes and retains non-trivial returns. This gap increases on uneven terrain, indicating that action noise combined with terrain-induced contact variability exacerbates failures of the unshielded policy. 
+
+External perturbations. Under impulsive perturbations, performance degrades more smoothly for all methods as the perturbation frequency increases, but the ordering remains consistent. PPO-RL shows the steepest drop in both success and return, particularly on heightfields. Adding an NCBF shield improves robustness over PPO-RL, but our method achieves the best overall safety-performance trade-off: it main-tains the highest success rates across the sweep and preserves higher returns, suggesting that the predictive critic is able to anticipate destabilizing events and trigger earlier, less disrup-tive interventions than single-step safety heuristics. Overall, these results demonstrate that our method, in-corporating predictive risk estimation with a differentiable projection, yields markedly better safety generalization under distribution shift. The gains are strongest in regimes where disturbances occur frequently and where terrain irregularity amplifies transient errors, which are exactly the conditions that dominate real-world failure cases in legged locomotion. 
+
+C. Ablation on Horizon Length 
+
+Fig. 4 reports an ablation on the prediction horizon H
+
+of the receding-horizon safety critic under the domain shift with enlarged external perturbations, evaluated on both flat and heightfield (uneven) terrains, with the model trained on flat terrain. Using similar notation as in the previous section, this experiment isolates how far-horizon safety prediction im-pacts both closed-loop robustness and locomotion performance when the evaluation dynamics deviate from training. A key motivation for the receding-horizon critic is to address the myopia of classical and neural CBFs, where single-step or local constraints can fail to anticipate failures several steps in advance. Increasing H extends the look-ahead window and improves early risk detection, which tends to raise success under stronger perturbations—especially on heightfields where contacts and footholds introduce longer-term instabilities. However, the figure also highlights a clear bias–variance / generalization trade-off. As H grows, training becomes harder (longer credit assignment, noisier supervision, and a larger effective hypothesis class). In practice, longer-horizon critics are more prone to overfitting to the training distribution and to producing overly conservative risk estimates under shift. This conservatism increases intervention frequency and reduces returns, and can even lower success when the shield becomes too restrictive. Consistent with this, the H = 50 setting tends to degrade performance relative to moderate horizons, partic-ularly as perturbations intensify and the heightfield dynamics differ from those seen during training. Overall, H = 25 , which corresponds to 0.5 seconds, provides the best compromise under domain shift: it is long 0.0 0.5 1.0           
+
+> success rate  Perturbation - Flat Terrain Perturbation - Heightfield Terrain
+> 0.0020.005 0.01 0.015 0.02
+> sampling probability
+> 2.5 5.0 7.5
+> avg. return
+> 0.0020.005 0.01 0.015 0.02
+> sampling probability
+> H = 1 H = 10 best (H = 25) H = 50
+> Fig. 4: Ablation on prediction horizon H for selecting the safety-critic/shield horizon under sim-to-sim domain shift. Experiment set-tings are similar to Fig. 2. Curves show mean performance, with shaded bands indicating standard error across different seeds
+
+enough to mitigate myopic failure modes (improving robust-ness at higher perturbation strengths), yet not so long that the critic becomes difficult to train or excessively conservative, preserving higher average return. The complete results, also under action noise, are presented in Appendix E. V. C ONCLUSION 
+
+We presented a safe locomotion framework that replaces myopic one-step safety constraints with a receding-horizon safety critic and a closed-form, differentiable safety shield. The critic predicts horizon-wise feasibility from rollout-derived labels and is stabilized through temporal-consistency and smoothness regularization, while an ensemble with CVaR aggregation provides conservative safety estimates under dis-tribution shift. The resulting safety layer performs minimal action corrections without requiring a dynamics model at deployment and can be trained end-to-end with PPO via a safety-anticipation loss, reducing policy–filter mismatch. Across simulated quadruped locomotion under controlled domain shifts (action noise, external perturbations, and terrain changes), our method improves success rates while preserving competitive returns relative to PPO with domain randomization and an NCBF-based shield. An ablation over the horizon length highlights a practical trade-off between anticipatory safety and critic trainability/conservatism. A promising direction for future work is to fine-tune the safety critic using data from real world experiments to further enhance the robustness when faced with sim2real gap. REFERENCES 
+
+[1] Akshay Agrawal, Brandon Amos, Shane Barratt, Stephen Boyd, Steven Diamond, and Zico Kolter. Differentiable Convex Optimization Layers, October 2019. URL http: //arxiv.org/abs/1910.12430. arXiv:1910.12430 [cs]. [2] Shreenabh Agrawal, Manan Tayal, Aditya Singh, and Shishir Kolathaya. Neural Control Barrier Functions from Physics Informed Neural Networks, April 2025. URL http://arxiv.org/abs/2504.11045. arXiv:2504.11045 [cs]. [3] Aaron D. Ames, Xiangru Xu, Jessy W. Grizzle, and Paulo Tabuada. Control Barrier Function Based Quadratic Programs for Safety Critical Systems. IEEE Transac-tions on Automatic Control , 62(8):3861–3876, August 2017. ISSN 0018-9286, 1558-2523. doi: 10.1109/TAC. 2016.2638961. URL http://ieeexplore.ieee.org/document/ 7782377/. [4] Paolo Arena, Alessia Li Noce, and Luca Patanè. Sta-bility and Safety Learning Methods for Legged Robots. 
+
+Robotics , 13(1):17, January 2024. ISSN 2218-6581. doi: 10.3390/robotics13010017. URL https://www.mdpi.com/ 2218-6581/13/1/17. [5] Federico Pizarro Bejarano, Lukas Brunke, and Angela P. Schoellig. Safety Filtering While Training: Improving the Performance and Sample Efficiency of Reinforcement Learning Agents. IEEE Robotics and Automation Letters ,10(1):788–795, January 2025. ISSN 2377-3766, 2377-3774. doi: 10.1109/LRA.2024.3512374. URL https:// ieeexplore.ieee.org/document/10778608/. [6] Federico Pizarro Bejarano, Lukas Brunke, and Angela P. Schoellig. Safety filtering while training: Improving the performance and sample efficiency of reinforcement learning agents. IEEE Robotics and Automation Let-ters , 10(1):788–795, January 2025. ISSN 2377-3774. doi: 10.1109/lra.2024.3512374. URL http://dx.doi.org/ 10.1109/LRA.2024.3512374. [7] Richard Cheng, Gabor Orosz, Richard M. Murray, and Joel W. Burdick. End-to-End Safe Reinforcement Learn-ing through Barrier Functions for Safety-Critical Contin-uous Control Tasks, March 2019. URL http://arxiv.org/ abs/1903.08792. arXiv:1903.08792 [cs]. [8] Desong Du, Shaohang Han, Naiming Qi, Haitham Bou Ammar, Jun Wang, and Wei Pan. Reinforcement Learn-ing for Safe Robot Control using Control Lyapunov Barrier Functions, May 2023. URL http://arxiv.org/abs/ 2305.09793. arXiv:2305.09793 [cs]. [9] Yousef Emam, Paul Glotfelter, Sean Wilson, Gennaro Notomista, and Magnus Egerstedt. Data-Driven Ro-bust Barrier Functions for Safe, Long-Term Opera-tion, April 2021. URL http://arxiv.org/abs/2104.07592. arXiv:2104.07592 [cs]. [10] Yousef Emam, Gennaro Notomista, Paul Glotfelter, Zsolt Kira, and Magnus Egerstedt. Safe Reinforcement Learn-ing Using Robust Control Barrier Functions, June 2022. URL http://arxiv.org/abs/2110.05415. arXiv:2110.05415 [eess]. [11] Ruben Grandia, Andrew J. Taylor, Aaron D. Ames, and Marco Hutter. Multi-Layered Safety for Legged Robots via Control Barrier Functions and Model Predictive Con-trol, June 2021. URL http://arxiv.org/abs/2011.00032. arXiv:2011.00032 [cs]. [12] Manas Gupta and Xuesu Xiao. T-CBF: Traversability-based Control Barrier Function to Navigate Vertically Challenging Terrain, August 2025. URL http://arxiv.org/ abs/2503.06083. arXiv:2503.06083 [cs]. [13] Jonas Günster, Puze Liu, Jan Peters, and Davide Tateo. Handling Long-Term Safety and Uncertainty in Safe Reinforcement Learning, September 2024. URL http: //arxiv.org/abs/2409.12045. arXiv:2409.12045 [cs]. [14] Tairan He, Chong Zhang, Wenli Xiao, Guanqi He, Changliu Liu, and Guanya Shi. Agile But Safe: Learning Collision-Free High-Speed Legged Locomotion, 2024. URL https://arxiv.org/abs/2401.17583. Version Number: 3. [15] Puze Liu, Haitham Bou-Ammar, Jan Peters, and Davide Tateo. Safe Reinforcement Learning on the Constraint Manifold: Theory and Applications, November 2024. URL http://arxiv.org/abs/2404.09080. arXiv:2404.09080 [cs]. [16] Simin Liu, Changliu Liu, and John Dolan. Safe Control Under Input Limits with Neural Control Barrier Func-tions, November 2022. URL http://arxiv.org/abs/2211. 11056. arXiv:2211.11056 [cs]. [17] Kehan Long, Cheng Qian, Jorge Cortés, and Nikolay Atanasov. Learning Barrier Functions with Memory for Robust Safe Navigation, February 2021. URL http: //arxiv.org/abs/2011.01899. arXiv:2011.01899 [cs]. [18] Stephen McIlvanna, Nhat Nguyen Minh, Yuzhu Sun, Mien Van, and Wasif Naeem. Reinforcement Learning-Enhanced Control Barrier Functions for Robot Manipu-lators, November 2022. URL http://arxiv.org/abs/2211. 11391. arXiv:2211.11391 [cs]. [19] Ziyu Meng, Tengyu Liu, Le Ma, Yingying Wu, Ran Song, Wei Zhang, and Siyuan Huang. SafeFall: Learning Protective Control for Humanoid Robots, November 2025. URL http://arxiv.org/abs/2511.18509. arXiv:2511.18509 [cs]. [20] Alexander Robey, Haimin Hu, Lars Lindemann, Hanwen Zhang, Dimos V. Dimarogonas, Stephen Tu, and Nikolai Matni. Learning Control Barrier Functions from Expert Demonstrations, November 2020. URL http://arxiv.org/ abs/2004.03315. arXiv:2004.03315 [eess]. [21] Ivan Dario Jimenez Rodriguez, Noel Csomay-Shanklin, Yisong Yue, and Aaron D. Ames. Neural Gaits: Learning Bipedal Locomotion via Control Barrier Functions and Zero Dynamics Policies, April 2022. URL http://arxiv. org/abs/2204.08120. arXiv:2204.08120 [cs]. [22] Ehsan Sabouni, H. M. Sabbir Ahmad, Vittorio Gi-ammarino, Christos G. Cassandras, Ioannis Ch Pascha-lidis, and Wenchao Li. Reinforcement Learning-based Receding Horizon Control using Adaptive Con-trol Barrier Functions for Safety-Critical Systems, February 2025. URL http://arxiv.org/abs/2403.17338. arXiv:2403.17338 [eess]. [23] John Schulman, Filip Wolski, Prafulla Dhariwal, Alec Radford, and Oleg Klimov. Proximal Policy Optimization Algorithms, August 2017. URL http://arxiv.org/abs/1707. 06347. arXiv:1707.06347 [cs]. [24] Oswin So, Zachary Serlin, Makai Mann, Jake Gonzales, Kwesi Rutledge, Nicholas Roy, and Chuchu Fan. How to Train Your Neural Control Barrier Function: Learning Safety Filters for Complex Input-Constrained Systems, December 2023. URL http://arxiv.org/abs/2310.15478. arXiv:2310.15478 [math]. [25] Ihab Tabbara and Hussein Sibai. Learning Conservative Neural Control Barrier Functions from Offline Data, September 2025. URL http://arxiv.org/abs/2505.00908. arXiv:2505.00908 [cs]. [26] Daniel C. H. Tan, Fernando Acero, Robert McCarthy, Dimitrios Kanoulas, and Zhibin Li. Value Functions are Control Barrier Functions: Verification of Safe Policies using Control Theory, December 2023. URL http://arxiv. org/abs/2306.04026. arXiv:2306.04026 [cs]. [27] Andrew Taylor, Andrew Singletary, Yisong Yue, and Aaron Ames. Learning for Safety-Critical Control with Control Barrier Functions, December 2019. URL http: //arxiv.org/abs/1912.10099. arXiv:1912.10099 [eess]. [28] Kim P. Wabersich and Melanie N. Zeilinger. A predictive safety filter for learning-based control of constrained nonlinear dynamical systems, May 2021. URL http: //arxiv.org/abs/1812.05506. arXiv:1812.05506 [cs]. [29] Kim P. Wabersich and Melanie N. Zeilinger. Predic-tive Control Barrier Functions: Enhanced Safety Mech-anisms for Learning-Based Control. IEEE Transac-tions on Automatic Control , 68(5):2638–2651, May 2023. ISSN 0018-9286, 1558-2523, 2334-3303. doi: 10. 1109/TAC.2022.3175628. URL https://ieeexplore.ieee. org/document/9779571/. [30] Kim P. Wabersich, Andrew J. Taylor, Jason J. Choi, Koushil Sreenath, Claire J. Tomlin, Aaron D. Ames, and Melanie N. Zeilinger. Data-Driven Safety Fil-ters: Hamilton-Jacobi Reachability, Control Barrier Func-tions, and Predictive Methods for Uncertain Systems. 
+
+IEEE Control Systems , 43(5):137–177, October 2023. ISSN 1066-033X, 1941-000X. doi: 10.1109/MCS.2023. 3291885. URL https://ieeexplore.ieee.org/document/ 10266799/. [31] Wei Xiao, Ramin Hasani, Xiao Li, and Daniela Rus. BarrierNet: A Safety-Guaranteed Layer for Neural Net-works, November 2021. URL http://arxiv.org/abs/2111. 11277. arXiv:2111.11277 [cs]. [32] Junjun Xie, Shuhao Zhao, Liang Hu, and Huijun Gao. Certificated Actor-Critic: Hierarchical Reinforcement Learning with Control Barrier Functions for Safe Naviga-tion, January 2025. URL http://arxiv.org/abs/2501.17424. arXiv:2501.17424 [cs]. [33] Lizhi Yang, Blake Werner, Ryan K. Cosner, David Fridovich-Keil, Preston Culbertson, and Aaron D. Ames. SHIELD: Safety on Humanoids via CBFs In Expectation on Learned Dynamics, August 2025. URL http://arxiv. org/abs/2505.11494. arXiv:2505.11494 [cs]. [34] Lizhi Yang, Blake Werner, Massimiliano de Sa, and Aaron D. Ames. CBF-RL: Safety Filtering Reinforce-ment Learning in Training with Control Barrier Func-tions, October 2025. URL http://arxiv.org/abs/2510. 14959. arXiv:2510.14959 [cs]. [35] Yujie Yang, Yuxuan Jiang, Yichen Liu, Jianyu Chen, and Shengbo Eben Li. Model-Free Safe Reinforce-ment Learning Through Neural Barrier Certificate. 
+
+IEEE Robotics and Automation Letters , 8(3):1295–1302, March 2023. ISSN 2377-3766, 2377-3774. doi: 10. 1109/LRA.2023.3238656. URL https://ieeexplore.ieee. org/document/10023989/. [36] Yuxuan Yang and Hussein Sibai. Learning Neural Control Barrier Functions from Expert Demonstrations using Inverse Constraint Learning, October 2025. URL http://arxiv.org/abs/2510.21560. arXiv:2510.21560 [cs]. [37] Hongchao Zhang, Junlin Wu, Yevgeniy Vorobeychik, and Andrew Clark. Exact Verification of ReLU Neural Control Barrier Functions, October 2023. URL http: //arxiv.org/abs/2310.09360. arXiv:2310.09360 [cs]. APPENDIX 
+
+Appendices are submitted as supplemental materials. Our codebase will be released after the double-blind review phase. 
+
+A. Hyperparameters 
+
+In this section, we list the most relevant hyperparameters selected for our method. For the complete set of hyperparam-eters and their values, we refer to our codebase, which will be released after acceptance.                               
+
+> TABLE I: Hyperparameters.
+> Hyperparameter Symbol Value
+> Safety prediction horizon H5Safety margin (threshold) γc0.5 Unsafe-label discount γlabel 0.95 CVaR tail probability αcvar 0.4 Ensemble size M5CBF gain (for ˜α(s) = ηCBF s)ηCBF 0.5 Sampling ratio from safe buffer ρ+0.2 Loss weight: horizon-safety classification wlabel 1Loss weight: temporal consistency wcbf 0.5 Loss weight: Lipschitz/gradient penalty wlip 0.0001 Loss weight: weight decay wwd 0.00001 QP slack penalty λs1000 Anticipation loss weight λanticipate 0.01
+
+B. Two Variants of the Safety Critic 
+
+We introduce two variants of the safety critic in the main paper: (i) the state-only safety critic, which relies on a nominal dynamics model to predict safety, and (ii) the state–action safety critic, which integrates both the state and the action to provide a more accurate safety estimate. Under nominal model mismatch, a model-based safety layer can compute an incorrect one-step lookahead and thus fail to map the raw action into the true safe-action set. This misalignment can degrade the robustness of closed-loop per-formance using a safety layer based on the state-only safety critic, especially under large distribution shifts. To evaluate these models, we use the same evaluation protocol as in the main paper and visualize the predicted safety signals and the resulting action modifications in Fig. 6. We focus on the most 0.0 0.5 1.0                     
+
+> Success rate
+> Action Noise - Flat Terrain Action Noise - Heightfield Terrain Perturbation - Flat Terrain Perturbation - Heightfield Terrain
+> 00.2 0.4 0.6 0.8 1
+> sampling probability
+> 05
+> Avg. return
+> 00.2 0.4 0.6 0.8 1
+> sampling probability
+> 0.002 0.005 0.01 0.015 0.02
+> sampling probability
+> 0.002 0.005 0.01 0.015 0.02
+> sampling probability
+> state safety critic state-action safety critic
+
+Fig. 5: Comparison of state-only and state-action safety critics. The state-action safety critic demonstrates better generalizability and robustness, particularly under perturbations and domain shifts. The results are shown for success rate (top) and average return (bottom) across different perturbation settings. The result is aggregated over 5 seeds, and the shaded area shows the standard error. The state-action model outperforms the state-only model under external perturbation and domain shift. 
+
+challenging setting—heightfield terrain with enlarged external perturbations—which induces the largest sim-to-sim shift. The results shown in Fig. 6 highlight a key failure mode for state-model-based shielding. In the third panel, the nominal-model-based safety estimate hϕ( ˆfnom (xt, u t)) (orange) devi-ates significantly from the ground truth safety value evaluated on the actual next state h(xt+1 ) (black dashed). The mismatch is particularly noticeable around t ≈ 175 –190 , where the nominal model predicts a sharp drop in safety (down to ∼ 0.5), even though the actual next-state safety value remains close to 1 with only a mild decrease. This erroneous pessimism correlates with spikes in epistemic uncertainty (top panel, red dashed σt) and triggers unnecessary action corrections by the safety layer (middle panel, green), even though the next-state reference suggests substantially lower risk. These results indicate that, under large domain shifts, the nominal model can distort the safety estimate and cause the safety shield to intervene at inappropriate times, either by being overly conservative or by missing imminent failures when the mismatch flips sign. This limitation motivates the use of state– action critics that do not rely on a potentially miscalibrated nominal dynamics model. In terms of generalizability and robustness, the state-action variant outperforms the state-only one, particularly in handling domain shifts, as shown by the experiment in Fig. 5, which is similar to those in the main paper. In the action noise test, the policies with the state-action model show slightly better results than those with the state-only safety critic at lower noise levels. However, as the action noise sampling ratio increases, the state-only model outperforms the state-action model. This is expected because the state-action model is more sensitive to large and frequent action noises due to the direct input of actions. When faced with perturbations and domain shifts, however, the safety layer based on the state-only safety critic and the nominal model struggles to capture the true dynamics because of the nominal model mismatch, leading to a clear performance gap in favor of the state-action model. 0.00 0.25 0.50 0.75 1.00           
+
+> safety pred.  single prediction CVaR safety prediction std 0.0 2.5 5.0 7.5
+> action
+> u0
+> t
+> ut
+> utu0
+> t
+> 050 100 150 200 250
+> timestep
+> 0.6 0.8 1.0
+> model safety
+> h(fnom (xt,ut))
+> h(xt+ 1 )
+> 0.00 0.05 0.10
+> std  t
+
+Fig. 6: Prediction of the state-based safety critic under domain shift. Top: ensemble safety predictions (gray), CVaR-aggregated safety prediction (black), and ensemble standard deviation σt (red dashed, right axis). Middle: action norms before and after shield-ing, ∥u0 
+
+> t
+
+∥ (orange dashed), ∥˜ut∥ (blue), and correction magnitude 
+
+∥˜ut − u0 
+
+> t
+
+∥ (green). Bottom: nominal-model-based one-step safety estimate hϕ( ˆfnom (xt, u t)) (orange) versus the corresponding value evaluated on the realized next state h(xt+1 ) (black dashed). Under heightfield terrain with enlarged perturbations, the nominal estimate can diverge substantially from the next-state reference (e.g., around 
+
+t ≈ 175 –190 ), leading to spurious risk alarms and unnecessary interventions. 
+
+Because of the better generalizability and robustness of the state-action model, we choose to present it as our main method for the rest of the evaluations. C. Safety Critics vs. SafeFall Baseline 
+
+A key contribution of our approach is a structured training pipeline for the safety critic, formulated as an unsafe-event predictor. In humanoid locomotion, falling is one of the most critical safety events and has been extensively studied in recent work. In particular, SafeFall [19] is closely related in spirit: it trains a predictor for the probability of falling, but differs in how supervision is constructed and how the loss is defined. Our method trains the critic in a receding-horizon manner with temporally discounted labels, which yields dense supervi-sion at every timestep and supports flexible horizon selection at both training and deployment. In contrast, SafeFall discretizes each trajectory into three regions—safe ( t < T 1), ambiguous (T1 < t < T 2), and unsafe ( t > T − T2, where T denotes the trajectory length)—using hand-crafted triggers tied to a fixed number of steps. This design encodes a similar intuition (early states are safer; states close to failure are riskier), but it imposes several practical limitations. First, because the labeling is defined relative to a fixed tra-jectory length, it implicitly restricts training and data collection to rollouts with a pre-specified horizon. This can reduce label coverage when episodes terminate early or vary in length. Additionally, by construction, each trajectory is anchored around a single terminal event, which limits the representation of repeated near-failure episodes or multiple failure modes within the same rollout (e.g., stumble–recovery–fall). Second, the supervision is highly sensitive to the threshold choices 
+
+(T1, T 2): shifting either boundary changes which states are treated as safe versus ambiguous/unsafe, directly affecting both class balance and the sharpness of the decision boundary learned by the predictor. As a result, the predictor quality can degrade under distribution shift if the step-based segmentation no longer aligns with the true time-to-failure statistics. Third, our safety predictor leverages an ensemble of models to better capture uncertainty. The ensemble approach allows the safety critic to provide more accurate risk estimates and provide more conservative predictions, which is particularly valuable when faced with the complexities of real-world environments. In this section, we compare the SafeFall-style falling predic-tor with our receding-horizon safety predictor along three key dimensions: (i) prediction quality under domain shift through visualization, (ii) quantitative evaluation of the prediction qual-ity, and (iii) closed-loop performance, where each predictor is used to instantiate a safety layer. Performance is measured by success rate and average return. For SafeFall, we adopt the parameterization from the orig-inal paper, setting T1 = 2T 
+
+> 3
+
+and T2 = T − 100 ms . In our implementation, rollouts are truncated to a fixed horizon of 
+
+T = 10 s and simulated at 50 Hz. 
+
+Visualization of the Predictions: In Fig. 7, we present safety predictions from the SafeFall predictor across several random episodes. The trajectory length is set to 250 timesteps. As shown, the SafeFall predictor tends to provide more binary predictions, where the safety value sharply drops right before the failure event occurs. This characteristic of the SafeFall predictor means that it is unable to provide sufficient early 0.00 0.25 0.50 0.75 1.00      
+
+> safety prediction  Episode 1 0.00 0.25 0.50 0.75 1.00
+> safety prediction  Episode 2 0.00 0.25 0.50 0.75 1.00
+> safety prediction  Episode 3 050 100 150 200 250
+> timestep
+> 0.6 0.7 0.8 0.9 1.0
+> safety prediction  Episode 4
+> Fig. 7: Safety predictions from the SafeFall predictor across several random episodes. The trajectory length is set to 250 timesteps. SafeFall’s predictions tend to be more binary, predicting failure only shortly before the event. This contrasts with our receding-horizon method, which provides earlier and more gradual safety estimates.
+
+warning of an impending failure, limiting the time available for the safety layer to intervene. In contrast, our method offers more gradual safety predictions, which allows it to identify potential failure risks earlier in the episode. SafeFall uses the predictor as a switch to turn on a backup policy and, therefore, has less stringent requirements on reaction time and gradient. However, the ability to predict failures robustly and as early as possible is crucial for a safety layer. By identifying the risk of failure sooner, the system can take corrective actions proactively, preventing the system from reaching an unrecoverable state. Furthermore, the softer gradients in the safety prediction lead to more gradual adjustments in the action, preventing large, abrupt changes that could exceed action limits or cause instability in the system. This smoother action modification is essential for maintaining continuous and safe operation, as sudden jumps in action could result in undesirable system behavior or damage. Therefore, our approach not only offers earlier failure detection but also produces safer, more controlled interventions compared to the binary predictions of the SafeFall-style predictor. TABLE II: Comparison of performance metrics between our state-action safety critic and SafeFall predictor under perturbations on flat and heightfield terrains.                                                                                
+
+> Metric Experiment State-Action Safety Critic SafeFall
+> Accuracy Perturbation - Flat Terrain 0.6160 ±0.0200 0.6200 ±0.0265 Accuracy Perturbation - Heightfield Terrain 0.5800 ±0.0254 0.5480 ±0.0232 False Positives Perturbation - Flat Terrain 0.0800 ±0.0086 0.1680 ±0.0171 False Positives Perturbation - Heightfield Terrain 0.1760 ±0.0197 0.2480 ±0.0113 False Negatives Perturbation - Flat Terrain 0.0736 ±0.0053 0.0160 ±0.0020 False Negatives Perturbation - Heightfield Terrain 0.0612 ±0.0071 0.0129 ±0.0014 Prediction Steps before Failure Perturbation - Flat Terrain 29.9833 ±1.3152 12.0833 ±0.4587 Prediction Steps before Failure Perturbation - Heightfield Terrain 24.8333 ±1.8499 16.8250 ±0.5575 0.0 0.5 1.0
+> Success rate
+> Action Noise - Flat Terrain Action Noise - Heightfield Terrain Perturbation - Flat Terrain Perturbation - Heightfield Terrain
+> 00.2 0.4 0.6 0.8 1
+> sampling probability
+> 05
+> Avg. return
+> 00.2 0.4 0.6 0.8 1
+> sampling probability
+> 0.002 0.005 0.01 0.015 0.02
+> sampling probability
+> 0.002 0.005 0.01 0.015 0.02
+> sampling probability
+> SafeFall ours
+
+Fig. 8: Comparison of SafeFall and our method in Safe RL training using each as a safety critic. The plot compares success rate (top row) and average return (bottom row) across different levels of action noise and external perturbations. Both methods show similar robustness under action noise, but our method outperforms SafeFall when faced with perturbations, demonstrating its superior generalizability. 
+
+Quantitative Evaluation: Additionally, we compute sev-eral metrics to evaluate prediction accuracy:  
+
+> •
+
+Accuracy (how often unsafe and safe episodes are pre-dicted correctly),  
+
+> •
+
+False positive rate (the proportion of unsafe episodes predicted as safe),  
+
+> •
+
+False negative rate (the proportion of safe episodes pre-dicted as unsafe),  
+
+> •
+
+Average prediction steps before failure (the number of steps before an unsafe episode when the predictor is able to predict the failure). Since SafeFall has by design a shorter predictions horizon, we calculate accuracy, false positive rate and false negative rate based on the last five steps only to have a fail comparison. To evaluate the ability of predicting failure in advance, we introduce the last metric, indicating how many steps in advance is the predictor able to predict possible failures. The values reported in Table II are aggregated over all seeds, episodes, and sampling ratios of the perturbation. As shown in the table, the state-action safety critic demonstrates similar accuracy to the SafeFall predictor in most cases. However, the SafeFall predictor exhibits a higher false positive rate, particularly under perturbations on heightfield terrain, highlighting the effectiveness of our uncertainty-aware, conser-vative predictions in handling domain shifts. While our method does result in a higher false negative rate, we argue that a more conservative approach, prioritizing safety by avoiding false positives, is crucial in high-risk scenarios. A higher false negative rate ensures that potential failures are not prematurely classified as safe, allowing for timely interventions before reaching unsafe states. The prediction steps for true positives further demonstrate the advantage of the state-action safety critic. On flat terrain, it predicts failures an average of 29.98 steps ahead, while the SafeFall predictor identifies failures only 12.08 steps ahead. On heightfield terrain, the state-action model predicts failure at 24.83 ± 1.85 steps, compared to 16.83 ± 0.56 for SafeFall. This ability to predict failures earlier is crucial for proactive safety interventions and reinforces the generalizability of our method in complex environments. 
+
+Closed-Loop Performance: In Fig. 8, we compare the performance of SafeFall and our method in the context of Safe RL training using each as a safety critic. The plot shows the results for both success rate (top row) and average return (bottom row) across different levels of action noise and external perturbations following the same experiment setting as in the main paper and as introduced in Sec. D. Both methods show similar robustness in the action noise test, with only minor differences in performance as the noise level increases. However, when faced with external perturbations (especially on heightfield terrain), our method consistently outperforms the SafeFall predictor, demonstrating the superior generalizability and robustness of our receding-horizon safety critic under domain shifts. Our approach excels because it provides earlier and more accurate predictions of failure, which enables the safety layer to intervene more effectively and avoid catastrophic outcomes. In contrast, the SafeFall predictor tends to give more binary and delayed predictions, which can limit its effectiveness in handling complex, real-world disturbances. This highlights the advantage of using a state–action-based safety critic for environments with more dynamic and uncertain conditions. 
+
+D. RL-PPO with Domain Randomization 
+
+We employ a set of domain randomizations to improve robustness and expose the safety critic to diverse dynam-ics during training. The randomizations are implemented as modular components and can be grouped into the following categories:  
+
+> •
+
+MuJoCo model randomization: randomizes physical pa-rameters of the simulator model (e.g., masses, inertias, joint/actuator properties, and contact-related parameters) to induce dynamics variability.  
+
+> •
+
+Observation noise: injects noise and/or bias into propri-oceptive observations to emulate sensor corruption and partial observability.  
+
+> •
+
+Action delay: applies stochastic control latency to account for delays between policy output and actuation.  
+
+> •
+
+Joint dropout: randomly masks (drops) a subset of joint signals to simulate intermittent sensing/estimation fail-ures.  
+
+> •
+
+Initial-state randomization: perturbs the initial base pose/velocity and joint configuration at reset to diversify starting conditions.  
+
+> •
+
+External perturbations: applies impulse-like disturbances directly to the base and joints. This is the primary shift we sweep at evaluation time and is detailed next. Among the different domain randomization aspects, we elaborate in detail on how we do the evaluations with the controlled sim2sim shift on the external perturbations. The implementation details can be found in our codebase. 
+
+External Perturbations (Evaluated Shift): The perturbation module injects impulse-like disturbances by directly mod-ifying the simulator generalized coordinates and velocities 
+
+(q, ˙q). In the evaluation setting, we apply the full-strength perturbation (i.e., the scaling coefficient is set to 1). 
+
+a) Base (Trunk) Velocity Perturbation: We first define a magnitude bound for the 6D base velocity (3 linear + 3 angular) as 
+
+vmax = min ( km · M, v clip ) , (17) where M = P 
+
+> b
+
+mb is the total body mass, km > 0 is a mass-proportional scaling factor, and vclip > 0 is an absolute cap. We then sample a random base-velocity offset: 
+
+∆ ˙ qbase ∼ U (−vmax , v max )6 , (18) and update the base velocity as: 
+
+˙qnew  
+
+> base
+
+= ˙ qbase + 1{ξ < p add }∆ ˙ qbase , (19) where ξ ∼ U (0 , 1) and padd ∈ [0 , 1] is the probability of applying the additive base-velocity perturbation. If the event does not trigger, the base velocity remains unchanged. 
+
+b) Joint Velocity and Position Perturbation: For the actuated joints, we sample independent uniform perturbations for velocities and positions: 
+
+∆ ˙ qj ∼ U (−¯vj, ¯vj)nj , (20) 
+
+∆qj ∼ U (−¯qj, ¯qj)nj , (21) where nj is the number of actuated joints, ¯vj > 0 bounds the per-joint velocity perturbation magnitude, and ¯qj > 0 bounds the per-joint position perturbation magnitude. The perturbed joint state is then updated as: 
+
+˙qnew  
+
+> j
+
+= ˙ qj + ∆ ˙ qj, qnew  
+
+> j
+
+= qj + ∆ qj. (22) In our evaluation sweeps, we double the magnitude of both base and joint perturbations and vary the perturbation sampling probability, which controls how frequently this procedure is applied during a rollout. 
+
+Action Noise: The action noise test evaluates the robustness of our safety critic against sub-optimal policy output. In this test, the magnitude of the action noise is sampled from a Gaussian distribution with a standard deviation equal to 50% of the action range, ensuring that the noise perturbations are large enough to simulate significant errors while remaining within realistic operational bounds. The key factor in this test is the variation in the sampling probability , which controls how frequently the noise is applied to the action signals during the rollout. By performing this test, we are able to understand how the safety critic performs under noisy conditions, leading to sub-optimal policy outputs. This is a realistic scenario for many robotic applications, especially in dynamic and unpredictable environments. It also provides insight into the limits of the state-only versus state-action safety critic in handling increasing levels of disturbance, giving us a better understanding of their respective strengths and weaknesses in noisy, real-world settings. 
+
+E. Ablation Study on Horizon Length 
+
+This section reports the complete ablation results for the receding-horizon safety critic, varying the prediction horizon 
+
+H ∈ { 1, 10 , 25 , 50 }. We evaluate under the same sim-to-sim shifts as in the main paper, including the action noise and impulsive external perturbations, on both flat and heightfield terrain. For each setting, we sweep the disturbance sampling probability and report success rate and average return (Fig. 9). The PPO-RL baseline without shielding is included for refer-ence. Across all four suites, increasing disturbance frequency monotonically degrades performance, with the unshielded PPO-RL collapsing rapidly under action noise, especially on heightfields. Adding the predictive shield improves robustness for all H, but the horizon length governs a clear robustness-performance trade-off. Short horizons ( H=1 ) behave more myopically and tend to lose success under stronger shifts, while very long horizons ( H=50 ) can become overly conser-vative, leading to lower returns and, in some regimes, reduced success. A moderate horizon ( H=25 ) is the most consistent choice in our experiments: it achieves the best or near-best 0.0 0.5 1.0 
+
+> Success rate
+
+Action Noise - Flat Terrain Action Noise - Heightfield Terrain Perturbation - Flat Terrain Perturbation - Heightfield Terrain      
+
+> 00.2 0.4 0.6 0.8 1
+
+sampling probability      
+
+> 05
+> Avg. return
+> 00.2 0.4 0.6 0.8 1
+
+sampling probability    
+
+> 0.002 0.005 0.01 0.015 0.02
+
+sampling probability    
+
+> 0.002 0.005 0.01 0.015 0.02
+
+sampling probability     
+
+> PPO-RL H=1 H=10 H=25 H=50
+
+Fig. 9: Complete ablation on prediction horizon H. Success rate (top row) and average return (bottom row) under action noise and external perturbations on flat and heightfield terrain. The x-axis represents the action noise or disturbance sampling probability. Curves show mean performance over 5 seeds; shaded bands indicate standard error. 
+
+success rates over a wide range of sampling probabilities, particularly under perturbations and on heightfields, while preserving higher returns than H=50 . These trends mirror the discussion in the main paper and support selecting H=25 as a robust default across disturbance types and terrains.

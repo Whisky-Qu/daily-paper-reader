@@ -1,6 +1,22 @@
 {
-  "generated_at": "2026-03-06T19:11:18.471356+00:00",
-  "updated_date": "20260306",
+  "generated_at": "2026-10-20T06:29:35.058539+00:00",
+  "updated_date": "20261020",
   "carryover_days": 9,
-  "items": []
+  "tag_states": {
+    "hip-exo": {
+      "updated_date": "20261020",
+      "carryover_days": 9,
+      "items": []
+    },
+    "exo-vision": {
+      "updated_date": "20261020",
+      "carryover_days": 9,
+      "items": []
+    },
+    "humanoid": {
+      "updated_date": "20261020",
+      "carryover_days": 9,
+      "items": []
+    }
+  }
 }

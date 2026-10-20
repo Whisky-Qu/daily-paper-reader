@@ -1,0 +1,822 @@
+1
+Tread: A Visuo-Inertial Framework for Terrain
+and Locomotion Context-Aware Gait-Phase and
+Speed Estimation in Wearable Robotics
+Debadrata Sarkar, Akash Bachhar, Aman Arora *
+Abstract— A wearable assistive robot must continu-
+ously estimate terrain, locomotion mode, gait phase,
+and walking speed. These quantities are commonly
+addressed by separate, terrain-specific models, with
+datasets rarely collected under a common protocol.
+This paper presents a visuo-inertial framework that
+connects these estimates through a causal pipeline
+using a chest-mounted camera and four lower-limb
+inertial measurement units (IMUs). Anticipatory Ter-
+rain Perception (ATP) classifies incoming terrain with
+96.3% accuracy and anticipates terrain transitions by
+1.46 s on average. Terrain-Aware Locomotion Mode Identification (TALMI) achieves 93.7% and 98.8% accuracy for its
+level-ground and stairs experts respectively, with mean transition latencies being below 200 ms. The relevant TALMI
+posterior is retained as a Probabilistic Locomotion Context (PLC) vector and provided to a shared Gait Kinematic Encoder
+(GKE), which supports 50-Hz bilateral gait-phase estimation and 2-Hz walking-speed estimation. Leave-one- subject-
+out evaluation yields gait-phase RMSEs of 1.75%, 2.97%, and 4.55% for level walking, stair ascent, and stair descent
+respectively while estimating speed over 3.5-5.5 km/h with a RMSE of 0.218 ± 0.072 km/h. All inertial sensing based models
+use sensor-fused Euler angles as input rather than raw accelerometer and gyroscope signals, reducing dependence on
+sensor mounting variation.
+Index Terms— Wearable robotics, exoskeleton, terrain classification, locomotion mode identification, gait phase estima-
+tion, walking speed estimation, inertial sensing, context-aware estimation, edge inference.
+Supplementary video: A video demonstrating real-time operation of the complete visuo-inertial
+inference pipeline is available at https://doi.org/10.6084/m9.figshare.34442622
+I. INTRODUCTION
+P
+OWERED lower-limb exoskeletons, exosuits, and active
+prostheses require timely information about the user’s lo-
+comotion for adapting assistance to gait phase, walking speed,
+and terrain. Errors in timing or locomotion mode can reduce
+assistance quality and compromise stability [8], [15]. Recent
+reviews identify intention recognition and synchronization
+with the user as key requirements for wearable-robot autonomy
+[14]. Accordingly, a practical perception layer should estimate
+four quantities continuously: upcoming terrain, locomotion
+mode, gait phase, and walking speed. Although these quan-
+tities are often estimated separately, their integration into a
+single body-worn pipeline remains less explored.
+Vision provides anticipatory information about terrain, with
+egocentric datasets supporting terrain recognition and its
+This work was fully supported by the CSIR-National Laboratory
+Scheme under the ULIP [MLP002613] and the CSIR Mission Mode
+Project [NCP010303].
+This work involved human subjects. Approval of all ethical and ex-
+perimental procedures was granted by the 7th sitting of the Institutional
+Ethical Board of CSIR-CMERI, Durgapur, India, on 27 February 2024.
+The authors are with the Human Centred Robotics and Cybernetics
+Group, CSIR-Central Mechanical Engineering Research Institute, Dur-
+gapur 713209, India.
+*Corresponding author: Dr Aman Arora (e-mail: aman.cmeri@nic.in)
+use for terrain-aware assistance [1]–[5]. IMUs mounted on
+the lower limbs provide low-power, illumination-independent
+measurements for locomotion-mode, gait-phase, and speed
+estimation [6], [9]. Gait phase estimation has been addressed
+using both discrete and continuous formulations [10]–[12],
+while walking speed is commonly estimated with a dedicated
+regressor [13]. While plantar Force Sensitive Resistor (FSR)s
+are also widely used to derive ground truth [8] of gait-events,
+they are rarely used in deployment.
+Several limitations in state-of-the-art literature motivate the
+framework proposed through this work. Existing systems com-
+monly treat terrain, locomotion mode, gait phase, and speed
+as independent tasks, while coupled approaches may rely on
+hard switching between mode-specific estimators, which pro-
+duces undesirable estimations near terrain/locomotion mode
+transitions [7]. Gait-phase estimation accuracy has also been
+reported to degrade during terrain changes [9]. In addition,
+a unified system requires synchronized vision, multi-segment
+inertial measurements, gait-phase ground truth, and speed
+labels, although these are most conveniently collected under
+different protocols. Preparatory leg movements pose further
+challenge because stationary fidgeting can otherwise be mis-
+taken for walking. Finally, raw accelerometer and gyroscope
+signals can be sensitive to sensor mounting and re-donning
+This work has been submitted to the IEEE for possible publication. Copyright may be transferred without notice, after which this version may no
+longer be accessible.
+arXiv:2610.19067v1  [cs.RO]  13 Oct 2026
+
+
+2
+Fig. 1.
+Wearable visuo-inertial platform: front and rear views of the
+instrumented participant.
+variability [16]. Table I compares the proposed framework
+with representative studies.
+The main contribution of this work is a connected visuo-
+inertial pipeline that produces terrain, locomotion mode, bi-
+lateral gait phase, and walking speed estimation using a
+unified sensing suite deployed for onboard edge inference.
+Anticipatory Terrain Perception (ATP) uses vision to esti-
+mate the upcoming terrain, while Terrain-Aware Locomotion
+Mode Identification (TALMI) estimates the locomotion being
+executed. Rather than passing only a hard locomotion label
+downstream, the full TALMI softmax posterior is retained
+as a Probabilistic Locomotion Context (PLC) vector. Gait
+phase and walking speed are then decoded from a shared Gait
+Kinematic Encoder (GKE) through lightweight task-specific
+heads. A dedicated fidgeting class separates stationary leg
+movements from walking and a terrain-conditioned hierarchy
+allows datasets collected under different protocols to be com-
+bined within one estimation chain.
+All inertial models use pitch and yaw Euler angles obtained
+from onboard sensor fusion rather than raw accelerometer and
+gyroscope channels. This representation is gravity-referenced
+and expresses limb orientation in an anatomically mean-
+ingful frame, reducing dependence on sensor-frame rotation
+and small mounting variations [16], that otherwise make
+the reproducability and scalability difficult when used in a
+new wearable hardware. The experiments therefore evaluate
+whether this compact representation, combined with terrain
+and locomotion context, is sufficient for terrain-aware mode
+identification, continuous bilateral gait-phase estimation, and
+walking-speed regression.
+II. HARDWARE AND DATA COLLECTION
+A. Instrumentation
+The wearable platform is shown in Fig. 1. A smartphone
+RGB camera is mounted at sternum height and tilted 10–15◦
+from vertical to capture upcoming terrain while retaining the
+near-field ground. Four IMUs (BNO085, Adafruit Industries)
+are mounted laterally on the right thigh, right shank, left thigh,
+and left shank respectively. Each bilateral pair is interfaced
+to an ESP32 over I2C and both microcontrollers stream data
+via USB to a Jetson AGX Orin (NVIDIA Corporation). The
+Jetson, microcontrollers, and a 6S 13,500-mAh Li-ion battery
+with its power-distribution system are carried in a backpack,
+enabling fully onboard sensing and inference. Data acquisition,
+preprocessing and edge inference use ROS 2 and micro-ROS,
+providing a common time-stamped middleware layer. During
+data collection, sensorized insoles with an FSR beneath each
+heel provided heel-contact events for gait-phase annotation.
+These were used only as ground truth gait event markers and
+are excluded from the deployed system.
+B. Participants
+Data were collected from 10 male participants (mean age:
+28.7 ± 4.6 years; mean height: 171.2 ± 7.4 cm; 8 right-foot
+dominant), all of whom provided informed consent. Two ad-
+ditional male participants, excluded from training, validation,
+and test sets, were used only for unseen-user demonstrations
+(ages 29 and 28 years; heights 173 and 169 cm).
+C. Acquisition Protocols
+For terrain perception, participants walked at self-selected
+speeds through indoor and outdoor environments containing
+level ground, stair ascent and descent. Images were recorded at
+720×1280 pixels and 30 frames per second. For inertial data,
+participants followed routes containing level ground, stairs
+and turns while an observer followed behind and recorded
+a second-person video. Participants also stopped, turned and
+fidgeted naturally in addition to when prompted to do so,
+to avoid over-representation of steady walking. Turns were
+annotated for heading changes of approximately 60–90◦. The
+video was used for inertial-mode annotation, with heel-contact
+FSR traces providing additional temporal support. Approxi-
+mately 20 minutes of overground inertial data were collected
+per participant for locomotion-mode annotation, in addition to
+the treadmill sessions for annotated walking speed described
+below..
+For each limb, a gait cycle was defined between successive
+ipsilateral heel contacts and phase was linearly interpolated
+from 0–100% within each cycle. Speed-labeled data were
+collected on a treadmill at 3.5, 4.0, 4.5, 5.0, and 5.5 km/h
+using three sessions per speed, where each session was
+approximately of 2 minutes. Only four participants could
+maintain a continuous 5.5 km/h walk comfortably on treadmill.
+The treadmill and overground protocols were intentionally
+separate. The former provided controlled speed labels, whereas
+the latter provided terrain and turning data without direct speed
+labels. Their integration within the proposed framework is
+described in Sec. V.
+III. ANTICIPATORY TERRAIN PERCEPTION
+A terrain classifier that responds only after a new surface
+has been treaded over cannot provide advance information for
+control. ATP therefore classifies the terrain being approached,
+providing look-ahead information for downstream estimation
+as well as several supporting functions utilized during de-
+ployment, such as gain scheduling, hardware initialization or
+actuator pre-charging.
+
+
+SARKAR et al.: TREAD: A VISUO-INERTIAL FRAMEWORK FOR TERRAIN- AND LOCOMOTION-CONTEXT-AWARE ESTIMATION IN WEARABLE ROBOTICS
+3
+TABLE I
+COMPARISON WITH REPRESENTATIVE WORKS
+Work (year)
+Sensing
+Inertial
+signals
+Terrain
+Locomotion
+modes
+Gait phase
+Speed
+Context coupling
+Indicative result
+Laschowski et
+al. [2] (2022)
+RGB vision
+–
+12 classes
+–
+–
+–
+Perception only
+Best 12-class test accuracy: 73.2%
+Tricomi et al.
+[3] (2023)
+RGB vision + 2
+IMU
+acc, gyro
+LG, SA, SD –
+Continuous
+–
+Deterministic switch
+Per-class accuracy >85%
+Tricomi et al.
+[4] (2025)
+RGB vision
+(geometric)
+acc, gyro
+LG, stairs
+–
+–
+–
+Geometric context
+Overall terrain-detection accuracy:
+93.0 ± 1.1%
+Qian et al. [7]
+(2022)
+Depth vision +
+IMU
+acc, gyro
+LG, SA, SD LG, SA, SD
+Continuous
+–
+Predictive switch
+Mode accuracy: >98%
+Ma et al. [6]
+(2025)
+IMU only (6)
+acc, gyro
+–
+5 steady +
+transitions
+–
+–
+None (majority filter)
+Steady-mode accuracy: 99.58%
+Kang et al. [8]
+(2021)
+IMU + hip
+encoders
+acc, gyro,
+joint angle
+–
+–
+Continuous
+–
+None (mode-agnostic)
+Gait Phase RMSE: 5.04±0.79%
+Mazon et al.
+[11] (2022)
+IMU only (1–2)
+acc, gyro
+–
+ST, LW, RA,
+RD, SA, SD
+(+sit)
+Discrete
+–
+Joint multi-level
+(modes+trans.+phases)
+F1: 0.89–0.91 (10 subj., locomotion
+modes+ Gait phases)
+Maldonado et
+al. [13] (2025)
+IMU
+(prosthesis)
+acc, gyro
+–
+–
+–
+Speed (m/s)
+None
+Speed MAE: 0.074 m/s
+This work
+RGB vision +
+4 IMU
+pitch, yaw
+(Euler)
+LG, US,
+DS
+ST, FG, LW,
+RT, LT, SA, SD
+Continuous,
+bilateral
+Yes (km/h)
+Probabilistic (PLC)
+terrain accuracy: 96.3% (1.46s
+anticipation horizon); locomotion
+mode acuuracy: 93.7%-98.8%;
+gait phase RMSE: 1.75–4.55%;
+speed RMSE: 0.218 ± 0.072 km/h
+Reported values originate from different sensor sets, participant groups, and protocols, and are indicative rather than directly comparable. LG: level ground; US/SA: upstairs/stair
+ascent; DS/SD: downstairs/stair descent; ST: standing; FG: fidgeting; LW: level walking; RT/LT: right/left turn; RA/RD: ramp ascent/descent; acc: accelerometer; gyro: gyroscope;
+LOSO: leave-one-subject-out.
+Fig. 2.
+(a) ATP dataset construction from ExoNet and custom frames using the terrain dominance criterion and three terrain classes. (b) Power
+and data architecture of the onboard edge-inference backpack.
+The ATP corpus (Fig. 2) combines the public ExoNet
+dataset [1], which contributes 54.48% of the frames, with a
+custom recorded chest-camera dataset (45.52%). Both datasets
+use the same annotation rule; the upper 60% of each frame
+is considered the dominant region and the frame is assigned
+the terrain class which occupies at least the upper 60% region.
+This associates the image with the incoming terrain observed
+ahead of the user rather than the terrain directly underfoot,
+while providing a deterministic label for mixed-terrain frames.
+The annotated frames are divided into training, validation,
+and test sets using a 70%/20%/10% split, performed at the
+sequence level so that no frames from the same video appear
+in more than one split. Images are resized with the shorter
+side set to 256 pixels, center-cropped to 224 × 224 pixels and
+normalized using ImageNet statistics. ATP uses an ImageNet-
+pretrained ResNet-18 backbone [17] as a frozen feature extrac-
+tor(Fig. 3). Global average pooling yields z ∈R512, followed
+by a trainable MLP with 1024, 1024 and 3 units. While ReLU
+activations are used in the first two layers, the final softmax
+layer produces the terrain posterior q ∈R3; the predicted
+terrain being ˆc = arg maxj qj. The classifier head is trained for
+50 epochs using Adam optimizer, a learning rate of 10−3, step
+decay of 0.1 every 7 epochs, batch size of 32 and cross-entropy
+loss function. The ATP is designed to infer the oncoming
+
+
+4
+Fig. 3. ATP pipeline using a frozen ResNet-18 feature extractor and trainable three-layer classifier head.
+TABLE II
+ATP CLASSIFICATION REPORT ON THE HELD-OUT TEST SET
+Class
+Precision
+Recall
+F1-Score
+LG
+0.945
+0.953
+0.949
+US
+0.967
+0.973
+0.970
+DS
+0.978
+0.966
+0.972
+Accuracy
+0.963
+Fig. 4.
+ATP performance on the held-out test set. (a) Confusion matrix.
+(b) Accuracy within 200 ms of terrain transitions.
+terrain at 30 Hz.
+On the held-out test set, ATP achieves 96.3% accuracy,
+with class-wise F1 scores of 0.949, 0.970, and 0.972 for level
+ground, stair ascent, and stair descent, respectively (Table II).
+The confusion matrix (Fig. 4a) shows that stair ascent and
+descent are rarely confused and most of the classification
+errors occur between level ground and stairs.
+Accuracy within a window of 200 ms on either side of
+the terrain transitions is observed in the range of 92.1–93.6%
+across the four transition cases (Fig. 4b). The terrain transition
+anticipation horizon is observed to be 1460.0 ± 996.5 ms,
+measured from the ATP terrain transition to the correspond-
+ing locomotion-mode transition. The large standard deviation
+relative to the mean reflects substantial trial-to-trial variation,
+driven by differences in approach geometry and the point
+at which the new terrain becomes visually dominant. This
+anticipatory output is passed to TALMI and the downstream
+context-aware estimators.
+IV. TERRAIN-AWARE LOCOMOTION MODE
+IDENTIFICATION
+TALMI identifies seven locomotion modes: standing (ST),
+fidgeting (FG), level walking (LW), right turn (RT), left turn
+(LT), stair ascent (SA), and stair descent (SD). Fidgeting
+denotes leg movement while remaining stationary, such as
+weight shifting, foot repositioning, or stepping in place. It
+is treated separately from standing and walking to avoid
+triggering assistance during preparatory movement.
+TALMI uses pitch and yaw from the four IMUs. Pitch
+captures sagittal-plane motion, while yaw changes primarily
+during turns, enabling separation of turning from straight
+walking. Differences in pitch amplitude and waveform further
+distinguish stair ascent from descent. The synchronized heel-
+contact and IMU traces used for annotation are shown in
+Fig. 5.
+Pitch and yaw being sampled at 100 Hz, a 30-sample
+(300 ms) window is used, advancing by 10 samples (100
+ms), yielding a 10 Hz inference stream for locomotion mode
+estimation. For each IMU, seven pitch signal based temporal
+statistical features (mean, RMS, maximum, minimum, range,
+net excursion, and standard deviation) and three yaw based
+temporal statistical features (range, net excursion, and standard
+deviation) are extracted. Absolute yaw is excluded because it
+depends on heading and the observed change in yaw signals
+within the window captures turning motions. The resulting
+descriptor u(i)
+t
+∈R10 from each IMU is concatenated as:
+ut =
+
+u(1)⊤
+t
+, u(2)⊤
+t
+, u(3)⊤
+t
+, u(4)⊤
+t
+⊤∈R40.
+(1)
+The current descriptor and seven preceding descriptors form
+Ut = [ut−7, . . . , ut]⊤∈R8×40, corresponding to 1.0 s of
+temporal context.
+TALMI uses two terrain-specific experts with identical ar-
+chitectures (Fig. 6). The Level Ground Locomotion Identifica-
+tion (LGLI) expert classifies {ST, FG, LW, RT, LT}, whereas
+the Stairs Locomotion Identification (SLI) expert classifies
+{LW, SA, SD}. Each expert consists of a 16-unit LSTM [18]
+operating on the eight timesteps of Ut, followed by a softmax
+classifier. The SLI and LGLI are independent models and are
+
+
+SARKAR et al.: TREAD: A VISUO-INERTIAL FRAMEWORK FOR TERRAIN- AND LOCOMOTION-CONTEXT-AWARE ESTIMATION IN WEARABLE ROBOTICS
+5
+Fig. 5.
+Synchronized heel-contact and IMU traces used for annotation. (a) Level-ground sequence. (b) stairs sequence. (c,d) TALMI confusion
+matrices. FSR based heel-contact signals are used only for annotation.
+Fig. 6. TALMI pipeline from IMU acquisition and feature extraction to temporal stacking and the LGLI and SLI softmax layers.
+trained individually. The ATP terrain decision ˆc selects the
+active expert:
+mt =
+(
+mL
+t ,
+ˆc = LG
+mS
+t ,
+ˆc ∈{US, DS}
+(2)
+ˆℓt = arg max
+j [mt]j
+(3)
+This hierarchy restricts each expert to terrain-consistent
+classes. Both experts are trained for 50 epochs with Adam
+optimizer, batch size 128, categorical cross-entropy, inverse-
+frequency class weighting for further balancing the dataset,
+and a 70:30 training/validation split.
+LGLI and SLI achieve average accuracy of 93.7% and
+98.8% (Table III) respectively. LGLI errors are concentrated
+between level walking and turns, with turn precisions of
+0.772(right) and 0.797(left), whereas SLI errors mainly occur
+between level walking and stairs. Stair ascent and descent
+are rarely confused. Fidgeting achieves 0.985 precision, with
+errors primarily assigned to standing.
+Fig. 7 shows coupled ATP–TALMI inference for an unseen
+participant, where the change in terrain output before the cor-
+responding locomotion-mode transition confirms the anticipa-
+TABLE III
+TALMI CLASSIFICATION REPORTS FOR THE LGLI AND SLI
+EXPERTS
+Expert
+Class
+Precision
+Recall
+F1 Score
+LGLI
+ST
+0.941
+0.956
+0.949
+FG
+0.985
+0.966
+0.976
+LW
+0.954
+0.911
+0.932
+RT
+0.772
+0.908
+0.835
+LT
+0.797
+0.907
+0.848
+Accuracy
+0.937
+SLI
+LW
+0.982
+0.987
+0.984
+SA
+0.996
+0.993
+0.995
+SD
+0.986
+0.982
+0.984
+Accuracy
+0.988
+tory feature of the ATP. A two-sample filter is applied to the 10
+Hz locomotion mode inference stream, accepting a transition
+only after two consecutive inferences agree. This suppresses
+isolated predictions and adds at most 100 ms latency. Similar
+filtering has been used in IMU-only mode recognition [6]
+where the transition context is provided upstream by vision.
+TALMI transition detection latency is 171.4 ± 99.4 ms for
+late detection and 180.0 ± 130.3 ms for early detection, both
+with mean below 200 ms. Under leave-one-subject-out cross
+
+
+6
+Fig. 7. Coupled ATP–TALMI inference for a participant excluded from training, validation, and test partitions. (a) Mixed terrain route; (b) level-ground
+segment containing LGLI classes.
+Fig. 8.
+Subject-independent TALMI evaluation. (a) Per-class recall
+under leave-one-subject-out cross-validation. (b) Accuracy within 800
+ms of mode transitions on unseen participants.
+validation (Fig.8(a)), mean recall is near or above 90% for
+all level-ground classes and above 96% for both stair classes
+while fidgeting remains above 91%. Within a bidirectional
+window of 800 ms of true transitions on unseen participants
+(Fig. 8(b)), accuracy is observed to be 85.3–92.3%, with the
+lowest value for stair-descent-to-level-ground transitions.
+V. LOCOMOTION-CONTEXT-AWARE ESTIMATION
+A. Probabilistic Locomotion Context and Input Formation
+Gait phase and walking speed depend on locomotion mode.
+In this work,instead of hard switching between mode-specific
+estimators, TALMI’s posterior is retained as a probabilistic
+context input, allowing mode uncertainty to propagate to the
+downstream estimator.
+The PLC vector γn ∈R3 is obtained from the active
+TALMI expert as:
+γn =
+
+
+
+
+mS
+LW, mS
+SA, mS
+SD
+⊤,
+ˆc ∈{US, DS}
+
+mL
+LW, 0, 0
+⊤,
+ˆc = LG
+(4)
+where the stair-expert entries represent level walking, stair
+ascent, and stair descent probabilities. For level ground, only
+the level-walking posterior is propagated because the corre-
+sponding stair classes are excluded by ATP.
+TALMI operates at 10 Hz and the downstream estimator at
+50 Hz. The PLC vector is therefore held for five consecutive
+50-Hz windows:
+γ(50)
+n
+= γ⌊n/5⌋,
+n = 0, 1, 2, . . .
+(5)
+Only pitch signals are used for phase and speed estimation.
+For each of the four IMUs, the seven pitch statistics are
+computed over a 15-sample (150 ms) window advancing by
+2 samples (20 ms), yielding: vn ∈R28 at 50 Hz. The feature
+vector is:
+xn =
+
+v⊤
+n , γ(50)⊤
+n
+⊤∈R31
+(6)
+and the preceding 43 vectors are stacked as:
+Xn =
+
+xn−43, . . . , xn
+⊤∈R44×31
+(7)
+This provides approximately 1.01 s of temporal context and
+the inputs are standardized using training-set statistics.
+B. Shared Gait Kinematic Encoder
+The sequence Xn is processed by a 64-unit LSTM layer,
+the Gait Kinematic Encoder (GKE), whose final hidden state
+hn ∈R64 is shared by both decoders (Fig. 9). The GKE
+is first trained jointly with the gait-phase decoder and then
+frozen while the speed decoder is trained. This is essentially
+due to the fact that the gait phase estimation provides the more
+detailed temporal constraint throughout a gait cycle during
+training, whereas speed estimation is a much more aggregated
+effect. Thus, this allows the speed estimation decoder to be
+trained much conveniently without retraining the encoder.
+C. Context-Aware Gait Phase Estimation
+Gait phase is defined from 0% at heel contact to 100% at the
+next ipsilateral heel contact. To avoid the discontinuity at cycle
+wrap related to gradient based optimizers, phase is represented
+on the unit circle. For each limb, the decoder predicts cos ϕ
+and sin ϕ:
+ˆyn = [cos ˆϕL, sin ˆϕL, cos ˆϕR, sin ˆϕR]⊤
+(8)
+The decoder comprises a 32-unit ReLU layer and a four-
+unit tanh output layer. The phase angle and gait percentage
+are recovered as:
+
+
+SARKAR et al.: TREAD: A VISUO-INERTIAL FRAMEWORK FOR TERRAIN- AND LOCOMOTION-CONTEXT-AWARE ESTIMATION IN WEARABLE ROBOTICS
+7
+Fig. 9.
+CAGPE and CAWSE pipeline with PLC formation, the shared Gait Kinematic Encoder, and the two decoder heads with their inference
+rates.
+Fig. 10.
+CAGPE performance. (a)–(c) Estimated versus true gait
+phase for LW, SA, and SD. (d)–(e) Continuous bilateral phase estimation
+across stairs-to-level-walking transitions (stair ascent and stair descent,
+respectively).
+ˆϕ{L,R} = atan2(sin ˆϕ, cos ˆϕ) mod 2π,
+(9)
+GP(%) =
+ˆϕ
+2π × 100
+(10)
+The loss combines output regression with a unit-circle
+constraint:
+L = 1
+N
+X
+n
+∥ˆyn −yn∥2 + λ
+X
+l∈{L,R}
+
+sin2 ˆϕl + cos2 ˆϕl −1
+2
+(11)
+with λ = 0.1. The model is trained jointly with the GKE
+for 100 epochs using Adam optimizer and batch size 32 and
+runs at 50 Hz.
+Across LW, SA, and SD, the estimated phase follows the
+identity relationship over the full 0–100% range (Fig. 10 (a)-
+(c)). LOSO RMSEs are 1.75%, 2.97% and 4.55%, respec-
+tively (Fig. 11(a)) for the gait phase estimation during the
+TABLE IV
+TARGETED INFERENCE RATES AND MEASURED ONBOARD
+LATENCY
+Stage
+Targeted Rate
+Measured Latency (ms)
+ATP
+30 Hz
+13.57±1.22
+TALMI
+10 Hz
+14.52±0.58
+CAGPE
+50 Hz
+15.9±0.8
+CAWSE
+2 Hz
+256.05±5.35
+three locomotion modes. The larger error during stair descent
+reflects greater subject-to-subject dispersion. The continuous
+prediction on an unseen participant maintains bilateral phase
+through transitions (Fig. 10 (d)-(e)), with small deviations near
+mode changes that recover within one stride.
+D. Context-Aware Walking Speed Estimation
+CAWSE uses a short sequence of GKE states rather than a
+single hidden state. Twenty-five consecutive states are stacked
+as:
+Hk = [hk−24, . . . , hk]⊤∈R25×64
+(12)
+The 25 states are non-overlapping, yielding one speed
+estimate every 25 encoder outputs, or 2 Hz at the 50-Hz
+encoder rate. Two one-dimensional convolutional layers with
+five-timestep filters and same padding process Hk, followed
+by global average pooling and a linear output predicting speed
+in km/h. The decoder is trained for 100 epochs using Adam
+optimizer, batch size 64, and mean-squared-error loss with the
+GKE frozen, yielding a train RMSE of 0.019 km/h.
+Under LOSO validation, speed predictions follow the iden-
+tity relationship over 3.5–5.5 km/h (Fig. 11(b)), with a mean
+RMSE of 0.218 ± 0.072 km/h averaged across subjects and
+speeds, while the maximum observed deviation for subject
+means from ground truth is observed as 0.21 km/h. The
+shared GKE is trained for phase using a different dataset and
+then frozen for CAWSE, demonstrating that the speed task
+can be added without retraining the full pipeline. Table IV
+summarizes the target inference rates and onboard inference
+latency.
+
+
+8
+Fig. 11.
+LOSO evaluation of the context-aware estimators. (a) CAGPE
+gait-phase RMSE for level walking, stair ascent, and stair descent; (b)
+CAWSE predicted versus actual walking speed over 3.5–5.5 km/h
+VI. CONCLUSION
+This paper presents a single visuo-inertial framework for
+estimating four locomotion descriptors relevant to wearable-
+robot control: upcoming terrain, locomotion mode, bilateral
+gait phase and walking speed. A chest-mounted RGB camera
+provides anticipatory terrain information, while four lower-
+limb IMUs provide inertial locomotion cues. These compo-
+nents are connected causally, with the TALMI locomotion
+posterior passed as probabilistic context to a shared Gait
+Kinematic Encoder and its phase and speed decoders.
+ATP achieves 96.3% terrain-classification accuracy and an-
+ticipates terrain transitions by 1.46 s on average. TALMI
+achieves 93.7% and 98.8% accuracy for the level-ground
+and stairs experts respectively, with mean transition detection
+latencies below 200 ms. The shared encoder yields leave-one-
+subject-out gait-phase RMSEs of 1.75%, 2.97%, and 4.55%
+for level walking, stair ascent, and stair descent respectively,
+while speed estimation covers 3.5–5.5 km/h with a LOSO
+RMSE of 0.218 ± 0.072 km/h. Two design choices are
+central to the framework; probabilistic locomotion context
+rather than hard mode switching and a terrain-conditioned
+hierarchy that combines datasets collected under different
+protocols. The inertial pathway also uses gravity-referenced
+pitch and yaw Euler angles instead of raw inertial channels,
+reducing dependence on sensor mounting. For qualitative
+validation, a supplementary video is provided demonstrating
+real-time inference of the complete pipeline, including terrain
+anticipation, locomotion-mode detection, bilateral gait-phase
+estimation and walking-speed estimation during indoor and
+outdoor locomotion.
+Speed estimation was evaluated only for level walking using
+treadmill speed based annotated labels, and terrain perception
+was limited to level ground and stairs. Future work will
+extend speed estimation to stairs and overground walking,
+broaden terrain coverage and evaluate closed-loop exoskeleton
+assistance using kinematic and metabolic outcomes.
+REFERENCES
+[1] B. Laschowski, W. McNally, A. Wong, and J. McPhee, “ExoNet
+database: Wearable camera images of human locomotion environments,”
+Front. Robot. AI, vol. 7, 2020, doi: 10.3389/frobt.2020.562061.
+[2] B. Laschowski, W. McNally, A. Wong, and J. McPhee, “Environment
+classification for robotic leg prostheses and exoskeletons using deep
+convolutional neural networks,” Front. Neurorobot., vol. 15, 2022, doi:
+10.3389/fnbot.2021.730965.
+[3] E. Tricomi et al., “Environment-based assistance modulation for a hip
+exosuit via computer vision,” IEEE Robot. Autom. Lett., vol. 8, no. 5,
+pp. 2550–2557, May 2023, doi: 10.1109/LRA.2023.3256135.
+[4] E. Tricomi et al., “Leveraging geometric modeling-based computer
+vision for context aware control in a hip exosuit,” IEEE Trans. Robot.,
+vol. 41, pp. 3462–3479, 2025, doi: 10.1109/TRO.2025.3567489.
+[5] J. Wang et al., “Exosense: A vision-based scene understanding system
+for exoskeletons,” IEEE Robot. Autom. Lett., vol. 10, no. 4, pp. 3510–
+3517, Apr. 2025, doi: 10.1109/LRA.2025.3543971.
+[6] X. Ma, Y. Liu, X. Zhang, L. Masia, and Q. Song, “Real-time continuous
+locomotion mode recognition and transition prediction for human with
+lower limb exoskeleton,” IEEE J. Biomed. Health Inform., vol. 29, no.
+2, pp. 1074–1086, Feb. 2025, doi: 10.1109/JBHI.2024.3462826.
+[7] Y. Qian et al., “Predictive locomotion mode recognition and accurate
+gait phase estimation for hip exoskeleton on various terrains,” IEEE
+Robot. Autom. Lett., vol. 7, no. 3, pp. 6439–6446, Jul. 2022, doi:
+10.1109/LRA.2022.3173426.
+[8] I. Kang, D. D. Molinaro, S. Duggal, Y. Chen, P. Kunapuli, and A. J.
+Young, “Real-time gait phase estimation for robotic hip exoskeleton
+control during multimodal locomotion,” IEEE Robot. Autom. Lett., vol.
+6, no. 2, pp. 3491–3497, Apr. 2021, doi: 10.1109/LRA.2021.3062562.
+[9] Y. Ji, X. Yang, R. Zhao, Q. Ye, Q. Zheng, and Y. Fan, “Human
+locomotion implicit modeling-based real-time gait phase estimation,”
+IEEE Trans. Neural Syst. Rehabil. Eng., vol. 33, pp. 4124–4136, 2025,
+doi: 10.1109/TNSRE.2025.3621076.
+[10] L. Tang, M. Shushtari, and A. Arami, “IMU-based real-time estimation
+of gait phase using multi-resolution neural networks,” Sensors, vol. 24,
+no. 8, 2024, doi: 10.3390/s24082390.
+[11] D. M. Mazon, M. Groefsema, L. R. B. Schomaker, and R. Carloni,
+“IMU-based classification of locomotion modes, transitions, and gait
+phases with convolutional recurrent neural networks,” Sensors, vol. 22,
+no. 22, 2022, doi: 10.3390/s22228871.
+[12] X. Wu, Y. Yuan, X. Zhang, C. Wang, T. Xu, and D. Tao, “Gait phase
+classification for a lower limb exoskeleton system based on a graph
+convolutional network model,” IEEE Trans. Ind. Electron., vol. 69, no.
+5, pp. 4999–5008, May 2022, doi: 10.1109/TIE.2021.3082067.
+[13] J. Y. Maldonado-Contreras et al., “Real-time adaptation of deep learning
+walking speed estimators enables biomimetic assistance modulation in
+an open-source bionic leg,” IEEE Trans. Med. Robot. Bionics, vol. 7,
+no. 2, pp. 711–722, May 2025, doi: 10.1109/TMRB.2025.3550642.
+[14] H. van der Kooij, E. H. F. van Asseldonk, M. Sartori, C. Basla, A.
+Esser, and R. Riener, “AI in therapeutic and assistive exoskeletons and
+exosuits: Influences on performance and autonomy,” Sci. Robot., vol.
+10, no. 104, 2025, doi: 10.1126/scirobotics.adt7329.
+[15] D. D. Molinaro, K. L. Scherpereel, E. B. Schonhaut, G. Evangelopoulos,
+M. K. Shepherd, and A. J. Young, “Task-agnostic exoskeleton control
+via biological joint moment estimation,” Nature, vol. 635, no. 8038, pp.
+337–344, Nov. 2024, doi: 10.1038/s41586-024-08157-7.
+[16] K. Zhu, J. Li, D. Li, B. Fan, and P. B. Shull, “IMU shoulder angle
+estimation: Effects of sensor-to-segment misalignment and sensor ori-
+entation error,” IEEE Trans. Neural Syst. Rehabil. Eng., vol. 31, pp.
+4481–4491, 2023, doi: 10.1109/TNSRE.2023.3331238.
+[17] K. He, X. Zhang, S. Ren, and J. Sun, “Deep residual learning for
+image recognition,” in Proc. IEEE Conf. Comput. Vis. Pattern Recognit.
+(CVPR), 2016, pp. 770–778, doi: 10.1109/CVPR.2016.90.
+[18] S. Hochreiter and J. Schmidhuber, “Long short-term memory,” Neu-
+ral
+Comput.,
+vol.
+9,
+no.
+8,
+pp.
+1735–1780,
+Nov.
+1997,
+doi:
+10.1162/neco.1997.9.8.1735.

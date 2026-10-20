@@ -1,0 +1,562 @@
+Title: LiDAR-based Humanoid Navigation in Dynamic, Non-Convex Environments via Spatio-Temporal Safe Corridors
+
+URL Source: https://arxiv.org/pdf/2610.17232v1
+
+Published Time: Wed, 14 Oct 2026 04:02:13 GMT
+
+Number of Pages: 9
+
+Markdown Content:
+> 1
+
+# LiDAR-based Humanoid Navigation in Dynamic, Non-Convex Environments via Spatio-Temporal Safe Corridors 
+
+Shubham S. Kumbhar and Panagiotis Artemiadis ∗, IEEE Senior Member 
+
+Abstract —Navigating humanoid robots through dynamic, non-convex environments requires tightly coupling onboard percep-tion with footstep planning and dynamic locomotion control. Existing methods frequently discard complex free space through simplified convex obstacle bounds and fail to account for real-time dynamic occupancy predictions. This paper presents a real-time framework for humanoid navigation that directly constructs spatio-temporal safe corridors from LiDAR-based particle rep-resentations and couples them with Linear Inverted Pendulum (LIP)-based planning and Whole Body Control (WBC) to enable navigation around and within moving non-convex structures without restrictive geometric assumptions. Simulations on the Digit humanoid yield a 96% success rate in navigating around and inside moving non-convex obstacles in a 24 × 24 m 2 arena. Ablation studies confirm that the proposed iterative polytope generation significantly outperforms single-iteration baselines in narrow corridors, while evaluations demonstrate robustness to clutter, sensor noise, control delays, and force perturbations. 
+
+Index Terms —Dynamic occupancy mapping, model predictive control, obstacle avoidance, safe corridors 
+
+I. I NTRODUCTION 
+
+Humanoid robots have the potential to operate alongside humans in cluttered, dynamic environments, yet autonomous navigation remains challenging for bipedal systems. Unlike wheeled platforms, bipedal robots regulate their center-of-mass (CoM) dynamics through discrete foot contacts, coupling collision avoidance with the selection and timing of feasible footsteps. Model-based approaches, particularly reduced-order model-based Model Predictive Control (MPC) and Quadratic Programming (QP), have enabled dynamically stable bipedal locomotion [1–4], motivating their use in obstacle-aware nav-igation. Static-environment navigation was explored in [5] using half-plane constraints in MPC, assuming known obstacle geometry and position. An end-to-end quadruped navigation framework in [6] combined vision-based mapping and global 
+
+A∗ planning with walking and jumping over static obstacles, but did not address dynamic obstacle avoidance. Safe-corridor-based navigation was explored in [1], which incorporated dynamic obstacle avoidance constraints into MPC but assumed simplified convex obstacle geometries and direct availability of obstacle position and velocity information. 
+
+Shubham S. Kumbhar, and Panagiotis Artemiadis are with the Mechanical Engineering Department, at the University of Delaware, Newark, DE 19716, USA. shubhamk@udel.edu, partem@udel.edu 
+
+> ∗
+
+Corrresponding author 
+
+The advancements associated with static obstacle navigation have naturally motivated extensions to dynamic environments, where obstacle motion must also be considered. A perception-to-walking pipeline for the humanoid Lola using Swept-Sphere-Volume (SSV) primitives [7] was developed in [8] and later extended with hierarchical footstep replanning [9]. While this representation can capture non-convex obstacles, the framework operates reactively without explicitly predicting obstacle motion. Similarly, a reactive avoidance scheme using spherical obstacle representations was employed in [10]. MPC-QP-based avoidance was extended to fast-moving objects in [11] using half-plane constraints and velocity-stretched ellipsoids for obstacles. However, that approach treats these ellipsoids as static over the MPC horizon rather than incorpo-rating time-varying obstacle predictions, and assumes a priori availability of obstacle states. Predictive MPC-QP obstacle avoidance using half-space relaxations of predicted obstacle motion was introduced in [12]. This approach was extended to bipedal standing and stepping avoidance in [13]. However, both approaches rely on simplified obstacle geometries and externally provided obstacle states. Additionally, these methods are not designed for global navigation and may get trapped in local minima. Social Zonotope Network (SZN)-MPC was proposed in [14] for avoiding dynamic obstacles in social navigation scenar-ios. Specifically, it predicts pedestrian motion using convex zonotopes for MPC-based collision avoidance. However, this representation primarily captures motion uncertainty rather than the physical geometry of obstacles. A learning-based approach, the reactive Agile But Safe (ABS) framework, was proposed in [15] for high-speed quadrupedal locomotion, while the Reflexive Evasion Robot (REBot) framework was proposed in [16] for high-speed evasion. Both approaches remain primarily local and rely on simplified sensing or obstacle representations, limiting their applicability to long-horizon navigation and explicit geometry-aware safety. Together, the existing approaches reveal two key limitations. First, obstacle geometry is often simplified using spheres or el-lipsoids, which can conservatively eliminate free space around non-convex obstacles. This can fundamentally restrict achiev-able navigation tasks. For example, a convex approximation of a C- or U-shaped obstacle may classify its concave interior as occupied, preventing a humanoid from navigating within the enclosed region. Second, most model-based approaches assume that obstacle geometry, position, and/or velocity are al-ready available. Consequently, only a few approaches connect arXiv:2610.17232v1 [cs.RO] 12 Oct 2026 2
+
+onboard spatial sensing and dynamic occupancy prediction with geometry-aware free-space construction, footstep selec-tion, and dynamically stable locomotion. Dynamic obstacle avoidance has been explored more ex-tensively in aerial robotics, where full-stack perception, pre-diction, planning, and control systems have been developed. Particle-based dynamic occupancy representations such as the Dual-Structure Particle (DSP) map enable complex obstacle geometries to be represented while maintaining a lightweight structure suitable for real-time prediction. It was utilized in [17] to construct risk-aware spatio-temporal (RAST) safety corridors for drone navigation. However, its rectangular corri-dor representation can remain conservative around complex obstacle boundaries and does not account for the discrete footstep selection and dynamic stability constraints inherent to bipedal locomotion. In this work, we present an algorithmic systems frame-work that brings the advantages of particle-based dynamic occupancy representations to bipedal navigation and tightly integrates them with footstep planning and locomotion control. The primary contributions are: (i) a full-stack perception-to-control framework for humanoid navigation that bridges 3D Light Detection and Ranging (LiDAR) perception and dynamic locomotion control through a modified DSP-map representation, A* global guidance, capture-region-constrained Linear Inverted Pendulum (LIP) sampling, LIP-MPC, and WBC, enabling collision-free navigation in dynamic, non-convex environments; (ii) a spatio-temporal safe corridor generation method that uses capture-region-constrained LIP trajectory sampling to extract kinematically and dynamically feasible seed points and a risk-aware iterative polytope gen-eration method with per-cluster risk thresholds to construct large, temporally consistent convex free regions from predicted particle-based obstacle occupancy; and (iii) comprehensive simulation-based validation of the complete framework on the Digit humanoid in dynamic, non-convex environments, including navigation within moving non-convex obstacles and robustness to sim-to-real imperfections such as sensor noise, control delays, and external perturbations. The remainder of this paper is organized as follows: Sec-tion II details the 360 ◦ LiDAR perception and the modi-fied DSP-map. Section III presents the planning and control pipeline, covering A*-based global guidance, LIP trajectory sampling, safe-polytope generation, and MPC-WBC execu-tion. Section IV provides simulation results and Section V concludes the paper. II. P ERCEPTION MODULE 
+
+The DSP map [18] is an egocentric local mapping frame-work that represents arbitrarily shaped static and dynamic obstacles as a set of weighted particles using Random Finite Set (RFS) theory. Each particle (i) represents an obstacle state ( ˜x(i) 
+
+> t0
+
+) comprising its 3D position ( ˜p(i) 
+
+> t0
+
+) and velocity (˜v(i) 
+
+> t0
+
+), with an associated weight w(i) 
+
+> t0
+
+at time t0. The particle weights represent the local intensity of obstacle point objects, with higher weights indicating a greater contribution to the estimated spatial occupancy. The environment is represented  
+
+> Fig. 1. Proposed Perception-to-Control Framework. (a) Perception module and DSP Mapping for particle-based obstacle representation and motion prediction. (b) Planning and control module for global navigation.
+
+by the Probability Hypothesis Density (PHD) of the random finite set of the particles. We denote this PHD by D(xt0 ),which is approximated using a Sequential Monte Carlo PHD (SMC-PHD) filter as 
+
+D(xt0 ) = 
+
+> nt0
+
+X
+
+> i=1
+
+w(i) 
+
+> t0
+
+δ
+
+
+
+xt0 − ˜x(i)
+
+> t0
+
+
+
+. (1) where δ(.) is the Dirac function, nt0 is the cardinality of the RFS of the particles and xt0 ∈ R3 is a point in 3D space. The filter updates particle states and weights from depth-sensor point clouds and robot odometry, thereby providing a local representation that captures both obstacle geometry and motion. In this work, we extend the DSP map with the modi-fications described below to support LiDAR-based perception and improve prediction quality for humanoid navigation. 
+
+A. Modifications to the DSP Map a) LiDAR Extension: The original DSP map [18] was developed for depth sensors with a limited field of view and uses pyramid-like subspace division for efficient particle prop-agation and occlusion handling. To support a 360 ◦ LiDAR, we divide the horizontal plane into four 90 ◦ sectors (front, left, back, and right), each with an independent pyramid subspace division with a fixed orientation relative to the sensor frame. The DSP update is performed in parallel across the four sectors, providing full 360 ◦ coverage. 
+
+b) Kalman Filter for Cluster Velocity Estimation: The DSP map assigns initial velocities to newly generated particles based on the estimated velocity of the obstacle cluster to which they belong [18]. The original method employs Euclidean cluster extraction using a k-d tree [19] and the Kuhn-Munkres (KM) algorithm for cluster matching. For matched clusters, obstacle velocity is estimated from cluster centroid displace-ment. However, direct position differences can provide poor velocity estimates because the cluster centroid is not a body-fixed point and can vary with viewing angle, obstacle rotation, and partial occlusion. Consequently, changes in cluster shape can be incorrectly interpreted as obstacle motion. We modify the velocity estimation module to decouple variations in cluster shape from actual obstacle motion. Each 3
+
+cluster is characterized by its centroid c ∈ R2 and scatter matrix S ∈ R2×2:
+
+c = 1
+
+McMcX
+
+> i=1
+
+pi, S =
+
+> Mc
+
+X
+
+> i=1
+
+(pi − c)( pi − c)⊤, (2) where pi are the cluster points and Mc is the number of points in the cluster. For each pair of matched clusters, we employ a constant-velocity Kalman filter [20] whose state consists of 
+
+x and y obstacle position (xo, y o) and velocity ( ˙ xo, ˙yo) with the cluster centroid c serving as the position measurement. To reduce the influence of centroid shifts caused by shape changes, the measurement noise covariance R is adapted on-line. Specifically, we use a separate constant-acceleration filter to track the cluster’s spatial spread and its temporal derivatives, providing a spread-aware measurement noise model. The standard deviations of the cluster-point spread along the x
+
+and y directions are denoted by σx and σy , respectively. We define the spread state as σ = [ σx, ˙σx, ¨σx, σ y , ˙σy , ¨σy ]⊤ ∈ R6
+
+and the measurements of σx and σy are given by zσ =[√S00 , √S11 ]⊤, where S is the scatter matrix defined in (2). The estimated spread velocities, [ˆ ˙σx, ˆ˙σy ]⊤, obtained from the Kalman filter are used to modulate the measurement noise covariance of the constant-velocity Kalman filter for obstacle velocity estimation: 
+
+R =
+
+R0 + α|ˆ˙σx| 00 R0 + α|ˆ˙σy |
+
+
+
+(3) with base noise R0 = 0 .001 and modulation gain α = 0 .2. A rapidly expanding cluster (high ˆ˙σx, ˆ˙σy ) indicates deformation or partial occlusion, increasing the measurement uncertainty and preventing the filter from following transient centroid jumps. The final estimated velocity ˆvt = [ˆ ˙xo, ˆ˙yo]⊤ is used in place of the raw centroid displacement for particle propagation in the DSP-map prediction step, improving the quality of future occupancy predictions for dynamic obstacles. 
+
+B. Future Particle Occupancy Extraction 
+
+The humanoid footstep plan is composed of alternate left and right single leg stance phases and the double stance phase is assumed to be absent. Each single stance phase has a duration of T = 0.3s. We define the kth step of the humanoid over the interval t ∈ [kT, (k + 1) T ). We use the current particle states from the DSP map and a constant-velocity model to predict and accumulate the particles over the entire kth step. This accumulated particle cloud is denoted by ˆOk and represents the space occupied by obstacles during the kth step. Given t0 ∈ [( k − 1) T, kT ] or in the (k − 1) th step, we compute the accumulated particle clouds over the next N + 1 prediction windows of length T ,
+
+{ ˆOk}k+Nn=k , following the approach in [17]. Here N denotes the horizon of the MPC which performs footstep planning for the humanoid. For particle accumulation within each window 
+
+n ∈ k, k + 1 , ..k + N , we propagate the particles to discrete evaluation points τ ∈ { (n−k)T, (n−k)T +0 .1, (n−k)T +0 .2}
+
+using a constant-velocity model, ˜p(i)  
+
+> tk+τ
+
+= ˜ p(i) 
+
+> t0
+
++ ˜ v(i) 
+
+> t0
+
+(τ +trem )
+
+Here, trem is the time remaining in the current (k−1) th step at 
+
+t = t0, and tk = t0 +trem is the predicted start time of the kth 
+
+step. These evaluated particles are accumulated to give us the representative particle cloud for each window n . Furthermore, we simplify the representation to have one particle at the center of each voxel with a weight equal to the sum of weights of all particles in that voxel. We further filter out voxels with low weights to give us the future occupancy particle clouds, 
+
+{ ˜Ok}k+Nn=k given by: 
+
+˜Ok =
+
+n
+
+b ∈ R3 wbk > ρ occ 
+
+o
+
+, (4) where b is the voxel centroid, wbk is the accumulated weight of the voxel and ρocc = 0 .1 is the occupancy threshold. The clouds ˜Ok are filtered via Euclidean clustering and flattened to 2D to produce noise-free clouds Ok.III. P LANNING AND CONTROL 
+
+The overall pipeline consists of the following sequential components: A* global path planning, LIP-based footstep sampling for seed extraction, iterative spatio-temporal safe polytope generation, desired velocity computation, LIP-MPC for footstep planning, and WBC for torque computation. Figure 1 illustrates the overall architecture. 
+
+A. A* Global Path Planning 
+
+We utilize A* search [21] to compute a collision-free path for local goal guidance in downstream planners. We construct a binary occupancy grid from the LiDAR point cloud mea-surements. This grid is further used for planning a collision-free, low-cost path. We additionally penalize immediate local deviations from the previously computed path to avoid sudden changes in the direction of motion and fluctuations in the local plan. 
+
+1) Grid Construction and Inflation: Given the sensor posi-tion xs ∈ R2, we construct a 20 ×20 m grid G with a resolution of rgrid = 0 .2 m, centered at xs. The grid is populated using the current LiDAR point cloud measurements, with a value of 1 assigned to occupied cells and 0 to free cells, thus forming a binary occupancy grid. Furthermore, the occupied voxels in the grid are inflated by a safety margin of Rinflate = 1 .0 m. 
+
+2) A* Search and Local Goals: An A* search finds the path 
+
+Pastar starting from the current CoM position, xc = xc yc⊤
+
+to the global goal, gglobal that minimizes the accumulated cell-to-cell path cost. We use the Euclidean distance to the goal as an admissible heuristic to guide the search. When a previous path Pprev exists, the A* cost is augmented with a deviation cost that biases the new path to stay close to 
+
+Pprev in the immediate vicinity of the robot. For each candidate grid cell i, let ri ∈ R2 denote its center. We compute the deviation cost, cdev as: 
+
+cdev (ri) = c0 d⊥(ri) w s(ri),w(s) = 
+
+(
+
+wnear , s ≤ Llookahead 
+
+wfar , otherwise (5) Here, d⊥(ri) is the perpendicular distance from the grid center, 
+
+ri to Pprev . If pri is the foot of the perpendicular from ri on 
+
+Pprev , then s(ri) is the arc length of pri on Pprev . c0 is a scalar constant and Llookahead is the distance on the A* path for which we want to minimize the deviation from Pprev .4
+
+To ensure this, we set a higher value for wnear , while a smaller value is chosen for wf ar to enable fast replanning. This deviation cost ensures that the A* path maintains con-sistency for the near future and avoids erratic changes in the direction of motion. The accepted path is then smoothed via moving-average to remove grid-scale zigzags while preserving endpoints to obtain the path, ˜P. Given t0 ∈ [( k − 1) T, kT ] or in the (k − 1) th step, we utilize ˜P to obtain the goal points 
+
+gi ∀ i ∈ { k, k + 1 , . . . , k + N }. These are calculated as 
+
+N + 1 equidistant points along ˜P over the lookahead distance 
+
+Llookahead = 2 .0 m, starting from the point on the path closest to xc. The farthest point gk+N provides global directional guidance, while the intermediate points refine the local heading for the downstream waypoint computation. At each goal point, 
+
+gi the desired yaw for the stance foot of the humanoid is computed as the slope of the local path tangent at that point using central finite difference. We denote these yaw goals by 
+
+θsi ∀ i ∈ { k, k + 1 , . . . , k + N }, where the subscript k denotes the goal for the kth step stance foot yaw. 
+
+B. Capture-Region-Constrained LIP Sampling 
+
+This section presents the sampling-based planner for gen-erating dynamically and kinematically feasible, stable, and collision-free locomotion plans. The best obtained trajectory is used to extract seed points for subsequent safe polytope gener-ation. We use LIP dynamics to propagate the state and sample kinematically feasible footstep sequences over a horizon of N
+
+footsteps, generating candidate CoM trajectories with N + 1 
+
+states each. A key feature of the planner is the use of M -step capture regions 1 to constrain footstep sampling. This ensures that all the sampled trajectories are stable, allowing a small number of samples to be used to extract dynamically and kinematically feasible seed points. 
+
+1) Capture Region-based Trajectory Sampling: We sample a total of Npool = 1000 candidate CoM trajectories using the LIP model dynamics. Let uk = [ uxk , u yk]⊤, xck = [ xck, y ck]⊤
+
+and ˙xck = [ ˙ xck, ˙yck]⊤ denote the x and y stance foot position, CoM position and velocity at the start of the kth step. The stance foot is assumed to remain the same during the entire step. Each sampled candidate consists of a footstep sequence 
+
+{ui}k+N −1 
+
+> i=k
+
+and a CoM trajectory {xci , ˙xci }k+Ni=k .
+
+a) Dynamic and Kinematic Feasibility: We use the LIP model [24] for CoM propagation, with the discrete dynamics given by Xck+1 = AX ck +Bu k, where Xck = [ xck, ˙xck, y ck, ˙yck]⊤.The analytical expression for matrices A and B can be found in [1]. The discrete evolution of the system must adhere to the robot’s kinematic constraints, which can be captured by the foot reachability set, Uk(θs
+
+> k
+
+, uk), parametrized by the stance foot position ( uk) and yaw ( θs
+
+> k
+
+) during the kth step. The sampled footstep for the (k + 1) th step ( uk+1 ) must belong to U(θsk, uk) for kinematic feasibility of the extracted seed points. This region is asymmetric in the lateral direction and its expression can be found in [2]. To simplify the sampling,                     
+
+> 1Terminology: A state is M-step capturable if there exists an evolution from it that brings the system to a stop within Msteps, respecting dynamic and actuation constraints. The M-step capture basin is the subset of states that are M-step capturable. An M-step capture point is a ground location where a contact leads to an (M−1) -step capturable state; the set of all such points defines the M-step capture region ,CM; see [22, 23].
+
+we have θsi = θsk−1 ∀ i ∈ { k, k + 1 , ..., k + N − 1}, i.e., plan along the current heading direction. This guarantees that a plan to reach these seed points exists and that the MPC can fall back to refining this constant-yaw plan in case of failure. 
+
+b) Stable Trajectories: We utilize the capturability framework developed in [22] to constrain foot placements such that the CoM evolution remains within the M -step capture basin, thereby ensuring a stable walking trajectory. The capture point ( ξ = [ ξx, ξ y ]⊤) for LIP dynamics as defined by the capturability framework is given by, ξ = xc + ˙xc/ω . Here, 
+
+ω = pg/H and H is the constant height at which the LIP CoM moves. Due to the decoupled and simple LIP dynamics, 
+
+M -step capture region ( CM ) can be explicitly computed in the form, CM = CxM × C yM for M ∈ { 0, 1, ... } ∪ {∞} . Here, the superscript x and y denote the M -step capture regions derived for the x and y axes. The sets CxM and CyM are given by the following expressions 
+
+CxM = {r ∈ R | dxM ≤ r ≤ dxM } (6) 
+
+CyM = {r ∈ R | dyM ≤ r ≤ dyM } (7) The expressions for these upper and lower bounds have been analytically computed in [23]. Constraining the capture point offset, defined as ξk − uk, to lie within CM as: 
+
+dxM ≤ ξxk − uxk ≤ dxM , dyM ≤ ξyk − uyk ≤ dyM , (8) guarantees that the footsteps produce stable and M -step cap-turable CoM trajectories. Using the conditions in (8) , we further constrain the footsteps to reduce the sampling space to uxk ∈ [ξxk + dxM xk , ξ kx + dxM xk ] ∩ U xk , (9) 
+
+uyk ∈ [ξyk + dyM xk
+
+, ξ ky + dyM xk ] ∩ U yk , (10) Here, Uxk and Uyk denote the kinematic reachability sets for the forward and lateral directions of motion [1]: M xk =
+
+max (M x 
+
+> 0
+
+, M x−k − 1) , M yk = max (M y 
+
+> 0
+
+, M y −k − 1) , where 
+
+M x and M y denote the minimum number of steps required for the current state to be capturable in the x− and y−directions, respectively, while M x 
+
+> 0
+
+and M y 
+
+> 0
+
+specify the minimum M -step capture basin for the CoM state during sampling. The capture regions are computed such that the set resulting from the intersections in (9) and (10) is guaranteed to be non-empty. Consequently, ensuring that all Npool samples exist and are stable, dynamically, and kinematically feasible CoM trajecto-ries. The initial state for planning is obtained by propagating the current robot state to the end of the stance phase using LIP dynamics. We utilize the discrete step dynamics of LIP and the above sampled footstep locations to generate candidate CoM trajectories ( T ). 
+
+2) Collision Checking: The kth segment of LIP is defined as the CoM trajectory evolving from xck to xck+1 with uk as the stance foot. A sampled trajectory ( T ) consists of N steps and so N segments of CoM evolution. Using the analytical solutions of the LIP dynamics, we can compute a bounding box Bk that encompasses all the CoM positions in the kth 
+
+segment trajectory. For collision checking, we compute such bounding boxes for all segments of the sampled trajectory and also inflate the boundaries by a safety margin defined by δb.5
+
+A segment is collision free if it satisfies the following condition: 
+
+(x, y ) /∈ B k ∀(x, y ) ∈ O k (11) where Ok is the flattened future occupancy map as computed in Section II-B. We discard all the candidate CoM trajectories that do not satisfy the collision check given by (11). 
+
+3) Trajectory Cost: Each non-colliding trajectory is evalu-ated by the cost 
+
+J = 1 .5 xck+N −1 − gk+N + 0 .5 
+
+> k+N−2
+
+X
+
+> i=k
+
+xci − gk+N , (12) weighting the terminal CoM position more heavily to steer the robot toward the local goal, gk+N . The trajectory with the lowest cost among all collision free candidates is retained. 
+
+4) Seed Position Extraction: The N + 1 CoM positions ({xci }k+Ni=k ) are extracted from the best trajectory as seed points ({si}Ni=0 ) for safe polytope generation. 
+
+C. Iterative Spatio-Temporal Safe-Polytope Generation 
+
+Given the future occupancy particle cloud ({O i}k+Ni=k ) from Section II-B and seed points from the sampling planner, we compute convex collision-free regions, {S i}k+Ni=k . Sk is aconvex polytope that is considered safe for navigation during the kth step. We propose an iterative risk-based algorithm for computing structurally smooth and large polytopes. Algorithm 1 is provided below. First, we explain the general polytope construction method for a set of objects, then describe our iterative algorithm. 
+
+1) Polytope Construction via Separating Half-planes: The function C OMPUTE POLYTOPE (O, s) constructs a convex safe polytope from a set of 2D obstacle positions O and a seed point s. A safe polytope S is the intersection of half-plane constraints: 
+
+S = {p ∈ R2 | a⊤ 
+
+> j
+
+p ≤ bj , j = 1 , . . . , m }. (13) Here, aTj is the slope of the jth line and bj is the corresponding offset. To construct this polytope, obstacles are first sorted by ascending distance from the seed point, s. For each obstacle, if its Cartesian position, o ∈ O , already lies behind an existing half-plane ( a⊤ 
+
+> j
+
+o > b j for some j), it is skipped. Otherwise, a separating half-plane given by n⊤p ≤ n⊤o is added with its boundary on the obstacle, where n is the outward normal given by n = ( o−s)/|o −s|. To ensure that the planned CoM trajectory starting from the current seed point to the next also lies inside the polytope S, we require that the bounding box containing this trajectory, B, lies in S. Therefore, after the construction of a half-plane, we identify the corner points of 
+
+B that lie on the other side of the plane as the seed point. Then, for each corner point, we form the line joining the obstacle point o and the corner point. We select the line that keeps the entire box and the seed point on the same side. In the event of a tie break, we select the normal that is closest to the original normal n. This ensures that the bounding box is on the safe side the the hyperplane. The returned polytope is the intersection of all such constraints. It is guaranteed to contain the bounding box and consequently, the entire planned trajectory between seed points. The obstacle for which we computed the plane becomes an anchor , one that actively constrains the polytope. FINDANCHORS (S) function stores a list of these anchor points that produce the closed polytope 2,
+
+S.
+
+2) Iterative Weighted Expansion with Per-Cluster Thresh-olding: The DSP-map particle clouds are inherently noisy, with particle additions and deletions causing temporal varia-tions in particle representation of the obstacle shape. Treating each particle as an obstacle during polytope construction can therefore produce abrupt changes in polytope size and shape, which may reduce the feasibility of downstream footstep planning. We propose an algorithm that selectively drops anchor particles (those generating active constraints) given an acceptable risk of collision with the particles. Each par-ticle oj ∈ O k has weight wj and cluster identifier cj . Let 
+
+Owk = {(oj , w j , c j )} and Wc = P  
+
+> j:cj=c
+
+wj denote the total weight of cluster c. We define the acceptable risk of collision (η) as the ratio of the total weight of particles inside the safe polytope to the total weight of all particles in the map. Given an allowable collision risk η ∈ [0 1] , we assign each cluster a weight-removal threshold Tc = ηW c. This threshold acts as a limit on how many anchor particles can be dropped from a cluster while ensuring the risk does not exceed η. Thus, the cumulative weight removed from any cluster cannot exceed its allocated risk budget. The algorithm starts with computing the initial polytope S
+
+and the anchor points A. For each of these anchors a ∈ A , we compute a polytope for the set of all particles except the anchor itself. We denote these polytopes as candidate polytopes and represent them by Sa. The corresponding anchors for these polytopes are denoted by Aa. For each candidate, we compute a lexicographic cost function defined below: cost (a) =  |A a|, − X
+
+> a′∈A a
+
+d(a′), w (a) (14) Here, w(a) is the weight of the anchor a and d(a′) is the shortest distance between the seed and the plane corresponding to anchor a′. This cost prioritizes: (1) minimizing remaining anchors, (2) maximizing the sum of anchor distances from the seed point, (3) dropping lower-weight obstacles first. The first priority objective of minimizing the number of anchors pre-vents sudden shape changes because of outlier particles which can be ignored under acceptable risk. The second priority objective ensures that the polytope boundaries are further away from the seed points giving us larger area for safe planning. The third priority objective ensures risk minimization. Candidates are sorted lexicographically by (14) in ascending order. The first candidate whose cluster’s dropped weight would not exceed its threshold after dropping is selected: 
+
+Dc + w(a) ≤ Tc, (15) where Dc is the cumulative weight already dropped from clus-ter c. The dropped weight is then updated: Dc ← Dc + w(a)
+
+and the polytopes and anchors for the next iteration are com-puted by dropping the selected anchor. If no candidate satisfies (15), the loop terminates. This is repeated independently for 
+
+> 2The polytope computation starts with a box constraint around the seed point and as a result a closed polytope is always possible. 6
+
+each of the N + 1 prediction windows to get {S i}k+Ni=k . The per-cluster threshold prevents the algorithm from removing too many safety constraints from any single obstacle cluster. This is critical in cluttered scenes where a single dynamic obstacle generates many points near the robot. Without a per-cluster limit, those points could all be dropped, leaving the region unsafe. 
+
+D. Velocity Command Extraction & LIP-MPC 
+
+Given the A*-derived lookahead points {gi}k+Ni=k and the safe polytopes {S i}k+Ni=k , we compute smooth CoM waypoints 
+
+{wi}N +1  
+
+> i=1
+
+for desired velocity computation via a Quadratic Program as follows: 
+
+min   
+
+> w1,..., wN+1
+> N+1
+
+X
+
+> i=1
+
+γsi ∥wi − wi−1∥2 + 
+
+> N+1
+
+X
+
+> i=1
+
+γg ∥wi − gk+i−1∥2
+
+(16) 
+
+subject to wi ∈ S k+i−1 ∩ S k+i, i = 1 , . . . , N (17) 
+
+wN +1 ∈ S k+N (18) where w0 = xc is the current CoM position and γsi ∀ i ∈{1, 2, .., N +1 }, γg are positive scalars. The first term penalizes deviation from the current position, the second encourages consecutive waypoints to be close, and the third attracts each waypoint toward its A*-derived lookahead goal. Constraint (17) enforces that each waypoint lies in the intersection of consecutive polytopes, enabling safe transitions of the robot between polytopes. Desired velocities for the LIP-MPC are computed from waypoint differences as vk+i 
+
+> des
+
+= (wi+1 −
+
+wi)/T, i = 1 , . . . , N. These velocity commands and the desired yaw computed in Section III-A are passed as targets to the MPC for footstep planning. The resulting convex MPC formulation is given as follows: 
+
+minimize  
+
+> Xc
+> i+1 ,ui
+> k+N−1
+
+X
+
+> i=k
+
+Ji
+
+ Xc 
+
+> i
+
+, ui−1, θ s
+
+> i−1
+
+ (19) 
+
+subject to Xci+1 = AX ci + Bu i (20) 
+
+ui = ( uxi , u yi ) ∈ U i(θs
+
+> i−1
+
+, ui−1) (21) 
+
+xci ∈ S i ∀i ∈ { k, k + 1 , ..k + N − 1} (22) 
+
+xci+1 ∈ S i ∀i ∈ { k, k + 1 , ..k + N − 2} (23) The decision variables of the optimization are the robot’s CoM states, Xc
+
+> i+1
+
+, and the stance foot positions, ui, for all 
+
+i ∈ { k, k + 1 , . . . , k + N − 1}. The optimization is subject to following constraints: (i) the step-to-step dynamics of the LIP model (20), (ii) the foot placement constraint (21), and (iii) CoM state belongs to the intersection of consecutive safe polytopes (22), (23). The MPC objective (Ji) combines two terms: a goal-velocity tracking cost and a CoM-foot distance regulation cost. The former penalizes the deviation between the CoM velocity and desired velocity vides , while the latter penalizes the CoM displacement from the stance foot, discouraging dynamically unfavorable footstep placements. The planned footsteps and CoM trajectory are then provided to the whole-body controller (WBC), which generates the corresponding torque commands. Details of the WBC can be found in [1]. 
+
+Algorithm 1 Iterative Spatio-temporal Safe-Polytope Genera-tion  
+
+> 1:
+
+Wc ← P  
+
+> j:cj=c
+
+wj , Tc ← ηW c, Dc ← 0 for each cluster c 
+
+> 2:
+
+S ← COMPUTE POLYTOPE (Ok , sk ) 
+
+> 3:
+
+A ← FIND ANCHORS (S) 
+
+> 4:
+
+while A̸ = ∅ do  
+
+> 5:
+
+C ← ∅ 
+
+> 6:
+
+for each a ∈ A do  
+
+> 7:
+
+Sa ← COMPUTE POLYTOPE (O \ { a}, s ) 
+
+> 8:
+
+Aa ← FIND ANCHORS (Sa) 
+
+> 9:
+
+C ← C ∪ { (a, cost (a)) } 
+
+> 10:
+
+end for  
+
+> 11:
+
+sort C by cost in ascending order  
+
+> 12:
+
+a∗ ← ∅ 
+
+> 13:
+
+for (a, ·) ∈ C do  
+
+> 14:
+
+if Dc(a) + w(a) ≤ Tc(a) then  
+
+> 15:
+
+a∗ ← a; break  
+
+> 16:
+
+end if  
+
+> 17:
+
+end for  
+
+> 18:
+
+if a∗ = ∅ then  
+
+> 19:
+
+break  
+
+> 20:
+
+end if  
+
+> 21:
+
+Dc(a∗) ← Dc(a∗) + w(a∗) 
+
+> 22:
+
+S ← COMPUTE POLYTOPE (O \ { a∗}, s ) 
+
+> 23:
+
+A ← FIND ANCHORS (S) 
+
+> 24:
+
+O ← {O \ { a∗}}  
+
+> 25:
+
+end while  
+
+> 26:
+
+return S
+
+IV. R ESULTS 
+
+We evaluate the proposed framework in dynamic environ-ments containing static and dynamic non-convex obstacles and human actors performing random walks 3. The humanoid is tasked with navigating to a goal located within a moving U-shaped object. This goal-containing object and other dynamic obstacles move at constant velocities. Unlike approaches that approximate non-convex obstacles using convex represen-tations, the DSP-map-based framework does not impose a predefined obstacle geometry, enabling navigation both around and within non-convex obstacles. In all experiments, the goal position within the non-convex region is assumed to be available in the humanoid’s local frame, decoupling high-level semantic goal specification from motion planning and control. Experiments are conducted in MuJoCo [25] using Agility Robotics’ Digit humanoid [26], equipped with a Velodyne VLP-16 LiDAR. LiDAR observations are generated at afrequency of 20Hz through kinematic simulation of Digit in Gazebo [27], with Gaussian measurement noise, control delays, and motor dynamics incorporated to better reflect real-world operation. Figure 2(a) shows representative snapshots of the humanoid navigating successfully among static and dy-namic non-convex obstacles, along with the generated spatio-temporal safe corridors shown in Fig. 2(b). 
+
+A. Large-Scale Experimentation 
+
+We evaluate the framework in randomly generated environ-ments containing L-, T-, and Z-shaped non-convex obstacles and human actors. The numbers of static and dynamic obsta-cles and human actors are independently sampled from 3–7      
+
+> 3A video of the simulation demonstrations is available at: https://www.youtube.com/watch?v=nuLPCccjv84 7
+> Fig. 2. (a) Snapshots of the Digit robot navigating in an 8×8 m 2arena containing human actors, moving non-convex obstacles (red), static obstacles (blue), and a U-shaped obstacle (gray), with the goal located at its center. (b) Corresponding safe corridors generated by the proposed algorithm and the future occupancy maps for the regions highlighted by the black boxes in (a). Five prediction windows are illustrated, with the first shown in green and the color gradually transitioning to red for the fifth prediction window. The green circle represents the goal position inside the gray-colored U-shaped moving object. (c) Success rates for three arena scales, force perturbations, measurement noise, and delays. (d) Success rates for varying narrow-corridor widths for both iterative and non-iterative cases. (e) Computation time of each module for a successful experiment in each of the three arena scales. The center of each bar represents the mean computation time, while the upper and lower extents indicate one standard deviation.
+
+each. Human actors perform random walks with a speed of 
+
+0.8 m/s, while dynamic obstacles and the U-shaped goal object are assigned random directions of motion and speeds between 
+
+−0.5 and 0.5 m/s. A trial is successful if the humanoid reaches the goal without collision or falling. A fall is declared when the torso height drops below 0.5 m or the roll/pitch magnitude exceeds 0.785 rad, while collisions are determined from the distance between the robot CoM and obstacle wall segments. We perform the following two evaluations: 
+
+1) Arena Scale and Clutter Density Evaluation: We evalu-ate three arena sizes, 24 × 24 m 2, 16 × 16 m 2, and 8 × 8 m 2,with the same obstacle-count range. The arena area decreases by a factor of nine from the largest to the smallest case, while the obstacle footprint remains unchanged, resulting in substantially higher clutter density in the 8 × 8 m 2 arena. We conduct 50 trials for each case. As shown in Fig. 2(c), the framework maintains a high success rate in the two larger arenas, with performance degrading in the 8 × 8 m arena as the fixed obstacle footprint leaves less maneuvering space and requires more aggressive footstep placement. Most failures are falls rather than collisions, indicating that obstacle avoidance is maintained but the humanoid increasingly approaches its kine-matic and dynamic limits. Additionally, the lack of predictive capabilities in the global guidance provided by A∗ can lead the robot to narrow spaces that could otherwise be avoided. 
+
+2) Evaluation under Sim-to-Real Imperfections: We evalu-ate robustness to external perturbations by applying random forces on the robot’s torso every 2 s, uniformly sampled from [−50 , 50] N and applied for 100 ms [1]. As shown in Fig. 2(c), the success rate for 50 trials in the 24 × 24 m2
+
+arena remains comparable to the baseline case, with failures primarily caused by pushes that leave no capturable safe foot placement. Robustness to noise and a conservative 15 ms con-trol delay is evaluated using empirical parameters from [28], with σ = 0 .01 for joint position/velocity ( rad , rad /s) and torso position/velocity/orientation/angular velocity ( m, m/s,
+
+rad , rad /s). The framework achieves a 74% success rate over 50 trials in the 24 × 24 m2 (see Fig. 2(c)), demonstrating robustness to moderate sensing and actuation imperfections. 
+
+B. Narrow Corridor: Iterative vs. Non-Iterative Polytope Gen-eration 
+
+We conduct an ablation study in 5 m-long corridors of varying widths to evaluate risk-aware iterative polytope gener-ation. We compare the proposed iterative method with a single polytope-generation iteration as a non-iterative baseline. Ten trials are conducted per corridor width, and success is defined as reaching the opposite end without collision or falling. As shown in Fig. 2(d), both methods perform comparably in wide corridors, but the non-iterative method degrades sharply as the corridor narrows. With the conservative 1 m robot-size assumption, the iterative method successfully traverses corridors as narrow as 1.9 m. The non-iterative baseline retains low-weight particles as active constraints, resulting in more half-space constraints and unnecessarily smaller safe 8
+
+regions. Moreover, its polytopes exhibit abrupt temporal shape changes when the robot is near obstacles. In contrast, the iterative method selectively removes anchors while respecting the cluster-level risk threshold and minimizes the number of active half-spaces per obstacle. This produces larger and more consistent free regions, enabling successful navigation through narrower regions. 
+
+C. Computational Performance 
+
+Figure 2(e) summarizes the per-module computation times for successful experiments across the three arena scales. The DSP-map generation and planning and control modules run in separate threads, enabling fast motion replanning. For all experiments in the results section, 1000 LIP trajectories are sampled for seed-point extraction. The low sampling time is due to the reduced sampling space imposed by the capture-region constraints. The computation times for the planning and control modules remain small and relatively consistent across the experimental conditions, with a modest increase in polytope computation in the 8 × 8 m arena due to its higher obstacle density. We also observe a modest increase in DSP-map update time as clutter density increases. The complete system runs on a desktop equipped with an Intel i9 CPU and 64 GB of RAM, without GPU acceleration. V. C ONCLUSION 
+
+This paper presented an integrated, real-time perception-to-control framework for humanoid navigation in dynamic envi-ronments with non-convex obstacles. The architecture bridges 
+
+360 ◦ LiDAR perception and locomotion control by unifying a modified DSP map, A∗ global guidance, capture-region-constrained LIP sampling, iterative safe corridor generation, LIP-MPC, and WBC. The key algorithmic contribution is a spatio-temporal polytope construction that combines capture-region-constrained LIP sampling with an iterative polytope generation algorithm. By pruning dynamically unrecoverable states early via M -step capture regions, the sampler effi-ciently extracts feasible seed points with few samples. The iterative polytope generation algorithm uses these seed points to construct spatially and temporally consistent convex free regions for future times without restrictive shape assump-tions. Extensive simulation experiments on the Digit humanoid demonstrate a 96% success rate for the 24 m × 24 m arena, validating the framework’s ability to navigate both around and inside moving non-convex obstacles.Ablations confirm the iterative polytope’s superiority in narrow corridors, while evaluations show resilience to sensor noise, delays, and force perturbations. Future work will target predictive global plan-ning and hardware validation. REFERENCES [1] K. S. Narkhede, A. M. Kulkarni, D. A. Thanki, and I. Poulakakis, “A sequential MPC approach to reactive planning for bipedal robots using safe corridors in highly cluttered environments,” IEEE Robotics and Automation Letters , vol. 7, no. 4, pp. 11 831–11 838, 2022. [2] S. S. Kumbhar and P. Artemiadis, “MPC-QP-based control framework for compliant behavior of humanoid robots in physical collaboration with humans,” in 2025 IEEE International Conference on Robotics and Automation (ICRA) , 2025, pp. 14 714–14 720. [3] Y. Ding, C. Khazoom, M. Chignoli, and S. Kim, “Orientation-aware model predictive control with footstep adaptation for dynamic humanoid walking,” in 2022 IEEE-RAS 21st International Conference on Hu-manoid Robots (Humanoids) , 2022, pp. 299–305. [4] Q. Nguyen and K. Sreenath, “Safety-critical control for dynamical bipedal walking with precise footstep placement,” IFAC-PapersOnLine ,vol. 48, no. 27, pp. 147–154, 2015. [5] D. Simone, N. Scianca, P. Ferrari, L. Lanari, and G. Oriolo, “MPC-based humanoid pursuit-evasion in the presence of obstacles, in 2017 ieee,” in RSJ International Conference on Intelligent Robots and Systems (IROS)(IEEE, 2017) , 2017, pp. 5245–5250. [6] S. Gilroy, D. Lau, L. Yang, E. Izaguirre, K. Biermayer, A. Xiao, M. Sun, A. Agrawal, J. Zeng, Z. Li et al. , “Autonomous navigation for quadrupedal robots with optimized jumping through constrained obstacles,” in 2021 IEEE 17th International Conference on Automation Science and Engineering (CASE) . IEEE, 2021, pp. 2132–2139. [7] D. Wahrmann, A.-C. Hildebrandt, R. Wittmann, F. Sygulla, D. Rixen, and T. Buschmann, “Fast object approximation for real-time 3D obstacle avoidance with biped robots,” in 2016 IEEE International Conference on Advanced Intelligent Mechatronics (AIM) . IEEE, 2016, pp. 38–45. [8] A.-C. Hildebrandt, D. Wahrmann, R. Wittmann, D. Rixen, and T. Buschmann, “Real-time pattern generation among obstacles for biped robots,” in 2015 IEEE/RSJ International Conference on Intelligent Robots and Systems (IROS) . IEEE, 2015, pp. 2780–2786. [9] A.-C. Hildebrandt, M. Klischat, D. Wahrmann, R. Wittmann, F. Sygulla, P. Seiwald, D. Rixen, and T. Buschmann, “Real-time path planning in unknown environments for bipedal robots,” IEEE Robotics and Automation Letters , vol. 2, no. 4, pp. 1856–1863, 2017. [10] L. Rossini, E. M. Hoffman, S. H. Bang, L. Sentis, and N. G. Tsagarakis, “A real-time approach for humanoid robot walking including dynamic obstacles avoidance,” in 2023 IEEE-RAS 22nd International Conference on Humanoid Robots (Humanoids) . IEEE, 2023, pp. 1–8. [11] T. Wang and C. Hubicki, “Dynamic bipedal MPC with foot-level obsta-cle avoidance and adjustable step timing,” in 2025 IEEE International Conference on Robotics and Automation (ICRA) . IEEE, 2025, pp. 12 372–12 378. [12] J. White, D. Jay, T. Wang, and C. Hubicki, “Avoiding dynamic obstacles with real-time motion planning using quadratic programming for varied locomotion modes,” in 2022 IEEE/RSJ International Conference on Intelligent Robots and Systems (IROS) . IEEE, 2022, pp. 13 626–13 633. [13] T. Wang, J. White, and C. Hubicki, “Real-time dynamic bipedal avoid-ance,” in 2023 IEEE/RSJ International Conference on Intelligent Robots and Systems (IROS) . IEEE, 2023, pp. 8566–8573. [14] A. Shamsah, K. Agarwal, N. Katta, A. Raju, S. Kousik, and Y. Zhao, “Socially acceptable bipedal robot navigation via social zonotope net-work model predictive control,” IEEE Transactions on Automation Science and Engineering , vol. 22, pp. 10 130–10 148, 2024. [15] T. He, C. Zhang, W. Xiao, G. He, C. Liu, and G. Shi, “Agile but safe: Learning collision-free high-speed legged locomotion,” arXiv preprint arXiv:2401.17583 , 2024. [16] Z. Xu, C. Hao, C. Wang, K. Sima, F. Shi, and J. S. Dong, “Rebot: Reflexive evasion robot for instantaneous dynamic obstacle avoidance,” 
+
+IEEE Robotics and Automation Letters , vol. 11, no. 2, pp. 1746–1753, 2025. [17] G. Chen, S. Wu, M. Shi, W. Dong, H. Zhu, and J. Alonso-Mora, “Rast: Risk-aware spatio-temporal safety corridors for mav navigation in dynamic uncertain environments,” IEEE Robotics and Automation Letters , vol. 8, no. 2, pp. 808–815, 2022. [18] G. Chen, W. Dong, P. Peng, J. Alonso-Mora, and X. Zhu, “Continuous occupancy mapping in dynamic environments using particles,” IEEE Transactions on Robotics , vol. 40, pp. 64–84, 2023. [19] R. B. Rusu, “Semantic 3D object maps for everyday manipulation in human living environments,” KI-K¨ unstliche Intelligenz , vol. 24, no. 4, pp. 345–348, 2010. [20] Y. Bar-Shalom, X. R. Li, and T. Kirubarajan, Estimation with applica-tions to tracking and navigation: theory algorithms and software . John Wiley & Sons, 2001. [21] P. E. Hart, N. J. Nilsson, and B. Raphael, “A formal basis for the heuristic determination of minimum cost paths,” IEEE transactions on Systems Science and Cybernetics , vol. 4, no. 2, pp. 100–107, 1968. [22] T. Koolen, T. De Boer, J. Rebula, A. Goswami, and J. Pratt, “Capturability-based analysis and control of legged locomotion, part 1: Theory and application to three simple gait models,” The international journal of robotics research , vol. 31, no. 9, pp. 1094–1113, 2012. [23] S. S. Kumbhar, A. M. Kulkarni, and I. Poulakakis, “Finite-step cap-turability and recursive feasibility for bipedal walking in constrained 9
+
+regions,” in 2025 IEEE International Conference on Robotics and Automation (ICRA) , 2025, pp. 397–403. [24] S. Kajita, F. Kanehiro, K. Kaneko, K. Yokoi, and H. Hirukawa, “The 3D linear inverted pendulum mode: A simple modeling for a biped walking pattern generation,” in IEEE/RSJ IROS , 2001, pp. 239–246. [25] E. Todorov, T. Erez, and Y. Tassa, “Mujoco: A physics engine for model-based control,” in 2012 IEEE/RSJ international conference on intelligent robots and systems . IEEE, 2012, pp. 5026–5033. [26] Agility Robotics, “Digit humanoid robot,” https://agilityrobotics.com/ robots/digit, 2023. [27] N. Koenig and A. Howard, “Design and use paradigms for gazebo, an open-source multi-robot simulator,” in 2004 IEEE/RSJ international conference on intelligent robots and systems (IROS)(IEEE Cat. No. 04CH37566) , vol. 3. Ieee, 2004, pp. 2149–2154. [28] S. S. Kumbhar, A. M. Kulkarni, and P. Artemiadis, “Efficient and com-pliant control framework for versatile human-humanoid collaborative transportation,” arXiv preprint arXiv:2512.07819 , 2025.

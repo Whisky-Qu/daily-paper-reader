@@ -1,0 +1,249 @@
+{
+  "date": "20261020",
+  "date_label": "",
+  "generated_at": "2026-10-20 06:33:22 UTC",
+  "recommend_exists": true,
+  "run_count": 1,
+  "papers": [
+    {
+      "paper_id": "2610.15833v1",
+      "route": "202610/20/2610.15833v1-p-bfm-perceptive-behavioral-foundation-models-for-humanoid-control-via-unsupervised-reinforcement-learning",
+      "title": "P-BFM: Perceptive Behavioral Foundation Models for Humanoid Control via Unsupervised Reinforcement Learning",
+      "section": "deep",
+      "tags": [
+        {
+          "kind": "query",
+          "label": "humanoid"
+        }
+      ],
+      "score": 9.0,
+      "evidence": "基于无监督强化学习的感知行为基础模型用于地形条件人形全身控制",
+      "first_seen_at": "2026-10-20 06:33:22 UTC",
+      "updated_at": "2026-10-20 06:33:22 UTC"
+    },
+    {
+      "paper_id": "2610.19067v1",
+      "route": "202610/20/2610.19067v1-tread-a-visuo-inertial-framework-for-terrain-and-locomotion-context-aware-gait-phase-and-speed-estimation-in-wearable-robotics",
+      "title": "Tread: A Visuo-Inertial Framework for Terrain and Locomotion Context-Aware Gait-Phase and Speed Estimation in Wearable Robotics",
+      "section": "deep",
+      "tags": [
+        {
+          "kind": "query",
+          "label": "exo-vision"
+        }
+      ],
+      "score": 9.0,
+      "evidence": "面向可穿戴辅助机器人的视惯地形感知与步态相位速度估计",
+      "first_seen_at": "2026-10-20 06:33:22 UTC",
+      "updated_at": "2026-10-20 06:33:22 UTC"
+    },
+    {
+      "paper_id": "2610.19393v1",
+      "route": "202610/20/2610.19393v1-beyond-kinematic-tracking-preserving-expressive-characteristics-in-humanoid-whole-body-control",
+      "title": "Beyond Kinematic Tracking: Preserving Expressive Characteristics in Humanoid Whole-Body Control",
+      "section": "quick",
+      "tags": [
+        {
+          "kind": "query",
+          "label": "humanoid"
+        }
+      ],
+      "score": 7.0,
+      "evidence": "通过残差学习实现保留表现性动作特征的人形全身控制",
+      "first_seen_at": "2026-10-20 06:33:22 UTC",
+      "updated_at": "2026-10-20 06:33:22 UTC"
+    },
+    {
+      "paper_id": "2610.21152v1",
+      "route": "202610/20/2610.21152v1-koda-kinematics--observation-data-alignment-for-humanoid-learning-from-human-egocentric-demonstration",
+      "title": "KODA: Kinematics--Observation Data Alignment for Humanoid Learning from Human Egocentric Demonstration",
+      "section": "quick",
+      "tags": [
+        {
+          "kind": "query",
+          "label": "humanoid"
+        }
+      ],
+      "score": 7.0,
+      "evidence": "对齐人类自我中心演示以训练人形机器人全身视觉-语言-动作策略",
+      "first_seen_at": "2026-10-20 06:33:22 UTC",
+      "updated_at": "2026-10-20 06:33:22 UTC"
+    },
+    {
+      "paper_id": "2610.22176v1",
+      "route": "202610/20/2610.22176v1-inertially-significant-humanoid-teleoperation-via-whole-body-model-predictive-control-and-online-parameter-estimation",
+      "title": "Inertially Significant Humanoid Teleoperation via Whole Body Model Predictive Control and Online Parameter Estimation",
+      "section": "quick",
+      "tags": [
+        {
+          "kind": "query",
+          "label": "humanoid"
+        }
+      ],
+      "score": 7.0,
+      "evidence": "结合在线惯性参数估计的人形全身模型预测控制",
+      "first_seen_at": "2026-10-20 06:33:22 UTC",
+      "updated_at": "2026-10-20 06:33:22 UTC"
+    },
+    {
+      "paper_id": "2610.24235v1",
+      "route": "202610/20/2610.24235v1-multimodal-interaction-estimation-for-contact-aware-adaptive-impedance-control",
+      "title": "Multimodal Interaction Estimation for Contact-Aware Adaptive Impedance Control",
+      "section": "quick",
+      "tags": [
+        {
+          "kind": "query",
+          "label": "hip-exo"
+        }
+      ],
+      "score": 7.0,
+      "evidence": "面向安全人机接触的多模态交互估计与自适应阻抗控制",
+      "first_seen_at": "2026-10-20 06:33:22 UTC",
+      "updated_at": "2026-10-20 06:33:22 UTC"
+    },
+    {
+      "paper_id": "2610.24847v1",
+      "route": "202610/20/2610.24847v1-diplo-self-distilled-diffusion-planning-for-loco-manipulation",
+      "title": "DiPLO: Self-distilled Diffusion Planning for Loco-manipulation",
+      "section": "quick",
+      "tags": [
+        {
+          "kind": "query",
+          "label": "humanoid"
+        }
+      ],
+      "score": 7.0,
+      "evidence": "人到人形动作重定向加强化学习全身跟踪策略，用于移动操作",
+      "first_seen_at": "2026-10-20 06:33:22 UTC",
+      "updated_at": "2026-10-20 06:33:22 UTC"
+    },
+    {
+      "paper_id": "2610.25711v1",
+      "route": "202610/20/2610.25711v1-swap-test-time-steerable-humanoid-whole-body-collision-avoidance",
+      "title": "SWAP: Test-Time Steerable Humanoid Whole-Body Collision Avoidance",
+      "section": "quick",
+      "tags": [
+        {
+          "kind": "query",
+          "label": "humanoid"
+        }
+      ],
+      "score": 7.0,
+      "evidence": "基于感知的人形全身避障与平衡控制",
+      "first_seen_at": "2026-10-20 06:33:22 UTC",
+      "updated_at": "2026-10-20 06:33:22 UTC"
+    },
+    {
+      "paper_id": "2610.17232v1",
+      "route": "202610/20/2610.17232v1-lidar-based-humanoid-navigation-in-dynamic-non-convex-environments-via-spatio-temporal-safe-corridors",
+      "title": "LiDAR-based Humanoid Navigation in Dynamic, Non-Convex Environments via Spatio-Temporal Safe Corridors",
+      "section": "quick",
+      "tags": [
+        {
+          "kind": "query",
+          "label": "humanoid"
+        }
+      ],
+      "score": 6.0,
+      "evidence": "激光雷达感知与落脚规划及全身控制耦合的人形导航",
+      "first_seen_at": "2026-10-20 06:33:22 UTC",
+      "updated_at": "2026-10-20 06:33:22 UTC"
+    },
+    {
+      "paper_id": "2610.17930v1",
+      "route": "202610/20/2610.17930v1-locomotion-with-online-awareness-of-dynamics-for-precision-footholds",
+      "title": "Locomotion with Online Awareness of Dynamics for Precision Footholds",
+      "section": "quick",
+      "tags": [
+        {
+          "kind": "query",
+          "label": "humanoid"
+        }
+      ],
+      "score": 6.0,
+      "evidence": "基于深度感知的足式运动策略与真机迁移",
+      "first_seen_at": "2026-10-20 06:33:22 UTC",
+      "updated_at": "2026-10-20 06:33:22 UTC"
+    },
+    {
+      "paper_id": "2610.18872v1",
+      "route": "202610/20/2610.18872v1-egoexplorer-a-vision-motion-touch-observatory-for-human-loco-manipulation-in-situ",
+      "title": "EgoExplorer: A Vision-Motion-Touch Observatory for Human Loco-Manipulation In Situ",
+      "section": "quick",
+      "tags": [
+        {
+          "kind": "query",
+          "label": "humanoid"
+        }
+      ],
+      "score": 6.0,
+      "evidence": "面向人体移动操作学习的自我中心视觉-运动-触觉数据集",
+      "first_seen_at": "2026-10-20 06:33:22 UTC",
+      "updated_at": "2026-10-20 06:33:22 UTC"
+    },
+    {
+      "paper_id": "2610.18950v1",
+      "route": "202610/20/2610.18950v1-0-scaling-open-world-egocentric-human-data-for-humanoid-loco-manipulation",
+      "title": "$λ_0$: Scaling Open-World Egocentric Human Data for Humanoid Loco-Manipulation",
+      "section": "quick",
+      "tags": [
+        {
+          "kind": "query",
+          "label": "humanoid"
+        }
+      ],
+      "score": 6.0,
+      "evidence": "人到人形机器人的第一人称运动数据迁移用于移动操作学习",
+      "first_seen_at": "2026-10-20 06:33:22 UTC",
+      "updated_at": "2026-10-20 06:33:22 UTC"
+    },
+    {
+      "paper_id": "2610.19183v1",
+      "route": "202610/20/2610.19183v1-a-mode-unified-continuous-and-biomimetic-control-strategy-of-a-robotic-lower-limb-prosthesis",
+      "title": "A Mode-Unified, Continuous, and Biomimetic Control Strategy of a Robotic Lower Limb Prosthesis",
+      "section": "quick",
+      "tags": [
+        {
+          "kind": "query",
+          "label": "hip-exo"
+        }
+      ],
+      "score": 6.0,
+      "evidence": "依赖步态相位与地形坡度的连续阻抗控制",
+      "first_seen_at": "2026-10-20 06:33:22 UTC",
+      "updated_at": "2026-10-20 06:33:22 UTC"
+    },
+    {
+      "paper_id": "2610.20255v1",
+      "route": "202610/20/2610.20255v1-safe-reinforcement-learning-with-receding-horizon-safety-critic-and-differentiable-action-shields",
+      "title": "Safe Reinforcement Learning with Receding-Horizon Safety Critic and Differentiable Action Shields",
+      "section": "quick",
+      "tags": [
+        {
+          "kind": "query",
+          "label": "humanoid"
+        }
+      ],
+      "score": 6.0,
+      "evidence": "预测运动失效的滚动时域安全评论家",
+      "first_seen_at": "2026-10-20 06:33:22 UTC",
+      "updated_at": "2026-10-20 06:33:22 UTC"
+    },
+    {
+      "paper_id": "2610.21534v1",
+      "route": "202610/20/2610.21534v1-attribution-gated-joint-estimation-of-intention-and-capability-for-assist-as-needed-upper-limb-robots",
+      "title": "Attribution-Gated Joint Estimation of Intention and Capability for Assist-as-Needed Upper-Limb Robots",
+      "section": "quick",
+      "tags": [
+        {
+          "kind": "query",
+          "label": "hip-exo"
+        }
+      ],
+      "score": 6.0,
+      "evidence": "移动时域估计与模型预测控制在线估计意图与力矩能力以自适应助力",
+      "first_seen_at": "2026-10-20 06:33:22 UTC",
+      "updated_at": "2026-10-20 06:33:22 UTC"
+    }
+  ]
+}

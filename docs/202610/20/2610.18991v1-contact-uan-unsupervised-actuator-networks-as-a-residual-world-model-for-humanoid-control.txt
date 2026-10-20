@@ -1,0 +1,1980 @@
+Contact-UAN: Unsupervised Actuator Networks as a
+Residual World Model for Humanoid Control
+Nolan Fey∗, Khai Nguyen∗, Yash Prabhu, Gabriel B. Margolis, Pulkit Agrawal
+Improbable AI Lab, MIT, ∗Co-first authors.
+{nolanfey,khain,yprabhu,gmargo,pulkitag}@mit.edu
+http://contact-uan.csail.mit.edu/
+ 
+A Efficient 3 m/s running
+ 
+C Extreme compliance
+ 
+B Precise force control
+ 
+D Accurate impedance control
+ 
+E Dynamic jumping and soft landing
+Figure 1: Sim-to-real transfer of efficient, precise, and dynamic humanoid behaviors. Contact-
+UAN enables residual world model learning from hardware trajectories with contact by inferring
+contact-consistent simulator reset states from onboard proprioception. The resulting residual world
+model constrains policy learning to actuator-feasible behaviors.
+Abstract: Humanoid policies trained in simulation can transfer qualitatively to
+hardware while failing to transfer the force interactions learned during training,
+compromising torque efficiency, load regulation, and robustness to impacts. This
+failure can arise from actuator sim-to-real gaps because forces depend on actua-
+tor torques. We introduce Contact-UAN, a residual world model that preserves a
+simulator’s physics priors while correcting actuator dynamics to align simulated
+rollouts with recorded hardware rollouts. For humanoid motion with contact, this
+requires contact-consistent replay: if hardware playback in simulation begins with
+misaligned contact wrenches, the residual model learns to correct reset artifacts
+rather than actuator discrepancies. Using only onboard proprioception, Contact-
+UAN infers the simulator-side stance-foot pose needed to initialize replay with
+consistent contact forces. We show that a UAN trained on 6.5 minutes of real-
+world walking data generalizes to tasks that benefit from accurate force and im-
+pulse regulation and produces policies that transfer seamlessly to the real world,
+yielding 20% lower running torque, 43% lower force-tracking error, extreme com-
+pliance, accurate impedance control, and dynamic, robust jumps.
+Keywords: Sim-to-Real Transfer, Humanoids, Residual World Models
+10th Conference on Robot Learning (CoRL 2026), Austin TX, USA.
+arXiv:2610.18991v1  [cs.RO]  13 Oct 2026
+
+
+1
+Introduction
+Humanoid robots can perform diverse tasks by virtue of their general-purpose morphology, and
+recent advances in learning-based control within physics simulators have enabled increasingly com-
+plex behaviors [1–4]. For sim-to-real humanoid control, qualitative motion transfer is only a coarse
+measure of success; the robot must also generate force profiles with the magnitude and timing
+needed to move efficiently, regulate loads, and absorb impacts. Policy optimization can exploit
+imperfect actuator dynamics, producing policies that may transfer qualitative motions but not force
+interactions, leading to excessive torques, poor commanded-force tracking, or failures during high-
+impulse phases (Section 4.2). Because these forces are mediated by joint torques, we study how
+improving the actuator model used during policy training reduces force-level sim-to-real gaps.
+The actuator model fidelity required for sim-to-real transfer is task-dependent: simple models may
+suffice for quasi-static behaviors, while behaviors such as efficient running, force tracking, jumping,
+and landing depend on accurate actuator response, force generation, and impact absorption. Analytic
+simulators [5, 6] provide useful physical structure, yet they often approximate actuator effects such
+as torque saturation and load-dependent nonlinear friction, precisely the effects that shape ground-
+force generation, external-force regulation, and impact absorption [7, 8]. Domain randomization
+improves robustness by training over parameter ranges, but it can produce conservative policies that
+under-utilize hardware [9–12]. Online adaptation and SysID can recover performance by estimating
+dynamics parameters, but require choosing which simulator parameters to randomize and identify [1,
+2, 13–17]. Fully learned world models (WMs) take another approach: fit dynamics directly from
+data and can, in principle, capture effects omitted by analytical simulators [18–21], but must model
+the full robot-environment dynamics needed for policy optimization. We therefore follow prior
+work in residual modeling and actuator learning [7, 22–27]: retain the physical priors of an existing
+simulator and learn only the sim-to-real gap in the actuator command channel.
+Learning such an actuator-channel residual to improve downstream transfer requires a training sig-
+nal. Supervised actuator networks use measured motor torques as this signal [7], but reliable output
+torque sensing is unavailable on many humanoid platforms. Without such labels, residual methods
+can use trajectory replay-based training instead: reset the simulator to a recorded hardware state,
+apply the recorded commands, and train residual commands so the simulated rollout matches the
+recorded hardware trajectory [8, 28]. Critically, this objective isolates modeling error only if re-
+play begins from a hardware-equivalent simulator state. Otherwise, the residual model may learn to
+correct simulation reset artifacts rather than underlying actuator discrepancies.
+Matching a given hardware state in simulation is a kinematics problem for suspended, free-space
+motions [8, 15].
+However, such motion lacks the contact information needed to capture load-
+dependent actuator behavior during stance, force generation, impact, and landing. He et al. [28]
+collect data with contacts and use a motion capture system to provide ground-truth body poses.
+However, consider a humanoid robot standing still: on hardware, ground-reaction forces balance its
+weight, but initializing a soft-contact simulator with the feet exactly at the ground surface may not
+produce equivalent forces. Instead, matching the hardware force interaction requires introducing
+slight ground penetration via adjustments to the simulated foot height and orientation, not a precise
+height measurement. This is necessary because millimeter-scale foot-height and degree-scale orien-
+tation errors can substantially change simulated contact wrenches (Fig. 3). These observations point
+to a critical need to address contact-consistent state initialization for replay-based residual learning.
+We introduce Contact-UAN, a residual world-modeling approach to training humanoid policies for
+force- and impulse-sensitive behaviors. The core contribution is contact-consistent state initializa-
+tion from proprioception, which enables replay-based residual learning from hardware trajectories
+with contacts. From proprioception alone, Contact-UAN infers the simulator-side stance-foot pose,
+including the small ground penetration and tilt needed to initialize replay with contact wrenches
+consistent with the hardware trajectory, together with the base velocity needed to complete the reset
+state. With replay initialized in this contact-consistent state, the UAN residual can learn to correct
+true actuator modeling errors in simulation.
+2
+
+
+Contact Status 
+Estimator
+Foot 
+Orientation 
+Estimators
+Foot Height 
+Estimators
+ˆpL,t, ˆpR,t
+ˆhL,t, ˆhR,t
+ˆgL,t, ˆgR,t
+Foot Height Fusion
+Root height at t
+Foot Orientation Fusion
+Root orientation at t
+pL = 0
+pR = 1
+zt
+Base Velocity 
+Estimator
+Lrut1NYW9/Y3Cpul3Z29/YPyodHTyZONeNFstYtwNquBSKN1Gg5O1EcxoFkreC0d3Mb425NiJWjzhJuB/RgRKhYBSt1Br3suACp71yxa26c5BV4uWkAjkavfJXtx+zNOIKmaTGdDw3QT+jGgWTfFrqpoYnlI3ogHcsVTixs/m507JmVX6JIy1LYVkrv6eyGhkzCQKbGdEcWiWvZn4n9dJMbzxM6GSFLli0VhKgnGZPY76QvNGcqJZRpYW8lbEg1ZWgTKtkQvOWXV8nTZdWrVWsPV5X6bR5HEU7gFM7Bg2uowz
+0oAkMRvAMr/DmJM6L8+58LFoLTj5zDH/gfP4AW+WPmg=</latexit>vb,t
+gt
+vb,t
+KOXxiB4kDAjEj0GvXiMYhZIhtDT6Uma9PQM3TVCGPIRXjwo4tXv8ebf2FmEuD0oeLxXRVW9IJHCoOt+OLml5ZXVtfx6YWNza3unuLvXMHGqGa+zWMa6FVDpVC8jgIlbyWa0yiQvBkMryZ+85rI2J1h
+6OE+xHtKxEKRtFKzUE3uz3BcbdY8sruFMT9Rb6sEsxR6xbfO72YpRFXyCQ1pu25CfoZ1SiY5ONCJzU8oWxI+7xtqaIRN342PXdMjqzSI2GsbSkU3VxIqORMaMosJ0RxYH56U3Ev7x2iuGFnwmVpMgVmy
+0KU0kwJpPfSU9ozlCOLKFMC3srYQOqKUObUGExhP9J47TsVcqVm7NS9XIeRx4O4BCOwYNzqMI1KAODIbwAE/w7CTOo/PivM5ac858Zh+wXn7BC9pj30=</latexit>hR,t
+gR,t
+Recorded proprioception at t →2, t →1, t
+Toe 
+penetration!
+Figure 2:
+Our proprioceptive state estimation framework.
+Simulation supervision maps load-dependent proprioceptive cues
+to the simulator-side stance-foot pose consistent with them under
+the soft-contact model. Equations (4)–(6) fuse confident contacts
+into the root pose used for hardware replay in simulation.
+-2
+-1
+0
+1
+2
+-2
+-1
+0
+1
+2
+−60
+−50
+−40
+−30
+−20
+−10
+0
+10
+20
+Change from zero-offset reset (%)
++ height
+0
+- height
++pitch
+0
+-pitch
+Root height offset
+(mm)
+Root pitch offset
+(deg)
+Normal force
+Support moment
+Figure 3: Contact-wrench sen-
+sitivity. A mm-scale height er-
+ror substantially changes force,
+and a degree-scale pitch error
+substantially changes moment.
+We evaluate Contact-UAN on a Unitree G1 using the state-of-the-art BeyondMimic G1 parameters
+as the nominal simulator [2, 29], and compare policies trained with and without UAN (Section 4).
+We choose downstream tasks that expose distinct actuator-sensitive force and impulse regimes: run-
+ning requires torque-efficient ground-force generation, force and impedance control require accurate
+external-force regulation, and jumping requires takeoff impulse and landing absorption. A single
+UAN trained from 6.5 minutes of real-world walking data improves transfer across these behaviors.
+Training in this corrected simulator yields a running policy that preserves velocity tracking while re-
+ducing hardware torque usage by 20% relative to the no-UAN baseline, showing that the UAN gives
+policy learning a more accurate torque signal. The same residual reduces force-tracking error by
+43% and improves jumping: both reference-tracking policies transfer, while task-reward fine-tuning
+for higher jumps transfers with UAN but fails without it (Section 4.2). Sim-to-sim experiments
+reveal the importance of contact-consistent initialization and show that Contact-UAN remains effec-
+tive under larger actuator gaps (Sections 4.1 and 4.3).
+2
+Method
+Contact-UAN has three stages (Fig. 4): relabel hardware data for contact-consistent replay initial-
+ization (Section 2.1); train the UAN residual (Section 2.2); and train downstream policies in the
+augmented simulator (Section 2.3). Only the task policy runs on hardware.
+2.1
+Contact-Consistent Replay Initialization
+Accurate replay requires each window to begin with simulated contacts that reproduce hardware
+contact wrenches. Onboard sensing provides neither the contact wrench nor absolute base height,
+and reconstructing global pose is inadequate because soft-contact wrenches depend on simulator-
+specific, millimeter-scale foot penetration and tilt (Fig. 3). We therefore infer the simulator-side
+contact-consistent reset state from proprioception.
+Contact affects joint motion and IMU response, making contact wrenches inferable from a short
+proprioceptive history [4, 30]. The state estimators are trained in simulation and assume flat terrain,
+enabling use of a root-xy and -yaw invariant frame. They predict contact probabilities, stance-foot
+pose, and base linear velocity from a K-step history of IMU measurements, joint states, and previous
+joint targets.
+Although proprioception could be used to estimate contact force directly, a force estimate alone
+does not specify the simulator state used at reset. We therefore regress simulator-side stance-foot
+pose, learning in one step the map from load-dependent proprioception to the penetrating height
+and orientation that reproduce the contact wrenches. Initialization from this pose avoids separately
+3
+
+
+❄State 
+Estimation
+Base 
+velocity
+Recorded proprioception
+Contact 
+frame
+Proprioceptive Replay
+a) UAN Training
+Simulator
++
+Reinforcement Learning
+🔥UAN
+rt = →ωq
+!!qsim
+t
+→qhw
+t
+!!2
+2
+→ω ˙q
+!! ˙qsim
+t
+→˙qhw
+t
+!!2
+2
+→ω! ↑εqt →εqt→1↑2
+2
+ωqt
+qcmd
+t
+Rollout
+Weight 
+update
+oµ
+t
+qhw
+t
+b) Policy Training
+Simulator
++
+Reinforcement Learning
+❄UAN
+qbase
+t
+ωqt
+qcmd
+t
+Rollout
+Weight 
+update
+TIPJaZWSEs+QovHhTx6ud482+cJHvQxIKGoqb7q4o4cxY3/2VlbX1jc2C1vF7Z3dvf3SwWHTqFQT2iCK92OsKGcSdqwzHLaTjTFIuK0FY1upn7riWrDlLy34SGAg8kixnB1kPqmcfs65IJ71S2a/4M6BlEuSkDnqvdJXt69IKqi0hGNjOoGf2D2jLC6aTYTQ1NMBnhAe04
+KrGgJsxmB0/QqVP6KFbalbRopv6eyLAwZiwi1ymwHZpFbyr+53VSG1+FGZNJaqk80VxypFVaPo96jNieVjRzDRzN2KyBrTKzLqOhCBZfXibN80pQrVTvLsq16zyOAhzDCZxBAJdQg1uoQwMICHiGV3jztPfivXsf89YVL585gj/wPn8AOvKQtQ=</latexit>
+oµ
+t
+🔥Policy
+oω
+t
+c) Deployment
+Robot
+qbase
+t
+❄Policy
+oω
+t
+Figure 4: Contact-UAN. a) Train a UAN to add joint-position target corrections to reduce simulation
+transition error relative to recorded hardware data, with base velocities and contact poses labeled via
+proprioceptive state estimators. b) Train a task policy in the UAN-augmented simulator with no
+robot-specific domain randomization. c) Deploy only the learned policy on hardware.
+inverting the simulator’s contact model. It is critical that absolute base height is omitted from the
+observations: otherwise, the estimator can minimize its simulation loss by copying height rather
+than using load-dependent cues. This shortcut need not transfer because hardware height may differ
+from the simulator height that reproduces the same contact force.
+We first estimate contact status and train the pose regressors only on stance samples. Swing poses
+largely map to zero contact wrench, so their variation dominates the objective without informing
+the contact model. In stance, however, small pose differences strongly affect the wrench: in our
+MuJoCo model (Table 4) [6], a +2 mm root-height offset reduces normal force by roughly 50%,
+while a −2◦pitch offset changes the support moment by roughly 45% (Fig. 3). Stance conditioning
+therefore focuses the regression on the contact-sensitive variation needed at reset (Figs. 5 and 15).
+Each confident stance-foot estimate yields a candidate root height and orientation through forward
+kinematics. We fuse candidates using contact-probability weights and discard windows with no con-
+fident contact; full equations are in Appendix A.4. Because the estimators are trained in simulation,
+their key transfer assumption is that load-dependent proprioceptive cues remain informative across
+domains. Figure 5A probes this assumption in controlled sim-to-sim: the stance estimator, trained
+in the base simulator, achieves low contact-height error in the hard target simulator despite actuator
+parameter perturbations unseen during training. Figure 5B and Appendix Figure 14 provide comple-
+mentary end-to-end evidence through improved hardware replay. The estimators are used only for
+offline relabeling and are absent from downstream policy training and deployment. Together with
+estimated base velocity, the fused root pose initializes contact-consistent UAN replay, enabling the
+UAN to learn to correct actuator discrepancies rather than simulator reset artifacts.
+2.2
+UAN as a Residual World Model
+Let st denote the robot state and let at denote the action. The real robot transition is f(st, at),
+while the baseline simulator transition is fsim(st, at). We learn a residual model µ that corrects the
+simulator input rather than the simulator state:
+min
+µ
+E(st,at)
+h
+∥f(st, at) −fsim(st, at + µ(oµ
+t ))∥2
+2
+i
+.
+(1)
+In implementation, µ outputs a residual correction δqt that is added to a base target qbase
+t
+:
+qcmd
+t
+= qbase
+t
++ δqt,
+δqt = µ(oµ
+t ).
+(2)
+During UAN training, qbase
+t
+≡qhw
+t
+is the recorded replay target, and during downstream policy
+training, qbase
+t
+is the policy output. The UAN therefore preserves the simulator’s rigid-body dy-
+namics, actuator implementation, contact solver, and numerical integration; it only modulates the
+command that those existing simulation components integrate forward.
+UAN observations and architecture. The UAN observes joint-local tracking signals over a short
+history. For each joint, the observation history contains the target-position error and joint velocity,
+oµ
+t =
+
+(qbase −q)t−Hµ+1:t, ˙qt−Hµ+1:t
+
+.
+(3)
+4
+
+
+Direct
+Stance
+0
+20
+40
+(A)
+↓better
+Contact height RMSE (mm)
+Direct
+Stance
+Contact-
+UAN
+0
+1
+2
+3
+(B)
+↓better
+q MSE (10−3 rad2)
+Without
+residual
+With
+residual
+0
+0.04
+0.08
+(C)
+q RMSE (rad)
+Ground truth
+Estimated
+Figure 5: Contact estimation and replay accuracy. (A) Contact-height RMSE for estimators
+trained on both stance and swing (Direct) or stance only (Stance), evaluated in the hard target
+simulator. (B) 24-step hardware joint-position MSE on WTW training data. (C) Sim-to-sim 24-step
+joint-position RMSE. The same UAN substantially reduces replay error under both estimated and
+ground-truth initialization, supporting actuator-model correction beyond compensation for state-
+estimation errors.
+This compact observation limits the residual model to local actuator-tracking information to avoid
+overfitting [7, 8]. In our experiments we set Hµ = 3 (60 ms).
+To improve data efficiency, we share network parameters across joints with identical actuator hard-
+ware [7, 8]. Each actuator type has its own two-layer MLP with hidden dimensions (128, 128) and
+ELU activations. This enforces a hardware-structured residual model while having enough capacity
+to model actuator-specific nonlinearities.
+Data collection. We first train a Walk-These-Ways (WTW)-style locomotion policy [31] in the
+nominal simulator without a UAN, using domain randomization to support initial hardware transfer.
+We then deploy this policy to collect the hardware trajectories used for UAN training, varying gait
+frequency and swing height to diversify stance durations, swing speeds, and impacts. We record
+onboard proprioception: base angular velocity, projected gravity, joint positions and velocities, and
+commanded joint targets; then relabel each hardware window with base velocity and pose following
+Section 2.1. Appendix C gives WTW policy-training details.
+UAN task design. The UAN is trained in a replay environment built from labeled hardware win-
+dows via PPO [32]. At reset, each simulated robot is initialized from a randomly sampled replay
+window. We use a plane terrain, 4096 parallel environments, a 24-step (480 ms) replay horizon, and
+PPO rollouts of the same length. The reward penalizes joint-position MSE, joint-velocity MSE, and
+residual-rate magnitude. This replay task encourages the UAN to learn corrections that make sim-
+ulated joint transitions match hardware while discouraging unnecessarily high-frequency residual
+commands to aid with exploration.
+2.3
+Policy Training and Deployment
+After UAN training, we freeze its weights and insert it into downstream task training as a deter-
+ministic residual correction. We remove all robot-specific DR, but still randomize the terrain mesh,
+ground friction, and external pushes to encourage robust, deployable behaviors. The task policy
+outputs joint-position targets, but the simulator receives the UAN-corrected target from (2). This ex-
+poses the downstream policy to actuation behavior closer to the hardware, so high-reward behaviors
+must remain feasible under the corrected actuator response. At deployment, only the learned task
+policy is run on the robot.
+3
+Experimental Setup
+We evaluate Contact-UAN on a 29-DoF Unitree G1 humanoid. The nominal simulator uses Be-
+yondMimic G1 parameters [2, 29], including PD gains and manufacturer-provided actuator inertias.
+5
+
+
+Hardware
+UAN
+No UAN
+0
+0.2
+0.4
+−25
+−15
+−5
+Time (s)
+Torque (N m)
+(A) Left knee
+0
+0.2
+0.4
+−40
+−25
+−10
+Time (s)
+Torque (N m)
+(B) Right knee
+No UAN
+UAN
+0
+0.10
+0.20
+69.2%
+reduction
+Torque-usage relative error
+(C) Aggregate mismatch
+Figure 6: Held-out running torque replay. (A, B) Representative left- and right-knee commanded-
+torque traces under identical relabeled initial states. (C) Aggregate commanded torque-usage rela-
+tive error decreases by 69.2% with UAN.
+No additional robot-specific SysID is performed before Contact-UAN training. The method requires
+useful rigid-body and contact dynamics, but not an accurately identified actuator model.
+For data collection, we deploy a WTW-style policy [31] on hardware for 6.5 minutes while varying
+the WTW commands. For downstream evaluation, we compare running, force-control, and jump-
+ing policies trained in the frozen UAN-augmented and nominal simulators. No-UAN policies use
+additional robot-specific randomization, following BeyondMimic [2]; UAN policies do not (Ap-
+pendix D). Running follows the mjlab G1 velocity-tracking task [29] (Appendix D.1); force control
+adapts legged force-control objectives [30] (Appendix D.2); and jumping uses reference tracking [2],
+followed by task-reward optimization for height (Appendix D.3). These tasks are chosen because
+their performance benefits from accurate actuation while the robot exchanges forces with the envi-
+ronment: running benefits from efficient ground-force generation, force control and impedance from
+precise external force regulation, and jumping from impulse generation and impact absorption.
+For controlled sim-to-sim evaluation, we construct easy, medium, and hard target simulators by
+scaling deterministic perturbations to damping, friction loss, action delay, encoder bias, and arma-
+ture; exact values are in Appendix E. Videos are provided on our project website.
+4
+Results
+4.1
+Residual World Model Accuracy
+Does our estimation pipeline accurately recover foot penetration? We evaluate the contact-pose
+estimator in the hard sim-to-sim setting, where ground-truth contact pose is available. Fig. 5A
+shows that directly regressing foot height over all gait phases yields large errors, because swing-foot
+variation dominates the supervised objective. In contrast, our contact-conditioned estimator, which
+first identifies contact status and then estimates pose only for confident contacts, reduces contact-
+height RMSE by an order of magnitude. This shows that the proposed estimation pipeline provides
+sufficiently accurate contact initialization for replay-based residual learning.
+Does Contact-UAN reduce the sim-to-real gap? Relabeling improves replay over direct initial-
+ization, and adding the UAN further reduces 24-step joint-position MSE on WTW hardware data
+(Fig. 5B), with representative knee trajectories following held-out hardware running data (Appendix
+Figure 14). On held-out running data, we replay identical recorded commands from the same rela-
+beled initial states in the nominal and UAN-augmented simulators. For commanded torques, define
+aggregate usage as U(τ) = P
+t,j |τt,j| and relative mismatch as |U(τ sim) −U(τ hw)|/U(τ hw).
+Contact-UAN reduces this all-joint aggregate mismatch by 69.2% (Fig. 6C). Figure 6A–B pro-
+vides representative knee-torque traces. Because both simulators use identical commands and initial
+states, the reduced torque mismatch reflects improved actuator modeling on motions with contacts.
+Appendix G.4 shows qualitative open-loop replay images.
+6
+
+
+Baseline velocity
+WTW-UAN-aug velocity
+Baseline force
+WTW-UAN-aug force
+1.0
+2.0
+2.5
+3.0
+0
+1
+2
+3
+safe damping
+(A)
+Command (m/s)
+Achieved speed (m/s)
+1.0
+2.0
+2.5
+0
+10
+20
+30
+(B)
+↑better
+Command (m/s)
+Torque reduction (%)
+0
+5
+10
+15
+20
+0
+5
+10
+15
+20
+(C)
+Commanded force (N)
+Measured force (N)
+Figure 7: Improved running and force control sim-to-real transfer. UAN running policy re-
+tains tracking ability (A) while improving efficiency (B). The baseline marker at 3.0 m s−1 de-
+notes protection-triggered safe damping. UAN force policy reduced average force tracking error by
+42.8 ± 12.1% (C).
+Are the gains explained by reset-estimation errors? In the hard sim-to-sim setting, we evalu-
+ate the same trained UAN, without retraining, under estimated and ground-truth initialization, with
+the residual enabled or disabled. Even with ground-truth initialization, the residual reduces joint-
+position RMSE from 0.0720 to 0.0184 rad, supporting improved actuator modeling rather than com-
+pensation for initialization error (Fig. 5C).
+4.2
+Sim-to-Real Task Transfer
+Does Contact-UAN improve torque efficiency? We compare the baseline and UAN policy at
+commanded forward speeds of 1.0, 2.0, and 2.5 m s−1. For each policy and command, we run five
+hardware trials over a fixed 30 ft course. We compute achieved speed from the traversal time and
+log joint torques over the same interval to measure torque usage. The UAN policy preserves velocity
+tracking while reducing torque usage relative to the baseline policy (Fig. 7A,B). Since both policies
+achieve similar speeds, the torque reduction reflects improved efficiency rather than reduced task
+execution. The UAN policy also transfers to a 3.0 m s−1 command, achieving 3.13±0.06 m s−1 on
+hardware (Fig. 1A). In contrast, the baseline policy triggers motor-overheating protection and enters
+safe-damping mode after a few seconds of tracking this command.
+Does Contact-UAN improve force control precision? We evaluate end-effector force tracking
+using a dynamometer. For each policy and commanded force, we perform four hardware trials,
+increasing the commanded downward force in increments of 5 N. The robot is connected to the
+dynamometer through an exercise band, requiring whole-body coordination rather than solely arm
+motion to realize the commanded force (Fig. 1B). The UAN force policy reduces overall force-
+tracking error by 42.8 ± 12.1% relative to the baseline (Fig. 7C). The improvement is largest at
+higher commanded forces, where the robot must bend its legs and coordinate lower-body posture to
+generate the desired force, increasing sensitivity to actuator-modeling errors. At zero commanded
+force, the UAN policy is qualitatively compliant: the end-effector can be pulled in different direc-
+tions while the body flexibly yields rather than resisting (Fig. 1C). We also compose the force-control
+policy with a proprioceptive end-effector estimator and PD outer loop to perform impedance position
+control. The resulting controller tracks a circular trajectory using onboard sensing alone (Fig. 1D
+and Fig. 10), suggesting that Contact-UAN’s force-control gains transfer to higher-level compliant
+interaction behaviors; details are in Appendix D.2.
+Does Contact-UAN enable robust, dynamic motions? We train jumping policies in two stages:
+reference-motion tracking [2], then task-reward fine-tuning for increased jump height.
+Both
+reference-tracking policies transfer to hardware, but UAN tracks better and jumps higher. After
+task-reward fine-tuning, the no-UAN policy fails during landing on hardware, whereas the UAN
+policy transfers with greater jump height and stable landings, even under pushes (Fig. 1E). This be-
+havior is consistent with the no-UAN policy exploiting actuator-model inaccuracies. The same UAN
+uses only walking training data. Appendix D.3 and Fig. 9 provide the training stages and images of
+the hardware experiments.
+7
+
+
+Baseline
+WTW UAN
+WTW+Vel UAN
+Expert
+(A) Reset quality and transfer
+Direct Est.
+Base
+Cnt.
+Pose
+All
+0
+50
+100
+20 s survival (%)
+(B) Velocity tracking
+Easy
+Medium
+Hard
+0
+0.25
+0.5
+0.75
+↓better
+XY RMSE (m/s)
+(C) Torque usage
+Easy
+Medium
+Hard
+0
+1,000
+2,000
+3,000
+↓better
+Torque2 (N2m2)
+Figure 8: Sim-to-sim reset ablation and policy transfer. (A) Reported 20-s survival after retrain-
+ing UANs and policies with direct, estimated (Est.), component-oracle, or full-oracle (All) resets.
+Base, Cnt., and Pose replace base velocity, contact state, and stance pose, respectively, with ground
+truth. (B, C) Velocity tracking and squared torque across target gaps. WTW-trained UAN policies
+approach expert performance, with little additional benefit from task-specific running data.
+4.3
+Sim-to-Sim Evaluation
+Can Contact-UAN overcome larger sim-to-real gaps? To test whether the UAN is effective when
+the nominal simulator is substantially inaccurate, we evaluate transfer in sim-to-sim experiments
+with progressively larger deterministic actuator perturbations. The WTW UANs were trained on 5
+minutes of WTW data, while the WTW+Vel UAN was trained on 5 minutes of WTW data and 5
+minutes of running data. Across the easy, medium, and hard target simulators, the baseline policy
+degrades sharply as the gap increases, while policies trained with the UAN achieve expert-level
+tracking error and torque usage (Fig. 8B–C). Adding task-specific running data to the UAN training
+set provides little additional benefit over the WTW data alone, suggesting that this walking dataset is
+sufficient to learn a residual model that generalizes to running. These results indicate that the UAN
+can compensate for larger actuator-modeling errors than those observed on hardware.
+How does replay initialization affect transfer? We train separate UANs on hard target data using
+direct-estimator, contact-consistent, and oracle reset variants. For each UAN, we train a down-
+stream policy and evaluate transfer to the target simulator. Contact-consistent resets increase 20-s
+survival from 49.8% to 96.7% relative to direct-estimator resets, while component and full-oracle
+resets yield 96.6–98.4% (Fig. 8A). These results show that contact-consistent initialization sub-
+stantially improves downstream transfer, approaching the performance obtained with oracle resets.
+Appendix G.1 details the reset protocols and oracle components; Appendix G.2 reports additional
+retraining experiments with structured sensor corruption.
+How do alternative architectures compare? We also examine alternative choices for the learned
+dynamics model. A matched simulation comparison gives similar downstream performance for po-
+sition residuals, torque residuals, and supervised torque models. Position residuals avoid torque
+supervision and retain the deployed position-control interface; Appendix G.3 reports the complete
+comparison. Appendix F provides an additional data-efficiency comparison with our G1 implemen-
+tation of a fully learned offline world model [19, 33].
+5
+Limitations
+Our current Contact-UAN does not capture coupled actuator effects or motor-temperature-dependent
+effects [34]. Coupled actuator effects could be introduced by using a single model that observes
+the whole body or through cross-attention. Temperature effects are harder to identify from short
+datasets because motor temperature evolves slowly relative to the control loop. Capturing them may
+also require heat modeling or additional sensors.
+8
+
+
+6
+Related Work
+System Identification and Domain Randomization. System identification estimates inertial and
+dynamic parameters from robot data, traditionally via least-squares regression on rigid-body dy-
+namics [35, 36], with recent geometric, convex, differentiable, and exploration-based variants im-
+proving robustness and excitation [37–41]. Other approaches identify simulators as black boxes
+using trajectory-matching [15] or distribution-matching objectives [42]. These methods remain lim-
+ited by the structure of the chosen parametric model. Domain randomization instead trains over
+parameter distributions [9, 10, 43–46], but wide randomization can yield conservative or ineffi-
+cient policies [11, 12]. Online adaptation mitigates this by inferring latent dynamics at deploy-
+ment [13, 14, 47–49]. Recent humanoid systems have therefore moved toward less randomization
+and more accurate models [1, 2, 15]. Our work follows this direction by replacing actuator random-
+ization with a residual actuator correction learned from proprioceptive hardware data.
+Robotic World Models. Fully learned world models replace hand-designed simulators with dynam-
+ics models trained from robot data. Dyna-style approaches alternate data collection, model learning,
+and policy optimization through imagined rollouts [20, 21, 50], while RWM and RWM-U extend
+this paradigm to legged robots in online [19] and fully offline settings [33]. Such models reduce
+the structural bias of parametric simulators but require large datasets and mechanisms to prevent
+exploitation outside the data distribution [18]. We instead learn a residual world model: the simula-
+tor retains rigid-body dynamics, contact, and integration, while learning is restricted to the actuator
+channel. This physics prior mitigates reward hacking.
+Residual Models and Actuator Networks. Residual learning combines analytical physics with
+learned corrections across object, system, simulator, and calibration levels [22–27, 51]. At the ac-
+tuator level, supervised actuator networks predict output torques from tracking histories and have
+enabled effective sim-to-real transfer [7], but require torque sensing; current-based alternatives re-
+duce sensing requirements but cannot capture all gearbox effects [39]. UAN removes torque super-
+vision by learning residual actions that match joint transitions in simulation with recorded hardware
+data [8], but was previously demonstrated only on a manipulator arm mounted on a quadruped.
+Closely related humanoid methods such as ASAP and MOSAIC also learn residual corrections,
+but rely on motion capture or target interface-specific gaps rather than reusable actuator dynam-
+ics [28, 52]. We extend UAN to a floating-base 29-DoF humanoid by using proprioceptive state esti-
+mators for base velocity and contact pose, enabling contact-aligned residual model learning without
+external sensing.
+7
+Conclusion
+We present Contact-UAN, a residual world-modeling approach for humanoid control that preserves
+the structure of an analytical simulator while learning actuator-level corrections from offline proprio-
+ceptive data. To enable replay-based learning from humanoid motion with contacts, we estimate base
+velocity, contact status, and simulator-side contact pose from onboard observations, allowing hard-
+ware trajectories to be initialized in simulation with consistent contact forces. Our UAN-augmented
+simulator improves transfer of whole-body policies across diverse tasks using only 6.5 minutes of
+real-world walking data: 20% lower running torque usage, 43% lower force-tracking error, compli-
+ant interaction, accurate impedance control, and higher jumps with stable landings after task-reward
+optimization. Reset ablations support contact-consistent initialization, and the residual’s benefit
+persists under ground-truth initialization. Sim-to-sim experiments further show that Contact-UAN
+remains effective under larger controlled actuator gaps. These results suggest that residual world
+models provide a data-efficient alternative to fully learned dynamics models, retaining the gener-
+alization benefits of physics simulation while improving fidelity where the sim-to-real gap is most
+consequential.
+9
+
+
+Acknowledgments
+We thank the members of the Improbable AI lab, especially Venkateshkrishna Venganallore Par-
+suram, Michelle Wang, and Ryan Bahlous-Boldi for supporting hardware experiments. We also
+thank Patrick Wensing and members of the Harvard Biorobotics Lab for helpful discussions. The
+research was partly supported by the Ministry of Trade, Industry, and Energy (MOTIE), Korea, un-
+der the “Global Industrial Technology Cooperation Center program” supervised by the Korea Insti-
+tute for Advancement of Technology (KIAT) under Grant No. P0028435 and the National Science
+Foundation Graduate Research Fellowship under Grant No. 2141064. This work was also partly
+supported by the Sony Research Award.
+References
+[1] J. P. Sleiman, H. Li, A. Adu-Bredu, R. Deits, A. Kumar, K. Bergamin, M. Bhardwaj, S. Bid-
+dlestone, N. Burger, M. A. Estrada, et al. Zest: Zero-shot embodied skill transfer for athletic
+robot control. arXiv preprint arXiv:2602.00401, 2026.
+[2] Q. Liao, T. E. Truong, X. Huang, Y. Gao, G. Tevet, K. Sreenath, and C. K. Liu. Beyondmimic:
+From motion tracking to versatile humanoid control via guided diffusion.
+arXiv preprint
+arXiv:2508.08241, 2025.
+[3] Z. Wu, X. Huang, L. Yang, Y. Zhang, X. Chen, P. Abbeel, R. Duan, A. Kanazawa, C. Sferrazza,
+G. Shi, and C. K. Liu. Perceptive humanoid parkour: Chaining dynamic human skills via
+motion matching, 2026. URL https://arxiv.org/abs/2602.15827.
+[4] G. B. Margolis, M. Wang, N. Fey, and P. Agrawal. Softmimic: Learning compliant whole-body
+control from examples. arXiv preprint arXiv:2510.17792, 2025.
+[5] NVIDIA. Isaac Sim. URL https://github.com/isaac-sim/IsaacSim.
+[6] E. Todorov, T. Erez, and Y. Tassa. Mujoco: A physics engine for model-based control. In
+2012 IEEE/RSJ International Conference on Intelligent Robots and Systems, pages 5026–
+5033, 2012. doi:10.1109/IROS.2012.6386109.
+[7] J. Hwangbo, J. Lee, A. Dosovitskiy, D. Bellicoso, V. Tsounis, V. Koltun, and M. Hutter. Learn-
+ing agile and dynamic motor skills for legged robots. Science Robotics, 4(26), Jan. 2019.
+ISSN 2470-9476. doi:10.1126/scirobotics.aau5872. URL http://dx.doi.org/10.1126/
+scirobotics.aau5872.
+[8] N. Fey, G. B. Margolis, M. Peticco, and P. Agrawal. Bridging the sim-to-real gap for ath-
+letic loco-manipulation.
+In Robotics: Science and Systems (RSS), 2025.
+URL https:
+//openreview.net/forum?id=0HwPNCqQft.
+[9] J. Tobin, R. Fong, A. Ray, J. Schneider, W. Zaremba, and P. Abbeel. Domain randomization
+for transferring deep neural networks from simulation to the real world, 2017.
+[10] F. Muratore, F. Ramos, G. Turk, W. Yu, M. Gienger, and J. Peters.
+Robot learning from
+randomized simulations: A review. Frontiers in Robotics and AI, 9:799893, 2022.
+[11] Z. Xie, X. Da, M. Van de Panne, B. Babich, and A. Garg. Dynamics randomization revisited:
+A case study for quadrupedal locomotion. In 2021 IEEE International Conference on Robotics
+and Automation (ICRA), pages 4955–4961. IEEE, 2021.
+[12] L. Campanaro, S. Gangapurwala, W. Merkt, and I. Havoutis. Learning and deploying robust
+locomotion policies with minimal dynamics randomization. In 6th Annual Learning for Dy-
+namics & Control Conference, pages 578–590. PMLR, 2024.
+[13] A. Kumar, Z. Fu, D. Pathak, and J. Malik. Rma: Rapid motor adaptation for legged robots. In
+Robotics: Science and Systems (RSS), 2021.
+10
+
+
+[14] M. Liu, D. Pathak, and A. Agarwal. Locoformer: Generalist locomotion via long-context
+adaptation. In Conference on Robot Learning, pages 532–546. PMLR, 2025.
+[15] F. Bjelonic, F. Tischhauser, and M. Hutter. Towards bridging the gap: Systematic sim-to-real
+transfer for diverse legged robots. arXiv preprint arXiv:2509.06342, 2025.
+[16] G. B. Margolis, G. Yang, K. Paigwar, T. Chen, and P. Agrawal. Rapid locomotion via rein-
+forcement learning, 2022. URL https://arxiv.org/abs/2205.02824.
+[17] G. B. Margolis, X. Fu, Y. Ji, and P. Agrawal. Learning to see physical properties with active
+sensing motor policies, 2023. URL https://arxiv.org/abs/2311.01405.
+[18] B. Hou, G. Li, J. Jia, T. An, X. Guo, S. Leng, H. Geng, Y. Ze, T. Harada, P. Torr, et al. World
+model for robot learning: A comprehensive survey. arXiv preprint arXiv:2605.00080, 2026.
+[19] C. Li, A. Krause, and M. Hutter. Robotic world model: A neural network simulator for robust
+policy optimization in robotics. arXiv preprint arXiv:2501.10100, 2025.
+[20] N. Hansen, J. SV, V. Sobal, Y. LeCun, X. Wang, and H. Su. Hierarchical world models as visual
+whole-body humanoid controllers. In International Conference on Learning Representations,
+volume 2025, pages 62175–62195, 2025.
+[21] P. Wu, A. Escontrela, D. Hafner, P. Abbeel, and K. Goldberg. Daydreamer: World models for
+physical robot learning. In Conference on robot learning, pages 2226–2240. PMLR, 2023.
+[22] J. Gruenstein, T. Chen, N. Doshi, and P. Agrawal. Residual model learning for microrobot
+control. In 2021 IEEE International Conference on Robotics and Automation (ICRA), pages
+7219–7226. IEEE, 2021.
+[23] A. Zeng, S. Song, J. Lee, A. Rodriguez, and T. Funkhouser. Tossingbot: Learning to throw
+arbitrary objects with residual physics. IEEE Transactions on Robotics, 36(4):1307–1319,
+2020.
+[24] F. Golemo, A. A. Taiga, A. Courville, and P.-Y. Oudeyer. Sim-to-real transfer with neural-
+augmented robot simulation. In Conference on Robot Learning, pages 817–828. PMLR, 2018.
+[25] J. Gao, M. Y. Michelis, A. Spielberg, and R. K. Katzschmann. Sim-to-real of soft robots with
+learned residual physics. IEEE Robotics and Automation Letters, 9(10):8523–8530, 2024.
+[26] Y. Jiang, T. Zhang, D. Ho, Y. Bai, C. K. Liu, S. Levine, and J. Tan. Simgan: Hybrid simulator
+identification for domain adaptation via adversarial reinforcement learning. In 2021 IEEE
+International Conference on Robotics and Automation (ICRA), pages 2884–2890. IEEE, 2021.
+[27] Y. Yu and L. Liu. Neural fidelity calibration for informative sim-to-real adaptation. arXiv
+preprint arXiv:2504.08604, 2025.
+[28] T. He, J. Gao, W. Xiao, Y. Zhang, Z. Wang, J. Wang, Z. Luo, G. He, N. Sobanbab, C. Pan,
+et al. Asap: Aligning simulation and real-world physics for learning agile humanoid whole-
+body skills. In Robotics: Science and Systems (RSS), 2025.
+[29] K. Zakka, Q. Liao, B. Yi, L. L. Lay, K. Sreenath, and P. Abbeel. mjlab: A lightweight frame-
+work for gpu-accelerated robot learning. arXiv preprint arXiv:2601.22074, 2026.
+[30] T. Portela, G. B. Margolis, Y. Ji, and P. Agrawal. Learning force control for legged manip-
+ulation. In 2024 IEEE International Conference on Robotics and Automation (ICRA), pages
+15366–15372. IEEE, 2024.
+[31] G. B. Margolis and P. Agrawal. Walk these ways: Tuning robot control for generalization with
+multiplicity of behavior. In Conference on Robot Learning, pages 22–31. PMLR, 2023.
+11
+
+
+[32] J. Schulman, F. Wolski, P. Dhariwal, A. Radford, and O. Klimov. Proximal policy optimization
+algorithms, 2017.
+[33] C. Li, A. Krause, and M. Hutter. Uncertainty-aware robotic world model makes offline model-
+based reinforcement learning work on real robots. arXiv preprint arXiv:2504.16680, 2025.
+[34] D. M¨uller, E. Knoop, D. Mylonopoulos, A. Serifi, M. A. Hopkins, R. Grandia, and M. B¨acher.
+Olaf: Bringing an animated character to life in the physical world. IEEE Robotics and Au-
+tomation Letters, 2026.
+[35] P. K. Khosla and T. Kanade. Parameter identification of robot dynamics. In 1985 24th IEEE
+conference on decision and control, pages 1754–1760. IEEE, 1985.
+[36] C. G. Atkeson, C. H. An, and J. M. Hollerbach. Estimation of inertial parameters of manipula-
+tor loads and links. The International Journal of Robotics Research, 5(3):101–119, 1986. doi:
+10.1177/027836498600500306. URL https://doi.org/10.1177/027836498600500306.
+[37] T. Lee, P. M. Wensing, and F. C. Park. Geometric robot dynamic identification: A convex
+programming approach. IEEE Transactions on Robotics, 36(2):348–365, 2020. doi:10.1109/
+TRO.2019.2926491.
+[38] P. M. Wensing, G. Niemeyer, and J.-J. E. Slotine. A geometric characterization of observability
+in inertial parameter identification. The International Journal of Robotics Research, 43(14):
+2274–2302, 2024. doi:10.1177/02783649241258215. URL https://doi.org/10.1177/
+02783649241258215.
+[39] L. Schwendeman, A. SaLoutos, E. Stanger-Jones, and S. Kim. Improving domain transfer of
+robot dynamics models with geometric system identification and learned friction compensa-
+tion. In 2023 IEEE-RAS 22nd International Conference on Humanoid Robots (Humanoids),
+pages 1–8, 2023. doi:10.1109/Humanoids57100.2023.10375233.
+[40] Q. Le Lidec, I. Kalevatykh, I. Laptev, C. Schmid, and J. Carpentier. Differentiable simulation
+for physical system identification. IEEE Robotics and Automation Letters, 6(2):3413–3420,
+2021.
+[41] N. Sobanbabu, G. He, T. He, Y. Yang, and G. Shi. Sampling-based system identification with
+active exploration for legged sim2real learning. In 9th Annual Conference on Robot Learning,
+2025.
+[42] A. Miller, F. Yu, M. Brauckmann, and F. Farshidian. High-performance reinforcement learning
+on spot: Optimizing simulation parameters with distributional measures, 2025. URL https:
+//arxiv.org/abs/2504.17857.
+[43] J. Tan, T. Zhang, E. Coumans, A. Iscen, Y. Bai, D. Hafner, S. Bohez, and V. Vanhoucke. Sim-
+to-real: Learning agile locomotion for quadruped robots. In Robotics: Science and Systems
+(RSS), 2018.
+[44] J. Lee, J. Hwangbo, L. Wellhausen, V. Koltun, and M. Hutter. Learning quadrupedal locomo-
+tion over challenging terrain. Science Robotics, 5(47), Oct. 2020. ISSN 2470-9476. doi:10.
+1126/scirobotics.abc5986. URL http://dx.doi.org/10.1126/scirobotics.abc5986.
+[45] N. Rudin, D. Hoeller, P. Reist, and M. Hutter. Learning to walk in minutes using massively
+parallel deep reinforcement learning. In Proceedings of the Conference on Robot Learning
+(CoRL), 2021.
+[46] J. R. Cha, W. Cha, J. Shin, D. Kim, and J. Park. Sim-to-real of humanoid locomotion policies
+via joint torque space perturbation injection. arXiv preprint arXiv:2504.06585, 2025.
+12
+
+
+[47] G. Ji, J. Mun, H. Kim, and J. Hwangbo. Concurrent training of a control policy and a state
+estimator for dynamic and robust legged locomotion. IEEE Robotics and Automation Letters,
+7(2):4630–4637, 2022.
+[48] I. M. A. Nahrendra, B. Yu, and H. Myung.
+Dreamwaq: Learning robust quadrupedal lo-
+comotion with implicit terrain imagination via deep reinforcement learning. In 2023 IEEE
+International Conference on Robotics and Automation (ICRA), pages 5078–5084. IEEE, 2023.
+[49] J. Long, Z. Wang, Q. Li, J. Gao, L. Cao, and J. Pang. Hybrid internal model: Learning agile
+legged locomotion with simulated robot response, 2024. URL https://arxiv.org/abs/
+2312.11460.
+[50] R. S. Sutton. Dyna, an integrated architecture for learning, planning, and reacting. ACM Sigart
+Bulletin, 2(4):160–163, 1991.
+[51] N. Sontakke, H. Chae, S. Lee, T. Huang, D. W. Hong, and S. Hal. Residual physics learning and
+system identification for sim-to-real transfer of policies on buoyancy assisted legged robots. In
+2023 IEEE/RSJ International Conference on Intelligent Robots and Systems (IROS), pages
+392–399. IEEE, 2023.
+[52] Z. Sun, B.-S. Huang, Y. Peng, X. Li, J. Ma, Y. Sun, Z. Li, H. Jiang, B. Gao, Z. Bing, et al.
+Mosaic: Bridging the sim-to-real gap in generalist humanoid motion tracking and teleoperation
+with rapid residual adaptation. arXiv preprint arXiv:2602.08594, 2026.
+[53] C. Schwarke, M. Mittal, N. Rudin, D. Hoeller, and M. Hutter. Rsl-rl: A learning library for
+robotics research. arXiv preprint arXiv:2509.10771, 2025.
+[54] Y.-H. Shin, T.-G. Song, G. Ji, and H.-W. Park. Actuator-constrained reinforcement learning
+for high-speed quadrupedal locomotion, 2023.
+[55] Carnegie Mellon University. CMU graphics lab motion capture database. http://mocap.
+cs.cmu.edu.
+13
+
+
+Figure 9: Dynamic and robust jumping policies. (A) The UAN policy first tracks a jumping
+reference motion, (B) then is fine-tuned to maximize jump height; (C) it is also robust to external
+disturbances.
+A
+State Estimation
+A.1
+Data Collection
+We collect data with the WTW-style data collection policy in its training environment (Appendix C),
+but on flat terrain with contact model parameters identical to those used in UAN training (Table 4),
+for 20 simulation seconds with 4096 environments. The dataset is split 90%/10% into training and
+validation samples by holding out a random 10% of the environments.
+A.2
+Architectures
+Table 1 summarizes the estimator architectures and shared optimization settings. Foot-height and
+foot-projected-gravity estimators are trained separately for left-stance and right-stance samples.
+A.3
+Observation Noise
+The simulated observation-noise model used for estimator-data collection is listed in Table 2. The
+same noise model is used when training the data-collection policy and the downstream policies
+except the jumping task, which uses a smaller joint-velocity noise (Table 9).
+14
+
+
+Figure 10: Impedance position control. Combining a precise force control policy with a propri-
+oceptive state estimator, we develop an impedance controller for closed-loop end-effector position
+tracking. The controller tracks a circular trajectory reasonably well without any external sensing.
+Table 1: State-estimator architectures. All estimators use ELU activations, Adam, learning rate
+3 × 10−4, batch size 4096, history length 3, and 200 epochs.
+Setting
+Base velocity
+Contact status
+Foot height
+Foot proj. gravity
+Output dimension
+3
+2
+1 per foot
+3 per foot
+Hidden layers
+(256, 256, 256)
+(128, 128)
+(256, 256, 256)
+(256, 256, 256)
+Loss
+MSE
+BCE-logits
+MSE
+MSE
+Table 2: Observation noise used when collecting simulated data (uniform additive).
+Observation
+Noise range
+Base angular velocity
+±0.2 rad/s
+Projected gravity
+±0.05
+Joint position
+±0.01 rad
+Joint velocity
+±1.5 rad/s
+Previous target
+none
+A.4
+Contact-Weighted Root-Pose Fusion
+We initialize replay from a root pose whose simulated contacts reproduce the support wrench im-
+plied by the hardware trajectory. Since contact predictions are uncertain on hardware, we fuse pose
+estimates from all confident contacts rather than selecting a single stance foot.
+Let ˆpi,t ∈[0, 1] be the estimated contact probability for foot i ∈{L, R}, and let pth be the contact-
+confidence threshold. We define contact weights
+wi,t = ˆpi,t 1[ˆpi,t ≥pth],
+αi,t =
+wi,t
+P
+j wj,t + ε.
+(4)
+States with no confident contact are excluded from the UAN initial-state buffer, since the stance-foot
+pose estimates cannot define a contact-consistent root pose.
+Each confident contact provides an independent estimate of root height. Let ˆhi,t be the estimated
+height of foot i relative to the terrain, and let hfk
+i,t(z = 0) be the foot height from forward kinematics
+when the root height is set to zero. The root height implied by foot i is
+ˆz(i)
+t
+= ˆhi,t −hfk
+i,t(z = 0),
+ˆzt =
+X
+i αi,t ˆz(i)
+t .
+(5)
+We recover root orientation using the same contact-weighted fusion. The orientation estimator pre-
+dicts projected gravity in each stance-foot frame, ˆgFi
+i,t. Forward kinematics maps each prediction to
+a root-frame candidate,
+ˆg(i)
+t
+= normalize
+
+RR←Fi(qt) ˆgFi
+i,t
+
+,
+ˆgt = normalize
+X
+i αi,t ˆg(i)
+t
+
+.
+(6)
+15
+
+
+On flat terrain, this projected-gravity estimate determines the roll and pitch used for replay initializa-
+tion in the yaw-invariant local frame. Together with the fused root height ˆzt and the separately esti-
+mated base velocity, the resulting relabeled hardware state initializes replay with contact-consistent
+support forces.
+B
+UAN Training Details
+Table 3 lists the five G1 actuator groups over which the UAN shares its per-group actor MLPs
+(Sec. 2.2). Table 4 lists relevant contact model parameters used in our mjlab simulation [29].
+Table 3: Unitree G1 actuator groups used by the shared UAN architecture.
+Actuator group
+Joints
+7520 14
+Hip pitch, hip yaw, waist yaw
+7520 22
+Hip roll, knee
+5020 2x
+Waist roll, waist pitch, ankle pitch, ankle roll
+5020
+Shoulder pitch, shoulder roll, shoulder yaw, elbow, wrist roll
+4010
+Wrist pitch, wrist yaw
+Table 4: MuJoCo contact parameters used in the contact-pose sensitivity diagnostic.
+Element
+condim
+friction
+solref
+solimp
+Foot collision geoms
+3
+[0.6, 0.005, 0.0001]
+[0.02, 1]
+[0.9, 0.95, 0.001, 0.5, 2]
+Terrain/ground geom
+3
+[1, 0.005, 0.0001]
+[0.02, 1]
+[0.9, 0.95, 0.001, 0.5, 2]
+Each replay episode corresponds to one labeled hardware window: 3 recorded steps prime the UAN
+observation history, after which the simulator rolls the window’s 24 recorded joint-position targets
+forward with the UAN residual applied. Windows are sampled only where the relabeled initial state
+has at least one confident foot contact (contact probability ≥0.8), and the residual correction is
+clipped to ±1.0 rad. The UAN replay reward terms are listed in Table 6; PPO settings for the UAN,
+the data-collection policy, and all downstream task policies are consolidated in Table 5. We use the
+RSL-RL library [53].
+C
+Data Collection Policy Training Details
+The data-collection policy is a WTW-style velocity-tracking policy with behavior-shaping com-
+mands [31].
+In addition to the base velocity command (vcmd
+x
+∈(−1.0, 1.0) m/s, ωcmd
+z
+∈
+(−1.0, 1.0) rad/s, no lateral command), the policy receives a gait-frequency command in
+(1.0, 2.5) Hz and a swing-height command in (0.05, 0.1) m; all commands are resampled every
+5–10 s. Varying these commands is what produces the diverse stance durations, swing speeds, and
+impacts of the UAN training data (Sec. 2.2). In addition to standard velocity-tracking and regulariza-
+tion terms, training adds gait-shaping penalties: a gait-phase contact schedule (−0.5), a swing-height
+tracking term (−20.0), and a Raibert-heuristic foot-placement term (−5.0, stance width 0.237 m).
+The policy uses a 3-step observation history and is trained on procedurally generated bumpy terrain;
+PPO settings are in Table 5.
+To support initial hardware transfer before UAN training, we train the data-collection policy in the
+nominal simulator with domain randomization. At simulator startup, each environment samples a
+foot sliding-friction coefficient uniformly from [0.3, 1.2], shared across its foot collision geometries,
+independent joint target offsets uniformly within ±0.015 rad, and torso center-of-mass offsets uni-
+formly within ±2.5 cm horizontally and ±3 cm vertically. These parameters remain fixed for each
+environment throughout training. The policy is trained without a UAN.
+16
+
+
+Table 5: PPO hyperparameters for the UAN, the WTW data-collection policy, and the downstream
+task policies.
+Parameter
+UAN
+WTW
+Running
+Force-control
+Jumping
+Optimization
+Parallel environments
+4096
+4096
+4096
+4096
+16384
+Steps per environment
+24
+24
+24
+24
+24
+Learning epochs
+5
+5
+5
+5
+5
+Mini-batches
+4
+4
+4
+4
+4
+Learning rate
+10−3, adaptive (target KL 0.01) for all
+Max gradient norm
+1.0
+1.0
+1.0
+1.0
+1.0
+PPO objective
+Clip parameter
+0.2
+0.2
+0.2
+0.2
+0.2
+Entropy coefficient
+0
+0.002
+0.01
+0.002
+0.005
+Value-loss coefficient
+1.0
+1.0
+1.0
+1.0
+1.0
+Use clipped value loss
+yes
+yes
+yes
+yes
+yes
+Discount γ
+0.95
+0.99
+0.99
+0.99
+0.99
+GAE λ
+0.95
+0.95
+0.95
+0.95
+0.95
+Networks (ELU activations)
+Actor MLP
+per-group (128, 128)
+(512, 512, 256, 128)
+(512, 256, 128)
+(512, 512, 256, 128)
+(512, 256, 128)
+Critic MLP
+(512, 512, 512, 512)
+(512, 512, 512, 512)
+(512, 256, 128)
+(512, 512, 512, 512)
+(512, 256, 128)
+Initial action std.
+0.3
+1.0
+1.0
+1.0
+1.0
+Table 6: UAN replay reward weights.
+Term
+Math
+Weight
+joint position mse
+1
+nq
+P
+j(qsim
+t,j −qhw
+t,j )2
+−1000
+joint velocity mse
+1
+nq
+P
+j( ˙qsim
+t,j −˙qhw
+t,j )2
+−0.1
+residual rate l2
+1
+nq
+P
+j(δqt,j −δqt−1,j)2
+−0.01
+D
+Downstream Policy Training Details
+Common setup. All downstream tasks share the same simulation and training setup. Simulation
+runs at 200 Hz (MuJoCo, ∆t = 5 ms) with a control decimation of 4, so policies act at 50 Hz;
+episodes last 20 s. Actions are joint-position offsets around the default standing configuration, ap-
+plied to per-joint PD controllers. During training, the frozen UAN deterministically adds its residual
+correction to the commanded target before the simulator applies its actuator and contact models; at
+deployment, only the downstream task policy is exported. The observation-noise model is identical
+to that used during state-estimation data collection (Table 2), except that the jumping task uses a
+smaller joint-velocity noise of ±0.5 rad/s (Table 9).
+All tasks randomize foot–ground friction (uniform in [0.3, 1.2], shared across all foot geoms) and
+push the robot by perturbing its root velocity at random intervals of 1–3 s, with task-specific push
+ranges. For running and force control, policies trained without the UAN additionally randomize
+per-joint encoder bias (uniform in ±0.015 rad, applied to joint position observations) and the torso
+center of mass (additive offset, uniform in ±2.5 cm in x and y, ±3 cm in z). Jumping uses the
+ranges in Appendix D.3. In the UAN-augmented simulator, all such robot-specific randomization is
+removed (Sec. 2.3). PPO hyperparameters for all tasks are listed in Table 5.
+The running and jumping policies are trained with a torque-speed actuator envelope [54]. For joint
+j, denote stall torque by ¯τj and no-load speed by ¯˙qj, and write rj = ˙qj/¯˙qj. The nominal PD torque
+satisfies
+−¯τj[1 + max(min(rj, 0), −1)] ≤τj ≤¯τj[1 −max(min(rj, 1), 0)] .
+(7)
+These asymmetric bounds retain full braking torque while reducing torque in the direction of motion.
+Each control step, the commanded joint-position target is clipped to satisfy these bounds, before
+adding the UAN residual in simulation; deployment applies the same clipping.
+17
+
+
+Table 7: Running policy reward weights.
+Term
+Math
+Weight
+Task rewards
+track linear velocity
+exp(−(∥vcmd
+xy
+−vb
+xy∥2 + (vb
+z)2)/0.25)
+2.0
+track angular velocity
+exp(−(ωcmd
+z
+−ωb
+z)2/0.25)
+2.0
+Regularization
+upright
+exp(−∥gb
+torso,xy∥2/0.2)
+1.0
+pose
+exp
+
+−1
+nq
+P
+j
+(qj−q0
+j )2
+σj(∥vcmd∥)2
+
+1.0
+Penalties
+dof pos limits
+P
+j
+ [qmin
+j
+−qj]+ + [qj −qmax
+j
+]+
+
+−10.0
+foot clearance
+Icmd
+P
+i |hi −0.1| ∥vw
+i,xy∥
+−2.0
+self collisions
+P
+ℓ1
+
+maxk ∥F self
+k,ℓ∥> 10
+
+−1.0
+foot swing height
+Icmd
+P
+i Ifc
+i
+
+hpeak
+i
+/0.1 −1
+2
+−0.25
+foot slip
+Icmd
+P
+i Ic
+i ∥vw
+i,xy∥2
+−0.1
+action rate l2
+P
+j(at,j −at−1,j)2
+−0.1
+angular momentum
+∥h∥2
+−0.02
+soft landing
+Icmd
+P
+i Ifc
+i ∥Fi∥
+−10−5
+For the task-policy reward tables, Icmd denotes the command-active mask, Ic
+i denotes contact for
+foot i, Ifc
+i
+denotes first contact, q0 denotes the default pose, and σj(·) denotes the command-
+dependent posture tolerance.
+D.1
+Running Policy
+To train a running policy, we adapt the default mjlab G1 velocity tracking task [29] with several
+modifications. We remove the base linear velocity observation to encourage the policy to rely on
+proprioception rather than privileged state, and extend the observation history to 5 steps. We add
+rough-terrain randomization and the torque-speed clipping of Eq. (7) to improve robustness. To
+improve motion quality, we lower the standing-command threshold for slow walking, add a low-
+height termination at 0.5 m to prevent kneeling local optima, and increase the penalty weight on
+joint position limits to −10. Table 7 gives the reward terms.
+On the command side, we remove heading-tracking environments and instead dedicate 20% of
+environments to pure turning. Commands follow a curriculum over training iterations: vcmd
+x
+∈
+(−1.0, 1.0) m/s and ωcmd
+z
+∈(−0.5, 0.5) rad/s from iteration 0, widening to (−1.5, 2.0) m/s and
+(−0.7, 0.7) rad/s at 5,000 iterations and to (−2.0, 3.0) m/s at 10,000 iterations.
+D.2
+Force Control Policy
+The commanded force is realized by a virtual force field: an impedance spring–damper attached to
+the right wrist and anchored at the end-effector position of the default standing pose. Every 10 s, a
+target force is sampled per axis from ±30 N (zero force with probability 0.2) together with a band
+stiffness k ∈(25, 400) N/m and damping 0.1 k; horizontal force commands are clipped so that the
+implied per-axis displacement |F|/k stays within a 0.3 m reach. The virtual force is recomputed
+from the current end-effector position and velocity and applied at every physics substep (200 Hz),
+ramped up over 2–4 s, held for 2 s, and ramped back down, with 2 s of zero force at the start of
+each episode; the applied force is clamped to 50 N. The policy observes the commanded force and
+uses a 20-step observation history. The reward combines standing stabilization and force tracking
+(Table 8), inspired by [30].
+Impedance Control. As an additional experiment, we use the force-control policy for compliant
+end-effector position control. We train a proprioceptive end-effector state estimator with the setup
+18
+
+
+Table 8: Force-control policy reward weights.
+Term
+Math
+Weight
+Task rewards
+track force ee
+exp(−∥F cmd −F applied∥2/50)
+3.0
+track lin vel xy exp
+exp(−∥vb∥2/0.25)
+2.0
+track ang vel z exp
+exp(−∥ωb∥2/0.5)
+2.0
+Regularization
+upright
+exp(−∥gb
+torso,xy∥2/0.2)
+1.0
+pose
+exp
+
+−1
+nq
+P
+j
+(qj−q0
+j )2
+σ2
+j
+
+1.0
+Penalties
+dof pos limits
+P
+j
+ [qmin
+j
+−qj]+ + [qj −qmax
+j
+]+
+
+−1.0
+self collisions
+P
+ℓ1
+
+maxk ∥F self
+k,ℓ∥> 10
+
+−1.0
+action rate l2
+P
+j(at,j −at−1,j)2
+−0.1
+body ang vel
+∥ωw
+torso,xy∥2
+−0.05
+angular momentum
+∥h∥2
+−0.02
+of Sec. A: it maps a history of onboard observations (base angular velocity, projected gravity, joint
+positions and velocities, and previous joint targets) to the right end-effector position and velocity
+in the yaw-aligned base frame. At deployment, an outer impedance loop converts the end-effector
+position error into a force command, F cmd = Kp(ˆp −pdes) + Kd ˆv with Kp = 50 N/m and
+Kd = 0.2 Kp, which is fed to the frozen force-control policy as its commanded force. The sign
+follows the training convention: the policy realizes a commanded band force by displacing the end-
+effector against it, so commanding a force pointing away from pdes drives the end-effector toward
+it. This realizes compliant end-effector position control (e.g., tracking circular trajectories of radius
+up to 0.3 m) without any arm-specific controller.
+D.3
+Jumping Policy
+Overview. The jumping task requires the G1 to perform repeated standing vertical jumps: starting
+from rest, the robot must leave the ground with both feet, gain height, and land softly back into a
+stable stance. We first train a reference-conditioned policy to track a retargeted jumping motion. The
+task is built on a BeyondMimic-style motion tracking formulation [2]. We then fine-tune the policy
+with an additional reward for the predicted ballistic rise of the robot’s center of mass at takeoff.
+The motion-tracking rewards retain their original weights during fine-tuning, while reference-error
+termination conditions are replaced with general fall conditions, allowing the policy to increase jump
+height while preserving the reference motion’s structure. The reference motion is the jump from
+CMU MoCap clip 02 04 (“jump and balance”) [55], retargeted to the G1 and resampled at 50 Hz
+(200 frames, 4 s). The clip is padded with 1 s of standing at the beginning and end (300 frames, 6 s
+total), so the policy must initiate the jump from rest and hold a stable stance after landing.
+Episode structure and reference-state initialization. The initial reference frame is sampled using
+failure statistics accumulated over temporal bins, followed by uniform sampling within the selected
+bin. The corresponding reference state is perturbed with uniform noise on the root pose (±5 cm
+in xy, ±1 cm in z, ±0.1 rad roll/pitch, ±0.2 rad yaw), root velocity (±0.5 m/s linear xy, ±0.2 m/s
+vertical, ±0.52 rad/s roll/pitch, ±0.78 rad/s yaw), and joint positions (±0.1 rad).
+Observations and actions. The actor combines onboard proprioception with features of the current
+reference frame; it does not observe the robot’s global position or measured root linear velocity.
+Table 9 lists the observation terms; concatenated, they form a 161-dimensional policy input. The
+reference joint targets in the command term provide the policy with an implicit phase signal for the
+clip. The critic additionally observes privileged, noise-free state: the root linear velocity, the refer-
+ence anchor position and orientation expressed in the base frame, and the positions and orientations
+19
+
+
+Table 9: Actor observation space for the jumping task. Noise is additive, sampled uniformly from
+[−n, n] per component. The anchor body is the torso link.
+Term
+Dim.
+Noise n
+Reference joint positions and velocities (current frame)
+58
+–
+Reference height
+1
+–
+Reference projected gravity
+3
+–
+Reference root velocity
+6
+–
+Projected gravity (IMU)
+3
+0.05
+Base angular velocity (IMU)
+3
+0.2
+Joint positions (relative to default)
+29
+0.01
+Joint velocities
+29
+0.5
+Previous action
+29
+–
+Total
+161
+Table 10: Reward terms for jumping pretraining and fine-tuning. Motion-tracking and regularization
+weights remain unchanged during fine-tuning, which adds a ballistic center-of-mass rise bonus. The
+indicator 1to marks a confirmed two-foot takeoff, rewarded at most once per eligible reference-
+motion segment. Here [x]+ = max(x, 0), and qmin
+j
+and qmax
+j
+are the soft joint-position limits. All
+terms are multiplied by the policy timestep ∆tpolicy when computing the reward.
+Term
+Math
+Pretraining
+Fine-tuning
+Motion tracking
+motion global root pos
+exp
+ −∥ˆpa −pa∥2/0.32
+0.5
+0.5
+motion global root ori
+exp
+ −(ˆqa ⊖qa)2/0.42
+0.5
+0.5
+motion body pos
+exp
+ −
+1
+|B|
+P
+b ∥ˆpb −pb∥2/0.32
+1.0
+1.0
+motion body ori
+exp
+ −
+1
+|B|
+P
+b(ˆqb ⊖qb)2/0.42
+1.0
+1.0
+motion body lin vel
+exp
+ −
+1
+|B|
+P
+b ∥ˆvb −vb∥2/1.02
+1.0
+1.0
+motion body ang vel
+exp
+ −
+1
+|B|
+P
+b ∥ˆωb −ωb∥2/3.142
+1.0
+1.0
+Jump objective
+jump com ballistic rise
+1to
+[vtakeoff
+COM,z]2
++
+2g ∆tpolicy
+0
+5.0
+Regularization
+action rate l2
+∥at −at−1∥2
+−0.1
+−0.1
+joint limit
+P
+j
+ [qmin
+j
+−qj]+ + [qj −qmax
+j
+]+
+
+−10
+−10
+self collisions
+# substeps with self-contact force > 10 N
+−10
+−10
+of all 14 tracked bodies relative to the robot’s anchor frame. Actions follow the common setup with
+a per-joint action scale of 0.25 τ max
+j
+/kp,j, where τ max
+j
+and kp,j are the effort limit and proportional
+gain of joint j [2], and the torque–speed envelope of Eq. (7).
+Rewards. Table 10 lists all reward terms. Let ˆ(·) denote reference quantities, pa and qa the position
+and orientation of the anchor body (torso), B the set of 14 tracked bodies, and q1 ⊖q2 the geodesic
+angle between two orientations. Before computing body position and orientation errors, the ref-
+erence bodies are rigidly re-anchored to the robot’s current anchor xy-position and yaw heading,
+making these terms invariant to global horizontal drift. The jump bonus uses the whole-body center-
+of-mass vertical velocity at takeoff to estimate ballistic rise, hballistic = max(vtakeoff
+COM,z, 0)2/(2g). A
+single bonus is available per reference-motion segment, provided the segment begins with a refer-
+ence frame classified as non-airborne. The robot must establish two-foot ground contact for two
+consecutive policy steps, followed by two consecutive steps with both feet out of contact. The ve-
+locity is recorded at the first airborne step, and additional hops within the same segment receive no
+further bonus.
+20
+
+
+Table 11: Termination conditions for jumping pretraining and fine-tuning. Thresholds are fixed
+within each stage; a dash indicates an inactive condition. The set E contains the tracked feet and
+wrists, ga,z is the vertical component of projected gravity in the anchor frame, and αroot is the root
+tilt angle from upright.
+Condition
+Trigger
+Pretraining
+Fine-tuning
+Episode timeout
+tepisode ≥θ
+20 s
+20 s
+Anchor height error
+|ˆza −za| > θ
+0.25 m
+–
+Anchor gravity mismatch
+|ˆga,z −ga,z| > θ
+0.8
+–
+End-effector height error
+maxb∈E |ˆzb −zb| > θ
+0.25 m
+–
+Minimum root height
+zroot < θ
+–
+0.30 m
+Maximum root tilt
+αroot > θ
+–
+80◦
+Terminations. During pretraining, reference-error terminations encourage accurate motion track-
+ing. During fine-tuning, these conditions are replaced by minimum-root-height and maximum-root-
+tilt conditions, allowing increased jump height without terminating solely because the policy departs
+from the reference. Both stages use a 20-s episode timeout.
+Domain randomization. Jumping uses the foot–ground friction randomization and disturbance
+intervals described in the common setup. Additive root-velocity disturbances are applied throughout
+the motion, with uniform ranges of ±0.5 m/s horizontally, ±0.2 m/s vertically, ±0.52 rad/s in roll
+and pitch, and ±0.78 rad/s in yaw. For jumping, the baseline-specific randomization uses joint
+encoder biases within ±0.01 rad and torso center-of-mass offsets within ±2.5 cm along x and ±5 cm
+along y and z. These parameters are sampled uniformly at simulator startup and remain fixed for
+each environment throughout training.
+E
+Sim-to-Sim Experiment Details
+Target simulator construction. For sim-to-sim evaluation, we construct easy, medium, and hard
+target simulators by applying deterministic actuator perturbations to the nominal G1 model. The
+perturbations modify joint damping, frictionloss, action delay, encoder bias, and armature. The
+easy target is chosen to produce a measurable but recoverable tracking gap for the nominal baseline;
+medium and hard scale the same perturbation vector to test increasingly severe actuator mismatch.
+The values are listed in Table 12.
+Table 12: Sim-to-sim target perturbations. Each target simulator applies deterministic actuator
+perturbations to the nominal G1 model. The medium and hard targets scale the same perturbation
+vector used for easy.
+Perturbation
+easy
+medium
+hard
+Damping offset
++2.0
++4.0
++6.0
+Frictionloss offset
++0.5
++1.0
++1.5
+Action delay
+1 step
+2 steps
+3 steps
+Encoder bias
++0.003 rad
++0.006 rad
++0.009 rad
+Armature multiplier
+1.5×
+2.0×
+2.5×
+Sim-to-sim policy training. For each target simulator, we train downstream velocity-tracking poli-
+cies either in the nominal simulator or in the UAN-augmented simulator. The WTW UAN is trained
+from 5 minutes of WTW target data. The WTW+Vel UAN is trained from the same 5 minutes of
+WTW data plus 5 minutes of running data, allowing us to test whether task-specific running data
+improves over the walking-only residual model.
+21
+
+
+F
+World Model Details
+Overview and scope. We compare Contact-UAN with our best-effort G1 adaptation of the fully
+learned offline RWM-U [33] on a single hard target environment for omnidirectional base velocity
+tracking on flat ground. This is a controlled data-efficiency reference, not a definitive benchmark of
+the original method.
+Data-efficiency results. A policy trained in the nominal physics simulator collects data in the
+hard target environment for model learning. In Fig. 11, UAN trained with 5 minutes of target
+data reaches the expert policy’s normalized episode length (100%). Our fully learned world model
+uses approximately 33 hours of target data (about 400× as much): a policy initialized from scratch
+inside it reaches 6.8% normalized episode length on the target, and a policy fine-tuned from the
+data-collection policy reaches 38.2%, compared with 32.6% for the nominal-simulator baseline. All
+policies reach 100% in their training environments. These results support the value of the simulator’s
+physics priors in this controlled setting.
+Train Env
+Target Env
+Expert
+Base
+WM
+33 h
+WM FT
+33 h
+UAN
+5 min
+0
+25
+50
+75
+100
+↑better
+Normalized episode length (%)
+Figure 11: Controlled world-model data-efficiency reference. Mean normalized episode length
+with standard deviation in each method’s training environment and the hard target environment.
+UAN uses 5 minutes of target data; our best-effort G1 adaptation of RWM-U uses approximately
+33 hours. WM initializes the policy randomly, while WM FT fine-tunes the data-collection policy
+inside the same learned world model.
+Observation, action, reward. The policy receives the same 99-dimensional observation as the
+on-policy baseline: base linear and angular velocity read from the IMU site imu in pelvis (6),
+projected gravity (3), a 3-D commanded base velocity, joint position residuals q −qdefault (29), joint
+velocities (29), and the previous action (29).
+Data collection. We collect 6 million transitions (around 33 hours of data) on the hard target
+environment using a baseline policy. For data collection we record the IMU sensor readings rather
+than the body-state lin vel w/ang vel w pair, so the world model is trained on exactly the inputs
+the policy sees at evaluation time.
+Robotic world model. The world model is a GRU ensemble (5 members, hidden size 256, 2 stacked
+layers) with a 32-step history horizon, an 8-step forecast horizon, and a contact channel of dimen-
+sion 30 (Table 13). At policy-training time, a per-step epistemic-uncertainty signal formed from
+ensemble disagreement on next-state predictions is subtracted from the reward with MOPO penalty
+λ = 1.0 [33]. Imagined rollouts terminate when the learned termination head exceeds 0.9; lower
+thresholds collapsed training because the policy learned to exploit short, high-reward fragments
+inside the model.
+Policy training. Given a trained world model, we run PPO on imagined rollouts using the same
+rsl rl algorithm and hyperparameters as the baseline (Table 14). The outer loop runs for 5,000
+iterations, following [33]; training longer overfits the policy to the inaccurate WM and degrades
+target performance. UAN is trained using only 5 minutes of data.
+22
+
+
+Table 13: World-model architecture and training hyperparameters used for RWM-U on G1.
+Parameter
+Value
+Architecture
+Backbone
+GRU ensemble
+Ensemble size
+5
+RNN hidden size
+256
+RNN layers
+2
+Head MLP (state / ext. / contact / term.)
+[128]
+Dimensions
+History horizon H
+32
+Forecast horizon F
+8
+Observation dim
+99
+Action dim
+29
+Contact channel dim
+30
+Data
+Dataset size
+6M transitions ≈33 hours
+File shard size
+10,000 rows
+Optimization
+Batch size
+1024
+Epochs
+4
+Optimizer
+Adam
+Learning rate
+1×10−4 →1×10−6 (cosine)
+Weight decay
+1×10−5
+Gradient steps (approx.)
+1.8×104
+Paradigms compared. The offline world model is trained once on the 6 M-transition dataset col-
+lected by the baseline policy. Variant WM trains a randomly initialized actor inside this learned
+model. Variant WM FT reuses the same learned world model but fine-tunes the actor from the data-
+collection policy checkpoint and adds a behavior anchor β KL(π∥πbaseline) with β =1.0 to the PPO
+loss. Thus, “FT” refers to policy fine-tuning within the world model, not to fine-tuning the world
+model itself.
+Evaluation protocol. Every policy is evaluated on the hard target with 32 parallel environments,
+2,000 simulator steps (up to two 1,000-step episodes per environment), and a 20 s episode cap. We
+report mean and standard deviation of survival length (%), defined as episode length divided by the
+1,000-step cap, across all completed episodes. The evaluation environment and seed distribution are
+identical across Expert, Baseline, UAN, and all RWM-U variants. This normalized mean episode
+length is defined separately from the 20-s survival percentages reported for the reset and sensor-
+corruption experiments in Appendix G.
+G
+Additional Ablations and Robustness Experiments
+G.1
+Reset and Estimator Protocols
+Training under different reset conditions. The reset-training ablation uses the hard target and
+compares UANs and downstream policies trained with direct, estimated, component-oracle, or full-
+oracle resets. The component oracles replace estimated base velocity (Base), contact state (Cnt.), or
+stance-foot pose (Pose) with simulator ground truth; the full oracle (All) replaces all three. The pose
+being initialized is the simulator-side contact pose, including the stance penetration and orientation
+needed for contact-consistent replay. The reported 20-s survival rises from 49.8% with direct reset
+to 96.7% with estimated reset; component/full-oracle variants yield 96.6–98.4%. Linear and yaw
+tracking errors differ by less than approximately 10% between estimated and oracle variants. The
+separately trained direct, estimated, and full-oracle conditions have 24-step joint-position replay
+RMSEs of 0.0318, 0.0239, and 0.0120 rad, respectively.
+23
+
+
+Table 14: PPO hyperparameters used for MOPO-PPO policy training inside the RWM-U world
+model. The baseline PPO column is shown for reference; only the bold rows differ.
+Parameter
+Baseline PPO
+MOPO-PPO (RWM-U)
+Rollout collection
+Parallel envs
+4096
+4096
+Steps per environment
+24
+24
+Rollout source
+simulator
+learned WM
+Outer iterations
+20,000
+5,000
+Optimization
+Learning epochs
+5
+5
+Mini-batches
+4
+4
+Learning rate
+10−3
+10−3
+Schedule
+adaptive
+adaptive
+Max gradient norm
+1.0
+1.0
+PPO objective
+Clip parameter
+0.2
+0.2
+Entropy coefficient
+0.01
+0.008
+Value-loss coefficient
+1.0
+1.0
+Use clipped value loss
+yes
+yes
+Discount γ
+0.99
+0.99
+GAE λ
+0.95
+0.95
+Target KL
+0.01
+0.01
+Actor / critic MLP
+[256, 128, 128]
+[256, 128, 128]
+RWM-U specific
+Uncertainty penalty λ
+–
+1.0
+Termination threshold
+–
+0.9
+Sensitivity analysis. A separate experiment evaluates the same residual with estimated and ground-
+truth initialization, either enabled or disabled. With estimated initialization, enabling the residual
+reduces 24-step joint-position RMSE from 0.0750 to 0.0239 rad; with ground-truth initialization it
+reduces RMSE from 0.0720 to 0.0184 rad (Figure 5C). Figure 12 shows the corresponding joint-
+velocity errors. Even with ground-truth initialization, enabling the UAN reduces error. Because
+this improvement persists when initialization error is removed, it supports the interpretation that
+the UAN learns actuator-dynamics corrections rather than merely compensating for errors in the
+estimated initial state.
+Without
+residual
+With
+residual
+0
+0.5
+1.0
+˙q RMSE (rad/s)
+Ground truth
+Estimated
+Figure 12: Fixed-residual initialization sensitivity: joint velocity. 24-step joint-velocity replay
+RMSE in rad/s in the sim-to-sim experiment. The same residual is either disabled or enabled under
+ground-truth and estimated initialization. Joint-position results are shown in Figure 5C.
+G.2
+Retraining with Structured Sensor Corruption
+We retrain with data corrupted by fixed IMU pitch biases of 0.5◦, 1◦, and 2◦, or causal velocity low-
+pass filtering at 20, 10, and 5 Hz. The filtering includes its associated delay. Across these conditions,
+24
+
+
+reported 20-s survival remains 97.1–100% (Fig. 13), 24-step joint-position and joint-velocity replay
+RMSEs remain within 8% and 11% of clean, respectively, and command-tracking errors remain
+within approximately 15% of clean.
+Clean
+0.5
+1
+2
+20
+10
+5
+0
+50
+100
+IMU bias (◦)
+Velocity LPF (Hz)
+20-s survival (%)
+Figure 13: Sensor-corruption retraining experiment. Reported 20-s survival after training with
+clean data, fixed IMU pitch bias (degrees), or velocity low-pass filtering (Hz).
+G.3
+Matched Actuator-Model Comparison
+Table 15 compares a position residual, a torque residual, and a torque-supervised actuator model
+in a matched 200-Hz simulation experiment. Torque supervision is available in this simulation
+comparison; it does not imply reliable output-torque sensing on G1 hardware. The three models
+show similar downstream performance.
+Table 15: Matched actuator-model comparison. While the position residual UAN achieves the
+tightest fit to target data, all variations achieve similar downstream performance.
+Model
+Replay q
+Survival
+XY error
+Yaw error
+Power
+(rad)
+(%)
+(m/s)
+(rad/s)
+(W)
+Position residual
+0.00349
+97.34
+0.391
+0.185
+69.29
+Torque residual
+0.00571
+98.17
+0.387
+0.214
+69.25
+Supervised torque
+0.00565
+97.56
+0.394
+0.215
+71.90
+G.4
+Additional Replay Visualizations
+Figure 14 shows representative knee-position trajectories on held-out hardware running data. Fig-
+ure 15 shows the qualitative open-loop replay sequence. The horizontal knee-torque/aggregate-
+usage comparison is in Figure 6.
+25
+
+
+1.0
+1.5
+rad
+Left Knee
+0.0
+0.1
+0.2
+0.3
+0.4
+0.5
+Time (s)
+1.0
+1.5
+rad
+Right Knee
+Hardware
+UAN
+No UAN
+Figure 14: Hardware replay knee-position trajectories. Representative knee-position trajectories
+on held-out running data compare recorded hardware motion with nominal and UAN-augmented
+simulator replay of identical recorded commands from the same relabeled initial states.
+Figure 15: Open-loop rollouts. We initialize the simulator with the estimated state and roll out
+recorded hardware actions. The estimated simulator reset state is shown in blue. (A) uses a foot-
+height estimator trained on both stance and swing data; (B) uses our estimator trained only on stance
+data to align initial contacts; (C) uses our estimator and UAN to reduce the actuation gap.
+26

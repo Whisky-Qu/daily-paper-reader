@@ -51,14 +51,14 @@
       <span class="dpr-home-dashboard-kicker">2026-10-20</span>
       <h3 class="dpr-home-dashboard-title">今日汇总</h3>
     </div>
-    <strong class="dpr-home-dashboard-count">共 16 篇</strong>
+    <strong class="dpr-home-dashboard-count">共 22 篇</strong>
   </div>
   <dl class="dpr-home-dashboard-stats">
-    <div class="dpr-home-dashboard-stat"><dt>累计更新</dt><dd>2 次</dd></div>
-    <div class="dpr-home-dashboard-stat"><dt>精读</dt><dd>2</dd></div>
-    <div class="dpr-home-dashboard-stat"><dt>速读</dt><dd>14</dd></div>
+    <div class="dpr-home-dashboard-stat"><dt>累计更新</dt><dd>3 次</dd></div>
+    <div class="dpr-home-dashboard-stat"><dt>精读</dt><dd>3</dd></div>
+    <div class="dpr-home-dashboard-stat"><dt>速读</dt><dd>19</dd></div>
   </dl>
-  <p class="dpr-home-dashboard-body">最近更新：2026-10-20 06:40:34 UTC<br>状态：成功</p>
+  <p class="dpr-home-dashboard-body">最近更新：2026-10-20 22:50:25 UTC<br>状态：成功</p>
 </section>
 <section class="dpr-home-dashboard-card dpr-home-brief-card">
   <div class="dpr-home-dashboard-header">
@@ -69,7 +69,7 @@
     <strong class="dpr-home-dashboard-count">AI</strong>
   </div>
   <div class="dpr-home-dashboard-body">
-<p>今日筛选16篇人形机器人与可穿戴机器人论文，精读2篇、速读14篇。最值得关注的是Tread用视觉-惯性融合估计地形与步态阶段，以及P-BFM用无监督强化学习为人形控制构建感知行为基础模型，两篇均获9.0分。普通读者可优先看这两篇的摘要与实验视频，再按需跟进速读中的全身控制和遥操作方向。</p>
+<p>今日筛选22篇机器人论文，精读3篇，聚焦人形机器人与可穿戴机器人控制。最值得看的是Tread用视觉-惯性融合实现地形与步态相位/速度估计（9.0分），以及P-BFM用无监督强化学习构建人形感知行为基础模型（9.0分）。普通读者可先读这两篇精读，再浏览TRACE跨机型迁移和LiDAR动态导航等速读方向。</p>
   </div>
 </section>
 <section class="dpr-home-dashboard-card dpr-home-deep-card">
@@ -78,12 +78,12 @@
       <span class="dpr-home-dashboard-kicker">今日累计</span>
       <h3 class="dpr-home-dashboard-title">精读推荐</h3>
     </div>
-    <strong class="dpr-home-dashboard-count">2 篇</strong>
+    <strong class="dpr-home-dashboard-count">3 篇</strong>
   </div>
   <div class="dpr-home-dashboard-body">
-<ul class="dpr-home-dashboard-paper-list"><li><span class="dpr-home-dashboard-paper-title" title="Tread: A Visuo-Inertial Framework for Terrain and Locomotion Context-Aware Gait-Phase and Speed Estimation in Wearable Robotics">Tread: A Visuo-Inertial Framework for Terrain and Locomotion Context-Aware Gait-Phase and Speed Estimation in Wearable Robotics</span></li><li><span class="dpr-home-dashboard-paper-title" title="P-BFM: Perceptive Behavioral Foundation Models for Humanoid Control via Unsupervised Reinforcement Learning">P-BFM: Perceptive Behavioral Foundation Models for Humanoid Control via Unsupervised Reinforcement Learning</span></li></ul>
+<ul class="dpr-home-dashboard-paper-list"><li><span class="dpr-home-dashboard-paper-title" title="Tread: A Visuo-Inertial Framework for Terrain and Locomotion Context-Aware Gait-Phase and Speed Estimation in Wearable Robotics">Tread: A Visuo-Inertial Framework for Terrain and Locomotion Context-Aware Gait-Phase and Speed Estimation in Wearable Robotics</span></li><li><span class="dpr-home-dashboard-paper-title" title="P-BFM: Perceptive Behavioral Foundation Models for Humanoid Control via Unsupervised Reinforcement Learning">P-BFM: Perceptive Behavioral Foundation Models for Humanoid Control via Unsupervised Reinforcement Learning</span></li><li><span class="dpr-home-dashboard-paper-title" title="A Mode-Unified, Continuous, and Biomimetic Control Strategy of a Robotic Lower Limb Prosthesis">A Mode-Unified, Continuous, and Biomimetic Control Strategy of a Robotic Lower Limb Prosthesis</span></li></ul>
   </div>
-  <div class="dpr-home-dashboard-tags"><span class="dpr-home-dashboard-tag">exo-vision <strong>1</strong></span><span class="dpr-home-dashboard-tag">humanoid <strong>1</strong></span></div>
+  <div class="dpr-home-dashboard-tags"><span class="dpr-home-dashboard-tag">exo-vision <strong>1</strong></span><span class="dpr-home-dashboard-tag">hip-exo <strong>1</strong></span><span class="dpr-home-dashboard-tag">humanoid <strong>1</strong></span></div>
 </section>
 <section class="dpr-home-dashboard-card dpr-home-skim-card">
   <div class="dpr-home-dashboard-header">
@@ -91,12 +91,12 @@
       <span class="dpr-home-dashboard-kicker">今日累计</span>
       <h3 class="dpr-home-dashboard-title">速读推荐</h3>
     </div>
-    <strong class="dpr-home-dashboard-count">14 篇</strong>
+    <strong class="dpr-home-dashboard-count">19 篇</strong>
   </div>
   <div class="dpr-home-dashboard-body">
-<ul class="dpr-home-dashboard-paper-list"><li><span class="dpr-home-dashboard-paper-title" title="Beyond Kinematic Tracking: Preserving Expressive Characteristics in Humanoid Whole-Body Control">Beyond Kinematic Tracking: Preserving Expressive Characteristics in Humanoid Whole-Body Control</span></li><li><span class="dpr-home-dashboard-paper-title" title="KODA: Kinematics--Observation Data Alignment for Humanoid Learning from Human Egocentric Demonstration">KODA: Kinematics--Observation Data Alignment for Humanoid Learning from Human Egocentric Demonstration</span></li><li><span class="dpr-home-dashboard-paper-title" title="Inertially Significant Humanoid Teleoperation via Whole Body Model Predictive Control and Online Parameter Estimation">Inertially Significant Humanoid Teleoperation via Whole Body Model Predictive Control and Online Parameter Estimation</span></li></ul>
+<ul class="dpr-home-dashboard-paper-list"><li><span class="dpr-home-dashboard-paper-title" title="LiDAR-based Humanoid Navigation in Dynamic, Non-Convex Environments via Spatio-Temporal Safe Corridors">LiDAR-based Humanoid Navigation in Dynamic, Non-Convex Environments via Spatio-Temporal Safe Corridors</span></li><li><span class="dpr-home-dashboard-paper-title" title="TRACE: Efficient Transfer Learning for Neural Whole-Body Control Across Humanoid Embodiments">TRACE: Efficient Transfer Learning for Neural Whole-Body Control Across Humanoid Embodiments</span></li><li><span class="dpr-home-dashboard-paper-title" title="Contact-UAN: Unsupervised Actuator Networks as a Residual World Model for Humanoid Control">Contact-UAN: Unsupervised Actuator Networks as a Residual World Model for Humanoid Control</span></li></ul>
   </div>
-  <div class="dpr-home-dashboard-tags"><span class="dpr-home-dashboard-tag">humanoid <strong>10</strong></span><span class="dpr-home-dashboard-tag">hip-exo <strong>3</strong></span><span class="dpr-home-dashboard-tag">exo-vision <strong>2</strong></span></div>
+  <div class="dpr-home-dashboard-tags"><span class="dpr-home-dashboard-tag">humanoid <strong>15</strong></span><span class="dpr-home-dashboard-tag">hip-exo <strong>3</strong></span><span class="dpr-home-dashboard-tag">exo-vision <strong>2</strong></span></div>
 </section>
 </div>
 

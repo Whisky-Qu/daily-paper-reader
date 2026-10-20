@@ -1,0 +1,450 @@
+Title: A Flow-Theoretic Multimodal Control Framework Fusing Mental and Physical Engagement for Upper-Limb Rehabilitation
+
+URL Source: https://arxiv.org/pdf/2610.21590v1
+
+Published Time: Fri, 16 Oct 2026 01:07:41 GMT
+
+Number of Pages: 10
+
+Markdown Content:
+> IEEE TRANSACTIONS ON HUMAN-MACHINE SYSTEMS (UNDER REVIEW) 1
+
+# A Flow-Theoretic Multimodal Control Framework Fusing Mental and Physical Engagement for Upper-Limb Rehabilitation 
+
+Jun Leng, Student Member, IEEE , Pengcheng Li, Senior Member, IEEE , Hanze Wang, Student Member, IEEE ,Shuxiang Guo, Fellow, IEEE , and Junlin Jiang, Student Member, IEEE 
+
+Abstract —While Assist-as-Needed (AAN) control aims to max-imize user participation in robot-assisted training, existing meth-ods relying solely on physical metrics cannot distinguish muscular inability from mental disengagement, leading to suboptimal interventions. To address this ambiguity, a Flow-theoretic mul-timodal AAN framework is proposed, fusing EEG-based mental engagement and sEMG-based physical engagement into an adap-tive impedance control strategy. A four-quadrant fuzzy decision engine translates these dual physiological metrics into continuous control policies. This enables the upper-limb exoskeleton to inject feedforward assistance during intent-execution mismatch (e.g., motor output attenuation despite mental focus) and escalate guiding stiffness to penalize mental distraction. The framework was validated with healthy participants against a state-of-practice sEMG-only AAN baseline. Kinematically and mechanically, the proposed framework reduced robotic energy expenditure by 71.9% while maintaining precise trajectory tracking, confirming it elicited greater voluntary human effort. Physiologically, the system increased the time spent in the neuroplasticity zone (Flow State Ratio) from 4.6% to 42.8%. These results validate that decoupling and jointly regulating mental and physical states enhances the selectivity of robotic assistance, mitigating user passivity and sustaining the engagement crucial for motor learning. 
+
+Index Terms —flow theory, multimodal physiological sensing, Assist-as-needed (AAN), upper limb rehabilitation. 
+
+I. I NTRODUCTION 
+
+# UPPER limb movement dysfunction caused by neurolog-ical injuries, such as stroke, severely impairs an indi-vidual’s ability to perform Activities of Daily Living (ADLs) and significantly reduces quality of life [1]. Modern neurore-habilitation relies on promoting patients’ active participation in high-intensity, repetitive training to stimulate neuroplasticity and facilitate functional recovery [2]. To address these rigorous demands, robot-assisted therapy provides consistent, quantifi-able training that directly complements traditional therapist-led 
+
+This work has been submitted to the IEEE for possible publication. Copyright may be transferred without notice, after which this version may no longer be accessible. Manuscript received [ ]. This work was supported by the High Level of Special Funds from the Southern University of Science and Technology under Grant G03034K003, and in part by the Shenzhen “Medical Engineering In-tegration” Special Support Program Project under Grant F-2024-Z99-502365. 
+
+(Corresponding authors: Pengcheng Li; Shuxiang Guo.) 
+
+Jun Leng, Pengcheng Li, Hanze Wang, Shuxiang Guo, and Jun-lin Jiang are with the Department of Electronic and Electrical En-gineering, Southern University of Science and Technology, Shenzhen 518055, China (e-mail: lengj2024@mail.sustech.edu.cn, lipc@sustech.edu.cn; guo.shuxiang@sustech.edu.cn). Shuxiang Guo is also with the Aerospace Center Hospital, School of Life Science, and the Key Laboratory of Convergence Medical Engineering System and Healthcare Technology, Ministry of Industry and Information Technology, Beijing Institute of Technology, Beijing 100081, China. 
+
+methods [3], [4]. These systems offer precise physical guid-ance while reducing the labor burden on clinicians, making them essential for delivering the high-dosage therapy required for motor learning. To maximize therapeutic outcomes, the field has widely adopted the “Assist-as-Needed” (AAN) paradigm. The core principle of AAN is to minimize robotic intervention, pro-viding assistance only when the user cannot complete the movement independently. This approach aims to ensure max-imal active effort [5]. However, accurately inferring the user’s true “need” remains a critical challenge. Traditional AAN strategies rely heavily on physical performance metrics, such as kinematic error or interaction force. For instance, Han et al. [6] proposed an adaptive control method that infers movement intention by decomposing real-time interaction forces. The system then adjusts the robot’s impedance parameters to pro-mote active participation. More recently, researchers have inte-grated surface Electromyography (sEMG) to incorporate phys-iological effort into the control loop. Xu et al. [7], for example, developed a framework that adapts training trajectories and robotic assistance based on sEMG-derived muscle activation. This system encourages patient participation by modulating feedback gains. However, while such approaches successfully measure mechanical or muscular execution, they still fail to capture user’s mental focus. Although high-amplitude sEMG quantifies physical exertion, it cannot differentiate genuine task engagement from pathological co-contraction or abnormal compensatory synergies. Execution-level metrics alone fall short in revealing the user’s mental intent. Without monitoring mental focus, purely physical assistance strategies often fail to maintain an optimal training challenge, eventually leading to user passivity. To resolve this ambiguity, integrating electroencephalogra-phy (EEG) into the control loop is essential for providing a direct measure of task-related attentional focus [8]. While EEG is widely applied in robotic rehabilitation, current paradigms mostly use it within Motor Imagery-based Brain-Computer Interfaces (MI-BCI) to decode discrete movement intentions [9], [10]. This paper introduces an adaptive control framework grounded in Flow Theory to map these multidimensional phys-iological signals into actionable robotic interventions. Classic Flow Theory defines an optimal mental state as a balance between external task challenge and intrinsic user skill [11], [12]. The modern four-quadrant extension categorizes user experience into Flow, Anxiety, Boredom, and Apathy based on these misalignments [13]. In robot-assisted training, keeping users within this flow state mitigates both task-induced anxiety arXiv:2610.21590v1 [cs.RO] 15 Oct 2026 IEEE TRANSACTIONS ON HUMAN-MACHINE SYSTEMS (UNDER REVIEW) 2
+
+and under-stimulated boredom [14], [15]. This equilibrium sustains intrinsic motivation and facilitates motor learning [16]. Most existing flow-aware systems rely on predefined task difficulties or intermittent self-reporting, limiting their real-time adaptability. Directly quantifying the abstract Challenge and Skill axes in real-time is also highly impractical during dynamic robot-assisted training, as the user’s motor capabili-ties fluctuate continuously due to fatigue and varying physical demands. To address this gap, the proposed framework by-passes the direct measurement of classic Flow coordinates. It instead establishes a two-dimensional physiological diagnostic space using mental engagement ( 𝑠 ∗
+
+> me
+
+, via EEG) and physical engagement ( 𝑠 ∗
+
+> pe
+
+, via sEMG) as continuous proxies. By con-tinuously monitoring the congruence or mismatch between cognitive intent and motor execution, the system inversely infers the user’s psychological state. This diagnostic mapping directly drives the real-time, closed-loop interventions. The main contributions of this paper are summarized as follows: 1) A multimodal, mental-physical aware exoskeleton system is developed to fuse real-time EEG and sEMG signals, enabling the continuous monitoring of the user’s mental and physical engagement during robot-assisted training. 2) A Flow-grounded fuzzy decision engine, coupled with a sensorless variable impedance controller, is proposed. By estimating the user’s Flow state, the system dynamically adjusts guiding stiffness and feedforward assistance to mitigate physical passivity, address the mismatch between mental intent and physical execution, and optimize the AAN interaction. II. S YSTEM OVERVIEW AND HARDWARE PLATFORM 
+
+To validate the proposed flow-grounded control frame-work, the Cable-driven Upper-limb Rehabilitation Exoskeleton (CURE) is utilized. This platform, developed in previous work [17], is integrated with a multimodal physiological sensing suite. 
+
+A. CURE Exoskeleton 
+
+The CURE system targets home-based rehabilitation (Fig. 1(a), (b)). A Bowden-cable transmission spatially sepa-rates the actuation unit from the wearable arm brace, relocating the heavy components to a backpack. This configuration reduces the distal arm mass to approximately 0.7 kg, which lowers interaction inertia and delays user fatigue. Although the robot supports three degrees of freedom (DoFs) across the elbow and wrist, this study validates the control strategy on the 1-DoF elbow joint. A high-torque DC motor (GO-M8010-6, Unitree, China) actuates this joint. Motor encoders and Inertial Measurement Units (IMUs, JY901, WitMotion, China) measure joint kine-matics (angular position 𝑞 and velocity ¤𝑞 ) to provide high-frequency state feedback for the closed-loop controller. A backpack-mounted emergency stop button provides a hardware safety override.   
+
+> (a) (b)
+> (c) Fig. 1. System overview and hardware architecture. (a) Posterior view show-ing the backpack-mounted actuation unit and the Bowden-cable transmission. (b) Lateral view of the user wearing the CURE exoskeleton, detailing the 1-DoF elbow joint and IMU sensor placements. (c) Schematic of the multimodal sensing interface (EEG and sEMG) and the closed-loop data flow architecture.
+
+B. Multimodal Sensing Interface 
+
+A multimodal sensing interface (Fig. 1(c)) is integrated to close the human-in-the-loop control. A wireless 8-channel EEG system (OpenBCI Cyton, USA) captures real-time neural activity, with dry electrodes positioned at Fp1, Fp2, F3, F4, Fz, Cz, Pz, and Oz. This montage targets frontal and parieto-occipital regions to decode mental engagement. Bipolar sEMG sensors (Sichiray, China) attached to the Biceps and Triceps Brachii quantify physical engagement by monitoring agonist voluntary effort and antagonist co-activation. A central PC manages the entire system, acquiring physiological streams via LSL and serial interfaces and synchronizing them with the robot’s low-level torque controller at a 100 Hz loop rate. III. F LOW -G ROUNDED STRATEGY AND DECISION 
+
+MAKING 
+
+The proposed hierarchical framework (Fig. 2) is decoupled into two primary components. Grounded in Flow Theory, the high-level controller (Fig. 2(a)) acts as the multimodal decision-making engine, evaluating physiological states to balance task challenge with user skill. The low-level controller (Fig. 2(b)) translates these strategic policies into adaptive impedance parameters for physical execution. IEEE TRANSACTIONS ON HUMAN-MACHINE SYSTEMS (UNDER REVIEW) 3 
+
+> Fig. 2. Overall architecture of the proposed flow-grounded AAN framework. (a) High-Level Controller: A multimodal decision-making engine that processes EEG and sEMG signals to map the user’s mental and physical engagement into continuous strategic policies via fuzzy inference. (b) Low-Level Controller: An adaptive execution module that synthesizes these policies into targeted impedance parameters ( 𝐾 , 𝐷, 𝜏 assist ) to regulate sensorless human-robot interaction.
+
+A. Multimodal Physiological Decoding 
+
+To quantify real-time internal states, a multimodal interface fusing EEG and sEMG is utilized, applying hybrid smoothing to ensure robust control inputs. 
+
+1) Signal Preprocessing: EEG (250 Hz) and sEMG (1000 Hz) signals are preprocessed using 50 Hz notch filters, alongside 1–40 Hz FIR and 20–450 Hz Butterworth band-pass filters, respectively. Following sEMG full-wave rectification, both streams are segmented via a 1.0 s sliding window (0.25 s step). Within each epoch, sEMG intensity is quantified via root-mean-square (RMS) amplitude, and EEG power spectral density (PSD) is estimated via Welch’s method (0.5 s sub-windows). 
+
+2) Mental Engagement ( 𝑠 ∗
+
+> me
+
+): As a proxy for mental focus [18], this metric integrates the normalized Theta/Beta Ratio ( ˆ𝑅 TBR (𝑡 ) ∈ [0, 1]) and Alpha Suppression Index ( ˆ𝐼 𝛼 (𝑡 ) ∈[0, 1]) from frontal EEG channels into a weighted combina-tion: 
+
+𝑠 me, raw (𝑡 ) = 𝑤 tbr · ˆ𝑅 TBR (𝑡 ) + 𝑤 𝛼 · ˆ𝐼 𝛼 (𝑡 ) (1) where positive weights satisfy 𝑤 tbr + 𝑤 𝛼 = 1. To mitigate transient artifacts and attentional shifts, a moving average filter yields a stable, tonic metric 𝑠 ∗ 
+
+> me
+
+(𝑡 ) suitable for continuous robotic modulation. 
+
+3) Physical Engagement ( 𝑠 ∗
+
+> pe
+
+) and Co-activation ( 𝑠 co ): Two motor metrics are derived from sEMG. The primary metric, physical engagement ( 𝑠 ∗
+
+> pe
+
+), quantifies voluntary output via RMS amplitude normalized by Maximum Voluntary Contrac-tion (MVC) [19]. Letting ¯𝑠 agonist (𝑡 ) and ¯𝑠 antagonist (𝑡 ) denote normalized activations, the raw metric penalizes excessive co-contraction: 
+
+𝑠 raw (𝑡 ) = 1100 · max  0, ¯𝑠 agonist (𝑡 ) − 𝑤 · ¯𝑠 antagonist (𝑡 ) (2) where 𝑤 ∈ [0, 1] is a penalty weight. To prevent false disengagement detection during rhythmic relaxation, a peak-hold mechanism with exponential decay yields the smoothed score 𝑠 ∗ 
+
+> pe
+
+(𝑡 ), providing the core input for the fuzzy engine. To inform low-level joint rigidity (Section IV-A), a sec-ondary co-activation metric is defined as the contraction over-lap: 
+
+𝑠 co (𝑡 ) = min   ¯𝑠 agonist (𝑡 ), ¯𝑠 antagonist (𝑡 ) (3) 
+
+B. Flow-Grounded Theoretical Mapping 
+
+Because quantifying absolute “Challenge” and “Skill” in real-time remains impractical, the decision-making en-gine translates the four-quadrant Flow model into a two-dimensional physiological diagnostic space (Fig. 2(a)). Rather than relying on intermittent self-reporting, real-time control requires a reverse-inference approach. Mental engagement (𝑠 ∗
+
+> me
+
+) proxies the user’s perceived cognitive demand (task Challenge), while effective physical engagement ( 𝑠 ∗
+
+> pe
+
+) reflects execution capability (Skill). Monitoring their congruence al-lows the system to infer psychological divergence from multi-modal signatures. IEEE TRANSACTIONS ON HUMAN-MACHINE SYSTEMS (UNDER REVIEW) 4
+
+Neuroergonomic and cognitive workload literature demon-strates that shifts in the Challenge-Skill balance elicit dis-tinct physiological manifestations across central and peripheral pathways. For example, concurrent high cognitive demand dur-ing physical exertion induces prefrontal neuronal interference, which increases neuromotor noise and impairs joint steadiness [20]. This provides a quantifiable basis for task overload (Challenge ≫ Skill). Conversely, resource theory suggests highly overlearned, automated motor executions demand min-imal attentional resources; prolonged exposure to such task underload (Challenge ≪ Skill) diminishes cognitive vigilance while preserving physical task-tracking output [20]. When both task-directed cognitive drive and volitional motor execu-tion are deficient, the neuromuscular system exhibits concur-rent hypo-arousal and dropping active torque, characterizing complete task disengagement [21]. Finally, neurophysiological evidence shows active volitional intention coupled with effec-tive peripheral execution induces the early cortical activation and somatosensory synchronization vital for Hebbian-based neural plasticity [22]. Maintaining the task-skill equilibrium (Challenge ≈ Skill) thus ensures the synchronous central and peripheral activation necessary for optimal motor learning. By diagnosing the user through this reverse-inference lens, the system maps these four intent-execution manifestations directly to targeted robotic interventions within a closed-loop framework. 1) Anxiety (High 𝑠 ∗
+
+> me
+
+, Low 𝑠 ∗
+
+> pe
+
+): Intense cognitive effort fails to produce effective motor output, re-flecting an acute intent-execution mismatch (task challenge severely exceeds motor capability) that triggers an Assist & Guide intervention. 2) Boredom (Low 𝑠 ∗
+
+> me
+
+, High 𝑠 ∗
+
+> pe
+
+): High motor efficacy with minimal cognitive allocation points to rote automaticity; to counter this, a Correction & Alert strategy (e.g., escalating virtual stiffness) is executed to prompt cortical re-engagement. 3) Flow (High 𝑠 ∗
+
+> me
+
+, High 𝑠 ∗
+
+> pe
+
+): Synchronous, high-intensity activation across both domains indicates an opti-mal challenge-skill match, sustaining a Maintain & Challenge strategy to foster motor adaptation. 4) Apathy (Low 𝑠 ∗
+
+> me
+
+, Low 
+
+𝑠 ∗
+
+> pe
+
+): Concurrent low neural drive and muscular output signify complete task disengagement, initiating a Re-engage protocol to safely pause training. This feature-engineered diagnostic mapping circumvents the need for explicit subjective coordinate measurement. It translates the abstract psychological dimensions of Flow The-ory into computable physiological parameters for real-time, closed-loop robotic modulation. 
+
+C. Decision Engine Implementation 
+
+To translate the aforementioned qualitative strategies into continuous and safe control commands, the right section of Fig. 2(a) implements two sequential modules: a fuzzy inference engine and a decision stabilizer. 
+
+1) Four-Quadrant Fuzzy Inference: The module maps con-tinuous physiological states ( 𝑠 ∗
+
+> me
+
+, 𝑠 ∗
+
+> pe
+
+) to two continuous policy variables: Assistance Demand ( 𝑐 ∗
+
+> assist
+
+) and Challenge Level (𝑐 ∗
+
+> challenge
+
+). To ensure continuous differentiability and prevent mechanical chattering, Gaussian membership functions 𝜇 (𝑥 ) =
+
+exp (− ( 𝑥 −𝑐 )2 
+
+> 2𝜎 2
+
+) are employed. Rather than using symmetric   
+
+> (a) (b) Fig. 3. Continuous control output surfaces generated by the Fuzzy Infer-ence System. (a) The Assist Level ( 𝑐 ∗
+> assist ) surface mapped across the two-dimensional physiological state space. (b) The Challenge Level ( 𝑐 ∗
+> challenge )surface.
+
+mathematical midpoints, parameters are derived from physio-logical baselines. For mental engagement ( 𝑠 ∗
+
+> me
+
+), users naturally sustain active tracking between 0.5 and 0.8, while distracted states fall below 0.3. A symmetric 0.5 threshold would be overly punitive. Thus, the Gaussian parameters ( 𝑐 med = 0.4,
+
+𝜎 = 0.15 ) position the dominant inflection point at 0.4, a boundary empirically established via subsequent preliminary tuning trials (Section V-C.1), accommodating natural atten-tional fluctuations while detecting drift early [23]. A core design feature is “Physiological Clamping” for physical engagement ( 𝑠 ∗
+
+> pe
+
+). Because muscle activation below 30% MVC is insufficient to elicit robust motor learning [19], [24], the “High” state is asymmetrically parameterized (𝑐 = 1.0, 𝜎 = 0.35 ). This broad, left-skewed tail places the clamping threshold (inflection point) at 0.3, aligning with the preliminary experimental results. Consequently, the system classifies any muscular output below 0.3 as low engagement. This baseline restricts sub-optimal effort, forcing the system to either provide assistance (during Anxiety) or escalate difficulty (during Boredom) until the user generates effective voluntary forces. To translate discrete firing strengths 𝑤 𝑘 (𝑡 ) into de-terministic control policies, the policy vector c(𝑡 ) =
+
+[𝑐 ∗ 
+
+> assist
+
+(𝑡 ), 𝑐 ∗ 
+
+> challenge
+
+(𝑡 )] 𝑇 is aggregated using a normalized weighted average defuzzification: 
+
+𝑐 ∗ (𝑠 ∗
+
+> me
+
+, 𝑠 ∗
+
+> pe
+
+) =
+
+Í𝑁 𝑘 =1 𝑤 𝑘 (𝑡 ) · 𝑂 𝑘 
+
+Í𝑁 𝑘 =1 𝑤 𝑘 (𝑡 ) (4) where 𝑂 𝑘 ∈ [ 0, 1] represents the crisp singleton output for the 𝑘 -th rule. By coupling Gaussian functions with Eq. (4), the architecture establishes a continuously differentiable ( 𝐶 1)control manifold. Unlike discrete Boolean triggers that cause mechanical jerk, this topology bounds the rate of change of robotic impedance, ensuring smooth force transitions despite volatile physiological inputs. The generated control surfaces (Fig. 3) validate this design. The assistance demand ( 𝑐 ∗
+
+> assist
+
+, Fig. 3(a)) peaks within the Anxiety quadrant. The steep roll-off reflects the 0.3 physi-ological clamp: the system provides assistance only during motor output attenuation and tapers it to zero once voluntary effort crosses the effective threshold. Conversely, the challenge level ( 𝑐 ∗
+
+> challenge
+
+, Fig. 3(b)) plateaus in the Flow region and extends a moderately high ridge into the Boredom quadrant. IEEE TRANSACTIONS ON HUMAN-MACHINE SYSTEMS (UNDER REVIEW) 5
+
+Governed by the 0.4 mental inflection point, this contour applies a progressive haptic penalty (e.g., increased stiffness) during mental distraction to prompt re-engagement. 
+
+2) Dual-Stage Decision Stabilizer: Because physiological signals are non-stationary, evaluating the FIS outputs in-stantaneously can induce rapid, erratic mode switching in robotic behavior. To address this, a Dual-Stage Decision Stabilizer is introduced. First, the continuous input space is discretized into a macroscopic pending state 𝑧 pend (𝑡 ) ∈{Flow, Anxiety, Apathy, Boredom }. Rather than updating the control parameters instantaneously, a temporal dwell-time mechanism is implemented. The system updates the confirmed quadrant state 𝑍 𝑘 (𝑡 ), which dictates the downstream discrete modulation factors, only if the newly decoded pending state 
+
+𝑧 pend (𝑡 ) persists continuously for a predefined threshold du-ration 𝑇 dwell . Any state fluctuation before exceeding 𝑇 dwell 
+
+immediately resets the internal timer. This hard reset directly rejects high-frequency physiological artifacts. Second, a first-order low-pass filter is applied to the continu-ous FIS outputs ( 𝑐 ∗
+
+> assist
+
+, 𝑐 ∗
+
+> challenge
+
+). This dual-stage stabilization ensures that macroscopic strategic mode switches ( 𝑍 𝑘 ) remain deliberate, while microscopic parameter adjustments stay con-tinuous and safe. Together, these stabilized outputs form the complete high-level control commands sent to the physical execution layer. IV. A DAPTIVE IMPEDANCE CONTROL 
+
+The low-level controller (Fig. 2(b)) translates the strategic intent derived from the high-level engine into physical robotic interaction via a Variable Impedance Control scheme. This architecture enables sensorless compliance modulation, ensur-ing intrinsic safety while executing the prescribed therapeutic strategies. 
+
+A. Adaptive Parameter Synthesis 
+
+This module synthesizes the continuous policy variables (𝑐 ∗
+
+> assist
+
+, 𝑐 ∗
+
+> challenge
+
+) and the macroscopic state ( 𝑍 𝑘 ) into action-able physical parameters: stiffness 𝐾 (𝑡 ), damping 𝐷 (𝑡 ), and assistance force 𝐹 assist (𝑡 ).To govern the user’s control authority, two state-dependent modulation factors are introduced, specifically the Strength Reduction Factor ( 𝛾 str ) and the Co-activation Penalty Factor (𝛿 co ): 
+
+𝛾 str (𝑍 𝑘 ) = 𝛿 co (𝑍 𝑘 ) =
+
+
+
+1.0, if 𝑍 𝑘 = 𝑍 Flow 
+
+0.5, if 𝑍 𝑘 = 𝑍 Boredom 
+
+0.0, if 𝑍 𝑘 ∈ { 𝑍 Anxiety , 𝑍 Apathy }
+
+(5) This discrete allocation ensures safety. Factors of 1.0 in the Flow state maximize voluntary authority, while factors of 0.0 during Anxiety or Apathy isolate the control loop from erratic signals, transferring full authority to the robot for stable guidance. Based on these factors, the assistive force 𝐹 assist (𝑡 ) is formulated as: 
+
+𝐹 assist (𝑡 ) = sgn (𝑑 (𝑡 )) ·  𝐹 min + 𝑐 ∗ 
+
+> assist
+
+(𝑡 )Δ𝐹  ·
+
+
+
+1 − 𝛾 str (𝑍 𝑘 )𝑠 ∗
+
+> pe
+
+
+
+(6) where Δ𝐹 = 𝐹 max − 𝐹 min and 𝑑 (𝑡 ) is the desired direc-tion. This multiplicative fusion ensures zero-latency assis-tance withdrawal. Even under high commanded assistance, any spontaneous valid effort ( 𝑠 ∗
+
+> pe
+
+) immediately attenuates the robotic power output, achieving Assistance-As-Needed (AAN) behavior. The impedance parameters ( 𝐾 and 𝐷 ) are directly mapped from the challenge policy: 
+
+𝐾 (𝑡 ) = 𝐾 min + 𝑐 ∗ 
+
+> challenge
+
+(𝑡 ) · Δ𝐾 (7) 
+
+𝐷 (𝑡 ) = (𝐷 min + 𝑐 ∗ 
+
+> challenge
+
+(𝑡 ) · Δ𝐷 ) · ( 1 + 𝛿 co (𝑍 𝑘 ) 𝛽 co 𝑠 co (𝑡 )) 
+
+(8) where Δ𝐾 and Δ𝐷 represent the respective parameter ranges, and 𝛽 co is a scaling coefficient. 𝐾 (𝑡 ) determines the strict-ness of the spatial constraint, while 𝐷 (𝑡 ) amplifies baseline damping proportionally to the co-activation level 𝑠 co (𝑡 ). This haptic penalty makes excessive co-contraction feel artificially “heavy,” driving the user to adopt relaxed motor synergies. Although the modulation factors ( 𝛾 str and 𝛿 co ) undergo discrete step changes, they do not compromise continuous physical interaction. This smoothness is guaranteed through two mechanisms. First, the Dual-Stage Stabilizer (Section III-C.2) strictly bounds the transition frequency. Second, a low-level Exponential Moving Average (EMA) filter is applied to bridge these targets with mechanical execution. Let Φ ∈{𝐾, 𝐷, 𝐹 assist } denote the synthesized target parameters. The actual commanded parameter Φcmd (𝑡 ) is updated via: 
+
+Φcmd (𝑡 ) = 𝛼 · Φcmd (𝑡 − Δ𝑡 ) + ( 1 − 𝛼 ) · Φ(𝑡 ) (9) where 𝛼 ∈ [ 0, 1) is the smoothing factor ( 𝛼 = 0.8 at 100 Hz). Combined with the continuously differentiable cognitive policies, this kinetic filtering translates macroscopic mode switches into dynamically smooth haptic interventions without mechanical jerk. 
+
+B. Variable Impedance Control 
+
+To ensure intrinsic safety and robustness against sen-sor noise in dynamic settings, a position-based Variable Impedance Control (VIC) scheme is employed. This approach modulates interaction compliance directly, without relying on potentially unstable force-feedback loops. The actuator command torque 𝜏 cmd is formulated as asuperposition of feedback impedance, feedforward assistance, and static friction compensation [25]: 
+
+𝜏 cmd = 𝐾 (𝑡 )( 𝑞 𝑑 − 𝑞 ) + 𝐷 (𝑡 )( ¤ 𝑞 𝑑 − ¤ 𝑞 ) + 𝜏 assist (𝑡 ) + 𝜏 fric (10) where 𝑞 and 𝑞 𝑑 denote the actual and desired joint posi-tions, respectively. By structurally decoupling the time-varying feedback impedance ( 𝐾 (𝑡 ) and 𝐷 (𝑡 )) from the feedforward assistance (𝜏 assist , derived from 𝐹 assist (𝑡 ) via the Jacobian transpose), the low-level controller independently executes the multidimensional AAN interventions directed by the high-level cognitive strategies. IEEE TRANSACTIONS ON HUMAN-MACHINE SYSTEMS (UNDER REVIEW) 6
+
+V. E XPERIMENT AND CHARACTERISTIC EVALUATION 
+
+Based on the proposed framework, experimental validations were conducted to assess its efficacy across diverse mental and physical states. As illustrated in Fig. 5, the overall experimen-tal procedure comprised an individualized calibration phase followed by two primary validation studies.  
+
+> (a) (b) Fig. 4. Experimental setup and the visual feedback interface. (a) Overview of the experimental scenario during the active tracking task. (b) A representative screenshot of the custom graphical user interface (GUI), illustrating the target trajectory, the user’s real-time cursor, and the synchronized phase prompts.
+
+A. Experimental Participants and Setup 
+
+Ten healthy, right-handed volunteers (age 23 .3 ± 1.8 years; 8 males, 2 females) participated in the study under institu-tional ethics approval (no. 20250066). The CURE upper-limb exoskeleton was utilized for 1-DoF elbow flexion/extension. As illustrated in Fig. 4(a), seated participants interacted with a custom visual feedback interface on a monitor. Through this interface (Fig. 4(b)), participants tracked a continuous sinusoidal target (0.2 Hz, range 0◦–90 ◦) by controlling a real-time cursor that reflected their actual elbow joint angle. The interface also delivered synchronized on-screen text and audio cues to guide subjects through specific behavioral phases. To emulate the elevated physical demand and intent-execution mismatch often encountered in robot-assisted training, a 1.2 kg weight was affixed to the user’s wrist. This added inertial load ensures sustained muscular effort and natural fatigue during prolonged tracking tasks. As depicted in Fig. 5(a), an individualized calibration ses-sion was conducted prior to the main trials. The normalization bounds ( [𝑠 min , 𝑠 max ]) for the EEG decoder were established through a 60-second resting baseline, a passive following task (eyes closed, mental relaxation), and an active tracking task (maximal visual focus). Concurrently, physical engagement for the sEMG decoder was normalized against peak values obtained from a 5-second Maximum Voluntary Contraction (MVC) test. 
+
+B. Experiment Protocol 
+
+As illustrated in Fig. 5, the experimental validation was structured into three sequential phases to establish physiologi-cal baselines, characterize the system’s dynamic stability, and evaluate its functional efficacy. 
+
+1) Preliminary Parameter Tuning (Fig. 5(a)): To empirically establish the Gaussian membership inflection points ( 𝑐 = 0.4 
+
+> (a)
+> (b)
+> (c) Fig. 5. Experimental procedure and protocol design. (a) Individualized calibration phase. (b) Study I: Continuous adaptive response test (240-s). (c) Study II: Comparative efficacy analysis against a baseline AAN mode (5-min).
+
+and 0.3) for the decision engine, participants completed 1-minute isolated trials. Maximal and minimal mental engage-ments were induced via active visual tracking versus distracted tracking. Correspondingly, physical engagement boundaries were established using a “Zero-Assist” mode (requiring max-imal voluntary effort) versus a “Passive Following” mode (complete arm relaxation). 
+
+2) Continuous Adaptive Response Test (Fig. 5(b)): To eval-uate real-time functional responses to specific anomalies (e.g., intent-execution mismatch), participants completed a continu-ous 240-s session. Guided by audio-visual cues, they traversed the four Flow quadrants at 60-s intervals. Specific behaviors were safely induced: intense focus with active tracking (Flow), visual distraction with physical tracking (Boredom), intense focus with intentionally suppressed muscular output (Anxiety), and total relaxation (Apathy). System stability during these pseudo-randomized state transitions was quantified using Tran-sition Latency and Maximum Force Derivative ( |𝑑𝐹 assist /𝑑𝑡 |)to ensure safe, chatter-free interventions. 
+
+3) Comparative Efficacy Analysis (Fig. 5(c): To quanti-tatively assess the multimodal architecture, participants per-formed three 5-minute sessions under the Fusion Mode (FM) and a baseline EMG-driven AAN mode. This baseline repre-sents current slacking-prevention protocols [26], [27], which decay feedforward assistance proportionally to physical en-gagement ( 𝐹 assist ∝ 1− 𝑠 ∗
+
+> pe
+
+) while maintaining constant guiding stiffness. Performance was assessed via kinematic tracking error (RMSE) and the raw robotic assistive force ( |𝐹 assist |). To prevent circular reasoning when evaluating physiological exertion, high-fidelity offline metrics (iEMG and EEG PSD) were extracted using zero-phase Butterworth filtering. This non-causal processing eliminates phase distortion, providing an independent physiological ground truth to quantify the Flow State Ratio. IEEE TRANSACTIONS ON HUMAN-MACHINE SYSTEMS (UNDER REVIEW) 7
+
+C. Experimental Results 1) Results of Preliminary Parameter Tuning: To empirically justify the fuzzy membership parameterization (Section III-C), the steady-state physiological responses from the 1-minute isolated tuning blocks were analyzed. As summarized in Table I, the specific task conditions (e.g., “Zero-Assist” vs. “Passive Following”, and active focus vs. distraction) elicited distinct and statistically separable physiological boundaries across all 10 participants. 
+
+TABLE I PHYSIOLOGICAL RESPONSES DURING THE ISOLATED 1-M INUTE 
+
+INDUCTION BLOCKS (M EAN ± SD)                  
+
+> Physiological Metric Induced “Low” State Induced “High” State Selected Inflection ( 𝑐 )
+> Mental Engagement ( 𝑠 ∗
+> me )0.22 ±0.08 0.65 ±0.12 0.40
+> Physical Engagement ( 𝑠 ∗
+> pe )0.15 ±0.06 0.58 ±0.10 0.30
+
+These empirical distributions reveal that a mathematically symmetric 0.5 threshold would significantly overlap with the lower confidence intervals of the “High” states, leading to a punitive control scheme. By anchoring the Gaussian inflection points at 0.3 for 𝑠 ∗ 
+
+> pe
+
+and 0.4 for 𝑠 ∗ 
+
+> me
+
+(Table I), the 95% confidence intervals of both distributions are separated. This data-driven thresholding allows the fuzzy engine to delineate active voluntary effort from passive slacking or mental disen-gagement. 
+
+2) Results of Continuous Adaptive Response Test: Fig. 6 illustrates a representative 240-s session from Subject 6, with the top ribbon indicating the real-time decoded macroscopic states. Table II summarizes the specific robotic interventions extracted from the actual trajectories across the four induced phases. 
+
+TABLE II SUMMARY OF SYSTEM RESPONSES ACROSS THE FOUR INDUCED STATES                                 
+
+> Phase (State) s∗
+> me s∗
+> pe Stiffness 𝐾 (N ·m/rad) Assist. Force 𝐹 assist (N)
+> 1 (Flow) High High High ( ∼10 )Minimal ( <1.0)2 (Boredom) Low High Firm ( ∼8)Withheld ( <1.0)3 (Apathy) Low Low Low ( ∼2)Moderate Peaks ( ∼2.0)4 (Anxiety) High Low Fluctuating ( ∼5)Strong Peaks ( ∼2.3)
+
+As detailed in Table II, the system tailors its interventions across all four psychological states. In the Flow phase, the robot minimizes assistance to maximize voluntary effort while maintaining a firm guiding stiffness. During Boredom, it continues to withhold power and enforces a haptic constraint to demand mental re-engagement. When the user disengages (Apathy), the controller prioritizes safety by reducing the stiff-ness ( 𝐾 ∼ 2 N · m/rad) to prevent rigid dragging. Conversely, during an intent-execution mismatch (Anxiety), the system injects feedforward assistance to ensure trajectory completion (Fig. 6(c), (d)). To quantify the transition dynamics, 23 major inter-quadrant shifts were evaluated (Fig. 7). The average transition latency (3.10 ± 0.87 s) matches the combined Dwell-Time and low-pass filter delay. Furthermore, the macroscopic rate of change of the assistance force ( |𝑑𝐹 assist /𝑑𝑡 |) averaged 1.86 ± 1.03 N/s, remaining well within comfortable bounds. These metrics 
+
+(a) 
+
+(b) 
+
+(c) 
+
+(d) Fig. 6. System dynamic response across the four quadrants during acontinuous 240-s training session. The top ribbon indicates the real-time decoded macroscopic states ( 𝑍 𝑘 ). (a) Smoothed physiological inputs: mental engagement ( 𝑠 ∗
+
+> me
+
+) and physical engagement ( 𝑠 ∗
+
+> pe
+
+). (b) High-level continuous policy variables: assistance demand ( 𝑐 ∗
+
+> assist
+
+) and challenge level ( 𝑐 ∗
+
+> challenge
+
+). (c) Low-level modulated impedance parameters: virtual stiffness ( 𝐾 ) and feedforward assistance force ( 𝐹 assist ). (d) Kinematic tracking performance. 
+
+(a) (b) Fig. 7. Quantitative analysis of transition smoothness across 23 major inter-quadrant shifts. (a) Boxplot of the controller response latency. (b) Boxplot of the maximum rate of change of the assistance force ( |𝑑𝐹 assist /𝑑𝑡 |). IEEE TRANSACTIONS ON HUMAN-MACHINE SYSTEMS (UNDER REVIEW) 8
+
+confirm that the system translates macroscopic state shifts into smooth, chatter-free haptic interventions. 
+
+3) Results of Comparative Efficacy Analysis: The FM demonstrated significant advantages over the baseline AAN mode across all participants, as summarized in Table III.                                 
+
+> TABLE III QUANTITATIVE COMPARISON BETWEEN BASELINE AAN AND PROPOSED
+> FUSION MODE (FM)
+> Evaluation Metric Baseline AAN Fusion Mode (FM) p-value
+> Tracking RMSE (rad) 0.177 0.174 >0.05 (n.s.) Mean Assistive Force (N) 1.85 0.51 <0.001
+> Mental Engagement ( 𝑠 ∗
+> me )0.35 0.45 <0.01
+> Physical Engagement ( 𝑠 ∗
+> pe )0.21 0.34 <0.001
+> Flow State Ratio (%) 4.642 .8<0.001
+
+Kinematically, while both modes maintained comparable trajectory tracking (Fig. 8(a), (b)), the FM reduced the mean robotic assistive force by 72 .4% (Fig. 8(c)). This raw mechan-ical force reduction provides an objective, independent metric confirming that the FM elicited greater voluntary human effort. Physiologically, 2D Kernel Density Estimation maps show the baseline density drifting into passive lower-left regions (Fig. 9(b)). Under the FM, this high-density cluster shifted into the upper-right Flow quadrant (Fig. 9(c)). Consequently, the Flow State Ratio, defined as the percentage of total session time where both mental ( 𝑠 ∗
+
+> me
+
+) and physical ( 𝑠 ∗
+
+> pe
+
+) engagement scores exceeded their respective Gaussian inflection thresholds (0.4 and 0.3), increased nearly tenfold from 4.6% to 42 .8% .To detail the closed-loop mechanisms driving these macro-scopic gains, two representative microscopic windows were extracted from the first FM trial of Subject 2 (Fig. 10). Time axes are relative to highlight localized transient dynamics. During motor output attenuation (Anxiety, Fig. 10(a)), the sys-tem injected feedforward assistance ( 𝐹 assist spiked to ∼ 3.5 N) to bridge the intent-execution mismatch, allowing the user to gradually regain physical capability over 15–20 s. Conversely, during visual distraction (Boredom, Fig. 10(b)), the robot escalated virtual stiffness to ∼ 14 N·m/rad rather than injecting power. This rigid haptic penalty triggered rapid cortical re-engagement within 5–10 s. By decoupling the control outputs, the FM translates multi-dimensional physiological anomalies into targeted robotic in-terventions. This dual-intervention mechanism curtails passiv-ity and sustains an environment conducive to neuroplasticity. VI. D ISCUSSION 
+
+A. Resolving Intent-Execution Ambiguity in Multimodal AAN Control 
+
+While recent advancements in robot-assisted rehabilitation have driven significant progress in personalized therapy, sus-taining optimal neuroplastic engagement remains a formidable challenge. Contextualizing the proposed architecture within the landscape of contemporary AAN paradigms elucidates the necessity of its underlying design and its fundamental functional departures.      
+
+> (a)
+> (b) (c) Fig. 8. Kinematic tracking performance and robotic assistance evaluation. (a) A representative tracking trajectory segment under AAN and Fusion Mode (FM). (b) Grand-averaged Root Mean Square Error (RMSE) across all subjects (𝑝 > 0.05 ). (c) Grand-averaged mean feedforward assistive force showcasing a significant reduction in robotic physical intervention ( 𝑝 < 0.001 ).
+
+Unimodal sEMG- or kinematic-driven AAN controllers [28] adapt support via peripheral effort but remain blind to cogni-tive states. Failing to distinguish motor fatigue from mental distraction, they inadvertently reward rote repetitions or with-hold assistance from exhausted users. Conversely, EEG-driven systems [14] monitor mental engagement but lack peripheral feedback to assess execution capability, unable to discern whether a disengaged user requires feedforward assistance or a haptic penalty. To address this, recent multimodal systems [29], [30] fuse EEG and sEMG, yet typically implement decoupled integrations (e.g., using EEG as a discrete switch while sEMG drives admittance). Such rigid state-machine designs fail to continuously diagnose intent-execution congru-ence, while their discrete thresholds induce mechanical chat-tering during physiological fluctuations, disrupting immersion. The design philosophy of the proposed framework shifts from discrete, symptom-based triggering to a continuous physiological-mechanical closed loop grounded in Flow the-ory. Rather than layering multimodal signals, it evaluates the cognitive-motor balance via a continuously differentiable ( 𝐶 1)fuzzy manifold. By decoding intent-execution mismatches, it delivers chatter-free haptic interventions, specifically assist-ing during motor output attenuation ( Anxiety ) and penalizing slacking ( Boredom ). By adapting to the user’s state without disrupting immersion, this physiological-mechanical fusion curtails passivity, driving the tenfold increase in neuroplastic IEEE TRANSACTIONS ON HUMAN-MACHINE SYSTEMS (UNDER REVIEW) 9 
+
+> (a)
+> (b) (c) Fig. 9. Physiological state maintenance and 2D state distribution derived from offline analysis. (a) Grand-averaged mental and physical engagement scores, alongside the Flow State Ratio. (b) 2D Kernel Density Estimation (KDE) map of user states under the baseline AAN mode. (c) 2D KDE map of user states under the proposed Fusion Mode (FM).
+
+engagement (42 .8% vs. 4.6% ). However, this multimodal approach requires a trade-off in deployment efficiency. Simul-taneous EEG and sEMG sensor preparation, combined with the individualized empirical tuning of the fuzzy parameters, introduces higher calibration complexity and computational overhead compared to unimodal systems. 
+
+B. Multimodal Integration and Functional Implications 
+
+Integrating hybrid physiological smoothing with the macro-scopic Dwell-Time Stabilizer eliminates standard BCI “chat-tering,” yielding safe impedance modulation despite biosignal non-stationarity. The Flow-grounded strategy penalizes antag-onist co-activation within the physical metric ( 𝑠 ∗
+
+> pe
+
+). Unlike sim-ple force estimation that misinterprets excessive co-contraction as high effort, the proposed metric identifies it as low effective engagement, triggering an Assist & Guide strategy to prevent reinforcing maladaptive patterns. “Physiological Clamping” ensures that insufficient challenge triggers Boredom haptic penalties, compelling users to train within target physiological zones. The comparative efficacy results demonstrate the transi-tion from execution-aware to intent-aware training. Common EMG-driven baselines [26], [27] assume muscular output mirrors active participation, rewarding distracted repetitions or wrongly withholding assistance during motor output attenua-tion. The proposed Fusion Mode resolves this ambiguity. By coupling bidirectional haptic adaptability, specifically penaliz-ing distraction and assisting during motor output attenuation, the system drove a 72.4% reduction in robotic energy and a nearly tenfold increase in Flow State Ratio, proving that sus-taining neuroplasticity demands synchronized central neural drive and peripheral motor effort. 
+
+C. Limitations and Future Work 
+
+Validating on healthy young adults limits generalizability to elderly stroke populations, as healthy intent and execu-tion are naturally coupled. The induced mismatches represent controlled approximations. Future longitudinal trials enrolling age-matched stroke survivors will validate parameter general-izability and therapeutic robustness against severe, neurologi-cally derived intent-execution mismatches. While the Apathy quadrant detects complete disengagement, sustained physical exertion may induce muscle fatigue prior to total mental drop-off. Future deployments will integrate an auxiliary safety layer analyzing real-time sEMG spectral shifts (e.g., median frequency decline) to monitor fatigue directly, preemptively modulating robotic impedance or ini-tiating mandatory rest to ensure patient safety. VII. C ONCLUSION 
+
+This paper presented a multimodal AAN framework for upper-limb rehabilitation that integrates Flow Theory with adaptive variable impedance control. By fusing real-time EEG and sEMG signals to simultaneously quantify mental and physical engagement, a four-quadrant fuzzy decision engine was developed to mitigate intent-execution mismatch and passive user disengagement. Compared to widely adopted unimodal sEMG-driven baselines, the proposed framework achieved tighter trajectory tracking while reducing robotic energy expenditure by 71.9%, confirming the elicitation of greater voluntary human effort. Physiologically, it increased the time spent in the optimal neuroplasticity zone (Flow State Ratio) nearly tenfold (from 4.6% to 42.8%). Continuous dynamic testing verified the system’s stability, demonstrating its ability to safely inject feedforward assistance during motor output attenuation and escalate guiding stiffness during mental distraction. This decoupled, sensorless architecture provides a safe, intent-responsive, and intensive human-robot interaction. REFERENCES [1] M. L. Prust, R. Forman, and B. Ovbiagele, “Addressing disparities in the global epidemiology of stroke,” Nat. Rev. Neurol. , vol. 20, pp. 207–221, Apr. 2024. [2] H. Yan, F. Zhang, X. Li, C. Zhang, Y. Zhang, and Y. Feng, “An assist-as-needed control strategy based on a subjective intention decline model,”                   
+
+> Bioengineering , vol. 11, Nov. 2024. [3] P. Li, S. Guo, and C. Li, “A phase-dependent and emg-driven variable stiffness control strategy for upper limb rehabilitation robot,” IEEE Int. Conf. Robot. Biomim. , Bangkok, Thailand, 2024 , pp. 504–509. [4] H. Wang, S. Guo, H. Li, and M. Ding, “A semg-based muscle-compensation-error elimination module for the home-based bilateral re-habilitation system,” IEEE Robot. Autom. Lett. , vol. 10, no. 7, pp. 6696– 6703, 2025. [5] Y. Cao, X. Chen, M. Zhang, and J. Huang, “Adaptive position con-strained assist-as-needed control for rehabilitation robots,” IEEE Trans. Ind. Electron. , vol. 71, pp. 4059–4068, Apr. 2024. IEEE TRANSACTIONS ON HUMAN-MACHINE SYSTEMS (UNDER REVIEW) 10
+
+(a) (b) Fig. 10. Microscopic case studies illustrating the closed-loop autonomous recovery mechanisms. (a) Recovery from Anxiety (intent-execution mismatch): the system decreases virtual stiffness ( 𝐾 ) and elevates feedforward assistance ( 𝐹 assist ) in response to acute motor output attenuation. (b) Recovery from Boredom (attentional drift): the system escalates virtual stiffness ( 𝐾 ) to apply a haptic penalty in response to dropping mental engagement, thereby prompting rapid cortical re-engagement. [6] S. Han, H. Wang, and H. Yu, “Human-robot interaction evaluation-based aan control for upper limb rehabilitation robots driven by series elastic actuators,” IEEE Trans. Robot. , vol. 39, pp. 3437–3451, Oct. 2023. [7] J. Xu, K. Huang, T. Zhang, K. Cao, A. Ji, L. Xu, and Y. Li, “A rehabilitation robot control framework with adaptation of training tasks and robotic assistance,” Front. Bioeng. Biotechnol. , vol. 11, p. 1244550, 2023. [8] M. Du, Y. Yao, J. Xiang, X. Chen, Y. Jin, K. Zhang, G. Bao, and S. Cai, “A method for improving online active engagement during lower limb rehabilitation training based on eeg signals,” IEEE Trans. Hum.-Mach. Syst. , 2025. [9] R. Fu, Z. Wang, S. Wang, X. Xu, J. Chen, and G. Wen, “Eegnet-msd: A sparse convolutional neural network for efficient eeg-based intent decoding,” IEEE Sensors Journal , vol. 23, no. 17, pp. 19684–19691, 2023. [10] Y. Song, Q. Zheng, B. Liu, and X. Gao, “Eeg conformer: Convolutional transformer for eeg decoding and visualization,” IEEE Trans. Neural Syst. Rehabil. Eng. , vol. 31, pp. 710–719, 2023. [11] D. C. K. Tse, J. Nakamura, and M. Csikszentmihalyi, “Flow experiences across adulthood: Preliminary findings on the continuity hypothesis,” J. Happiness Stud. , vol. 23, pp. 2517–2540, Aug. 2022. [12] M. Csikszentmihalyi, Flow: The Psychology of Optimal Experience .New York, NY, USA: Harper & Row, 1990. [13] B. Ottiger, E. Van Wegen, K. Keller, T. Nef, T. Nyffeler, G. Kwakkel, and T. Vanbellingen, “Getting into a “flow” state: a systematic review of flow experience in neurological diseases,” J. Neuroeng. Rehabil. , vol. 18, no. 1, p. 65, 2021. [14] B. Tian, S. Zhang, D. Xue, S. Chen, Y. Zhang, K. Peng, and D. Wang, “Decoding intrinsic fluctuations of engagement from eeg signals during fingertip motor tasks,” IEEE Trans. Neural Syst. Rehabil. Eng. , 2025. [15] N. Kumar and K. P. Michmizos, “Machine learning for motor learning: Eeg-based continuous assessment of cognitive engagement for adap-tive rehabilitation robots,” IEEE RAS/EMBS Int. Conf. Biomed. Robot. Biomech. , New York, USA, 2020 , pp. 521–526. [16] K. Yoshida, K. Ogawa, T. Mototani, Y. Inagaki, D. Sawamura, K. Ikoma, and S. Sakai, “Flow experience enhances the effectiveness of attentional training: A pilot randomized controlled trial of patients with attention deficits after traumatic brain injury,” Neurorehabilitation , vol. 43, no. 2, pp. 183–193, 2018. [17] P. Li, S. Guo, J. Leng, and W. Chen, “Cure: A cable-driven upper-limb rehabilitation exoskeleton for assisting adls in home-based environment,” 
+
+IEEE Int. Conf. Mechatronics Autom. , Beijing, China, 2025 , pp. 764– 769. [18] H. Wei, L. Chen, and L. Zhao, “Can the spontaneous electroencephalog-raphy theta/beta power ratio and alpha oscillation measure individuals’ attentional control?,” Behav. Sci. , vol. 14, no. 3, 2024. [19] M. Besomi, P. W. Hodges, E. A. Clancy, J. Van Die¨ en, F. Hug, M. Lowery, R. Merletti, K. Søgaard, T. Wrigley, T. Besier, R. G. Carson, C. Disselhorst-Klug, R. M. Enoka, D. Falla, D. Farina, S. Gandevia, A. Holobar, M. C. Kiernan, K. McGill, E. Perreault, J. C. Rothwell, and K. Tucker, “Consensus for experimental design in electromyogra-phy (cede) project: Amplitude normalization matrix,” J. Electromyogr. Kinesiol. , vol. 53, p. 102438, Aug. 2020. [20] R. K. Mehta and R. Parasuraman, “Neuroergonomics: a review of applications to physical and cognitive work,” Front. Hum. Neurosci. ,vol. 7, 2013. [21] J. F. Hopstaken, D. van der Linden, A. B. Bakker, and M. A. J. Kompier, “A multifaceted investigation of the link between mental fatigue and task disengagement,” Psychophysiology , vol. 52, no. 3, pp. 305–315, 2015. [22] G. Tacchino, M. Gandolla, S. Coelli, R. Barbieri, A. Pedrocchi, and A. M. Bianchi, “Eeg analysis during active and assisted repetitive movements: Evidence for differences in neural engagement,” IEEE Trans. Neural Syst. Rehabil. Eng. , vol. 25, no. 6, pp. 761–771, 2017. [23] Y. Zhou, P. Wang, P. Gong, F. Wei, X. Wen, X. Wu, and D. Zhang, “Cross-subject cognitive workload recognition based on eeg and deep domain adaptation,” IEEE Trans. Instrum. Meas. , vol. 72, pp. 1–12, 2023. [24] Z. Du, Y. Xu, A. Cheng, Y. Jin, and L. Xu, “Myoelectric fatigue and motor-unit firing patterns during sinusoidal vibration superimposed on low-intensity isometric contraction,” IEEE Trans. Neural Syst. Rehabil. Eng. , vol. 32, pp. 3773–3781, 2024. [25] P. Li, S. Guo, J. Leng, and Z. Wang, “A cable-driven home-based upper-limb rehabilitation robot for adl-based training in unstructured daily environments,” IEEE Robot. Autom. Lett. , vol. 11, no. 1, pp. 794–801, 2026. [26] Z. Yang, S. Guo, Y. Liu, M. Kawanishi, and H. Hirata, “A task performance-based semg-driven variable stiffness control strategy for upper limb bilateral rehabilitation system,” IEEE/ASME Trans. Mecha-tronics , vol. 28, pp. 792–803, Apr. 2023. [27] Y. Zhu, Q. Wu, B. Chen, and Z. Zhao, “Design and voluntary control of variable stiffness exoskeleton based on semg driven model,” IEEE Robot. Autom. Lett. , vol. 7, no. 2, pp. 5787–5794, 2022. [28] S. M. U. S. Samarakoon, H. M. K. K. M. B. Herath, S. L. P. Yasakethu, D. Fernando, N. Madusanka, M. Yi, and B.-I. Lee, “Long short-term memory-enabled electromyography-controlled adaptive wearable robotic exoskeleton for upper arm rehabilitation,” Biomimetics , vol. 10, no. 2, 2025. [29] H. Zou, Q. Wu, L. Yang, Y. Zhu, and H. Wu, “Design and emg-eeg fusion-based admittance control of a hand exoskeleton with series elastic actuators,” IEEE Trans. Med. Robot. Bionics , vol. 7, no. 1, pp. 347–358, 2025. [30] S. Duan, L. Wu, A. Liu, R. Qian, and X. Chen, “An eeg-semg asyn-chronous time–frequency progressive fusion model for hand trajectory estimation,” IEEE Trans. Neural Syst. Rehabil. Eng. , vol. 34, pp. 69–80, 2026.

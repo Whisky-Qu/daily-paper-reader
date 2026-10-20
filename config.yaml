@@ -1,5 +1,5 @@
 github:
-  owner: ''
+  owner: Whisky-Qu
   repo: daily-paper-reader
 arxiv_paper_setting:
   mode: standard
@@ -25,3 +25,73 @@ subscriptions:
     stage: A
     diff_threshold_pct: 15
   keyword_recall_mode: or
+  intent_profiles:
+    - tag: hip-exo
+      description: 髋关节外骨骼控制：步态相位、助力策略、人机协同及个体自适应控制
+      enabled: true
+      paper_sources: [arxiv]
+      keywords:
+        - keyword: hip exoskeleton
+          keyword_cn: 髋关节外骨骼
+          query: Hip exoskeleton assistance control for walking including gait phase estimation and adaptive torque profiles
+        - keyword: hip exosuit
+          keyword_cn: 髋关节柔性助力服
+          query: Control of soft hip exosuits for locomotion assistance and reducing metabolic cost
+        - keyword: lower limb exoskeleton control
+          keyword_cn: 下肢外骨骼控制
+          query: Model predictive control reinforcement learning and human in the loop optimization for lower limb exoskeleton assistance
+      intent_queries:
+        - query: Personalized adaptive hip exoskeleton control with gait phase estimation human intention prediction and assistance torque optimization
+          query_cn: 个体自适应髋关节助力、步态相位估计与人体意图预测
+          enabled: true
+          source: manual
+        - query: Human robot interaction and safe impedance control for wearable hip exoskeletons during walking and transitions
+          query_cn: 行走及步态切换中的人机交互与安全阻抗控制
+          enabled: true
+          source: manual
+    - tag: exo-vision
+      description: 外骨骼视觉：地形与障碍识别、视觉步态意图预测、感知与助力控制融合
+      enabled: true
+      paper_sources: [arxiv]
+      keywords:
+        - keyword: vision exoskeleton
+          keyword_cn: 外骨骼视觉
+          query: Vision based environmental perception for lower limb exoskeleton locomotion assistance
+        - keyword: terrain recognition wearable robot
+          keyword_cn: 穿戴机器人地形识别
+          query: Terrain and stair recognition using wearable cameras and depth sensors for exoskeleton control
+        - keyword: exoskeleton locomotion prediction
+          keyword_cn: 外骨骼运动意图预测
+          query: Visual anticipation of locomotion transitions and user intent for wearable assistive robots
+      intent_queries:
+        - query: Fusion of depth camera vision and inertial sensors for terrain aware adaptive exoskeleton control
+          query_cn: 深度相机与惯性传感融合的地形自适应外骨骼控制
+          enabled: true
+          source: manual
+        - query: Egocentric visual perception of stairs slopes and obstacles for anticipatory control of lower limb exoskeletons
+          query_cn: 第一视角台阶坡道障碍感知与前瞻助力
+          enabled: true
+          source: manual
+    - tag: humanoid
+      description: 人形机器人运动控制与识别：全身控制、强化学习、运动模仿、视觉运动控制及状态估计
+      enabled: true
+      paper_sources: [arxiv]
+      keywords:
+        - keyword: humanoid locomotion
+          keyword_cn: 人形机器人行走
+          query: Robust humanoid locomotion using reinforcement learning model predictive control and sim to real transfer
+        - keyword: humanoid whole body control
+          keyword_cn: 人形机器人全身控制
+          query: Whole body motion control balance and coordination for humanoid robots
+        - keyword: humanoid visual perception
+          keyword_cn: 人形机器人视觉感知
+          query: Visual perception object recognition and state estimation for humanoid robot motion and loco manipulation
+      intent_queries:
+        - query: Humanoid motion imitation and reinforcement learning for robust whole body control on uneven terrain
+          query_cn: 人形机器人运动模仿、强化学习与复杂地形全身控制
+          enabled: true
+          source: manual
+        - query: Vision based humanoid motion control combining terrain object and human action recognition with state estimation
+          query_cn: 融合地形、目标与人体动作识别及状态估计的视觉运动控制
+          enabled: true
+          source: manual

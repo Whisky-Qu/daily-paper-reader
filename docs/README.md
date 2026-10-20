@@ -51,14 +51,14 @@
       <span class="dpr-home-dashboard-kicker">2026-10-20</span>
       <h3 class="dpr-home-dashboard-title">今日汇总</h3>
     </div>
-    <strong class="dpr-home-dashboard-count">共 15 篇</strong>
+    <strong class="dpr-home-dashboard-count">共 16 篇</strong>
   </div>
   <dl class="dpr-home-dashboard-stats">
-    <div class="dpr-home-dashboard-stat"><dt>累计更新</dt><dd>1 次</dd></div>
+    <div class="dpr-home-dashboard-stat"><dt>累计更新</dt><dd>2 次</dd></div>
     <div class="dpr-home-dashboard-stat"><dt>精读</dt><dd>2</dd></div>
-    <div class="dpr-home-dashboard-stat"><dt>速读</dt><dd>13</dd></div>
+    <div class="dpr-home-dashboard-stat"><dt>速读</dt><dd>14</dd></div>
   </dl>
-  <p class="dpr-home-dashboard-body">最近更新：2026-10-20 06:33:22 UTC<br>状态：成功</p>
+  <p class="dpr-home-dashboard-body">最近更新：2026-10-20 06:40:34 UTC<br>状态：成功</p>
 </section>
 <section class="dpr-home-dashboard-card dpr-home-brief-card">
   <div class="dpr-home-dashboard-header">
@@ -69,7 +69,7 @@
     <strong class="dpr-home-dashboard-count">AI</strong>
   </div>
   <div class="dpr-home-dashboard-body">
-<p>2026-10-20 日报精选 15 篇人形机器人与可穿戴机器人论文，其中 2 篇精读，均获 9.0 分：P-BFM 通过无监督强化学习构建感知行为基础模型，Tread 结合视觉与惯性信息，实现地形与运动状态感知下的步态相位和速度估计。最值得关注“行为基础模型驱动的人形全身控制”和“视觉-惯性融合提升可穿戴机器人步态估计”这两个方向。普通读者可先读这两篇精读论文的摘要与实验部分，再按兴趣浏览速读中的全身控制与运动跟踪工作。</p>
+<p>今日筛选16篇人形机器人与可穿戴机器人论文，精读2篇、速读14篇。最值得关注的是Tread用视觉-惯性融合估计地形与步态阶段，以及P-BFM用无监督强化学习为人形控制构建感知行为基础模型，两篇均获9.0分。普通读者可优先看这两篇的摘要与实验视频，再按需跟进速读中的全身控制和遥操作方向。</p>
   </div>
 </section>
 <section class="dpr-home-dashboard-card dpr-home-deep-card">
@@ -81,7 +81,7 @@
     <strong class="dpr-home-dashboard-count">2 篇</strong>
   </div>
   <div class="dpr-home-dashboard-body">
-<ul class="dpr-home-dashboard-paper-list"><li><span class="dpr-home-dashboard-paper-title" title="P-BFM: Perceptive Behavioral Foundation Models for Humanoid Control via Unsupervised Reinforcement Learning">P-BFM: Perceptive Behavioral Foundation Models for Humanoid Control via Unsupervised Reinforcement Learning</span></li><li><span class="dpr-home-dashboard-paper-title" title="Tread: A Visuo-Inertial Framework for Terrain and Locomotion Context-Aware Gait-Phase and Speed Estimation in Wearable Robotics">Tread: A Visuo-Inertial Framework for Terrain and Locomotion Context-Aware Gait-Phase and Speed Estimation in Wearable Robotics</span></li></ul>
+<ul class="dpr-home-dashboard-paper-list"><li><span class="dpr-home-dashboard-paper-title" title="Tread: A Visuo-Inertial Framework for Terrain and Locomotion Context-Aware Gait-Phase and Speed Estimation in Wearable Robotics">Tread: A Visuo-Inertial Framework for Terrain and Locomotion Context-Aware Gait-Phase and Speed Estimation in Wearable Robotics</span></li><li><span class="dpr-home-dashboard-paper-title" title="P-BFM: Perceptive Behavioral Foundation Models for Humanoid Control via Unsupervised Reinforcement Learning">P-BFM: Perceptive Behavioral Foundation Models for Humanoid Control via Unsupervised Reinforcement Learning</span></li></ul>
   </div>
   <div class="dpr-home-dashboard-tags"><span class="dpr-home-dashboard-tag">exo-vision <strong>1</strong></span><span class="dpr-home-dashboard-tag">humanoid <strong>1</strong></span></div>
 </section>
@@ -91,12 +91,12 @@
       <span class="dpr-home-dashboard-kicker">今日累计</span>
       <h3 class="dpr-home-dashboard-title">速读推荐</h3>
     </div>
-    <strong class="dpr-home-dashboard-count">13 篇</strong>
+    <strong class="dpr-home-dashboard-count">14 篇</strong>
   </div>
   <div class="dpr-home-dashboard-body">
 <ul class="dpr-home-dashboard-paper-list"><li><span class="dpr-home-dashboard-paper-title" title="Beyond Kinematic Tracking: Preserving Expressive Characteristics in Humanoid Whole-Body Control">Beyond Kinematic Tracking: Preserving Expressive Characteristics in Humanoid Whole-Body Control</span></li><li><span class="dpr-home-dashboard-paper-title" title="KODA: Kinematics--Observation Data Alignment for Humanoid Learning from Human Egocentric Demonstration">KODA: Kinematics--Observation Data Alignment for Humanoid Learning from Human Egocentric Demonstration</span></li><li><span class="dpr-home-dashboard-paper-title" title="Inertially Significant Humanoid Teleoperation via Whole Body Model Predictive Control and Online Parameter Estimation">Inertially Significant Humanoid Teleoperation via Whole Body Model Predictive Control and Online Parameter Estimation</span></li></ul>
   </div>
-  <div class="dpr-home-dashboard-tags"><span class="dpr-home-dashboard-tag">humanoid <strong>10</strong></span><span class="dpr-home-dashboard-tag">hip-exo <strong>3</strong></span></div>
+  <div class="dpr-home-dashboard-tags"><span class="dpr-home-dashboard-tag">humanoid <strong>10</strong></span><span class="dpr-home-dashboard-tag">hip-exo <strong>3</strong></span><span class="dpr-home-dashboard-tag">exo-vision <strong>2</strong></span></div>
 </section>
 </div>
 

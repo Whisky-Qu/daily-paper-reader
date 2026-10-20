@@ -1,26 +1,10 @@
 {
   "date": "20261020",
   "date_label": "",
-  "generated_at": "2026-10-20 06:33:22 UTC",
+  "generated_at": "2026-10-20 06:40:34 UTC",
   "recommend_exists": true,
-  "run_count": 1,
+  "run_count": 2,
   "papers": [
-    {
-      "paper_id": "2610.15833v1",
-      "route": "202610/20/2610.15833v1-p-bfm-perceptive-behavioral-foundation-models-for-humanoid-control-via-unsupervised-reinforcement-learning",
-      "title": "P-BFM: Perceptive Behavioral Foundation Models for Humanoid Control via Unsupervised Reinforcement Learning",
-      "section": "deep",
-      "tags": [
-        {
-          "kind": "query",
-          "label": "humanoid"
-        }
-      ],
-      "score": 9.0,
-      "evidence": "基于无监督强化学习的感知行为基础模型用于地形条件人形全身控制",
-      "first_seen_at": "2026-10-20 06:33:22 UTC",
-      "updated_at": "2026-10-20 06:33:22 UTC"
-    },
     {
       "paper_id": "2610.19067v1",
       "route": "202610/20/2610.19067v1-tread-a-visuo-inertial-framework-for-terrain-and-locomotion-context-aware-gait-phase-and-speed-estimation-in-wearable-robotics",
@@ -34,6 +18,22 @@
       ],
       "score": 9.0,
       "evidence": "面向可穿戴辅助机器人的视惯地形感知与步态相位速度估计",
+      "first_seen_at": "2026-10-20 06:33:22 UTC",
+      "updated_at": "2026-10-20 06:40:34 UTC"
+    },
+    {
+      "paper_id": "2610.15833v1",
+      "route": "202610/20/2610.15833v1-p-bfm-perceptive-behavioral-foundation-models-for-humanoid-control-via-unsupervised-reinforcement-learning",
+      "title": "P-BFM: Perceptive Behavioral Foundation Models for Humanoid Control via Unsupervised Reinforcement Learning",
+      "section": "deep",
+      "tags": [
+        {
+          "kind": "query",
+          "label": "humanoid"
+        }
+      ],
+      "score": 9.0,
+      "evidence": "基于无监督强化学习的感知行为基础模型用于地形条件人形全身控制",
       "first_seen_at": "2026-10-20 06:33:22 UTC",
       "updated_at": "2026-10-20 06:33:22 UTC"
     },
@@ -134,6 +134,42 @@
       "updated_at": "2026-10-20 06:33:22 UTC"
     },
     {
+      "paper_id": "2610.15548v1",
+      "route": "202610/20/2610.15548v1-pointwalker-mapless-quadruped-locomotion-directly-from-raw-lidar-point-clouds",
+      "title": "PointWalker: Mapless Quadruped Locomotion Directly From Raw LiDAR Point Clouds",
+      "section": "quick",
+      "tags": [
+        {
+          "kind": "query",
+          "label": "exo-vision"
+        }
+      ],
+      "score": 6.0,
+      "evidence": "面向腿足运动控制的楼梯斜坡地形识别",
+      "first_seen_at": "2026-10-20 06:40:34 UTC",
+      "updated_at": "2026-10-20 06:40:34 UTC"
+    },
+    {
+      "paper_id": "2610.17930v1",
+      "route": "202610/20/2610.17930v1-locomotion-with-online-awareness-of-dynamics-for-precision-footholds",
+      "title": "Locomotion with Online Awareness of Dynamics for Precision Footholds",
+      "section": "quick",
+      "tags": [
+        {
+          "kind": "query",
+          "label": "exo-vision"
+        },
+        {
+          "kind": "query",
+          "label": "humanoid"
+        }
+      ],
+      "score": 6.0,
+      "evidence": "基于深度感知的足式运动策略与真机迁移",
+      "first_seen_at": "2026-10-20 06:33:22 UTC",
+      "updated_at": "2026-10-20 06:40:34 UTC"
+    },
+    {
       "paper_id": "2610.17232v1",
       "route": "202610/20/2610.17232v1-lidar-based-humanoid-navigation-in-dynamic-non-convex-environments-via-spatio-temporal-safe-corridors",
       "title": "LiDAR-based Humanoid Navigation in Dynamic, Non-Convex Environments via Spatio-Temporal Safe Corridors",
@@ -146,22 +182,6 @@
       ],
       "score": 6.0,
       "evidence": "激光雷达感知与落脚规划及全身控制耦合的人形导航",
-      "first_seen_at": "2026-10-20 06:33:22 UTC",
-      "updated_at": "2026-10-20 06:33:22 UTC"
-    },
-    {
-      "paper_id": "2610.17930v1",
-      "route": "202610/20/2610.17930v1-locomotion-with-online-awareness-of-dynamics-for-precision-footholds",
-      "title": "Locomotion with Online Awareness of Dynamics for Precision Footholds",
-      "section": "quick",
-      "tags": [
-        {
-          "kind": "query",
-          "label": "humanoid"
-        }
-      ],
-      "score": 6.0,
-      "evidence": "基于深度感知的足式运动策略与真机迁移",
       "first_seen_at": "2026-10-20 06:33:22 UTC",
       "updated_at": "2026-10-20 06:33:22 UTC"
     },

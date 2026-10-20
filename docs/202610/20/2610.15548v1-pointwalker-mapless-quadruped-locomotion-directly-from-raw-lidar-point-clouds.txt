@@ -1,0 +1,1230 @@
+PointWalker: Mapless Quadruped Locomotion
+Directly From Raw LiDAR Point Clouds
+Sicen Li1,2, Zhen Chu1,2, Chao Li2, Jun Zheng4, Qiuguo Zhu1, and Jun Wu1,3,*
+Abstract—Quadruped robots deployed for inspection and field
+missions must cross heterogeneous terrain, from stairs, slopes,
+and gaps to high platforms, stepping stones, and balance beams,
+where safe support is sparse or see-through. Existing methods
+interpose a terrain map or a depth image between sensing and
+control. Maps are costly to maintain, corrupted by odometry
+drift and outliers, and misled by see-through gratings, while
+depth cameras degrade with lighting and surface material. In
+this paper, we present PointWalker, a mapless framework whose
+single reinforcement learning policy directly consumes raw point
+clouds from four light detection and ranging (LiDAR) sensors.
+Voxelized points are encoded by linear self-attention and fused
+with proprioception through cross-attention, so terrain geometry
+reaches the policy without maps or foothold estimation. One
+proximal policy optimization (PPO) run, with terrain-aware
+rewards and dual-channel simulation of see-through gratings,
+yields one policy for all seven terrain classes with a 90.1%
+mean success rate in simulation. Deployed zero-shot on a Deep
+Robotics X30 at 50 Hz onboard, it crosses 0.8-m gaps, climbs 0.8-
+m platforms and 45◦steel-grating stairs, carries a 50-kg payload,
+and completes a 2.5-km mountain route.
+Index Terms—Legged locomotion, legged robots, LiDAR, point
+clouds, reinforcement learning.
+I. INTRODUCTION
+Quadruped robots are entering industrial inspection, payload
+delivery, and field exploration, where one platform must
+cross heterogeneous terrain: stairs, steep slopes, gaps, high
+platforms, stepping stones, and balance beams (Fig. 1). Safe
+traversal depends on perceiving support geometry before con-
+tact (see-through grating treads, the far edge of a gap, the next
+stone in a sparse field), onboard in real time.
+Reinforcement learning (RL) dominates quadrupedal loco-
+motion: massively parallel simulation [1] yields robust pro-
+prioceptive policies [2], [3], and teacher–student distillation
+injects terrain awareness from privileged height or environ-
+ment observations [4], [5]. The resulting policies are reactive
+to what the feet touch: on gaps, high platforms, and sparse
+footholds (whose decisive geometry lies ahead of and beneath
+the body), blind performance collapses.
+Perceptive methods therefore insert a terrain representa-
+tion between sensing and control. Elevation maps [6], [7]
+1College of Control Science and Engineering, Zhejiang University,
+Hangzhou 310027, China (e-mail: {0625416, 12560199, qgzhu,
+junwuapc}@zju.edu.cn).
+2Yunshenchu
+Technology
+Co.,
+Ltd.,
+Hangzhou,
+China
+(e-mail:
+lichao@deeprobotics.cn).
+3Zhejiang Key Laboratory of Additive Manufacturing Technology and
+Equipment, Hangzhou, China.
+4Hangzhou Public Library, Hangzhou, China (e-mail: zj558@126.com).
+*Corresponding author: Jun Wu.
+Supplementary
+video
+is
+available
+at
+https://youtu.be/
+QnCFGh7QXIw.
+(a)
+(b)
+(c)
+(d)
+(e)
+(f)
+(g)
+(h)
+Fig. 1. Real-world experiments with the X30 quadruped robot, all driven by
+one policy. (a) Stepping stones, (b) an 80-cm gap, (c) an 80-cm-high platform,
+and (d) a balance beam. (e) Outdoor mountain slope and (f) outdoor stairs on
+the 2.5-km route (25-kg payload; Fig. 15), (g) industrial steel-grating stairs,
+and (h) stair ascent with a 50-kg payload.
+serve foothold planners [8] and perceptive controllers [9];
+depth images and reconstructed maps are consumed end-to-
+end by parkour policies [10]–[13]. The burden falls on this
+interface: odometry drift and registration error propagate into
+control, outliers corrupt the map, online rebuilding consumes
+onboard compute, see-through gratings violate its single-height
+assumption, and depth cameras degrade in bright or dim light.
+Light detection and ranging (LiDAR) provides direct,
+illumination-invariant 3-D geometry, yet in locomotion it still
+enters the policy through an intermediate form, an elevation
+map [14] or a learned representation [15], with raw-point
+input confined to collision avoidance [16]. Whether a policy
+can act on the raw points themselves and span terrain this
+heterogeneous in a single run remains open.
+In
+this
+paper,
+we
+propose
+PointWalker,
+a
+mapless
+perception–control framework for quadruped locomotion di-
+rectly from raw LiDAR point clouds (Fig. 1). Four LiDARs
+give a fused 360◦view of the terrain beneath and ahead; every
+control step, the policy consumes 350 voxelized points from
+the five latest scans. Linear self-attention encodes the points
+into tokens, and cross-attention with proprioceptive history
+as the query retrieves task-relevant terrain context: no map,
+no foothold estimate. A single proximal policy optimization
+(PPO) [17] run trains the policy over all terrains, combin-
+ing terrain-aware foot-placement rewards, terrain-modulated
+takeoff incentives, and a dual-channel simulation that renders
+gratings faithfully.
+The main contributions of this paper are as follows.
+• A mapless LiDAR locomotion interface. PointWalker
+is the first legged controller that learns terrain traversal
+directly from raw LiDAR point clouds: no terrain map,
+scan projection, world model, or learned latent between
+sensing and foot placement; the perception pathway runs
+in 2.01 ms onboard, 10% of the 20-ms control period.
+• One-stage training of a single policy across seven
+This work has been submitted to the IEEE for possible publication. Copyright may be transferred without notice, after which this version may no longer be
+accessible.
+arXiv:2610.15548v1  [cs.RO]  11 Oct 2026
+
+
+IEEE ROBOTICS AND AUTOMATION LETTERS. PREPRINT VERSION.
+2
+terrain classes: stairs, slopes, discrete obstacles, gaps,
+high platforms, stepping stones, and balance beams, with
+a 90.1% mean success rate at the highest curriculum
+difficulty.
+• Zero-shot validation on hardware: a single policy on
+a Deep Robotics X30 traverses 0.8-m gaps, mounts 0.8-
+m-high platforms, climbs 45◦steel-grating stairs, keeps
+walking with two LiDARs occluded, carries a 50-kg
+payload (91% of body weight), and completes a 2.5-km
+mountain route with 200 m of elevation gain.
+II. RELATED WORK
+A. Learning-Based Legged Locomotion
+Deep RL is the workhorse of quadrupedal control: Hwangbo
+et al. [2] learned actuator models for real ANYmals, mas-
+sively parallel simulation [1] cut training to minutes, and
+DreamWaQ [3] inferred terrain implicitly from proprioception
+alone. Teacher–student pipelines instead grant the teacher
+privileged observations and distill a proprioceptive student [4],
+[5]; Miki et al. [9] refined the recipe with a belief state over
+elevation maps whose trust is gated against sensor failure,
+and Ji et al. [18] trained the state estimator concurrently with
+the policy. For terrain whose support must be seen before it
+is stepped on, distillation cannot add information the student
+never senses; PointWalker trains a directly perceiving policy
+in one stage, with privilege confined to the critic.
+B. Perception Interfaces for Agile Locomotion
+Elevation maps [6], [7] fuse depth and point-cloud mea-
+surements with odometry into a robot-centric 2.5-D surface,
+on which foothold optimization [8] and attention-based map
+encoders [19] build. Depth images and maps reconstructed
+from multi-sensor point clouds instead feed parkour policies
+end-to-end [10]–[12]. Single-stage frameworks estimate terrain
+implicitly [13], reconstruct local height maps [20], or predict
+foothold priors [21] from vision, with depth-only perception
+extending to humanoids [22]. Specialized lines target hollow
+see-through stairs [23], platform jumps of varying distance and
+height [24], and jumping over gaps and high platforms [25].
+Across these systems, the interface rather than the task bounds
+performance, and forward depth limits perception to a cone
+that excludes the area beneath the body.
+C. LiDAR-Based Locomotion
+In terrain-aware locomotion, LiDAR reaches the policy
+in raw form only for collision avoidance among dynamic
+obstacles [16]. BeamDojo [14] trains humanoid locomotion
+on sparse footholds but feeds the policy an elevation map
+reconstructed from LiDAR scans; JEPLO [15] learns mapping-
+free terrain representations with a joint-embedding predictive
+world model, projecting accumulated scans onto a spherical
+depth image and acting on the learned latents. PointWalker re-
+moves the last intermediate form: one policy attends directly to
+raw voxelized LiDAR points cross-fused with proprioception
+(gratings and sparse footholds stay points) and spans stairs to
+balance beams in one training run.
+III. METHOD
+Fig. 2 illustrates PointWalker: one PPO run in massively
+parallel simulation [1], [26] produces a single policy covering
+all seven terrain classes, transferred zero-shot to the X30.
+A. Point Cloud Perception from Onboard LiDAR
+LiDAR configuration. Four Livox Mid-360 LiDARs are
+mounted at the corners of the body, two at the front and two
+at the rear, with interleaved pitch, for a combined 360◦hor-
+izontal field of view and −7◦–52◦vertical range. Simulation
+reproduces this geometry by casting multiple rays that also
+hit the perception-only structural layer (Section III-D) and the
+thigh and shank meshes to model leg self-occlusion. The rays
+are randomly permuted into five groups emitted in rotation
+(an effective 10-Hz scan rate), mimicking the Mid-360’s non-
+repetitive scanning. At 50 Hz, one group is read per step and
+the latest five retained: 5 × 70 = 350 points spanning 0.1 s.
+Preprocessing and degradation. Each step, the hits are
+transformed to the base frame, and points within 0.15 m of a
+sensor origin or inside the body bounding box are removed.
+Gaussian noise (σ = 0.02 m) is added; the rest is voxelized at
+0.1-m resolution over the perception region x ∈[−1.2, 1.2],
+y ∈[−0.6, 0.6], z ∈[−1.0, 0.5] m (the tops of the tallest
+curriculum platforms rise above this bound; their front faces
+remain in view) with per-voxel averaging; and 70 points per
+group are sampled from occupied voxels into the fixed-size
+tensor Pt ∈R5×70×3. Training also injects sensor degra-
+dation (2% invalidated points, 2% random outliers, 40–60-
+ms latency), so the policy trains against an already-degraded
+sensing chain. Invalid points are masked, not removed, in the
+attention below. Fixed-size sampling keeps onboard compute
+independent of scene complexity.
+Linear-attention encoding. Each slot, base-frame coordi-
+nates plus a temporal scan-group encoding (4-D input), is
+linearly embedded to 32 dimensions and contextualized by two
+levels of linear self-attention [27], yielding 32-D point tokens
+ei =
+∑
+j ϕ(W Qxi)⊤ϕ(W Kxj) xj
+∑
+j ϕ(W Qxi)⊤ϕ(W Kxj)
+,
+ϕ(x) = elu(x) + 1,
+(1)
+where xi is the 32-D embedding of the ith point, W Q and
+W K the query and key projections, and ϕ a positive feature
+map, with xj as its own value vector and the denominator
+clamped for numerical stability. Linear attention scales with
+the number of points instead of quadratically, avoiding the
+onboard latency of standard attention. Unlike shared-MLP
+encoders [28], it captures inter-point geometry (the parallel
+bars of a grating) that identifies steppable regions.
+B. Policy Network With Cross-Attention Fusion
+Observations and commands. The single-frame observa-
+tion is ot =
+[
+1
+4 ω⊤
+t , g⊤
+t , a⊤
+t−1, q⊤
+t ,
+1
+10 ˙q⊤
+t
+]⊤
+∈R42, where
+ωt is the base angular velocity, gt the projected gravity, at−1
+the previous action, and qt, ˙qt the positions and velocities of
+the 12 joints. Base linear velocity, not measurable without
+external localization, is excluded; channels carry Gaussian
+
+
+IEEE ROBOTICS AND AUTOMATION LETTERS. PREPRINT VERSION.
+3
+Exteroception
+4×LiDAR@10 Hz
+Proprioception
+Ot ∈ ℝ5×42
+ω , g , at−1, q , q̇
+Command ct ∈ ℝ5
+vx, vy, ωz,
+sin ψt, cos ψt
+Privileged info
+true states, dynamics
+(a) Environment
+Jump incentive
+Reward functions
+Gap overspeed
+tolerance
+Foot-edge penalty Local plane fitting
+(b) Actor network
+(c) Deployment
+Point-cloud
+filtering
+Voxelize 
+0.1 m
+5×70×3
+2×Linear 
+self-attn
+ei ∈ ℝ32
+concat
+Linear 512
+Linear 512
+Multi-head
+Cross-attention
+zt ∈ ℝ512
+Linear 512
+Linear 512
+Gaussian
+head
+μθ ∈ ℝ12
+concat
+foot
+clearance
+estimator
+ĥt ∈ ℝ4
+velocity 
+estimator
+v̂t ∈ ℝ3
+PPO training
+Critic
+GAE
+Policy
+Gradient 
+Auxiliary loss
+λv‖v̂t−vt‖2 + λh‖ĥt−ht‖2
+Action
+Motors@1000Hz
+IMU@200Hz
+4×LiDAR
+Proprioception
+Command 
+Controller
+Point cloud
+Voxel tokens
+Actor network
+@ 50Hz
+Zero-shot
+deployment
+Action
+Voxelize 
+st⊕zt ∈ ℝ1024
+PD servo
+Height scan
+vt, ht
+Fig. 2. PointWalker framework. (a) Environment: the policy receives proprioceptive history, commands, and four-LiDAR point clouds; privileged information
+(true states, dynamics) feeds the value network and the terrain-aware rewards in training only. (b) Actor network: linear self-attention point encoding, cross-
+attention fusion, a Gaussian action head with two auxiliary heads, and PPO training with an asymmetric critic. (c) Deployment: ONNX export and zero-shot
+50-Hz inference on the onboard RK3588.
+noise, mounting misalignment, and delays. The latest five
+frames (0.1 s) stack into Ot ∈R5×42. The command vector
+ct = [vcmd
+x
+, vcmd
+y
+, ωcmd
+z
+, sin ψt, cos ψt] ∈R5 combines veloc-
+ity commands (±1.5 m/s forward, ±0.9 m/s lateral, ±1 rad/s
+yaw rate) with the phase of a 1.4-Hz gait clock as the rhythmic
+prior for swing–stance alternation [29].
+Cross-attention fusion. A temporal branch concatenates
+each frame of Ot with ct, appends frame position encodings,
+and encodes the flattened vector with a two-layer 512-D mul-
+tilayer perceptron (MLP; linear, layer normalization, sigmoid
+linear unit) into st. The fusion module then queries the point
+tokens with this feature through multi-head cross-attention
+(MHA; Fig. 2(b)):
+zt = MHA
+(
+ut, {ei}350
+i=1
+)
+∈R512,
+(2)
+where the query ut is a per-head projection of st and 16 heads
+of 32 dimensions attend over the 350 tokens with invalid points
+masked and concatenate into the 512-D terrain context zt.
+Querying with proprioception and commands retrieves task-
+relevant geometry (the gap edge in the crossing direction, the
+support near a swinging leg) and suppresses the rest.
+Action and auxiliary heads. The backbone concatenates
+st with zt (1024-D), passes through a two-layer 512-D MLP,
+and feeds three linear heads. The action head parameterizes
+the diagonal Gaussian πθ(· | Pt, Ot, ct) = N(µθ, diag σ2
+θ)
+with mean µθ ∈R12 and log standard deviation clipped to
+[−6, 2]. Two auxiliary heads estimate the base linear velocity
+ˆvt ∈R3 and foot clearances ˆht ∈R4 under mean-squared-
+error supervision (3). The supervision forces the backbone to
+encode the motion state and local terrain geometry that blind
+policies recover implicitly and dynamical drift corrupts [9],
+[18]; unlike a separate concurrently trained estimator [18], the
+heads add no extra forward pass and yield online estimates.
+Action mapping and joint control. The action (sam-
+pled
+during
+training,
+the
+mean
+µθ
+at
+deployment)
+is
+scaled
+and
+clipped
+to
+joint
+position
+targets
+qdes
+t
+=
+clip
+(
+q0 + 0.25 at, q−
+lim, q+
+lim
+)
+around the default standing
+pose q0
+=
+[0, −1, 1.8] rad per leg. Joint proportional–
+derivative (PD) controllers track these targets with hip-
+abduction/hip-pitch/knee gains Kp = 100/100/120 N m/rad,
+Kd = 2.5/2.5/3 N m s/rad, and torque limits 84/84/150 N m,
+without additional low-level filtering.
+Asymmetric actor–critic. Beyond commands and actions,
+the asymmetric critic [30] reads training-only privileged inputs
+through a multilayer 512-D MLP: four frames of noise-
+free true state (base velocity, joint states, foot contacts), a
+height map around the body, and the ground-truth random-
+ized dynamics parameters (Table III). Privilege is confined
+to the value pathway and absent from the exported model.
+Deployment thus needs no height map or physical estimates
+and avoids the distillation gap of two-stage teacher–student
+pipelines [4], [5]. The policy minimizes the PPO loss jointly
+with the value and auxiliary losses:
+L(θ, ϑ) = −ˆE
+[
+min
+(
+ηt ˆAt, clip(ηt, 1−ϵ, 1+ϵ) ˆAt
+)]
++ βv ˆE
+[(
+Vϑ(ξt)−V targ)2]
++ λv∥ˆvt−vt∥2
++ λh∥ˆht−ht∥2,
+(3)
+where ηt is the action probability ratio, ˆAt the generalized
+advantage estimate, Vϑ the value network with parameters ϑ
+and input ξt, ϵ = 0.2 the clip parameter, βv = 1.0 and
+λv = λh = 0.1 the value and auxiliary coefficients, and vt, ht
+the privileged ground truth; remaining hyperparameters follow
+Section III-D.
+C. Terrain-Aware Reward Design
+Reward composition. The per-step reward is the weighted
+sum rt = ∑
+i wiri; Table I lists all terms, weights, and
+equations, with tracking terms from [3]. In Table I, τk, ˙qk,
+¨qk are joint torque, velocity, and acceleration; Fj the contact
+force of foot j; bj the contact flag; pf,j the foot position
+and ph,j its nominal standing location; sw/st mark swing
+and stance. Rewards use noise-free simulator state; the policy
+
+
+IEEE ROBOTICS AND AUTOMATION LETTERS. PREPRINT VERSION.
+4
+TABLE I
+REWARD TERMS AND WEIGHTS
+Reward term
+Equation
+Weight
+Lin. vel. tracking
+exp(−4∥vxy,cmd −vxy∥2)
++1.1
+Ang. vel. tracking exp(−4(ωcmd
+z
+−ωz)2)
++0.6
+Lin. velocity (z)
+v2
+z
+−2.0
+Ang. velocity (xy) ∥ωxy∥2
+−0.06
+Body height
+(hdes −hb)2
+−5.0
+Terrain alignment 1 −exp(−∥g −nt∥2)
+−1.0
+Collision
+Nc
+−0.2
+Joint limits
+∑
+k(qk −clip(qk, q−
+k , q+
+k ))2
+−0.2
+Stumble
+∑
+j 1[∥F xy
+j ∥>5|F z
+j |]
+−0.1
+Joint power
+∑
+k |τk ˙qk|
+−0.0015
+Torques
+∑
+k τ 2
+k
+−0.04
+Joint accelerations ∑
+k ¨q2
+k
+−0.001
+Landing impact
+∑
+j bj∥vf,j∥2
+−0.15
+Foot slip
+∑
+j∈st ∥vxy
+f,j∥2
+−0.15
+Foot placement
+∑
+j ∥pf,j −ph,j∥2
+−1.0
+Footswing height
+∑
+j∈sw(hf,j −hbez)2
+−10.0
+Phase tracking
+∑
+j 1[j∈sw](1−bj) + 1[j∈st] exp(−∥vxy
+f,j∥2)
++0.15
+Foot-edge penalty
+1
+M
+∑
+j∈st
+∑
+m 1[dj,m /∈W]
+−0.5
+Jump incentive
+vz (hp −h0)+, h0 = 0.25 m
++2.0
+Action rate
+∥at −at−1∥2
+−0.04
+Smoothness
+∥at −2at−1 + at−2∥2
+−0.04
+never observes base velocity, whose estimation rests with the
+auxiliary heads and value network (Section III-B).
+Local plane fitting. One reward basis covers all ter-
+rains: a least-squares plane fitted to the privileged height
+samples around the body yields the terrain normal nt =
+[A, B, −1]/∥[A, B, −1]∥of the fitted plane z=Ax+By+D
+and the body height hb above it (hdes the nominal standing
+height). The alignment term penalizes the deviation of the
+projected gravity from nt rather than the world vertical, so
+posture conforms to slopes and steps with no per-terrain
+switching.
+Foot edge and swing trajectory. Landing quality is scored
+by casting M = 11 privileged downward rays within a disc
+of radius 0.085 m under each foot (the privileged ring scan).
+For a stance foot j, dj,m (the vertical distance from the
+mth hit to the foot reference plane) is valid support only
+inside W = [−0.11, 0.02] m (misses, edge overhangs, and
+penetrating protrusions are invalid). The foot-edge penalty
+charges the invalid fraction (Table I); related penalties appear
+in [11], [20], [31]. Swing feet track a quadratic Bézier profile
+hbez.
+Dynamic
+traversal
+incentives. We add two terrain-
+modulated incentives for the pre-takeoff momentum that gaps
+and high platforms demand but purely tracking-style rewards
+suppress [10], [25]. For gaps, the commanded speed along
+the crossing direction is boosted by κ(Gw −G0)+ with
+the overspeed tolerance relaxed (Gw the gap width ahead,
+κ = 2 s−1, G0 = 0.3 m). For platforms, the jump incentive
+rewards the product vz(hp −h0)+ of vertical velocity and
+excess height (hp the platform height ahead, h0 = 0.25 m).
+Both are estimated online from the privileged height samples
+(gap width as the width of support-free columns, platform
+height as the difference between the means of the highest and
+lowest point sets). The incentive scales with difficulty.
+Termination. Episodes terminate on persisting undesirable
+body contact (≈1 s), tipping over, sinking below the support
+surface, falling into a gap, leaving the terrain, or timeout (20 s);
+failures and timeouts enter the advantage estimation differently.
+TABLE II
+DIFFICULTY CURRICULUM OF THE SEVEN TRAINING TERRAINS
+Terrain
+Difficulty parameter
+Curriculum range
+Stairs
+Step height (tread 0.28 m) 0.1 →0.28 m
+Slopes
+Slope (tan θ)
+0.2 →0.65
+Discrete obstacles Obstacle height
+0.1 →0.23 m
+Gaps
+Gap width
+0.15 →1.1 m
+High platforms
+Platform height
+0.25 →1.2 m
+Stepping stones
+Stone spacing
+0.1 →0.55 m
+Stone width
+0.8 →0.35 m
+Balance beams
+Beam width
+0.9 →0.3 m
+TABLE III
+TRAINING AND DOMAIN RANDOMIZATION CONFIGURATION
+Parameter
+Value
+Training configuration
+Parallel environments
+8192
+GPUs / training time
+4× RTX 5090 / ∼50 h
+Optimizer / learning rate
+Adam / 3 × 10−4
+Discount γ / GAE λ
+0.99 / 0.95
+Clip ϵ / grad. clip / epochs
+0.2 / 1.0 / 5
+Domain randomization
+Friction / restitution
+U(0.3, 1.2) / U(0, 0.3)
+Link mass / PD gains
+U(0.85, 1.15) / U(0.9, 1.1)
+CoM displacement
+x ± 0.1, y ± 0.05, z ∈(−0.075, 0.15) m
+Payload
+U(−10, 50) kg
+Motor strength
+U(0.85, 1.15)
+Action delay / IMU orientation 0–28 ms / ±0.1 rad
+Observation noise
+Joint pos. ±0.01 rad, joint vel. ±1.5 rad/s,
+base ang. vel. ±0.2 rad/s, proj. gravity ±0.1
+Point cloud degradation
+σ=0.02 m noise, 2% invalid/outlier,
+40–60 ms latency
+D. Dual-Channel Simulation and One-Stage Training
+Physics and perception channels. The physics channel
+holds the collidable height field and meshes; privileged height
+sampling and the foot rays of Section III-C cast only against
+it. The perception channel is a structural layer that enters
+LiDAR casting but never in collision: steel-grating treads and
+risers (5-mm flat bars at 40-mm pitch), stair handrails, random
+posts, hanging bars, and platform edge beams and posts. The
+privileged side sees solid support, while the policy’s point
+cloud sees the sparse grating, handrails, and clutter of a real
+industrial stair, flat bars and spacing preserved as points. The
+policy learns to land on solid support while perceiving the
+see-through structure.
+Terrain curriculum. The seven terrains (Table II) form
+a curriculum of 10 × 10-m tiles, robots starting on random
+difficulty rows; discrete obstacles are used in simulation only.
+Following legged_gym [1], traveling beyond half the tile
+length promotes a robot to a harder row, falling short of half
+the commanded distance demotes it. Balance beams are narrow
+beams arranged in a star.
+Domain randomization. To bridge the reality gap, train-
+ing randomizes contact, mass, actuation, and sensing [32];
+sensing-side degradation follows Section III-A. Half of the
+environments apply left–right mirror augmentation (joint re-
+ordering with matching reflections of observations, commands,
+actions, and points). Training runs in Isaac Lab with massive
+parallelism; the full configuration is in Table III.
+Deployment. Only the policy network is exported to ONNX
+(Fig. 2(c)) and runs deterministically (action mean) at 50 Hz
+on the X30’s onboard RK3588. The cross-attention weights
+are read out with the action and projected onto the points as
+per-point importance for interpreting foothold decisions.
+
+
+IEEE ROBOTICS AND AUTOMATION LETTERS. PREPRINT VERSION.
+5
+TABLE IV
+COMPUTE COST OF THE PERCEPTION REPRESENTATIONS
+Representation
+Params (M) FLOPs (M) Latency (ms)
+PointWalker, linear attn.,
+0.1-m voxels
+1.47
+7.35
+2.01 ± 0.85
+w/ Standard attention
+1.47
+22.67
+8.23 ± 3.68
+w/ 0.05-m voxels
+1.47
+19.52
+7.33 ± 2.40
+w/ 0.2-m voxels
+1.47
+4.36
+1.03 ± 0.45
+Depth-image encoding
+2.16
+11.82
+4.50 ± 2.25
+Height-map encoding
+1.26
+2.90
+1.18 ± 0.43
+Blind
+0.75
+1.89
+0.38 ± 0.06
+(a) Slopes
+(b) Stairs
+(c) Discrete obstacles (d) High platforms
+(e) Gaps
+(f) Balance beams
+(g) Stepping stones
+Fig. 3. Snapshots of the seven training terrains in simulation (Table II); points
+colored by cross-attention weight (Section III-B): red = high, blue = low.
+IV. EXPERIMENTS
+We report the experimental setup (Section IV-A), simulation
+results (Section IV-B), and hardware results (Section IV-C);
+discrete obstacles are evaluated in simulation only.
+A. Experimental Setup
+Platform and deployment. The robot is the Deep Robotics
+X30 quadruped (55 kg, 0.9-m body, 12 actuated joints); sens-
+ing and deployment follow Sections III-A and III-D. Table IV
+reports the onboard cost of each perception representation: net-
+work parameters, FLOPs, and full-pathway latency including
+voxelization, across 100 ONNX Runtime passes at batch size
+1 on the RK3588 CPU. Linear attention with 0.1-m voxels
+holds the per-step latency at 2.01 ms, 10% of the 20-ms
+control period, leaving headroom for servo control and safety
+monitoring.
+Metrics. A simulation trial succeeds if the robot crosses
+the full 10-m tile within the 20-s timeout without a failure
+termination (Section III-C). We evaluate success rates (Ta-
+ble V) at the highest curriculum difficulty (Table II; Fig. 3)
+with a 1.0-m/s command, the structural layer enabled, training-
+level sensor degradation, and the deterministic mean policy,
+matching deployment. Each cell covers 200 trials over 5 seeds.
+Landing quality is the edge-landing ratio, the invalid fraction
+of the privileged ring scan (Section III-C), on stairs, balance
+beams, and stepping stones.
+Baselines and ablations. Interface-level contrasts swap
+only the terrain representation (Height-map encoding) or re-
+move perception altogether (Blind); the external-method re-run
+(Depth-image encoding) keeps the source methods’ perception
+and adopts our terrain, curriculum, and environments. Pub-
+lished hardware numbers are not comparable across platforms
+(Section II), and re-running external systems on hardware is
+precluded by equipment and safety; method-level comparison
+therefore stays in simulation. All entries are retrained as single
+policies under Table III with only the ablated component
+changed; the simulation-evaluated entries share five seeds and
+TABLE V
+SIMULATION SUCCESS RATES (%)
+Method
+Stairs Slopes Obst. Gaps Plat. Stones Beams Mean
+PointWalker (full) 93.2
+96.3
+93.2 86.1 85.3
+83.8
+92.7
+90.1
+Depth-image enc.
+94.6
+94.9
+91.7 71.5 82.9
+68.4
+89.3
+84.8
+Height-map enc.
+86.7
+97.2
+93.3 82.4 87.1
+75.8
+89.1
+87.4
+Blind
+82.6
+84.1
+90.3 18.5 15.2
+6.4
+11.7
+44.1
+w/o Cross-attn.
+82.4
+92.1
+89.6 74.8 75.2
+68.9
+77.5
+80.1
+w/ Standard attn.
+94.3
+95.7
+94.0 87.2 84.8
+84.7
+92.1
+90.4
+w/ 0.05-m voxels
+92.8
+97.1
+94.5 88.5 87.4
+90.1
+94.3
+92.1
+w/ 0.2-m voxels
+82.7
+95.6
+92.5 79.1 79.6
+67.7
+78.3
+82.2
+one protocol, the rest being verified qualitatively on hardware
+(Section IV-C): Depth-image encoding follows the egocentric
+depth inputs of PIE [13] and START [20], virtual-camera
+rendered as in the originals (Tables IV, V); Height-map
+encoding aggregates the 350-point tensor into a 0.1-m 2.5-
+D height map encoded by an MLP [4], [6], the deployed
+form of elevation-map methods [14] (Tables IV, V); Blind
+removes the point branch [3] (Tables IV, V); w/o Dual-
+channel terrain removes the perception-only structural layer
+(Section III-D; hardware, qualitative); w/o Foot-edge penalty
+removes the foot-edge penalty (Table I; Fig. 4; hardware, quali-
+tative); w/o Overspeed tolerance removes the gap speed boost
+and overspeed tolerance (Section III-C; hardware, qualitative);
+w/o Jump incentive removes the jump incentive (Table I;
+hardware, qualitative); w/o Cross-attn. fusion replaces cross-
+attention (2) with mean pooling and concatenation (Table V);
+and w/ Standard attention / 0.05-m / 0.2-m voxels uses
+softmax attention instead of linear, or changes the voxel size
+(Tables IV, V).
+B. Simulation Results
+Overall traversal and baselines. PointWalker averages
+90.1% across the seven terrains and never drops below 83.8%,
+with one policy and no per-terrain switching (Table V).
+Height-map encoding trails on stairs and stepping stones
+(86.7% and 75.8% versus 93.2% and 83.8%): on the see-
+through grating (Fig. 3(b)), the 2.5-D aggregation yields spuri-
+ous heights that are neither safe support nor true geometry, and
+rasterization erases the geometry of sparse footholds. Slopes
+and platforms score slightly higher, yet the mean trails by 2.7
+points. Blind keeps 82.6% and 84.1% on stairs and slopes,
+terrain the feet can probe, but collapses below 30% on gaps,
+platforms, stones, and beams, where support must be seen
+before contact. Depth-image encoding averages 84.8%: gaps
+and stones fall well short (71.5% and 68.4% versus 86.1% and
+83.8%) and platforms and beams slightly short, as the forward
+camera cone, an interface property rather than an encoding
+deficit, misses the area beneath and beside the body and forces
+reliance on network memory. On stairs, slopes, and discrete
+obstacles the two trade places (94.6%, 94.9%, 91.7%). Image
+space keeps the grating’s 2-D bars that the height map loses
+on stairs, at 2.2× the latency (Table IV).
+Component ablation. Fig. 4 reports the edge-landing ra-
+tio: PointWalker stays lowest (11.5%–18.7%); Depth-image
+encoding rises to 18.6%–26.9%, about 60% higher on average
+and largest on stepping stones; w/o Foot-edge penalty reaches
+32.4%–57.2%, roughly three times PointWalker’s. Privileged
+
+
+IEEE ROBOTICS AND AUTOMATION LETTERS. PREPRINT VERSION.
+6
+Stairs
+Balance beams
+Stepping stones
+0
+20
+40
+60
+Edge landings (%)
+PointWalker
+Depth-image encoding
+w/o Foot-edge penalty
+Fig. 4.
+Edge-landing ratio (invalid fraction of the privileged ring scan,
+Section IV-A) on the three foothold-restricted terrains; error bars: standard
+deviation across five seeds.
+a
+b
+c
+d
+e
+0
+1
+2
+Linear velocity
+(m/s)
+a
+b
+c
+d
+e
+vx
+vy
+vz
+0
+0.5
+1.0
+1.5
+2.0
+2.5
+Time (s)
+−2
+−1
+0
+1
+Angular velocity
+(rad/s)
+ωx
+ωy
+ωz
+Fig. 5.
+Gap crossing with the overspeed tolerance (simulation). Top:
+keyframes a–e in time order; middle and bottom: base-frame linear and angular
+velocities, dashed lines marking the keyframe instants.
+landing supervision thus converts directly into an edge-landing
+constraint; the other three components follow in Section IV-C.
+Gap-crossing dynamics. In Fig. 5, the robot cruises at
+vx ≈1.1 m/s, within the soft tracking tolerance of the 1.0-m/s
+command (a), accelerates into the near edge as the front legs
+reach across it (b), peaks at 2.1 m/s, 90% above cruise, over
+the gap (c, d). ωy swings to 1.6 rad/s, and the robot resumes
+cruising on the far side (e). The pre-edge acceleration is what
+the overspeed tolerance permits (Section III-C).
+Platform-mounting dynamics. In Fig. 6, the robot cruises
+at 1.0 m/s (a), accelerates at the wall, rears up with ωy up
+to 4 rad/s (b–c), and peaks at 2.3 m/s, more than twice the
+cruise, while hooking the top edge and pivoting over it (c–e).
+A 0.5-m/s upward vz pulse marks the hind-leg push onto the
+top (e, f). The build-up and the vertical burst are what the
+jump incentive vz(hp −h0)+ (Table I) elicits.
+Architecture variants. Mean pooling instead of cross-
+attention costs 10 points on average (80.1% versus 90.1%):
+slopes and discrete obstacles degrade least (92.1%, 89.6%),
+stepping stones and beams most (68.9%, 77.5%). Decisive
+foothold points are a small fraction of the input, retrieved
+only by a motion-conditioned query (Section III-B). Standard
+softmax attention averages 90.4%, within 1.1 points per col-
+umn, at 4.1× the latency (Table IV): linear attention costs
+less than half a point and keeps onboard headroom. Voxels of
+0.05 m add 2.0 points (92.1%, stones +6.3) at 3.6× latency.
+Voxels of 0.2 m lose 7.9 (82.2%), sparing slopes and discrete
+obstacles but hitting stones (−16.1), beams (−14.4), and stairs
+(−10.5), whose narrow supports and grating bars approach the
+resolution limit. The voxel variants’ FLOPs (Table IV) track
+the point count, not the parameters: points are sampled from
+a
+b
+c
+d
+e
+f
+0
+1
+2
+Linear velocity
+(m/s)
+a
+b
+c
+d
+e
+f
+0
+0.5
+1.0
+1.5
+2.0
+Time (s)
+−4
+−2
+0
+2
+Angular velocity
+(rad/s)
+vx
+ωx
+vy
+ωy
+vz
+ωz
+Fig. 6. Climbing onto a high platform with the jump incentive (simulation).
+Top: keyframes a–f in time order; middle and bottom: base-frame velocities
+with the keyframe instants marked.
+Fig. 7.
+Ascent of the steel-grating stairs (top) and the simultaneous point-
+cloud attention (bottom; rows time-aligned, red = high, blue = low): attention
+concentrates on the support under the stance feet and the tread about to be
+stepped on; the sparse points preserve the step structure with no map.
+Fig. 8.
+Balance-beam crossing with the simultaneous point-cloud attention
+(rows time-aligned; red = high, blue = low): attention concentrates on the
+beam under the feet and extends to the next segment to be stepped on; the
+sparse points preserve the narrow strip with no map.
+occupied voxels, so finer voxels admit more points and coarser
+voxels fewer. The 0.1-m voxel balances accuracy and compute.
+C. Real-World Results
+We deploy the single policy of Section III-D zero-shot,
+without fine-tuning. The operator issues only a constant for-
+ward command (≈1.0 m/s) with no per-terrain switching or
+adjustment. Indoor tests run under overhead fall protection.
+Terrain traversal. The same policy passes six scenarios:
+industrial steel-grating stairs (25-cm steps, 45◦), natural out-
+door slopes (30◦–40◦), a 0.8-m gap, a 0.8-m platform, stepping
+stones (35-cm tops, 30-cm spacing), and a balance beam (35-
+cm width). The steepest slopes exceed the hardest curriculum
+level (Table II), an out-of-distribution crossing. The gap and
+platform sit in the upper difficulty range of the two dynamic
+
+
+IEEE ROBOTICS AND AUTOMATION LETTERS. PREPRINT VERSION.
+7
+Fig. 9.
+Failure of the w/o Dual-channel terrain variant (Section IV-A) on
+the same stairs. Left: a front leg reaches the first tread but the robot cannot
+mount; center: stalled at the stair base, torso pitched up; right: top view of
+the see-through treads (PointWalker: Fig. 7).
+(a) w/ Foot-edge penalty
+(b) w/o Foot-edge penalty
+Fig. 10. Foot-edge penalty, same-site contrast on stepping stones. (a) Point-
+Walker (w/ Foot-edge penalty): feet land inside the 35-cm stone tops. (b) w/o
+Foot-edge penalty: a front foot slips off a stone edge (red circle) and the robot
+falls.
+(a) w/ Overspeed tolerance
+(b) w/o Overspeed tolerance
+Fig. 11. Overspeed tolerance, same-site contrast at the same 0.8-m gap (multi-
+exposure composites). (a) PointWalker (w/ Overspeed tolerance): accelerates
+before the near edge and lands on the far side. (b) w/o Overspeed tolerance:
+momentum falls short; the nose strikes the far edge and the robot hangs.
+(a) w/ Jump incentive
+(b) w/o Jump incentive
+Fig. 12.
+Jump incentive, same-site contrast (multi-exposure composites;
+descending from a single-tier platform and climbing the 0.8-m platform).
+(a) PointWalker (w/ Jump incentive): hooks the top edge and pulls itself onto
+the top. (b) w/o Jump incentive: claws at the top edge and stalls (red circle).
+incentives (Section III-C), and the stones match the narrowest
+level, the beam approaching it. The grating stairs are the most
+direct evidence for the raw-point interface (Fig. 7): the real
+treads are the see-through structure that 2.5-D height maps
+cannot represent correctly, yet the policy lands on solid support
+straight from the points. The perception-to-foothold link is set
+by the dual-channel simulation (Section III-D). The balance
+beam (Fig. 8) is the sparse-foothold counterpart, crossed with
+no map and no foothold estimate. In both figures, the attention
+read out with the action (Section III-D) concentrates on the
+support beneath the feet and the next landing surface, corrob-
+orating the proprioception-conditioned fusion (Section III-B).
+Ablation verification. Each variant fails at exactly the
+maneuver its component supports. w/o Dual-channel terrain
+saw only solid stairs in training. The hollow grating lies outside
+its perception distribution, and it stalls at the stair base, at
+most resting a front foot on the first tread (Fig. 9), where
+PointWalker completes the climb (Fig. 7). w/o Foot-edge
+Fig. 13. Payload tests with rigid backpack loads (multi-exposure composites):
+left, 30 kg (55% of body weight) onto the 0.8-m platform; right, 50 kg (91%)
+up the grating stairs.
+Fig. 14. LiDAR occlusion test. Top-left and bottom-left: one front and one
+rear LiDAR blocked by adhesive covers (two in total). Right: multi-exposure
+traverse of stairs (20-cm steps), platform, and 20◦slope under occlusion.
+Fig. 15.
+Long-range outdoor and natural-terrain tests. Left: rocky section
+of the 2.5-km route (200-m gain, 25-kg payload); right: gravel, sand, and
+cobblestone, none of the seven training terrains.
+penalty slips off a stone edge and falls (Fig. 10), matching its
+threefold edge-landing ratio (Fig. 4). w/o Overspeed tolerance
+cannot build takeoff momentum and nose-dives onto the far
+edge (Fig. 11); w/o Jump incentive claws at the top edge and
+never mounts (Fig. 12).
+Payload. With rigid backpack loads, the X30 mounts the
+0.8-m platform carrying 30 kg (55% of body weight) and
+climbs the grating stairs carrying 50 kg (91%) (Fig. 13). The
+50-kg load equals the upper bound of the randomized payload
+range; negative values emulate unloading (Table III).
+Occlusion robustness. We block one front and one rear
+LiDAR (Fig. 14), removing far more returns than the 2%
+invalid-point degradation of training (Section III-A). The robot
+still passes the combined scene of stairs, platform, and slope
+(Fig. 14, right). The stairs and slope lie inside the curriculum,
+so the challenge is sensing degradation, met by the LiDARs’
+field-of-view redundancy and the injected degradation.
+Long-range and natural terrain. We also drive the policy,
+carrying 25 kg (45%), through a 2.5-km mountain route
+of 200 m elevation gain in about 46 min at 0.9 m/s. The
+route crosses rock slopes, leaf litter, and stone steps, and
+the policy runs unadjusted throughout. Gravel, sand, and
+cobblestone (Fig. 15) lie outside the seven training classes
+and differ in contact behavior (loose, sinking, rounded). The
+same policy walks stably on all three without targeted training,
+so its foothold decisions transfer beyond the training domain.
+
+
+IEEE ROBOTICS AND AUTOMATION LETTERS. PREPRINT VERSION.
+8
+Reported hardware gap crossings reach 0.8 m and platform
+jumps 0.5 m [11] under differing platforms and protocols
+(not directly comparable); PointWalker crosses 0.8-m gaps and
+mounts 0.8-m platforms with one mapless policy. All hardware
+experiments are in the supplementary video.
+V. DISCUSSION AND CONCLUSION
+In this paper, we presented PointWalker, a mapless frame-
+work in which one PPO run trains a single policy that attends
+directly to raw LiDAR points across seven terrain classes. In
+simulation, intermediate representations degraded on sparse
+and see-through support: height maps aggregated the grating
+into spurious heights, and depth images never saw beneath or
+beside the body. The raw points preserved that geometry. Only
+a small fraction of them are decisive footholds, so replacing
+cross-attention with mean pooling cost 10 points of success
+rate; linear attention held the perception pathway at 2.01 ms, a
+tenth of the control period. On hardware, each ablated training-
+only design was essential: without dual-channel simulation,
+the policy stalled at the stair base, and without the foot-
+edge penalty, it slipped off the stones. Without the traversal
+incentives, it reached the gap short of momentum and the
+platform without a leap. Zero-shot on the X30, the same
+policy crossed 0.8-m gaps, mounted 0.8-m platforms, walked
+on with two of four LiDARs blocked, and completed a 2.5-km
+mountain route, all without a terrain map.
+Perception is local and momentary, so the policy traverses
+only what the current points show; porting beyond the X30’s
+four-LiDAR layout is untested. Within that scope, it gener-
+alized to natural terrain beyond the training classes; global
+path planning and moving support remain open. The first
+extension embeds PointWalker in a navigation stack with a
+global planner. Another is dynamic environments, extending
+the interface to moving obstacles and support.
+REFERENCES
+[1] N. Rudin, D. Hoeller, P. Reist, and M. Hutter, “Learning to Walk in
+Minutes Using Massively Parallel Deep Reinforcement Learning,” in
+Conference on Robot Learning (CoRL), 2022, pp. 91–100.
+[2] J. Hwangbo, J. Lee, A. Dosovitskiy, D. Bellicoso, V. Tsounis, V. Koltun,
+and M. Hutter, “Learning Agile and Dynamic Motor Skills for Legged
+Robots,” Science Robotics, vol. 4, no. 26, p. eaau5872, 2019.
+[3] I. M. A. Nahrendra, B. Yu, and H. Myung, “DreamWaQ: Learning
+Robust Quadrupedal Locomotion With Implicit Terrain Imagination via
+Deep Reinforcement Learning,” in IEEE International Conference on
+Robotics and Automation (ICRA), 2023, pp. 5078–5084.
+[4] J. Lee, J. Hwangbo, L. Wellhausen, V. Koltun, and M. Hutter, “Learning
+Quadrupedal Locomotion over Challenging Terrain,” Science Robotics,
+vol. 5, no. 47, p. eabc5986, 2020.
+[5] A. Kumar, Z. Fu, D. Pathak, and J. Malik, “RMA: Rapid Motor
+Adaptation for Legged Robots,” in Robotics: Science and Systems (RSS),
+2021.
+[6] P. Fankhauser, M. Bloesch, and M. Hutter, “Probabilistic Terrain Map-
+ping for Mobile Robots with Uncertain Localization,” IEEE Robotics
+and Automation Letters, vol. 3, no. 4, pp. 3019–3026, 2018.
+[7] G. Erni, J. Frey, T. Miki, M. Mattamala, and M. Hutter, “MEM: Multi-
+Modal Elevation Mapping for Robotics and Learning,” in IEEE/RSJ
+International Conference on Intelligent Robots and Systems (IROS),
+2023, pp. 11 011–11 018.
+[8] F. Jenelten, T. Miki, A. J. Vijayan, M. Bjelonic, and M. Hutter, “Per-
+ceptive Locomotion in Rough Terrain—Online Foothold Optimization,”
+IEEE Robotics and Automation Letters, vol. 5, no. 4, pp. 5370–5376,
+2020.
+[9] T. Miki, J. Lee, J. Hwangbo, L. Wellhausen, V. Koltun, and M. Hutter,
+“Learning Robust Perceptive Locomotion for Quadrupedal Robots in the
+Wild,” Science Robotics, vol. 7, no. 62, p. eabk2822, 2022.
+[10] Z. Zhuang, Z. Fu, J. Wang, C. Atkeson, S. Schwertfeger, C. Finn, and
+H. Zhao, “Robot Parkour Learning,” in Conference on Robot Learning
+(CoRL), 2023, pp. 73–92.
+[11] X. Cheng, K. Shi, A. Agarwal, and D. Pathak, “Extreme Parkour with
+Legged Robots,” in IEEE International Conference on Robotics and
+Automation (ICRA), 2024, pp. 11 443–11 450.
+[12] D. Hoeller, N. Rudin, D. Sako, and M. Hutter, “ANYmal Parkour:
+Learning Agile Navigation for Quadrupedal Robots,” Science Robotics,
+vol. 9, no. 88, p. eadi7566, 2024.
+[13] S. Luo, S. Li, R. Yu, Z. Wang, J. Wu, and Q. Zhu, “PIE: Parkour
+with Implicit-Explicit Learning Framework for Legged Robots,” IEEE
+Robotics and Automation Letters, vol. 9, no. 11, pp. 9986–9993, 2024.
+[14] H. Wang et al., “BeamDojo: Learning Agile Humanoid Locomotion on
+Sparse Footholds,” in Robotics: Science and Systems (RSS), 2025.
+[15] Q. Yuan, Y. Qiu, Z. Cao, M. Cao, and K. Li, “JEPLO: Joint-
+Embedding Predictive Learning for LiDAR-Based Legged Locomotion,”
+arXiv preprint arXiv:2609.15770, 2026.
+[16] Z. Wang et al., “Omni-Perception: Omnidirectional Collision Avoidance
+for Legged Locomotion in Dynamic Environments,” in Conference on
+Robot Learning (CoRL), 2025.
+[17] J. Schulman, F. Wolski, P. Dhariwal, A. Radford, and O. Klimov, “Proxi-
+mal Policy Optimization Algorithms,” arXiv preprint arXiv:1707.06347,
+2017.
+[18] G. Ji, J. Mun, H. Kim, and J. Hwangbo, “Concurrent Training of a
+Control Policy and a State Estimator for Dynamic and Robust Legged
+Locomotion,” IEEE Robotics and Automation Letters, vol. 7, no. 2, pp.
+4630–4637, 2022.
+[19] J. He, C. Zhang, F. Jenelten, R. Grandia, M. Bächer, and M. Hutter,
+“Attention-Based Map Encoding for Learning Generalized Legged Lo-
+comotion,” Science Robotics, vol. 10, no. 105, p. eadv3604, 2025.
+[20] R. Yu et al., “START: Traversing Sparse Footholds With Terrain
+Reconstruction,” IEEE Robotics and Automation Letters, vol. 11, no. 2,
+pp. 2194–2201, 2026.
+[21] L. Wang et al., “PUMA: Perception-Driven Unified Foothold Prior for
+Mobility Augmented Quadruped Parkour,” IEEE Robotics and Automa-
+tion Letters, vol. 11, no. 9, pp. 10 290–10 297, 2026.
+[22] J. Sun et al., “DPL: Depth-Only Perceptive Humanoid Locomotion via
+Realistic Depth Synthesis and Cross-Attention Terrain Reconstruction,”
+IEEE Robotics and Automation Letters, vol. 11, no. 8, pp. 9407–9414,
+2026.
+[23] X. Tang et al., “StairMaster: Learning to Conquer Risky Hollow Stairs
+for Agile Quadrupedal Robots,” arXiv preprint arXiv:2606.25765, 2026.
+[24] G. Bellegarda, C. Nguyen, and Q. Nguyen, “Robust Quadruped Jumping
+via Deep Reinforcement Learning,” Robotics and Autonomous Systems,
+vol. 182, p. 104799, 2024.
+[25] Z. Wang et al., “SF-TIM: A Simple Framework for Enhancing
+Quadrupedal Robot Jumping Agility by Combining Terrain Imagination
+and Measurement,” in IEEE/RSJ International Conference on Intelligent
+Robots and Systems (IROS), 2025, pp. 10 676–10 683.
+[26] M. Mittal et al., “Isaac Lab: A GPU-Accelerated Simulation Framework
+for Multi-Modal Robot Learning,” arXiv preprint arXiv:2511.04831,
+2025.
+[27] A. Katharopoulos, A. Vyas, N. Pappas, and F. Fleuret, “Transformers
+are RNNs: Fast Autoregressive Transformers with Linear Attention,”
+in International Conference on Machine Learning (ICML), 2020, pp.
+5156–5165.
+[28] C. R. Qi, H. Su, K. Mo, and L. J. Guibas, “PointNet: Deep Learning
+on Point Sets for 3D Classification and Segmentation,” in Proceedings
+of the IEEE Conference on Computer Vision and Pattern Recognition
+(CVPR), 2017, pp. 652–660.
+[29] G. B. Margolis and P. Agrawal, “Walk These Ways: Tuning Robot
+Control for Generalization with Multiplicity of Behavior,” in Conference
+on Robot Learning (CoRL), 2022.
+[30] L. Pinto, M. Andrychowicz, P. Welinder, W. Zaremba, and P. Abbeel,
+“Asymmetric Actor Critic for Image-Based Robot Learning,” in
+Robotics: Science and Systems (RSS), 2018.
+[31] Y. Zhang et al., “RPL: Learning Robust Humanoid Perceptive Locomo-
+tion on Challenging Terrains,” arXiv preprint arXiv:2602.03002, 2026.
+[32] X. B. Peng, P. Abbeel, S. Levine, and M. van de Panne, “Sim-to-Real
+Transfer of Robotic Control with Dynamics Randomization,” in IEEE
+International Conference on Robotics and Automation (ICRA), 2018, pp.
+3803–3810.

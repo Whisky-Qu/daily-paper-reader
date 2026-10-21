@@ -1,0 +1,292 @@
+Title: Adaptive Traversal Tubes for Posture-Aware Navigation of Bipedal Humanoids
+
+URL Source: https://arxiv.org/pdf/2610.27688v1
+
+Published Time: Wed, 21 Oct 2026 00:50:24 GMT
+
+Number of Pages: 8
+
+Markdown Content:
+> 1
+
+# Adaptive Traversal Tubes for Posture-Aware Navigation of Bipedal Humanoids 
+
+Zijian Ge Member, IEEE 
+
+Abstract —Bipedal humanoids can change their effective foot-print by adjusting body yaw, enabling both narrow-passage traversal and socially aware yielding. This paper presents a posture-aware navigation framework centered on Adaptive Traversal Tubes (ATT), Interval Velocity–Heading (IVH) control, and a sidestep-enhanced AMP locomotion prior. ATT repre-sents a behavior-feasible corridor width field along a refer-ence path, unifying geometric clearance and social comfort into a continuous signal. IVH maps this width to a contin-uous frontal-to-sidestep posture schedule and omnidirectional velocity commands. A velocity-conditioned AMP policy, trained with GVHMR-retargeted frontal/sidestep motions and coupled 
+
+(vx, v y ) tracking rewards, is designed to improve transition stability over a generic locomotion controller while remain-ing interchangeable with the default onboard policy. This preprint presents the full method; a planned evaluation pro-tocol on a Unitree G1 is outlined, with quantitative results to follow. Demo videos of MuJoCo simulation and real-robot deployment are available at: https://github.com/lborogzj997/ Humanoid-Navigation-in-Crowds-and-Narrow-Spaces. 
+
+Index Terms —Humanoid robots, robot navigation, posture-aware planning, social navigation, motion control. 
+
+I. I NTRODUCTION 
+
+Indoor service settings—offices, hospitals, apartments, and retail floors—are built around the human body: doorways, cor-ridors, and furniture clearances are often only marginally wider than a person’s shoulders, while the same spaces are shared with pedestrians who expect socially acceptable distances and yielding [1]–[3]. Bipedal humanoids are uniquely well matched to this ecology. Unlike wheeled platforms, whose chassis footprint is essentially fixed in the horizontal plane, a humanoid can reshape its effective passage width by changing body yaw and locomotion style—walking face-forward in open space, then rotating into a lateral (sidestep) posture when the corridor tightens [4], [5]. The same posture change also supports socially polite yielding: by presenting a thinner frontal profile and shifting sideways, the robot can open a lane for a person without abandoning the intended route. This combination of geometric squeeze-through and socially aware lateral yielding is difficult to realize with classical wheeled navigation stacks, which typically inflate a disk or polygon footprint and either declare a passage infeasible or merely slow down [6]. Realizing that potential, however, exposes several gen-eral challenges that cut across applications. First, posture-dependent footprint ambiguity : the clearance that matters 
+
+This is a methods-oriented preprint. Quantitative experimental evaluation is ongoing and will be updated in a revised version. Corresponding author: Zijian Ge (e-mail: gezijian1001@gmail.com). 
+
+Fig. 1. Overview of the proposed idea. Top: ATT width field (green → red as the tube narrows) for a geometric squeeze-through (left) and social comfort compression (right). Bottom: corresponding real-robot behaviors on a Unitree G1, where IVH schedules a frontal-to-sidestep posture response. 
+
+is not raw wall-to-wall distance, but whether the robot’s current (and scheduled) body orientation makes the passage behaviorally feasible. A frontal shoulder width that is safe in a hallway may be too large for a door, while the same door may be passable in a sidestep posture; treating the robot as a fixed disk therefore both over-rejects and under-explains failures [4], [7]. Second, unified geometric and social constraints : in human environments, free space is further compressed by comfort and proxemic expectations [1], [2]. Prior social-navigation work—including our own congestion-aware and spatial–temporal routing methods for mobile robots [8]–[10]— has largely addressed crowd-aware path selection and speed adaptation for platforms with essentially fixed footprints. For arXiv:2610.27688v1 [cs.RO] 20 Oct 2026 2
+
+bipeds, social compression should instead trigger the same continuous posture response as a physical bottleneck: earlier sidestepping and lateral yielding, not only detours or slow-downs. Third, navigation-layer posture scheduling under locomotion interfaces : modern humanoids often expose om-nidirectional velocity commands to a learned or commercial locomotion policy. Contact-level footstep and whole-body planners can traverse tight spaces [5], [7], but their compu-tational focus is on footholds and balance rather than on an explicit, tunable mapping from corridor or social width to body yaw. Conversely, wheeled stacks such as Nav2 [6] provide mature map-based planning yet lack a first-class notion of frontal-to-sidestep posture. The general concern is therefore not merely find a collision-free path, but schedule posture and omnidirectional velocity so that the path remains behavior-feasible as clearance and social comfort vary along it. This paper argues that posture should be elevated to the navigation layer through a shared width signal (Fig. 1). We in-troduce Adaptive Traversal Tubes (ATT): a path-parameterized width field that represents an effective passage width along a reference path for frontal walking decisions, rather than the raw gap between walls. Far from obstacles this width saturates at a nominal upper bound wnom ; it shrinks when geometric clearance or social comfort tightens, thereby unifying static squeeze-through and dynamic yielding in one continuous scalar signal. We then introduce Interval Velocity–Heading 
+
+(IVH) tracking, which maps the tube width to a continuous frontal-to-sidestep posture schedule and the corresponding omnidirectional velocity and heading commands for bipedal locomotion. To execute these commands stably, we further train a sidestep-enhanced AMP locomotion prior from custom human videos (GVHMR capture and GMR retargeting), with task rewards that explicitly couple frontal and lateral velocity tracking during yaw transitions. ATT and IVH remain com-patible with a generic onboard controller; the enhanced prior mainly improves transition smoothness and lateral tracking when IVH requests nonzero (vx, v y ) jointly. 
+
+a) Contributions.: 
+
+1) ATT: a behavior-feasible traversal tube along a reference path that unifies static geometric clearance and dynamic social compression into one posture-relevant width field. 2) IVH: a continuous frontal–sidestep posture schedule driven by the tube width, producing omnidirectional velocity and heading commands for bipedal locomotion. 3) Sidestep-enhanced AMP prior: a velocity-conditioned locomotion policy trained with frontal/sidestep reference motions and coupled (vx, v y ) tracking objectives, in-tended to improve stability of frontal–sidestep transi-tions relative to a generic locomotion controller while remaining drop-in interchangeable with it. 4) Evaluation protocol: a planned simulation and real-robot comparison on a Unitree G1 against a frontal-only navigation baseline, to be reported in an updated version of this preprint. II. R ELATED WORK 
+
+We organize prior work on bipedal humanoid navigation into three strands: contact-level footstep and whole-body con-trol, learning-based locomotion and tightly coupled naviga-tion policies, and geometry-/social-aware mid-level naviga-tion. Across these strands, a recurring gap is an explicit, lightweight interface that schedules frontal-to-sidestep posture from a shared geometric–social width signal while remaining compatible with an existing stable locomotion stack. 
+
+a) Footstep planning with WBC/MPC.: Classical hu-manoid navigation plans discrete footholds (or contact se-quences) and tracks them with walking-pattern generation, whole-body control (WBC), or model predictive control (MPC), while regulating CoM/ZMP or related balance quanti-ties [7], [11]. This line of work is particularly strong when con-tact timing, rough terrain, and balance certificates dominate, and it has long recognized that humanoids can alter locomotion style to pass narrow spaces [4], [5]. Subsequent work further develops real-time pattern generation with nonlinear MPC and obstacle avoidance [12], as well as efficient contact-surface selection via sparse optimization for online footstep plan-ning [13]. Recent formulations continue to push whole-body feasibility in footstep MPC [11], [14]. Their computational focus, however, remains on where to step and how to stay balanced . Body yaw as a continuous navigational degree of freedom—used to reshape the effective frontal footprint for squeeze-through or yielding—is typically not exposed as a tunable navigation-layer schedule; when sidestepping appears, it is often a byproduct of contact optimization rather than an explicit posture policy. For indoor corridor and social settings where a reliable velocity-conditioned locomotion controller already exists, solving contact-level WBC/MPC online can also be heavier than necessary for the posture-scheduling decision we target. 
+
+b) Learning-based locomotion and tightly coupled nav-igation.: Reinforcement learning (RL) has substantially ad-vanced bipedal locomotion, from motion-prior stylization [15] and adaptive CPG-style bipedal controllers [16] to real-world humanoid walking policies [17]. Building on such controllers, recent work couples navigation more tightly with learning: emotion-aware social navigation for bipeds [18], end-to-end LiDAR-to-motor safe/comfortable policies [19], physics-guided narrow-path traversal [20], and navigation pri-ors learned from human walking data [21]. These methods can discover agile behaviors with limited hand-designed structure, but they typically entail costly training, careful reward or constraint design, and nontrivial sim-to-real transfer when perception, posture transitions, and balance are learned jointly. Retargeting to a new map stack, planner, or locomotion backend often requires substantial retraining rather than local parameter retuning. We keep ATT+IVH modular with respect to the locomotion backend, and additionally train a sidestep-enhanced AMP prior (Section III-D) that better matches IVH’s coupled (vx, v y ) and yaw-transition commands than a generic walking controller. 
+
+c) Geometry-aware and social bipedal navigation.: Acomplementary trend keeps learned (or model-based) loco-motion in the inner loop and adds mid-level planners or safety filters for cluttered scenes: hierarchical task-and-motion planning for safe bipedal navigation under partial observ-ability [22], Koopman-lifted MPC for narrow passages [23], 3
+
+geometry-aware CBF–MPC safety filters that can reorient a humanoid through tight gaps [24], and related CBF safety layers on learned humanoid controllers [25]. For human-shared spaces, social bipedal navigation has begun to incorporate proxemics and pedestrian prediction into footstep MPC [26], while wheeled social planners increasingly inject context or language-model cues into navigation costs [27], [28]. Classical wheeled stacks and social-navigation surveys, however, largely assume a fixed footprint and solve crowding by detours, inflation, or slowing down [1]–[3], [6]. These approaches are closest in spirit to our setting, yet most still either optimize contact sequences under social costs, or filter velocities for collision safety, without an explicit behavior-feasible width field that unifies geometric squeeze-through and social comfort into one continuous posture schedule. 
+
+d) Positioning of this work.: Relative to footstep– WBC/MPC pipelines, ATT+IVH do not aim to replace contact-level optimality; they provide a lighter navigation interface that schedules frontal–sidestep posture from tube width and leaves balance to the locomotion layer. Relative to end-to-end or tightly coupled RL navigation, we trade joint training flexibility for modularity: the same ATT/IVH block can sit atop different velocity-conditioned locomotion controllers with limited retuning, and the width field remains visualizable and parameter-interpretable. Relative to geometry-aware safety filters and social footstep MPC, we emphasize a shared path-parameterized width signal for both geometric and social compression, mapped by IVH into omnidirectional velocity–heading commands. In short, whenever a bipedal platform already offers stable omnidirectional locomotion, ATT+IVH add posture-aware passage and yielding without requiring a full contact planner or a navigation policy retrained from scratch. III. M ETHOD 
+
+A. System Overview 
+
+Fig. 2 summarizes the stack. Onboard Mid-360 LiDAR with FAST-LIO2-style localization maintains the robot pose on a prior map. A global A* planner produces a long-horizon refer-ence path; a local Hybrid A* module can refine the path in the near field under updated costmaps. ATT attaches a scalar width field w(s) to this path: the effective frontal passage width under geometry and, when available, social proximity. IVH then tracks the path while scheduling a continuous frontal-to-sidestep heading and emitting body-frame omnidirectional commands (vx, v y , ω z ). These commands are executed by a velocity-conditioned locomotion policy: by default we deploy a sidestep-enhanced AMP prior (Section III-D); a generic onboard controller can be substituted with the same IVH interface, typically at the cost of less stable frontal–sidestep transitions. 
+
+B. Adaptive Traversal Tube (ATT) a) Tube definition.: Let the planner output a reference path as a polyline with points p(s) ∈ R2, arc length s ∈ [0 , L ],unit tangent t(s), and left unit normal n(s). ATT augments this path with a scalar field w(s) > 0 and defines the tube 
+
+T =  {p(s)}s∈[0 ,L ], w (s). (1) Geometrically, the left/right tube edges are p(s)± 12 w(s) n(s).Physically, w(s) is the effective passage width used later by IVH for posture scheduling: it answers “how wide is the frontal walkway the robot should assume at s?”, not “what is the Euclidean gap between the two nearest walls”. In free space far from obstacles and agents, w(s) saturates at a fixed upper bound wnom (defined below); near walls or people, w(s)
+
+decreases so that IVH can request a stronger sidestep. We first construct a geometry-only width wstatic (s), then optionally take the pointwise minimum with a social term to obtain the final w(s).
+
+b) Static geometric width.: From an occupancy grid (global map and/or local costmap), compute the Euclidean distance transform and define the clearance 
+
+c(s) = dist  p(s), O ≥ 0, (2) i.e., the distance from the path sample p(s) to the nearest occupied cell set O. Interpreting c(s) as a half-width estimate of free space about the centerline, a raw bilateral width would be 2c(s). We convert clearance into a bounded tube width by 
+
+wstatic (s) = clip  2 c(s) − msafe , w min , w nom 
+
+, (3) where clip( x; a, b ) = min {max {x, a }, b } and the three scalars have direct physical roles:  
+
+> •
+
+msafe > 0: a fixed length subtracted from 2c(s) to leave margin for map noise, localization error, and the robot’s body thickness. Larger msafe yields a narrower tube (more conservative).  
+
+> •
+
+wnom > 0: the maximum tube width allowed by ATT. When the robot is far from obstacles ( 2c(s) − msafe ≥
+
+wnom ), we set wstatic (s) = wnom instead of letting the width grow without bound. This bound is intentional: IVH only needs to know that space is “wide enough for frontal walking”, not the true open-area size.  
+
+> •
+
+wmin ∈ (0 , w nom ]: the minimum tube width. It keeps 
+
+wstatic strictly positive in extreme bottlenecks so that downstream ratios and controllers remain well-defined. After (3), we apply a short sliding average along s and, near local minima of the width, an optional blend of length ℓblend so that wstatic (s) does not jump abruptly at doorways or corners. If both a global map and a rolling local costmap are available, clearances inside a forward horizon of the robot are taken from the local map, and beyond that horizon from the global map, with a smooth blend at the junction. 
+
+c) Social compression.: When nearby agents are de-tected, ATT reduces the tube width while keeping the same centerline p(s). Let d(s) be the distance from p(s) to the nearest agent, and let ra > 0 be that agent’s radius (or a comfort radius). The residual free distance to the agent’s comfort boundary is max(0 , d (s) − ra − msafe ); doubling it 4       
+
+> Fig. 2. System overview. Mid-360 LiDAR localization supports global A* and local Hybrid A* planning. ATT builds a behavior-feasible width field w(s)
+> along the reference path from geometric clearance and social comfort; IVH maps w(s)to a frontal–sidestep heading schedule and body-frame (vx, v y, ω z)
+> for a sidestep-enhanced AMP locomotion policy. Offline, GVHMR+GMR provide frontal/sidestep reference motions for AMP training; a generic onboard controller remains a compatible fallback.
+
+yields a social width analogous to 2c(s)−msafe . The effective width used by IVH is then 
+
+w(s) = min 
+
+
+
+wstatic (s),
+
+clip  2 max(0 , d (s) − ra − msafe ), w min , w nom 
+
+
+
+.
+
+(4) Hence a geometric squeeze and a social approach act through the same scalar w(s): both decrease w(s) and later raise the same IVH sidestep ratio. If no agent is present, the social term is inactive and w(s) = wstatic (s); in particular, far from obstacles one has w(s) = wnom .
+
+C. Interval Velocity–Heading (IVH) a) Control objective.: IVH sits between ATT and the locomotion backend. Its input is the tube width w(s) from Section III-B; its output is a body-frame command (vx, v y , ω z )
+
+that a velocity-conditioned walking policy can track. The design follows a fixed chain: 
+
+w(s) → ρ(s) → θdes (s) → (vx, v y , ω z ).
+
+Here ρ(s) ∈ [0 , 1] is a sidestep ratio (how much the robot should face sideways), and θdes (s) is the desired body yaw. The name “interval” refers to the fact that posture is not a binary frontal/sidestep switch: as w(s) varies between two body-size thresholds, ρ moves continuously inside [0 , 1] .
+
+b) Sidestep ratio.: Let wsh be the robot’s nominal frontal width (roughly shoulder-to-shoulder), and wdp its body depth (front-to-back), with wdp < w sh . These two lengths are the natural thresholds for posture:  
+
+> •
+
+if the tube is at least as wide as the shoulders ( w(s) ≥
+
+wsh ), the robot can walk face-forward;  
+
+> •
+
+if the tube is no wider than the body depth ( w(s) ≤ wdp ), a full sidestep is required to fit;  
+
+> •
+
+between these values, the robot should rotate gradually from frontal to sidestep. We encode this with 
+
+ρ(s) = 
+
+
+
+0, w(s) ≥ wsh ,
+
+1, w(s) ≤ wdp ,
+
+1 − S w(s); wdp , w sh 
+
+, otherwise ,
+
+(5) so that ρ = 0 means frontal walking, ρ = 1 means full sidestep, and intermediate ρ means a partial yaw offset. The map S(x; a, b ) first normalizes x onto the unit interval, 
+
+t = clip  (x − a)/(b − a), 0, 1,
+
+and then applies the standard cubic smoothstep 
+
+S(t) = t2(3 − 2t). (6) This cubic is the unique polynomial of degree ≤ 3 with 
+
+S(0) = 0 , S(1) = 1 , and S′(0) = S′(1) = 0 . The zero endpoint slopes matter in practice: ρ(s) (and therefore θdes )stays C1 when w(s) crosses wdp or wsh , so the robot does not get a kinked yaw schedule at the start or end of a narrow segment. 
+
+c) Desired heading.: Let ψ(s) = atan2( ty (s), t x(s)) be the path tangent heading, and let σ(s) ∈ {− 1, +1 } choose 5
+
+the sidestep side (left or right). The desired body yaw is a path-aligned heading plus a sidestep offset proportional to ρ:
+
+θdes (s) = ψ(s) + σ(s) · π
+
+2 · ρ(s). (7) When ρ = 0 , θdes = ψ (face along the path). When ρ = 1 ,
+
+θdes = ψ ± π/ 2 (face perpendicular to the travel direction). Side σ is chosen once at the onset of a narrowing segment by a minimum-yaw rule: among {+π/ 2, −π/ 2}, pick the rotation closer to the robot’s current yaw. A hysteresis latch then holds 
+
+σ: after ρ rises above an enter threshold, σ is frozen until ρ
+
+falls below a lower release threshold. This avoids left/right chatter when w(s) oscillates near wsh or wdp . Optional biases (path curvature, or the lateral side of a nearby pedestrian) can prefer one σ at latch time; once latched, a soft local replan does not flip the committed passing side. 
+
+d) Body-frame velocity commands.: At each control tick we project the robot pose onto the reference path to obtain the current arc length s, the signed lateral error elat , and lookahead samples of ρ and θdes . A progress speed v ≥ 0 starts from a cruise value, is reduced near the goal, and is further scaled down when ρ is large (narrow tube ⇒ move more carefully). The preferred planar velocity in the world frame combines forward progress along the tangent with a lateral correction toward the path: 
+
+vw = v t(s) − klat elat n(s). (8) Here klat > 0 is a lateral gain; it may be increased during mid-transition (intermediate ρ with large heading error) so that the robot stays centered while yawing. Commands are then rotated into the body frame and closed-loop on yaw: 
+
+(vx, v y ) = R(yaw) ⊤vw,ωz = clip  kθ wrap( θdes − yaw) , ±ωmax 
+
+, (9) where kθ > 0 is a heading gain, wrap( ·) wraps the angle error to (−π, π ], and ωmax limits the yaw rate. We additionally apply rate limits and low-pass filtering on (vx, v y , ω z ), and small dead-zones that keep a minimum |vy | (resp. vx) once sidestep (resp. frontal) motion is committed, so the command does not chatter about zero during a transition. Because both geometry and social proximity already entered through 
+
+w(s) → ρ(s), the same IVH law produces squeeze-through at doors and earlier yielding when comfort narrows the tube. 
+
+D. Sidestep-Enhanced AMP Locomotion a) Motivation for a sidestep-enhanced prior.: ATT and IVH do not balance the robot; they only emit body-frame commands (vx, v y , ω z ). Any locomotion backend that tracks these commands is therefore valid, including a generic onboard controller (e.g., the Unitree G1 default policy). In practice, generic priors are biased toward frontal walking. They degrade when IVH asks for sustained lateral speed vy , or when 
+
+vx and vy stay nonzero together while yaw rotates through a frontal–sidestep transition. We therefore train a preferred backend: a sidestep-enhanced AMP policy [15]. The change is deliberately narrow—we do not redesign navigation: 1) enrich the motion library with the frontal, sidestep, and transition gaits that IVH actually requests; 2) add a steering task that treats travel direction and facing direction as independent commands, so crab-walk and continuous yaw change are first-class behaviors. 
+
+b) Reference motions.: We record monocular videos of a human demonstrator performing the three command patterns that IVH emits: 1) Frontal: face along the travel direction, roughly 0.3–
+
+1.0 m /s, on straight or gently curved paths; 2) Sidestep: crab-walk with the torso about ±90 ◦ from the travel direction, at similar speeds, for both left and right; 3) Transitions: continuous yaw change while translating (frontal ↔sidestep), including slow in-place pivots and coupled (vx, v y ) progress during the turn. Clips last several seconds. We keep roughly equal duration of frontal, left-sidestep, right-sidestep, and transition footage so that the AMP discriminator is not dominated by frontal gait. Each video is lifted to world-grounded human motion with GVHMR [29] (SMPL-X), then retargeted to the Unitree G1 with GMR [30] ( unitree_g1 configuration). Retargeted clips are converted to the AMP motion format and replayed on the simulated G1 to check foot contact, root height, and self-penetration. Clips with large retargeting artifacts are discarded or re-recorded; we do not rely on RL to “fix” bad demonstrations. 
+
+c) Training objective.: Training follows AMP [15]: a policy π is optimized with PPO, while a discriminator D
+
+supplies a style reward rdisc that pushes the robot’s state tran-sitions toward the retargeted library. To make π commandable like IVH, each episode also specifies an independent steering command  dt, v ⋆, f ,
+
+where dt ∈ R2 is a unit travel direction in the world frame, 
+
+v⋆ ≥ 0 is the desired speed, and f ∈ R2 is a unit facing direction. This matches IVH’s posture schedule directly:  
+
+> •
+
+frontal walking: f ≈ dt (face along travel);  
+
+> •
+
+pure sidestep: f ⊥ dt (face sideways while moving laterally);  
+
+> •
+
+intermediate postures: the angle between f and dt lies in 
+
+(0 , π/ 2) .Let v be the measured planar root velocity and h the robot’s planar heading vector. The task reward is 
+
+rtask = wv exp  −αv ∥v⋆dt − v∥22
+
+ + wf max  0, f ⊤h,
+
+(10) with a clear split of roles:  
+
+> •
+
+velocity term: reward matching the commanded planar velocity v⋆dt; αv > 0 sets how sharply the reward falls when tracking error grows (larger αv ⇒ stricter speed tracking);  
+
+> •
+
+facing term: reward aligning heading h with f via a clipped cosine f ⊤h (no credit for facing the opposite way);  
+
+> •
+
+wv , w f > 0: relative weights of speed tracking versus facing (defaults wv = 0 .7, wf = 0 .3). 6
+
+If the projected speed along dt is negative, we zero the velocity term so that the policy cannot score well by walking backward during sidestep. The total reward mixes task and style, 
+
+r = λtask rtask + λdisc rdisc , (11) with default λtask = λdisc = 0 .5 and αv = 0 .5. If indoor G1 speeds are slower than the human clips, αv is lowered so that the exponential velocity reward does not become overly peaked. 
+
+d) Curriculum and deployment.: Steering commands are resampled every 4–7 s inside each episode. Let ϕ be the signed angle from dt to f . Training uses a short curriculum over ϕ: 
+
+> •
+
+Stage A (optional): pure style learning with λtask = 0 
+
+until rdisc is stable;  
+
+> •
+
+Stage B: discrete postures ϕ ∈ {0, ±π/ 2} with equal probability (frontal and left/right sidestep), v⋆ ∼U[0 .2, 0.8] m /s; 
+
+> •
+
+Stage C: continuous ϕ ∼ U [−π/ 2, π/ 2] , plus occasional segments where dt and f rotate together so that yaw rates resemble IVH transitions. Observations append a body-frame encoding of (dt, v ⋆, f )
+
+to the proprioceptive AMP state. At deployment, IVH’s 
+
+(vx, v y , ω z ) is converted into an equivalent (dt, v ⋆, f ) (or the policy is trained directly on body-frame velocity commands— an equivalent conditioning). We train in large-batch parallel simulation (on the order of 4096 environments) on the G1 asset, with 10 s episodes, fall terminations, and standard AMP discriminator settings (replay buffer, gradient penalty). After convergence, the actor is exported behind the same SDK bridge as the default G1 controller, so ATT and IVH stay unchanged. 
+
+e) Backend swap.: Because IVH already outputs 
+
+(vx, v y , ω z ), replacing the enhanced AMP prior with a generic onboard policy is a backend swap only. ATT+IVH do not re-quire the enhanced prior for correctness; the generic controller remains a valid fallback for validation, typically with larger heading/velocity tracking error and less stable balance during frontal–sidestep transitions. The enhanced prior is preferred when transition smoothness and sustained lateral tracking matter. IV. P LANNED EVALUATION 
+
+This section specifies the evaluation protocol for an upcom-ing revision. No quantitative success rates or timing statistics are claimed in the present preprint. 
+
+A. Platform and Scenarios 
+
+Target platform: Unitree G1 with Mid-360 LiDAR local-ization, map-based A*/Hybrid A* planning, ATT+IVH, and either the sidestep-enhanced AMP prior or the default onboard locomotion backend. Primary scenarios (Fig. 3): 1) Narrow corridor / doorway: gap width between the robot’s frontal shoulder width and body depth, so that frontal-only passage is expected to fail or contact obsta-cles while sidestep passage remains feasible. 2) Social yield (optional): an oncoming pedestrian along a still-feasible path, testing earlier tube compression and sidestep yielding without a large detour. 
+
+B. Baselines and Metrics 
+
+We plan a controlled comparison that isolates posture scheduling:  
+
+> •
+
+Frontal-only (baseline): the same localization, reference path, and locomotion backend, but with body yaw locked to the path tangent and vy ≈ 0 (no ATT/IVH sidestep schedule).  
+
+> •
+
+ATT+IVH (ours): full width-driven frontal–sidestep scheduling as in Sections III-B–III-C. Optional ablations for a later revision include: binary ±90 ◦
+
+yaw without smooth ρ(s); geometry-only w(s) without social compression; and default locomotion versus the enhanced AMP prior under identical IVH commands. Reported metrics will include success rate, collision/stuck counts, minimum obstacle clearance (and minimum interper-sonal distance when applicable), and traversal time. Transition-quality metrics (heading error, coupled (vx, v y ) tracking error) will be used when comparing locomotion backends. 
+
+C. Status 
+
+Quantitative tables and statistical comparisons are intention-ally omitted here and will be added once trials are completed. Until then, Fig. 3 should be read only as a qualitative sys-tem illustration. Accompanying simulation and Unitree G1 demo videos are hosted at https://github.com/lborogzj997/ Humanoid-Navigation-in-Crowds-and-Narrow-Spaces. V. C ONCLUSION 
+
+We presented ATT, IVH, and a sidestep-enhanced AMP locomotion prior for posture-aware bipedal navigation: abehavior-feasible corridor width, a continuous frontal–sidestep schedule, and a velocity-conditioned gait intended to track coupled omnidirectional commands during posture transitions. A generic onboard controller remains a compatible fallback. This preprint focuses on the method; quantitative evaluation against a frontal-only baseline on a Unitree G1, denser social tests, and locomotion-backend ablations are planned for an updated version. REFERENCES [1] T. Kruse, A. K. Pandey, R. Alami, and A. Kirsch, “Human-aware robot navigation: A survey,” Robotics and Autonomous Systems , vol. 61, no. 12, pp. 1726–1743, 2013. [2] J. R´ ıos-Mart´ ınez, A. Spalanzani, and C. Laugier, “From proxemics theory to socially-aware navigation: A survey,” International Journal of Social Robotics , vol. 7, no. 2, pp. 137–153, 2015. [3] A. Francis, C. P´ erez-D’Arpino, C. Li, F. Xia, A. Alahi, R. Alami, A. Bera, A. Biswas, J. Biswas, R. Chandra, H.-T. L. Chiang, M. Everett, S. Ha, J. Hart, J. P. How, H. Karnan, T.-W. E. Lee, L. J. Manso, R. Mirsky, S. Pirk, P. T. Singamaneni, P. Stone, A. V. Taylor, P. Traut-man, N. Tsoi, M. V´ azquez, X. Xiao, P. Xu, N. Yokoyama, A. Toshev, and R. Mart´ ın-Mart´ ın, “Principles and guidelines for evaluating social robot navigation algorithms,” ACM Transactions on Human-Robot Interaction ,vol. 14, no. 2, pp. 34:1–34:65, 2025. [4] F. Kanehiro, H. Hirukawa, K. Kaneko, S. Kajita, K. Fujiwara, K. Harada, and K. Yokoi, “Locomotion planning of humanoid robots to pass through narrow spaces,” in Proceedings of the IEEE International Conference on Robotics and Automation (ICRA) , 2004, pp. 604–609. 7
+
+Fig. 3. Qualitative illustration of the intended behaviors on a Unitree G1 (not a quantitative benchmark). (a) Socially aware pedestrian encounter: comfort-space compression narrows the tube and IVH schedules a frontal-to-sidestep yield. (b) Narrow-corridor traversal: geometric clearance shrinks w(s) at the gap, triggering a sidestep squeeze-through and recovery to frontal gait. Controlled comparisons against a frontal-only baseline are left to the evaluation protocol in Section IV. [5] I. Kumagai, M. Morisawa, S. Nakaoka, and F. Kanehiro, “Efficient locomotion planning for a humanoid robot with whole-body collision avoidance guided by footsteps and centroidal sway motion,” in Proceed-ings of the IEEE-RAS International Conference on Humanoid Robots (Humanoids) , 2018, pp. 251–256. [6] S. Macenski, F. Mart´ ın, R. White, and J. G. Clavero, “The Marathon 2: A navigation system,” in Proceedings of the IEEE/RSJ International Conference on Intelligent Robots and Systems (IROS) , 2020, pp. 2718– 2725. [7] J. J. Kuffner, S. Kagami, K. Nishiwaki, M. Inaba, and H. Inoue, “Online footstep planning for humanoid robots,” in Proceedings of the IEEE International Conference on Robotics and Automation (ICRA) , 2003, pp. 932–937. [8] Z. Ge, J. Jiang, and M. Coombes, “A congestion-aware path planning method considering crowd spatial-temporal anomalies for long-term autonomy of mobile robots,” in Proceedings of the IEEE International Conference on Robotics and Automation (ICRA) , 2023, pp. 7930–7936. [9] Z. Ge, J. Jiang, M. Coombes, and L. Sun, “PPUM-aided receding horizon optimization for robot path planning in uncertain environments,” 
+
+IEEE Transactions on Intelligent Vehicles , 2024. [10] Z. Ge, J. Jiang, M. Coombes, and S. Liang, “Enhancing swift and socially-aware navigation with continuous spatial-temporal routing,” 
+
+International Journal of Social Robotics , vol. 17, no. 1, pp. 87–98, 2025. [11] N. Scianca, D. De Simone, L. Lanari, and G. Oriolo, “MPC for humanoid gait generation: Stability and feasibility,” IEEE Transactions on Robotics , vol. 36, no. 4, pp. 1171–1188, 2020. [12] M. Naveau, M. Kudruss, O. Stasse, C. Kirches, K. Mombaur, and P. Sou` eres, “A reactive walking pattern generator based on nonlinear model predictive control,” IEEE Robotics and Automation Letters , vol. 2, no. 1, pp. 10–17, 2017. [13] D. Song, P. Fernbach, T. Flayols, A. Del Prete, N. Mansard, S. Tonneau, and Y. J. Kim, “Solving footstep planning as a feasibility problem using 
+
+L1-norm minimization,” IEEE Robotics and Automation Letters , vol. 6, no. 3, pp. 5961–5968, 2021. [14] T. Belvedere, N. Scianca, L. Lanari, and G. Oriolo, “Joint-level IS-MPC: A whole-body MPC with centroidal feasibility for humanoid locomotion,” in Proceedings of the IEEE/RSJ International Conference on Intelligent Robots and Systems (IROS) , 2024, pp. 11 240–11 247. [15] X. B. Peng, Z. Ma, P. Abbeel, S. Levine, and A. Kanazawa, “AMP: Adversarial motion priors for stylized physics-based character control,” 
+
+ACM Transactions on Graphics , vol. 40, no. 4, pp. 144:1–144:20, 2021. [16] G. Li, A. J. Ijspeert, and M. Hayashibe, “AI-CPG: Adaptive imitated central pattern generators for bipedal locomotion learned through rein-forced reflex neural networks,” IEEE Robotics and Automation Letters ,vol. 9, no. 6, pp. 5190–5197, 2024. [17] I. Radosavovic, T. Xiao, B. Zhang, T. Darrell, J. Malik, and K. Sreenath, “Real-world humanoid locomotion with reinforcement learning,” Sci-ence Robotics , vol. 9, no. 89, p. eadi9579, 2024. [18] W. Zhu, A. Raju, A. Shamsah, A. Wu, S. Hutchinson, and Y. Zhao, “EmoBipedNav: Emotion-aware social navigation for bipedal robots with deep reinforcement learning,” IEEE/ASME Transactions on Mecha-tronics , 2026. [19] Z. Wang, X. Yang, J. Zhao, J. Zhou, T. Ma, Z. Gao, A. Ajoudani, and J. Liang, “End-to-end humanoid robot safe and comfortable locomotion policy,” arXiv preprint arXiv:2508.07611 , 2025. [20] T. Huang, R. Xu, Y. Wang, W. Gao, and S. Zhang, “Traversing narrow paths: A two-stage reinforcement learning framework for robust and safe humanoid walking,” arXiv preprint arXiv:2508.20661 , 2025. [21] W. Wang, Y. Ze, C. K. Liu, and M. Kennedy, III, “Learning humanoid navigation from human data,” arXiv preprint arXiv:2604.00416 , 2026. [22] A. Shamsah, Z. Gu, J. Warnke, S. Hutchinson, and Y. Zhao, “Integrated task and motion planning for safe legged navigation in partially observ-8
+
+able environments,” IEEE Transactions on Robotics , vol. 39, no. 6, pp. 4913–4934, 2023. [23] J. Kim, Y. Han, H. Ravichandar, and S. Ha, “Safe navigation of bipedal robots via Koopman operator-based model predictive control,” arXiv preprint arXiv:2409.14736 , 2024. [24] R. M. Bena, G. Bahati, B. Werner, R. K. Cosner, L. Yang, and A. D. Ames, “Geometry-aware predictive safety filters on humanoids: From Poisson safety functions to CBF constrained MPC,” arXiv preprint arXiv:2508.11129 , 2025. [25] L. Yang, B. Werner, R. K. Cosner, D. Fridovich-Keil, P. Culbertson, and A. D. Ames, “SHIELD: Safety on humanoids via CBFs in expectation on learned dynamics,” arXiv preprint arXiv:2505.11494 , 2025. [26] A. Shamsah, K. Agarwal, N. Katta, A. Raju, S. Kousik, and Y. Zhao, “Socially acceptable bipedal robot navigation via social zonotope net-work model predictive control,” IEEE Transactions on Automation Science and Engineering , vol. 22, pp. 10 130–10 145, 2025. [27] E. Stefanini, L. Palmieri, A. Rudenko, T. Hielscher, T. Linder, and L. Pallottino, “Efficient context-aware model predictive control for human-aware navigation,” IEEE Robotics and Automation Letters , vol. 9, no. 11, pp. 9494–9501, 2024. [28] D. Song, J. Liang, A. Payandeh, A. H. Raj, X. Xiao, and D. Manocha, “VLM-social-Nav: Socially aware robot navigation through scoring using vision-language models,” IEEE Robotics and Automation Letters ,vol. 10, no. 1, pp. 508–515, 2025. [29] Z. Shen, H. Pi, Y. Xia, Z. Cen, S. Peng, Z. Hu, H. Bao, R. Hu, and X. Zhou, “World-grounded human motion recovery via gravity-view coordinates,” in SIGGRAPH Asia 2024 Conference Papers , 2024. [30] J. P. Ara´ ujo, Y. Ze, P. Xu, J. Wu, and C. K. Liu, “Retargeting matters: General motion retargeting for humanoid motion tracking,” 
+
+arXiv preprint arXiv:2510.02252 , 2025.

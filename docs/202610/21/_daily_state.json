@@ -1,0 +1,153 @@
+{
+  "date": "20261021",
+  "date_label": "",
+  "generated_at": "2026-10-21 22:17:44 UTC",
+  "recommend_exists": true,
+  "run_count": 1,
+  "papers": [
+    {
+      "paper_id": "2610.28480v1",
+      "route": "202610/21/2610.28480v1-supermimic-scaling-humanoid-whole-body-control-with-one-differentiable-world-model",
+      "title": "SuperMimic: Scaling Humanoid Whole-Body Control with One Differentiable World Model",
+      "section": "deep",
+      "tags": [
+        {
+          "kind": "query",
+          "label": "humanoid"
+        }
+      ],
+      "score": 8.0,
+      "evidence": "人形机器人运动模仿与全身跟踪策略学习",
+      "first_seen_at": "2026-10-21 22:17:44 UTC",
+      "updated_at": "2026-10-21 22:17:44 UTC"
+    },
+    {
+      "paper_id": "2610.26043v2",
+      "route": "202610/21/2610.26043v2-omniinteract-towards-unified-whole-body-interaction-control-for-dual-humanoids",
+      "title": "OmniInteract: Towards Unified Whole-Body Interaction Control for Dual Humanoids",
+      "section": "quick",
+      "tags": [
+        {
+          "kind": "query",
+          "label": "humanoid"
+        }
+      ],
+      "score": 7.0,
+      "evidence": "面向双人形机器人的统一全身交互控制，采用表面感知重定向与残差策略学习",
+      "first_seen_at": "2026-10-21 22:17:44 UTC",
+      "updated_at": "2026-10-21 22:17:44 UTC"
+    },
+    {
+      "paper_id": "2610.27271v1",
+      "route": "202610/21/2610.27271v1-xonav-an-exoskeleton-as-a-personalized-haptic-interface-for-assisted-navigation",
+      "title": "XoNav: An Exoskeleton as a Personalized Haptic Interface for Assisted Navigation",
+      "section": "quick",
+      "tags": [
+        {
+          "kind": "query",
+          "label": "hip-exo"
+        }
+      ],
+      "score": 7.0,
+      "evidence": "髋关节外骨骼结合IMU与LSTM步态状态估计输出步态同步提示",
+      "first_seen_at": "2026-10-21 22:17:44 UTC",
+      "updated_at": "2026-10-21 22:17:44 UTC"
+    },
+    {
+      "paper_id": "2610.19494v1",
+      "route": "202610/21/2610.19494v1-robust-real-time-monocular-human-pose-estimation-with-insole-based-sensor-fusion",
+      "title": "Robust Real-Time Monocular Human Pose Estimation with Insole-Based Sensor Fusion",
+      "section": "quick",
+      "tags": [
+        {
+          "kind": "query",
+          "label": "exo-vision"
+        }
+      ],
+      "score": 6.0,
+      "evidence": "融合鞋垫传感与单目视觉的下肢姿态与足地接触估计",
+      "first_seen_at": "2026-10-21 22:17:44 UTC",
+      "updated_at": "2026-10-21 22:17:44 UTC"
+    },
+    {
+      "paper_id": "2610.23548v1",
+      "route": "202610/21/2610.23548v1-reinforcement-learning-based-multi-terrain-adaptive-whole-body-control-for-a-quadruped-manipulator",
+      "title": "Reinforcement Learning Based Multi-Terrain Adaptive Whole-Body Control for a Quadruped Manipulator",
+      "section": "quick",
+      "tags": [
+        {
+          "kind": "query",
+          "label": "humanoid"
+        }
+      ],
+      "score": 6.0,
+      "evidence": "面向复杂地形的腿足机器人强化学习全身控制",
+      "first_seen_at": "2026-10-21 22:17:44 UTC",
+      "updated_at": "2026-10-21 22:17:44 UTC"
+    },
+    {
+      "paper_id": "2610.24675v2",
+      "route": "202610/21/2610.24675v2-action-aligned-latent-planning-for-versatile-humanoid-loco-manipulation",
+      "title": "Action-Aligned Latent Planning for Versatile Humanoid Loco-Manipulation",
+      "section": "quick",
+      "tags": [
+        {
+          "kind": "query",
+          "label": "humanoid"
+        }
+      ],
+      "score": 6.0,
+      "evidence": "面向人形机器人全身移动操作的潜在规划",
+      "first_seen_at": "2026-10-21 22:17:44 UTC",
+      "updated_at": "2026-10-21 22:17:44 UTC"
+    },
+    {
+      "paper_id": "2610.24847v1",
+      "route": "202610/21/2610.24847v1-diplo-self-distilled-diffusion-planning-for-loco-manipulation",
+      "title": "DiPLO: Self-distilled Diffusion Planning for Loco-manipulation",
+      "section": "quick",
+      "tags": [
+        {
+          "kind": "query",
+          "label": "humanoid"
+        }
+      ],
+      "score": 6.0,
+      "evidence": "人体到人形重定向与强化学习全身跟踪",
+      "first_seen_at": "2026-10-21 22:17:44 UTC",
+      "updated_at": "2026-10-21 22:17:44 UTC"
+    },
+    {
+      "paper_id": "2610.26170v1",
+      "route": "202610/21/2610.26170v1-data-efficient-learning-from-demonstration-for-humanoid-robots-via-feature-level-perception-and-prompt-based-object-detection",
+      "title": "Data-Efficient Learning from Demonstration for Humanoid Robots via Feature-Level Perception and Prompt-Based Object Detection",
+      "section": "quick",
+      "tags": [
+        {
+          "kind": "query",
+          "label": "humanoid"
+        }
+      ],
+      "score": 6.0,
+      "evidence": "提示式目标检测与深度感知用于人形机器人操作",
+      "first_seen_at": "2026-10-21 22:17:44 UTC",
+      "updated_at": "2026-10-21 22:17:44 UTC"
+    },
+    {
+      "paper_id": "2610.27688v1",
+      "route": "202610/21/2610.27688v1-adaptive-traversal-tubes-for-posture-aware-navigation-of-bipedal-humanoids",
+      "title": "Adaptive Traversal Tubes for Posture-Aware Navigation of Bipedal Humanoids",
+      "section": "quick",
+      "tags": [
+        {
+          "kind": "query",
+          "label": "humanoid"
+        }
+      ],
+      "score": 6.0,
+      "evidence": "面向双足人形机器人的姿态感知导航与全身运动控制",
+      "first_seen_at": "2026-10-21 22:17:44 UTC",
+      "updated_at": "2026-10-21 22:17:44 UTC"
+    }
+  ]
+}

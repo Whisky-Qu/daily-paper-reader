@@ -1,0 +1,144 @@
+Title: Data-Efficient Learning from Demonstration for Humanoid Robots via Feature-Level Perception and Prompt-Based Object Detection
+
+URL Source: https://arxiv.org/pdf/2610.26170v1
+
+Published Time: Tue, 20 Oct 2026 02:37:34 GMT
+
+Number of Pages: 6
+
+Markdown Content:
+# Data-Efficient Learning from Demonstration for Humanoid Robots via Feature-Level Perception and Prompt-Based Object Detection 
+
+Keyhan Rayati ∗, AliReza Beigy ∗, Anoosheh Saadati ∗, Pourya Shahverdi †,Mehdi Tale Masouleh ∗, Ahmad Kalhor ∗, Wing-Yue Geoffrey Louie †∗ Human and Robot Interaction Lab, University of Tehran, Tehran, Iran Emails: keyhan.rayati@ut.ac.ir, alireza.beigy@ut.ac.ir, anoosheh.saadati@ut.ac.ir, m.t.masouleh@ut.ac.ir, ahmad.kalhor@ut.ac.ir 
+
+† Intelligent Robotics Laboratory, Oakland University, Rochester, Michigan, USA Emails: pourya.shahverdi@oakland.edu, geoff.louie@oakland.edu 
+
+Abstract —Learning from Demonstration (LfD) allows robots to learn new skills from human examples; however, many vision-based methods require large datasets and resource-intensive end-to-end training. This paper introduces a data-efficient LfD framework for humanoid robots that learns manipulation skills from compact, task-specific features instead of raw images. The proposed approach integrates layered visual preprocessing, Kinect-based human joint estimation, prompt-based object detec-tion, and depth information to extract human motion features and three-dimensional object locations from demonstration videos. These features are used to train a temporal deep learning model that predicts robot joint-angle trajectories for execution. The framework is implemented on a NAO humanoid robot, evalu-ated quantitatively in simulation, and demonstrated on physical hardware. In simulation, the robot achieves a 78% success rate on a pick-and-place task using only 16 demonstrations, which increases to 86% when trained with 100 demonstrations. The framework also achieves a 71% success rate on a pushing task using eight demonstrations, highlighting its effectiveness for data-efficient humanoid skill acquisition. 
+
+Index Terms —Humanoid robots, Learning from demonstra-tion, Robot manipulation, Feature-level perception, NAO robot, Object detection 
+
+I. I NTRODUCTION 
+
+Learning from Demonstration (LfD) offers an effective way for robots to acquire new skills through the observation of hu-man actions, rather than depending on explicitly programmed control policies. This is especially beneficial for humanoid robots, as creating task-specific controllers for manipulation is labor-intensive and difficult to generalize across different objects, environments, and users. Nonetheless, acquiring de-pendable humanoid manipulation skills from a limited number of demonstrations remains difficult due to perceptual noise, embodiment differences between humans and robots, and the restricted computational resources available on several humanoid platforms. LfD has been extensively studied for transferring human skills to robots, from traditional trajectory-based techniques such as Dynamic Movement Primitives to recent data-driven methods for robot skill learning from demonstrations [1]– [3]. Vision-based robot learning has also shown strong per-formance in manipulation, from spatial correspondence mod-els such as Transporter Networks [4] to large-scale visuo-motor policies such as RT-1 [5]. However, many of these methods still rely on raw visual inputs, large demonstration datasets, or considerable task-specific adjustment [4]–[7]. For humanoid robots, these challenges become harder because of embodiment differences, restricted joint limits, and the need to translate human motion and task structure into robot-executable trajectories [8]–[10]. Recent studies have explored more data-efficient learning from human videos and robot-free demonstrations, including keypoint-based representations, one-shot transfer, humanoid manipulation from human play videos, whole-body control from monocular videos, and mo-bile manipulation from robot-free demonstrations [11]–[15]. Still, learning robust humanoid manipulation skills from only a few task demonstrations remains difficult, especially when the perception and policy learning stages are trained directly from visual data. This motivates the feature-level approach used in this work, where prompt-based object detection, depth information, and skeleton-based motion features are extracted before training the robot trajectory model. This research introduces a data-efficient LfD framework for humanoid robots that acquires manipulation skills using compact state representations rather than raw images. The proposed approach extracts task-relevant information from human demonstration videos, including human joint positions, prompt-detected objects, and depth-based three-dimensional object locations. Prompt-based object detection localizes task objects without requiring a task-specific detector, while skele-ton tracking provides human motion data for estimating robot joint trajectories. The collected features are then used to train a task-specific temporal model that predicts joint-angle commands for execution on a NAO humanoid robot. The framework is assessed quantitatively in simulation and demonstrated on real hardware, including upper-body imita-tion and two manipulation tasks: pick-and-place and object pushing. In the simulated pick-and-place task, the robot attains arXiv:2610.26170v1 [cs.RO] 19 Oct 2026 a success rate of 78% with 16 demonstrations and 86% with 100 demonstrations. The framework also attains a 71% success rate in the pushing task with only eight demonstrations. These results suggest that feature-level perception can facilitate hu-manoid skill acquisition with limited demonstration resources. The primary contributions of this work are summarized as follows:  
+
+> •
+
+A data-efficient LfD framework is provided for humanoid manipulation using compact state representations instead of raw image-based policy learning.  
+
+> •
+
+A layered perception pipeline is established to inte-grate Kinect-based skeleton tracking, prompt-based ob-ject detection, and depth data for extracting task-relevant demonstration features.  
+
+> •
+
+A temporal prediction model with explicit step and task-state embeddings is used to condition progress during autoregressive joint-trajectory rollout.  
+
+> •
+
+The framework is evaluated on a NAO humanoid robot through quantitative simulation experiments and repre-sentative real-world demonstrations, showing upper-body imitation, pick-and-place, and pushing actions with lim-ited demonstration data. 
+
+Supplementary Material: A video demonstration of the proposed framework is available online [Video]. The code implementation is available online [Code]. II. P ROPOSED FRAMEWORK 
+
+The proposed framework learns robot arm trajectories from human demonstration videos using a compact feature repre-sentation rather than raw image sequences. As illustrated in Fig. 1, the pipeline consists of demonstration capture, feature extraction, temporal model training, and robot execution. RGB images, depth information, and human skeletal joint positions are captured using a Kinect camera as a person performs the task. Task-relevant objects are localized using YOLO-World prompt-based object detection [16], with categories such as “red ball”, “green box”, or “block” provided as textual prompts. The detected image-space coordinates are matched with Kinect depth data and the camera model to estimate three-dimensional object positions. Human joint positions are derived from the Kinect skeleton stream and converted into joint-angle features suitable for the target robot motion. The same perception and learning framework is used across tasks; however, the trajectory model is trained separately for each manipulation objective. 
+
+A. Feature Extraction 
+
+The feature vector at each timestep combines human arm configuration, prompt-detected object positions, task state, and progress information. Human joint localization is obtained from the Kinect Skeleton API, with all joint positions ex-pressed in the Kinect camera coordinate frame. Building on prior NAO motion-transfer work [17], the measured human arm geometry is converted into robot-compatible joint-angle features. Let Pshoulder , Pelbow , and Pwrist denote the measured three-dimensional shoulder, elbow, and wrist positions. Shoul-der angles are computed first because they define the local frame used for elbow-angle estimation: 
+
+vse = Pelbow − Pshoulder 
+
+∥Pelbow − Pshoulder ∥ ,θroll = arctan 2( vse ·ez , vse ·ex),θpitch = arcsin( vse ·ey ). (1) The elbow and wrist positions are then transformed by the inverse shoulder rotation, R−1
+
+> shoulder
+
+, before computing the nor-malized elbow-to-wrist vector. Elbow yaw and elbow roll in the NAO joint convention are estimated from this transformed direction, yielding target values for LeftElbowYaw , LeftEl-bowRoll , LeftShoulderRoll , and LeftShoulderPitch .For manipulation tasks, YOLO-World detections provide object locations in image space, which are combined with Kinect depth data to estimate three-dimensional positions of the ball, box, or block. When an object is temporarily not detected or exits the camera field of view, the last reliable three-dimensional estimate is retained to preserve a continuous state vector. This design keeps the learning problem low-dimensional while retaining the information needed to adjust motion according to object placement, and it allows object categories to be changed through prompts without collecting new labels for a task-specific detector. All input and output variables are normalized before training so that object coordi-nates and joint angles have comparable numerical scales and remain within NAO joint limits during execution. 
+
+B. Temporal Model 
+
+The temporal model predicts robot joint angles from a fixed-length sequence of feature vectors. As depicted in Fig. 2, a Long Short-Term Memory (LSTM) layer captures short-term motion dependencies over an input window of 10 timesteps. Two supplementary embedding layers encode the current ex-ecution step and a three-valued grasp/task state representing the manipulation phase. The LSTM output and embeddings are concatenated and passed through a fully connected output layer with linear activation to predict continuous robot joint angles. The explicit step embedding provides a progress indicator during autoregressive rollout. During deployment, the model repeatedly predicts the next joint configuration and incor-porates the resulting state into the following input window. Without such a signal, recurrent models trained on limited datasets may remain near familiar states or cycle through incomplete motions. The step index provides a clear indication of execution progress, while the LSTM focuses on the rela-tionship among current features, object positions, and joint trajectories. 
+
+1) Sequence Handling and Temporal Windowing: Variable-length demonstrations are processed at their original temporal resolution rather than being standardized to a fixed duration. Each network input consists of a fixed window of 10 feature vectors, with the k-th element sampled at time t − k s for 
+
+k ∈ { 0, . . . , 9} and step size s. Sequences shorter than the Data Perception 
+
+> Kinect Skeleton API
+
+Joint Localization 
+
+> Nao Joint Limitation
+
+Joint Angle Calculation 
+
+> YOLO-WORLD Object Detection
+> Depth Image
+
+Object Localization  Frame Reduction Fig. 1. Overview of the proposed LfD framework, including demonstration capture, feature extraction, temporal modeling, and robot execution. 
+
+specified window are zero-padded at the beginning to support prediction from the initial frames. During training, step sizes ranging from 5 to 95 frames are used, producing approxi-mately (L − 1) × 10 windows for a demonstration of length L,thereby exposing the model to different demonstration speeds. During deployment, the step size controls execution speed, the step embedding is incremented with each prediction, and a conservative limit of 200 prediction steps is imposed to prevent unbounded rollout. Model selection involved evaluating 153 configurations with different layer counts, hidden sizes, learning rates, batch sizes, dropout rates, and optimizers. Validation loss was used as the primary offline selection criterion because it provides a consistent measure before robot execution and allows many configurations to be compared efficiently. However, task-level success is not guaranteed to be perfectly correlated with prediction error, especially in physical robot execution. Therefore, the selected model is further evaluated through task execution in simulation and representative physical trials. Training uses the AdamW optimizer, mean squared error loss, early stopping, and learning-rate reduction. The final training setup is summarized in Table I. 
+
+C. Human-to-Robot Execution 
+
+The learned commands are executed on a NAO humanoid robot. Because humans and NAO differ in size, reachability,                
+
+> TABLE I FINAL TEMPORAL MODEL CONFIGURATION .
+> Parameter Value
+> LSTM layers 1LSTM hidden units 256 Input window 10 timesteps Step embedding 64 dimensions State embedding 64 dimensions Output joints 4Optimizer AdamW Initial learning rate 0.001 Batch size 4096 Loss function MSE Maximum epochs 3000 Early stopping patience 50 epochs LR reduction factor 0.2 Minimum learning rate 10 −7
+
+and joint limits, the task setup is configured so that the demon-strated object positions remain within the robot workspace. Predicted joint commands are constrained to the feasible robot range before execution. In simulation, object and joint positions are measured relative to a reference plane aligned with the Kinect coordinate system, ensuring that simulated inputs remain compatible with the real-world preprocessing pipeline. This workspace alignment avoids the need for on-line replanning while preserving the relative task geometry observed in the demonstrations. For pick-and-place, a magnet LSTM 
+
+> Concatenation
+> Dense
+> Drop-out
+
+## Raw Data 
+
+## Preprocessing Steps 
+
+## Neural Network Model  Arm Angles 
+
+> Output layer
+> Feature Sequence
+> Feature Sequence
+> Embedding
+
+Step Step Fig. 2. Temporal model used to predict NAO arm joint angles from extracted demonstration features and auxiliary task embeddings. 
+
+is attached to the robot hand and a small metal component is secured to the ball, allowing the experiment to focus on trajectory learning rather than dexterous grasping. For pushing, the model predicts the arm motion required to move a block in the specified direction. III. E XPERIMENTS 
+
+The framework is evaluated in simulation and on a physical NAO robot. The experiments examine whether the proposed feature-level model can support humanoid imitation and ma-nipulation from limited demonstrations. Three scenarios are considered: upper-body imitation, pick-and-place, and object pushing. In the manipulation experiments, a trial is considered successful when the robot completes the task objective without leaving the feasible workspace: placing the ball in the box for pick-and-place, or moving the block in the specified direction for pushing. 
+
+A. Upper-Body Imitation 
+
+The upper-body imitation experiment confirms that Kinect-based joint localization and human-to-robot angle mapping, building on previous NAO motion-transfer research [17], can produce feasible NAO arm motion. Human subjects perform arm movements in front of the Kinect camera, and the derived joint angles are transformed into NAO commands. Preliminary assessments are performed in Choregraphe to ensure motion safety before executing the commands on physical hardware. As illustrated in Fig. 3, the robot reproduces representative arm configurations through coordinated shoulder and elbow move-ments. This experiment validates that the feature extraction process provides a viable basis for the manipulation studies.         
+
+> Fig. 3. Representative upper-body imitation results showing NAO arm configurations generated from human demonstrations.
+
+B. Pick-and-Place 
+
+The primary manipulation task is to place a red ball into a green box. Demonstrations are recorded with variations in the initial positions of the ball and box. The initial low-data setting contains 16 videos collected from two participants. For comparison with larger-data settings, an additional dataset of 100 demonstrations is collected with varied object place-ments within the robot workspace. The same preprocessing and model architecture are used in both settings. The 16-video dataset was gathered in two stages, with eight initial demonstrations followed by eight additional demonstrations using different object locations. The CoppeliaSim evaluation environment is shown in Fig. 4. Fig. 4. CoppeliaSim configuration for the pick-and-place task, with the NAO robot moving a red ball into a green box. 
+
+In simulation, the proposed framework achieves a 78% success rate with only 16 demonstrations and an 86% success rate with 100 demonstrations. Table II presents these results alongside relevant baselines from a related pick-and-place benchmark in Transporter Networks [4]. Because the tasks, robots, and sensing assumptions are different, this comparison is intended as a contextual data-efficiency reference rather than a controlled head-to-head benchmark. The comparison sup-ports the data-efficiency motivation for using compact object and motion features rather than learning a policy directly from raw images. Physical robot trials are performed with the box positioned on both sides of the ball and with distracting objects visible in the camera field of view. These trials are used to verify real-world feasibility of the perception and execution pipeline rather than to provide a full statistical sim-to-real benchmark. The robot successfully completes representative physical ex-ecutions in both left-side and right-side placement configu-rations. Accordingly, quantitative success rates are reported for the controlled simulation experiments, while the physical trials demonstrate that the learned trajectories and prompt-based localization can be transferred to the NAO hardware in the tested settings. 
+
+C. Pushing Task 
+
+The framework is also evaluated on a pushing task to examine its applicability beyond pick-and-place. The robot must push a block either from right to left or from left to right. A total of eight demonstrations are collected, with four for each direction. The same preprocessing pipeline is used, with the block position included as an object feature. Two direction-specific models are developed because, unlike the pick-and-place task where the box defines the target, the pushing objective is determined by the specified direction. In the right-to-left configuration, the robot succeeds in 37 out of 50 trials. In the left-to-right configuration, it succeeds in 34 out of 50 trials. Overall, the pushing task achieves a 71% success rate using only eight demonstrations. This                     
+
+> TABLE II CONTEXTUAL PICK -AND -PLACE SUCCESS RATE COMPARISON .
+> Method 1 demo. <20 demos. 100 demos. 1000 demos.
+> Conv. MLP [4] 0.0 3.0 25.5 31.3 GT-State MLP [4] 0.0 0.0 3.0 82.2 2-step GT-State MLP [4] 0.0 0.0 19.0 92.8 Proposed framework 0.0 78.0 86.0 –
+
+result indicates that the framework can be applied to another simple manipulation behavior by collecting a small task-specific dataset and retraining the temporal model. IV. D ISCUSSION 
+
+The findings suggest that feature-level perception can sup-port humanoid manipulation learning with limited demonstra-tion resources. Rather than learning both perception and con-trol from raw images, the framework uses existing perception modules to extract human joint positions, object locations, and task state. This compact state representation reduces the complexity of the temporal learning problem and supports adaptation across the tested variations in object placement. This method also has limitations. Kinect skeleton tracking may be inaccurate under occlusion or unusual arm positions, and detection failures can reduce the accuracy of the object state estimate. The quantitative pick-and-place comparison is simulation-based and contextual, while the physical robot trials demonstrate feasibility rather than broad robustness or a complete sim-to-real success-rate analysis. The current pick-and-place setup uses a magnetic attach-ment between the NAO hand and the ball. This design reduces grasping uncertainty and allows the experiments to focus on trajectory learning, object localization, and humanoid arm ex-ecution. Therefore, the reported pick-and-place results should not be interpreted as a full evaluation of dexterous grasping or general-purpose humanoid manipulation. Removing the mag-netic attachment would likely introduce additional grasping failures and requires a separate evaluation with a more realistic end-effector. The human-to-NAO motion mapping is also approximate because the human arm and the NAO arm have different kinematic structures, joint limits, and wrist capabilities. In particular, shoulder and elbow rotations may not map uniquely to the NAO 4-DOF arm, which can introduce end-effector pose uncertainty. In addition, validation loss was used as the main offline model-selection criterion, although task success may not always vary monotonically with prediction error. Future work should extend the framework to a wider range of manipulation skills, include task-level success in model selection, improve closed-loop correction during execution, and evaluate the method using more advanced sensors and dexterous end-effectors. V. C ONCLUSION 
+
+This paper introduced a data-efficient LfD framework for humanoid robots based on feature-level perception and prompt-based object detection. The framework extracts hu-man motion and object-location features from demonstration videos, trains a temporal model to predict NAO joint trajec-tories, evaluates the learned skills in simulation, and demon-strates them on physical hardware. Experiments show success-ful upper-body imitation, simulated pick-and-place success rates of 78% using 16 demonstrations and 86% using 100 demonstrations, and a 71% success rate in pushing with eight demonstrations. These results demonstrate that compact task-relevant features can support the evaluated humanoid skills under constrained demonstration budgets. REFERENCES [1] P. Pastor, H. Hoffmann, T. Asfour, and S. Schaal, “Learning and generalization of motor skills by learning from demonstration,” in 2009 IEEE International Conference on Robotics and Automation , IEEE. IEEE, 2009, pp. 763–768. [2] M. Saveriano, F. J. Abu-Dakka, A. Kramberger, and L. Peternel, “Dynamic movement primitives in robotics: A tutorial survey,” The International Journal of Robotics Research , vol. 42, no. 13, pp. 1133– 1184, 2023. [3] A. Correia and L. A. Alexandre, “A survey of demonstration learning,” 
+
+Robotics and Autonomous Systems , vol. 182, p. 104812, 2024. [4] A. Zeng, P. Florence, J. Tompson, S. Welker, J. Chien, M. Attarian, T. Armstrong, I. Krasin, D. Duong, V. Sindhwani et al. , “Transporter networks: Rearranging the visual world for robotic manipulation,” in 
+
+Conference on Robot Learning , PMLR. PMLR, 2021, pp. 726–747. [Online]. Available: https://proceedings.mlr.press/v155/zeng21a.html [5] A. Brohan, N. Brown, J. Carbajal, Y. Chebotar, J. Dabis, C. Finn, K. Gopalakrishnan, K. Hausman, A. Herzog, J. Hsu et al. ,“Rt-1: Robotics transformer for real-world control at scale,” in 
+
+Robotics: Science and Systems , 2023. [Online]. Available: https: //www.roboticsproceedings.org/rss19/p025.pdf [6] R. Rahmatizadeh, P. Abolghasemi, L. B¨ ol¨ oni, and S. Levine, “Vision-based multi-task manipulation for inexpensive robots using end-to-end learning from demonstration,” in 2018 IEEE International Conference on Robotics and Automation (ICRA) , IEEE. IEEE, 2018, pp. 3758– 3765. [7] E. Jang, A. Irpan, M. Khansari, D. Kappler, F. Ebert, C. Lynch, S. Levine, and C. Finn, “Bc-z: Zero-shot task generalization with robotic imitation learning,” in Conference on Robot Learning ,PMLR. PMLR, 2022, pp. 991–1002. [Online]. Available: https: //proceedings.mlr.press/v164/jang22a.html [8] A. G. Billard, S. Calinon, and R. Dillmann, “Learning from humans,” 
+
+Springer Handbook of Robotics , pp. 1995–2014, 2016. [9] B. Dariush, M. Gienger, A. Arumbakkam, Y. Zhu, B. Jian, K. Fujimura, and C. Goerick, “Online transfer of human motion to humanoids,” 
+
+International Journal of Humanoid Robotics , vol. 6, no. 2, pp. 265– 289, 2009. [10] Y. Matsuura, K. Kawaharazuka, N. Hiraoka, K. Kojima, K. Okada, and M. Inaba, “Development of a whole-body work imitation learning sys-tem by a biped and bi-armed humanoid,” in 2023 IEEE/RSJ International Conference on Intelligent Robots and Systems (IROS) , IEEE. IEEE, 2023, pp. 10 374–10 381. [11] J. Gao, X. Jin, F. Krebs, N. Jaquier, and T. Asfour, “Bi-kvil: Keypoints-based visual imitation learning of bimanual manipulation tasks,” in 2024 IEEE International Conference on Robotics and Automation (ICRA) ,IEEE. IEEE, 2024, pp. 16 850–16 857. [12] S. Park, H. Bharadhwaj, and S. Tulsiani, “DemoDiffusion: One-shot human imitation using pre-trained diffusion policy,” arXiv preprint arXiv:2506.20668 , 2025. [13] R. Shah, S. Liu, Q. Wang, Z. Jiang, S. Kumar, M. Seo, R. Mart´ ın-Mart´ ın, and Y. Zhu, “MimicDroid: In-context learning for humanoid robot ma-nipulation from human play videos,” arXiv preprint arXiv:2509.09769 ,2025. [14] H. Weng, Y. Li, N. Sobanbabu, Z. Wang, Z. Luo, T. He, D. Ramanan, and G. Shi, “HDMI: Learning interactive humanoid whole-body control from human videos,” arXiv preprint arXiv:2509.16757 , 2025. [15] X. Xu, J. Park, H. Zhang, E. Cousineau, A. Bhat, J. Barreiros, D. Wang, J. Bohg, and S. Song, “HoMMI: Learning whole-body mobile manip-ulation from human demonstrations,” arXiv preprint arXiv:2603.03243 ,2026. [16] T. Cheng, L. Song, Y. Ge, W. Liu, X. Wang, and Y. Shan, “Yolo-world: Real-time open-vocabulary object detection,” in Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR) , June 2024, pp. 16 901–16 911. [17] K. Rayati, A. Feizi, A. Beigy, P. Shahverdi, M. T. Masouleh, A. Kalhor, and W.-Y. G. Louie, “Real-time imitation of human head motions, blinks and emotions by nao robot: A closed-loop approach,” in 2023 11th RSI International Conference on Robotics and Mechatronics (ICRoM) .IEEE, 2023, pp. 794–800.

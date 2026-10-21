@@ -1,0 +1,757 @@
+1
+XoNav: An Exoskeleton as a Personalized Haptic Interface for
+Assisted Navigation
+Debadrata Sarkar, Soumen Sen, Aman Arora *
+Supplementary video: A video illustrating the XoNav hardware, haptic cues, Wizard-of-Oz trials
+and autonomous navigation is available at https://doi.org/10.6084/m9.figshare.34701648
+Abstract—Walking without vision requires timely, unambigu-
+ous guidance, yet many wearable aids encode directions as audio
+or vibrotactile signals that users must translate into movement.
+We present XoNav, a four-actuator hip exoskeleton that renders
+guidance cue directly at the hip joint. It renders Advance
+cue and two-level Braking cues through sagittal-plane actuators
+and two-level Steering cues through frontal-plane actuators.
+A bilateral LSTM-based gait-state classifier uses two thigh-
+mounted IMUs to identify gait states, enabling haptic cues
+to be delivered in coordination with the wearer’s gait while
+suppressing them during standing. The classifier generalized to
+unseen users with recalls of 95.2–97.9%, with mean detection
+delays of 38.6 and 63.1 ms for stance-to-swing and swing-to-stance
+transitions respectively. Constrained human-in-the-loop Bayesian
+optimization personalized Braking for minimum resistance and
+Steering for maximum comfort while ensuring detectability and
+safety. All participants reliably distinguished between grades of
+their personalized cues and the firmest Braking cue remained
+below 53% of the safety limit. In blindfolded Wizard-of-Oz
+navigation trials along three paths, the participants kept 98.8%
+of the walked distance within a 0.75 m wide passage, with a
+4.9% increase in mean progression speed per trial. A body-
+worn camera, RTAB-Map and Nav2 further enabled a feasibility
+study of autonomous navigation and detours around previously
+unmapped obstacles.
+Index Terms—Wearable robotics, haptics and haptic interfaces,
+prosthetics and exoskeletons, physical human–robot interaction,
+robot navigation.
+I. INTRODUCTION
+N
+AVIGATING without vision requires guidance about
+both direction and movement. Canes, guide dogs and
+electronic aids serve people with visual impairment, while
+comparable needs arise when sight is obscured or occupied,
+such as for firefighters in smoke [1] or industrial workers en-
+gaged in visually demanding tasks. A wearable RGB-D, audio
+and vibrotactile system improved navigation for blind and low-
+vision users [2], and bone conduction preserves awareness of
+environmental sounds [3]. Personalized smartphone audio has
+also guided blind users outdoors with performance comparable
+to a human guide [4]. Robotic canes [5] and quadruped
+The work was supported by financial grants from the Indian Council of
+Medical Research (ICMR), New Delhi with file bearing no. EM/Dev/CAR-
+2024-01-00481/F2/2024, dated: 03/09/2025. This work was also partially
+supported by the CSIR-National Laboratory Scheme under the ULIP
+[MLP002613].
+This work involved human subjects. Approval of all ethical and experimen-
+tal procedures was granted by the Institutional Ethical Board of CSIR-CMERI,
+Durgapur, India (approval number: 1.Adm.(1)/Misc./Committee/97-E, dated:
+29/04/2025) and all participants gave written informed consent.
+The authors are with the Human Centered Robotics and Cybernetics Group,
+CSIR-Central Mechanical Engineering Research Institute, Durgapur 713209,
+India.
+*Corresponding author: Dr Aman Arora (e-mail: aman.cmeri@nic.in)
+guides [6] provide physical guidance but occupy a hand and
+act from outside the body.
+Body-worn haptic interfaces offer hands-free guidance, al-
+though a survey found that many walking aids still depend on
+Wizard-of-Oz operators and are not ready for daily use [7].
+Vibrotactile belts reduce collisions during training [8], instru-
+mented walker handles can improve confidence [9], and textile
+interfaces distribute haptic feedback across the body [10], [11].
+Vibrotactile directions nevertheless require interpretation as
+locomotor actions, while audio competes with ambient cues.
+Kinesthetic interfaces instead communicate movement through
+force, as demonstrated by the resistance and pulling rendered
+by the Kinethreads exosuit [12].
+Lower-limb exoskeletons can convey guidance at the
+joints responsible for walking. Recent works include multi-
+activity [13] as well as task-agnostic [14] joint-moment as-
+sistance, data-driven community ambulation [15] and online
+personalization [16], frontal-plane control of step width and
+balance [17], [18], and improved haptic transparency [19].
+Variability in individual responses have motivated human-in-
+the-loop optimization (HILO) [20], [21], including Bayesian
+optimization [22] and preference-based methods [23], [24].
+Adding vibrotactile signals to exoskeleton torques can modu-
+late walking speed but may increase cognitive load [25].
+Closest to our work, Carrasquillo et al. [26] used artificial
+potential fields to modulate lower-limb exoskeleton impedance
+for obstacle avoidance. In virtual reality with occluded vision,
+this increased clearance and reduced collisions, demonstrating
+the potential of exoskeleton force feedback for human navi-
+gation. However, four gaps remain for real-world wayfinding.
+First, directional cueing through the hip’s frontal-plane degrees
+of freedom, which govern mediolateral foot placement and
+heading, remains unexplored. Second, guidance has not been
+phase-locked to gait events, potentially displacing an unloaded
+swing limb and overriding, rather than informing, motor intent.
+Third, navigation cues have used fixed parameters despite
+individual differences in perception and comfort, while HILO
+has not been formulated to jointly satisfy detectability, safety
+and comfort. Finally, reliance on external tracking leaves
+untested whether egocentric localization from a body-worn
+camera, despite gait-induced sway, can couple a navigation
+stack [27] with a human walker.
+Here, we present XoNav, a hip exoskeleton serving as a
+personalized haptic interface for assisted navigation (Fig. 1).
+XoNav renders Advance and two-level Braking cues in the
+sagittal plane and two-level Steering cues in the frontal plane.
+Each cue is gait-informed, being released at its gait event
+and withheld while the wearer stands, so that the exoskeleton
+This work has been submitted to the IEEE for possible publication. Copyright may be transferred without notice, after which this version may no
+longer be accessible.
+arXiv:2610.27271v1  [cs.RO]  19 Oct 2026
+
+
+2
+Fig. 1.
+XoNav hardware. (a) Front and rear views of the wearable system. (b) Schematic of the electronics architecture showing power distribution,
+sensing,computation, and actuator communication. (c) Waist-width and thigh-height adjustment mechanisms. (d) Joint impedance control architecture showing
+high-level commands from the Jetson and torque and current control executed by the motor driver.
+guides the movements the wearer initiates and never overrides
+them. The graded cues are personalized for reliable detection
+at the lowest intensity, within safety limits and in the profile the
+wearer finds most comfortable. The main contributions are: (i)
+a four-actuator hip exoskeleton realizing gait-informed haptic
+navigation cues, timed by a classifier that uses only two thigh
+IMUs and generalizes to unseen users; (ii) a constrained HILO
+framework that balances detectability, safety and comfort
+through a detection constraint, an analytic safety screen and
+duel-based comfort scoring; (iii) a blindfolded Wizard-of-Oz
+navigation study, using motion capture and user ratings to
+evaluate haptic guidance independently of robotic perception
+and planning errors; (iv) an autonomous navigation feasibility
+study integrating a body-worn camera with a ROS 2 navigation
+stack, demonstrating guidance and detours around unmapped
+obstacles. Our results show that wearers navigate reliably
+with personalized cues of minimal intensity, a step towards
+exoskeletons that guide human locomotion rather than driving
+it.
+II. XONAV HARDWARE
+XoNav is a bilateral, four-degree-of-freedom hip exoskel-
+eton (Fig. 1). Each side has a coaxial flexion–extension (FE)
+actuator and a posteriorly mounted abduction–adduction (AA)
+actuator that drives the thigh through waist and thigh links.
+All four are quasi-direct-drive AK80-9 actuators (CubeMars,
+China) with 9:1 reduction and MD80 drivers (MAB Robotics,
+Poland). The low reduction ratio limits backdrive torque,
+allowing unimpeded walking without cues. Adjustable waist
+and thigh links and padded cuffs accommodate users and
+transfer torques (Fig. 1(c)). Two BNO085 IMUs (Adafruit
+Industries, USA) are mounted on the thigh cuffs and a third
+on the torso. A chest-mounted RealSense D435i (Intel, USA)
+provides stereo and inertial measurements for navigation. Total
+system mass is 4.3 kg.
+The backpack (Fig. 1(b)) contains a 6S 13.5 Ah Li-ion
+battery, power distribution, an emergency cutoff switch and
+an event marking trigger switch for data collection. A Jetson
+Orin Nano (NVIDIA, USA) running ROS 2 Humble performs
+gait inference, cue generation and navigation. It communicates
+with the motor drivers over USB-to-CAN (CANdle, MAB
+Robotics) and receives IMU measurements through an ESP32
+(Espressif Systems).
+Each joint is driven in impedance mode (Fig. 1(d)),
+τc = KP (qd −q) + KD ( ˙qd −˙q) + τff,
+(1)
+Here q and ˙q are the encoder-measured joint angle and velocity
+and qd and ˙qd are their respective references. KP and KD
+denote the virtual stiffness and damping gains, respectively,
+while τff is the feed-forward torque. The driver converts τc to
+a motor-current reference id = τc/(NKt), using gear ratio N
+and torque constant Kt, and tracks it with a PI current loop.At
+100 Hz, the Jetson sends (qd, ˙qd, KP , KD, τff) to each actuator
+driver, with cue-specific settings of these inputs determining
+the rendered haptic behavior. A safety node clips position,
+gain and torque commands to verified limits, including during
+optimizer evaluations.
+III. GAIT-INFORMED HAPTIC CUES
+XoNav renders four everyday navigation commands as hap-
+tic cues at the hips, namely Advance (keep walking), Braking
+(slow down or stop), Steering (turn) and Neutral (no guidance)
+(Fig. 2). Their mechanical effects and gait-dependent timing
+are described below.
+A. Cue Vocabulary
+The Advance cue encourages continued walking. At termi-
+nal hip extension, identified by the extension-to-flexion zero
+crossing of thigh angular velocity, the FE actuator produces
+a brief trapezoidal flexion torque τff with KP = KD = 0
+(Fig. 2(a)). The perceived gentle forward pull accompanies
+the wearer’s ensuing step rather than initiating one.
+The Braking cue asks the wearer to slow down or to stop.
+The FE actuator renders a virtual spring–damper about the
+neutral hip angle (qd = ˙qd = 0) whose gains are switched by
+the hip flexion angle φ measured by the actuator encoder,
+(KP , KD) =
+(
+(KB
+P , KB
+D),
+φ > 0,
+(0, 0),
+φ ≤0.
+(2)
+
+
+3
+Fig. 2. Haptic cue profiles. (a) Advance cue. (b) Braking cue. (c) Left Steering
+cue. (d) Right Steering cue.
+The wearer feels resistance during forward thigh swing, but
+extension, standing and backward stepping remain unimpeded
+(Fig. 2(b)). Slow-down uses KB
+P = K0, Stop uses KB
+P =
+K0 + ∆K, and damping KB
+D remains fixed.
+The Steering cue abducts the turning-side thigh through
+its AA actuator with a trapezoidal profile of duration Ts
+and peak angle θmax
+Steer. Rise, hold and return occupy 0.3Ts,
+0.4Ts and 0.3Ts, respectively (Fig. 2(c), (d)). Mirrored left
+and right actuation produces an outward nudge toward the
+requested turn. Gentle Steering uses θmax
+Steer = θ0 = 15◦
+for mild directional corrections, while Sharp Steering uses
+θmax
+Steer = θ0 + ∆θ for more pronounced turns.
+In Neutral, FE gains are zero for free backdriving. The
+AA joints hold a wearer-selected neutral angle set at donning
+with nominal impedance gains, sufficient to support the FE
+actuators and links but compliant enough to follow frontal-
+plane motion during walking.
+B. Gait-Informed Rendering
+XoNav times its cues to accompany wearer-initiated move-
+ment rather than initiating it. Steering begins immediately
+during turning-side stance or waits until the next heel strike if
+commanded during swing, after which the full profile executes.
+With the foot loaded, the abduction cue is conveyed through
+the pelvis and trunk rather than displacing the swing foot and
+pilot wearers found it more perceptible than during swing. All
+cues are suppressed during standing.
+A bilateral classifier estimates Standing, Stance and Swing
+for each leg using only two thigh-IMU pitch signals sampled
+at 100 Hz. Every 50 ms, seven causal features (mean, RMS,
+maximum, minimum, range, net change and standard devia-
+tion) are computed for each signal over the preceding 300 ms.
+Six consecutive feature vectors (550 ms total history) feed
+a shared long short-term memory (LSTM) layer with sepa-
+rate classification heads, requiring two consecutive identical
+predictions to confirm a state transition. Heel and toe force-
+sensitive resistors provide stance and swing labels, while event
+triggers mark standing intervals, both used only for training.
+The classifier was trained on recordings from ten par-
+ticipants. The deployed model achieved recalls of 99.7%,
+95.8% and 98.4% for Standing, Stance and Swing, respectively
+(Fig. 3(a)). Leave-one-subject-out (LOSO) validation, avoiding
+leakage from overlapping windows and assessing unseen-user
+generalization, yielded bilateral recalls of 97.9±2.5%, 95.2±
+1.3% and 97.1 ± 1.7%, respectively, with comparable perfor-
+mance across legs (Fig. 3(b)). On the Jetson, the classifier ran
+at 20 Hz with an inference latency of 18.2 ± 4.1 ms. Before
+two-prediction confirmation, transition detection delays were
+38.6 ± 35.3 ms (stance-to-swing) and 63.1 ± 31.8 ms (swing-
+to-stance). Standing-to-swing transitions took 37.5 ± 25.0 ms,
+while transitions to Standing took 41.4±117.3 ms from Stance
+and 90.0±108.4 ms from Swing. These delays permit prompt
+Fig. 3.
+Bilateral gait-state classifier. (a) Validation confusion matrix of the
+deployed model (recall, %). (b) Leave-one-subject-out recall for each class,
+bilateral and per leg; dots show individual participants, and the labels give
+the bilateral mean ± SD.
+
+
+4
+Fig. 4. Human-in-the-loop optimization of (a) Braking and (b) Steering. The optimizer proposes a candidate (a1, b1); Braking undergoes a safety check (a2).
+Randomized cue presentations (a3–a4, b3–b4) are identified by the wearer (a5, b5). For Steering, the new Sharp cue is also compared with the incumbent
+(b6). Detection constraints (a7, b7) determine the penalized cost (a8, b8), returned to the optimizer. Dashed red paths indicate penalties.
+gait-dependent cue rendering and suppression.
+IV. HUMAN-IN-THE-LOOP CUE PERSONALIZATION
+Haptic cues must be reliably distinguishable without unnec-
+essarily interfering with natural walking, yet wearers differ in
+their perception of hip forces and motions and in comfort
+preferences. XoNav therefore personalizes its graded cues
+through constrained human-in-the-loop Bayesian optimization,
+using wearer feedback to balance detectability, comfort and
+safety (Fig. 4). Both loops share the evaluation and constraint-
+handling procedures described below. Sessions lasted 30–
+50 min, with rest breaks on request.
+A. Personalization Framework
+Each candidate parameter set X is evaluated in a walking
+block comprising two familiarization presentations followed
+by 15 randomized scored presentations (Fig. 4, a3–a4, b3–b4),
+during which the participant identifies the cue level after each
+presentation (a5, b5). The resulting detection accuracy ˆa must
+satisfy ˆa ≥0.85 (at least 13/15 correct; chance probability
+below 0.005) (a7, b7). Constraint violations are penalized in
+the candidate cost (a8, b8) as
+C = J + P
+j Pj,
+Pj =
+(
+β0 + β1 min{1, Vj},
+if constraint j is violated,
+0,
+otherwise,
+(3)
+where Vj is the normalized constraint violation, β0 separates
+feasible from infeasible costs and β1 scales the penalty with
+violation magnitude. A Gaussian process with a Mat´ern-5/2
+kernel models the cost and the next candidate minimizes the
+lower confidence bound (a1, b1)
+Xn+1 = arg min
+X
+µn(X) −κ σn(X),
+κ = 4,
+(4)
+where µn and σn are the posterior mean and standard deviation
+of C, respectively. Each session starts with five random
+candidates and the best evaluated feasible candidate is selected.
+B. Braking Cue Personalization
+Braking personalization seeks the lowest resistance that
+allows wearers to reliably distinguish the Slow-down and Stop
+cues, thereby minimizing interference with natural walking.
+The parameter set X = (K0, ∆K), with K0 ∈[10, 150] and
+∆K ∈[10, 190] N·m/rad, minimizes the mean commanded
+stiffness J = K0 + ∆K/2. Alongside the detection constraint
+ˆa ≥0.85, the Stop stiffness is bounded by K0 + ∆K ≤
+200 N·m/rad. Candidates violating this known safety bound
+are screened and penalized before rendering (a2), preventing
+their application to the wearer. The penalties use β0 = 175
+and β1 = 160, with 20 evaluations per session (five random,
+15 guided). Two Braking levels were adopted after pilot trials
+showed that an intermediate third level could not be reliably
+distinguished from its neighbors.
+C. Steering Cue Personalization
+Steering personalization seeks the most comfortable Sharp
+cue that remains reliably distinguishable from Gentle Steering.
+With Gentle amplitude fixed at θ0 = 15◦, the Sharp cue is
+optimized over X = (∆θ, Ts), where ∆θ ∈[5◦, 30◦] and
+Ts ∈[0.3, 1.2] s. No additional safety constraint is imposed,
+as all amplitudes remain within the AA joint range. Since pilot
+participants found absolute comfort ratings inconsistent, each
+candidate is evaluated through a relative comparison with the
+current best X+. After the identification block, the incumbent
+Sharp cue is replayed before the candidate’s, which is rated as
+much worse, slightly worse, slightly better or much better,
+encoded as m ∈{−2, −1, +1, +2} (b6). This comparison
+updates a chained comfort score:
+S(Xn) = clip[0,1]
+ S(X+) + m δ
+
+,
+(5)
+with δ = 0.08 and S = 0.5 for the first admissible candidate.
+The corresponding optimization cost is:
+J = 1 −S(Xn).
+(6)
+A candidate replaces X+ only if admissible and bears a
+lower-cost. Detection penalties use β0 = 1.25 and β1 = 1.0,
+with 15 evaluations per session (five random, ten guided).
+
+
+5
+Fig. 5.
+HIL personalization. (a), (b) Representative Braking and Steering
+optimization histories showing costs and parameters; crosses mark penalized
+candidates and stars the selected settings. (c), (d) Personalized settings across
+ten participants with magnified insets (mean ± SD). Dashed lines in (c)
+indicate iso-cost contours of J = K0 + ∆K/2.
+D. Results
+In representative sessions (Fig. 5(a), (b)), infeasible Braking
+candidates were penalized either before rendering for exceed-
+ing the safety limit or afterward for poor detectabiility. The
+optimizer then moved toward low base stiffness, selecting the
+best candidate at evaluation 18. For Steering, a small amplitude
+increment failed the detection criterion and was penalized,
+while the best candidate was selected at evaluation 10. Clip-
+ping the chained comfort score to [0, 1] prevents unbounded
+accumulation across comparisons and keeps its cost below the
+penalty offset. Although the score thereby saturates, ties at the
+ceiling retain the current best, deliberately favoring a stable
+selection over differences that pilot wearers could not reliably
+perceive between similarly comfortable profiles.
+Across ten participants (Fig. 5(c), (d)), Braking converged to
+low Slow-down stiffness (K0 = 10.7–25.7 N·m/rad) and sub-
+stantially higher Stop stiffness (∆K = 55.5–80.1 N·m/rad),
+a Stop-to-Slow-down ratio of 5.2 ± 1.1. Relative contrast
+mattered more than absolute stiffness. In one representative
+session, a base near 85 N·m/rad failed detection even though
+a similar increment passed at a base near 10 N·m/rad. This
+agrees with Weber’s law: discriminable increments rise with
+baseline stimulus intensity. The resulting Stop stiffness was
+72–105 N·m/rad, no more than 53% of the safety limit. The
+consistent optima suggest K0 ≈17 and ∆K ≈67 N·m/rad as
+starting values for shorter future sessions.
+Steering preferences varied more widely, with ∆θ = 6.5–
+15.7◦(Sharp amplitudes 1.4–2.0 times Gentle) and Ts = 0.34–
+0.63 s. Preferred profiles were brief enough for single-stance
+rendering at the tested walking speeds. Participants favoring
+larger amplitudes also favored longer durations, suggesting
+sensitivity to abduction rate. Frontal-plane displacement was
+discriminated at smaller relative contrasts than sagittal-plane
+resistance. Thus, Braking showed a shared low-intensity pat-
+tern, whereas Steering required individual comfort tuning; all
+selected settings met the detection criterion ˆa ≥0.85.
+V. WIZARD-OF-OZ NAVIGATION STUDY
+To evaluate navigation using the personalized cues inde-
+pendently of perception, localization and planning errors, we
+adopted a Wizard-of-Oz protocol [7]. A trained operator issued
+navigation commands, while the untethered exoskeleton ren-
+dered the corresponding gait-informed cues as in autonomous
+operation.
+A. Participants and Protocol
+Ten healthy male participants (age 28.1 ± 4.9 years; height
+166.3±5.9 cm; mass 67.3±8.7 kg; eight right-leg dominant)
+navigated blindfolded using their personalized cues. U-, N-
+and 8-shaped paths of 10.5, 12.5 and 17 m were marked as
+0.75 m-wide passages, approximately 1.5 times the combined
+hip width of the wearer and exoskeleton (Fig. 6). An operator
+in the arena issued Advance, Braking and Steering commands
+at predefined cue zones using a Bluetooth keyboard connected
+to the onboard computer, avoiding network-based ROS 2
+teleoperation delays. Each participant completed one sighted
+baseline per path to characterize natural head sway, followed
+by five blindfolded trials per path (150 guided trials). A
+motion-capture system (PhaseSpace, USA) tracked a head-
+mounted LED marker throughout.
+B. Metrics and Analysis
+Trajectories were referenced to each path’s centerline. Pro-
+gression speed is centerline advancement divided by time;
+corridor adherence is the fraction of walked distance inside the
+passage. Lateral wander accumulates head displacement side
+to side per metre of progress, capturing weaving even when
+mean offset is small. Corrective reversals count per-metre
+lateral-drift changes exceeding 50 mm, and RMS heading error
+measures deviation from path heading. To remove baseline
+head sway and marker variability, each participant’s same-path
+sighted value was subtracted from wander and, in quadrature,
+from heading error.
+Adaptation across trials was assessed using a linear mixed-
+effects model of log-transformed metrics, with trial number
+and path as fixed effects and a participant-by-path random
+intercept. The trial coefficient estimated percentage change per
+repetition, accounting for individual and path differences.
+
+
+6
+Fig. 6.
+Wizard-of-Oz navigation trials on (a) U-, (b) N- and (c) 8-shaped paths. Left: centerline, cue zones and traversed paths of one participant during
+sighted baseline and blindfolded trials 1 and 5. Right: snapshots captured at different instants during a blindfolded trial.
+Fig. 7. Changes over five blindfolded trials (mean ± SD per path): (a) progression speed, (b) normalized lateral wander, (c) corrective reversals, (d) normalized
+RMS heading error and (e) corridor adherence. Insets report mixed-effects model percentage change per trial and p-values.
+C. Results
+All 150 trials were completed, with mean corridor adher-
+ence of 98.8% and 93% of trials exceeding 95% adherence.
+Adherence improved by 0.24% per trial (p = 0.02; Fig. 7(e)),
+while mean progression speed rose from 0.24 to 0.29 m/s, a
+modeled increase of 4.9% per trial (p < 0.001; Fig. 7(a)).
+Concurrently, normalized lateral wander, heading error and
+corrective reversals decreased by 4.6% (p < 0.001), 4.4%
+(p = 0.002) and 4.0% (p < 0.001) per trial, respectively
+(Fig. 7(b)–(d)), while RMS lateral deviation remained near
+154 mm. Adherence was 99.3% on U, 99.4% on N and
+97.6% on the turn-intensive 8-shaped path. Overall, repeated
+haptic guidance improved speed and directional stability while
+maintaining high corridor adherence.
+VI. AUTONOMOUS NAVIGATION FEASIBILITY
+A chest-mounted camera sways and changes tilt and height
+with the wearer’s gait, complicating localization compared
+with wheeled platforms. Since prior exoskeleton navigation
+was evaluated with external tracking in virtual environ-
+ments [26], we tested whether onboard sensing alone could
+support closed-loop XoNav guidance.
+A. Localization and Navigation Stack
+The furnished laboratory arena was mapped using RTAB-
+Map with the chest-mounted D435i in stereo-inertial mode.
+Infrared stereo images (848×480 px, 30 Hz; emitter off) pro-
+vided visual odometry, while the camera IMU, fused through a
+Madgwick filter, provided gravity-aligned orientation. During
+navigation, RTAB-Map localized against the saved map, using
+the camera frame as the wearer reference so that heading and
+look-ahead were evaluated relative to the trunk.
+Nav2 [27] used 0.05 m-resolution costmaps combining the
+static map, live depth-point-cloud obstacles (marking 0.3–
+3.0 m, clearing to 4.0 m) and inflation (0.45 m radius,
+scaling factor 5.0) around a 0.30 m-radius circular footprint. A
+Dijkstra-based NavFn global planner generated paths, while a
+Dynamic Window Approach-based (DWB) controller tracked
+them at 10 Hz within an 8 × 8 m rolling window. Its
+configuration included human-compatible acceleration limits
+of 0.5 m/s2 and 1.0 rad/s2, a 3 s trajectory simulation horizon
+and a 1.2 m/s speed ceiling.
+To avoid unsafe maneuvers during vision-occluded walking,
+recovery was limited to costmap clearing and waiting rather
+than rotation or reversing. Goal arrival required only a position
+
+
+7
+Fig. 8. Autonomous navigation. (a) Arena views (C1–C4). (b) Costmap, traversed paths and initial global plans for three nominal trials. (c) Replanned route
+around an unmapped obstacle (C5). (d) Velocity commands and rendered cues from goal assignment to arrival in nominal trial 3.
+tolerance of 0.5 m, since trunk heading oscillates during
+walking.
+B. From Velocity Commands to Haptic Cues
+A ROS 2 node converts smoothed Nav2 velocity commands
+(vx, ωz) into discrete haptic cues. Steering takes priority
+when |ωz| > 0.25 rad/s and persists until it falls below
+0.15 rad/s, with direction set by the sign of ωz. Otherwise,
+vx ≥0.55 m/s triggers Advance, retained until vx < 0.45 m/s,
+while lower forward velocities trigger Slow-down. Hysteresis
+and a minimum cue duration of 0.8 s prevent chattering, with
+Braking and Neutral exempted for prompt response. Unlike
+velocity-derived Slow-down, Stop overrides other cues upon
+goal arrival or obstacle entry into the Nav2 collision monitor’s
+stop zone. It remains active until the classifier detects standing,
+after which Neutral is activated. When Stop is inactive, Neutral
+is also activated if no velocity commands are received for
+0.75 s. The velocities convey direction and urgency rather than
+impose walking speeds.
+C. Trials and Outcomes
+Three participants each completed five nominal start-to-
+goal trials and three trials with an obstacle placed along the
+planned route but absent from the saved map, totaling 24
+trials. Fig. 8(b) shows representative nominal paths of one
+participant, while Fig. 8(c) illustrates an obstacle trial in which
+the live point cloud registered the added obstacle and Nav2
+replanned around the central island, allowing the participant
+to follow the cues safely to the goal. The cue sequence of a
+nominal trial (Fig. 8(d)) shows Advance predominating along
+straight segments, Steering at turns and Slow-down during the
+final approach.
+Fourteen of 15 nominal trials reached the goal, although
+two involved light furniture contact followed by recovery
+without assistance. The remaining trial failed when sudden
+localization drift disrupted planning. Similarly, eight of nine
+obstacle trials successfully followed replanned detours, while
+delayed obstacle registration in the remaining trial prevented
+replanning and resulted in a collision. Across all trials, walking
+Fig. 9. Post-session questionnaire ratings (n = 10; independent wayfinding
+n = 3). Markers and error bars indicate mean ± SD on a five-point agreement
+scale. Asterisks denote significance above neutral (two-sided exact sign tests,
+Holm-adjusted p < 0.05).
+speed averaged 0.26 ± 0.015 m/s, with a planned-to-walked
+path-length ratio of 69.6 ± 5.0%. Lateral sway and corrective
+movements may have contributed to this difference. Overall,
+these results demonstrate the feasibility of autonomous haptic
+guidance using body-worn sensing under the tested indoor
+conditions, while identifying localization drift and delayed
+obstacle detection as important limitations.
+VII. USER FEEDBACK
+Participants rated nine aspects of XoNav after the experi-
+ments (Fig. 9). High ratings for cue clarity, distinguishability
+and control over walking supported the gait-informed guidance
+approach, while cue timing and comfort also scored above
+neutral. Wearability showed the greatest variation, suggesting
+scope for reducing device mass and improving fit. Trust and
+perceived safety remained favorable despite blindfolding. The
+three autonomous-navigation participants rated independent
+wayfinding positively, with overall acceptance receiving the
+highest rating.
+
+
+8
+VIII. CONCLUSION
+XoNav demonstrates how a hip exoskeleton can serve as
+a personalized, gait-informed haptic interface that conveys
+navigation guidance directly through joint motion rather than
+symbolic audio or vibration. Its four actuators render Advance,
+two-level Braking and Steering cues across the sagittal and
+frontal hip planes, coordinated with wearer-initiated movement
+through a classifier using only two thigh IMUs. The classifier
+achieved 95.2–97.9% leave-one-subject-out recall, with gait
+transitions detected within tens of milliseconds, enabling gait-
+dependent cue delivery and suppression during standing.
+Constrained human-in-the-loop optimization yielded reli-
+ably distinguishable Braking cues with minimal resistance and
+individually comfortable Steering cues across ten participants,
+with maximum Stop stiffness remaining below 53% of the
+safety bound. This personalization allowed guidance without
+unnecessarily restraining natural walking. In 150 blindfolded
+Wizard-of-Oz trials, participants maintained 98.8% corridor
+adherence within a 0.75 m passage while improving progres-
+sion speed by an estimated 4.9% per trial. The same cues also
+supported autonomous navigation using a body-worn camera,
+RTAB-Map and Nav2, including detours around unmapped
+obstacles. Together, these findings demonstrate the potential
+of personalized kinesthetic guidance for assisted navigation,
+although validation remains limited to blindfolded sighted
+participants in controlled indoor environments. Future work
+will evaluate XoNav with people with visual impairment
+against white-cane navigation, improve device wearability and
+extend autonomy to less structured environments.
+A supplementary video illustrates the XoNav hardware,
+control architecture and haptic cues, alongside blindfolded
+Wizard-of-Oz trials and camera-based autonomous indoor
+navigation.
+REFERENCES
+[1] A. E. Slater et al., “Navigating in zero-visibility: A haptic guidance
+system for improving egress and situation awareness of professional
+firefighters,” Hum. Factors, vol. 67, no. 11, pp. 1152–1169, 2025, doi:
+10.1177/00187208251348020.
+[2] J. Tang et al., “Human-centred design and fabrication of a wearable
+multimodal visual assistance system,” Nat. Mach. Intell., vol. 7, no. 4,
+pp. 627–638, 2025, doi: 10.1038/s42256-025-01018-6.
+[3] W. Xue et al., “Interactive wearable digital devices for blind and partially
+sighted people,” Nat. Rev. Electr. Eng., vol. 2, no. 6, pp. 425–439, 2025,
+doi: 10.1038/s44287-025-00170-w.
+[4] R. Liu and P. Slade, “Improving outdoor navigation for people with
+blindness using an AI-driven smartphone application and personalized
+audio guidance,” Nat. Biomed. Eng., early access, Aug. 2026, doi:
+10.1038/s41551-026-01772-x.
+[5] Q. Na, H. Zhou, H. Yuan, M. Gui, and H. Teng, “Improving walking
+path generation through biped constraint in indoor navigation system for
+visually impaired individuals,” IEEE Trans. Neural Syst. Rehabil. Eng.,
+vol. 32, pp. 1221–1232, 2024, doi: 10.1109/TNSRE.2024.3375944.
+[6] Y.
+Chen
+et
+al.,
+“Quadruped
+guidance
+robot
+for
+the
+visually
+impaired:
+A
+comfort-based
+approach,”
+in
+Proc.
+IEEE
+Int.
+Conf.
+Robot.
+Autom.
+(ICRA),
+2023,
+pp.
+12078–12084,
+doi:
+10.1109/ICRA48891.2023.10160854.
+[7] A. M. L. Kappers, R. J. Holt, T. J. W. Junggeburth, M. Fa Si Oen, B. J. T.
+van de Wetering, and M. A. Plaisier, “Hands-free haptic navigation
+devices for actual walking,” IEEE Trans. Haptics, vol. 17, no. 4, pp. 528–
+545, 2024, doi: 10.1109/TOH.2024.3405551.
+[8] F. Ricci, L. Liguori, E. Palermo, J. Rizzo, and M. Porfiri, “Navigation
+training for persons with visual disability through multisensory assistive
+technology: Mixed methods experimental study,” JMIR Rehabil. Assist.
+Technol., vol. 11, Art. no. e55776, 2024, doi: 10.2196/55776.
+[9] I. Lacˆote, P.-A. Cabaret, C. Pacchierotti, M. Babel, D. Gueorguiev, and
+M. Marchal, “Do vibrotactile patterns on both hands improve guided
+navigation with a walker?” in Proc. EuroHaptics, ser. Lecture Notes
+in Computer Science, vol. 14768. Cham, Switzerland: Springer, 2024,
+pp. 391–404, doi: 10.1007/978-3-031-70058-3 32.
+[10] C. du Pasquier et al., “Haptiknit: Distributed stiffness knitting for
+wearable haptics,” Sci. Robot., vol. 9, no. 97, Art. no. eado3887, 2024,
+doi: 10.1126/scirobotics.ado3887.
+[11] S. U. Park et al., “Wearable interactive full-body motion tracking and
+haptic feedback network systems with deep learning,” Nat. Commun.,
+vol. 16, Art. no. 8604, 2025, doi: 10.1038/s41467-025-63644-3.
+[12] V. Shen and C. Harrison, “Kinethreads: Soft full-body haptic exosuit
+using low-cost motor-pulley mechanisms,” in Proc. 38th Annu. ACM
+Symp. User Interface Softw. Technol. (UIST), 2025, Art. no. 1, doi:
+10.1145/3746059.3747755.
+[13] C. Siviy et al., “Opportunities and challenges in the development of
+exoskeletons for locomotor assistance,” Nat. Biomed. Eng., vol. 7, no. 4,
+pp. 456–472, 2023, doi: 10.1038/s41551-022-00984-1.
+[14] D. D. Molinaro, K. L. Scherpereel, E. B. Schonhaut, G. Evangelopoulos,
+M. K. Shepherd, and A. J. Young, “Task-agnostic exoskeleton control
+via biological joint moment estimation,” Nature, vol. 635, no. 8038,
+pp. 337–344, 2024, doi: 10.1038/s41586-024-08157-7.
+[15] D. Lee, S. Lee, and A. J. Young, “AI-driven universal lower-limb
+exoskeleton system for community ambulation,” Sci. Adv., vol. 10,
+no. 51, Art. no. eadq0288, 2024, doi: 10.1126/sciadv.adq0288.
+[16] I. Kang et al., “Online adaptation framework enables personaliza-
+tion of exoskeleton assistance during locomotion in patients affected
+by stroke,” IEEE Trans. Robot., vol. 41, pp. 4941–4959, 2025, doi:
+10.1109/TRO.2025.3595701.
+[17] J. K. Leestma, S. Mathur, M. D. Anderton, G. S. Sawicki, and A. J.
+Young, “Dynamic duo: Design and validation of an autonomous frontal
+and sagittal actuating hip exoskeleton for balance modulation during per-
+turbed locomotion,” IEEE Robot. Autom. Lett., vol. 9, no. 5, pp. 3995–
+4002, 2024, doi: 10.1109/LRA.2024.3371290.
+[18] A.
+Alili,
+A.
+Fleming,
+V.
+Nalam,
+M.
+Liu,
+J.
+C.
+Dean,
+and
+H. Huang, “Abduction/adduction assistance from powered hip exo-
+skeleton enables modulation of user step width during walking,”
+IEEE Trans. Biomed. Eng., vol. 71, no. 1, pp. 334–342, 2024, doi:
+10.1109/TBME.2023.3301444.
+[19] E. B. K¨uc¸¨uktabak et al., “Haptic transparency and interaction force
+control for a lower limb exoskeleton,” IEEE Trans. Robot., vol. 40,
+pp. 1842–1859, 2024, doi: 10.1109/TRO.2024.3359541.
+[20] P. Slade et al., “On human-in-the-loop optimization of human–robot
+interaction,” Nature, vol. 633, no. 8031, pp. 779–788, 2024, doi:
+10.1038/s41586-024-07697-2.
+[21] D. Sarkar, S. Chakraborty, S. Sen, S. S. Roy, and A. Arora, “SoftEX-
+Owalk: A human-in-the-loop optimized soft exosuit for assisting knee
+flexion using sensorized pneumatic muscles,” IEEE Trans. Med. Robot.
+Bionics, early access, 2026, doi: 10.1109/TMRB.2026.3722336.
+[22] Y. Ding, M. Kim, S. Kuindersma, and C. J. Walsh, “Human-in-
+the-loop optimization of hip assistance with a soft exosuit during
+walking,” Sci. Robot., vol. 3, no. 15, Art. no. eaar5438, 2018, doi:
+10.1126/scirobotics.aar5438.
+[23] U. H. Lee et al., “User preference optimization for control of ankle
+exoskeletons using sample efficient active learning,” Sci. Robot., vol. 8,
+no. 83, Art. no. eadg3705, 2023, doi: 10.1126/scirobotics.adg3705.
+[24] G.
+Ramella,
+A.
+Ijspeert,
+and
+M.
+Bouri,
+“Rapid
+online
+learn-
+ing
+of
+hip
+exoskeleton
+assistance
+preferences,”
+in
+Proc.
+IEEE
+Int.
+Conf.
+Robot.
+Autom.
+(ICRA),
+2025,
+pp.
+2501–2508,
+doi:
+10.1109/ICRA55743.2025.11128809.
+[25] M. I. Wu, P. Stegall, H. C. Siu, and L. A. Stirling, “Impact of haptic cues
+and an active ankle exoskeleton on gait characteristics,” Hum. Factors,
+vol. 66, no. 3, pp. 904–915, 2024,doi: 10.1177/00187208221113625.
+[26] C. Carrasquillo, A. Bajpai, D. Iyengar, K. Collins, A. Mazumdar, and
+A. J. Young, “Enhancing human navigation ability using force-feedback
+from a lower-limb exoskeleton,” IEEE Trans. Haptics, vol. 18, no. 2,
+pp. 312–324, 2025, doi: 10.1109/TOH.2025.3533974.
+[27] S. Macenski, T. Moore, D. V. Lu, A. Merzlyakov, and M. Ferguson,
+“From the desks of ROS maintainers: A survey of modern & capable mo-
+bile robotics algorithms in the robot operating system 2,” Robot. Auton.
+Syst., vol. 168, Art. no. 104493, 2023, doi: 10.1016/j.robot.2023.104493.
+[28] F. Nogueira, “Bayesian Optimization: Open-source constrained global
+optimization tool for Python,” GitHub repository, 2014. [Online]. Avail-
+able:
+https://github.com/bayesian-optimization/BayesianOptimization.
+Accessed: Oct. 19, 2026.

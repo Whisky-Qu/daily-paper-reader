@@ -1,0 +1,1177 @@
+Title: DiPLO: Self-distilled Diffusion Planning for Loco-manipulation
+
+URL Source: https://arxiv.org/pdf/2610.24847v1
+
+Published Time: Tue, 20 Oct 2026 01:07:44 GMT
+
+Number of Pages: 20
+
+Markdown Content:
+> 1
+
+# DiPLO: Self-distilled Diffusion Planning for Loco-manipulation 
+
+Shafeef Omar 1,4 , Sebastian Sanokowski 1, Elham Daneshmand 2, Dian Yu 1 Daniel Cremers 1, Cordelia Schmid 3,4 ,Majid Khadiv 1
+
+Fig. 1: Real-robot executions of our planner-tracker architecture for humanoid loco-manipulation on the Unitree G1. 
+
+Abstract —Humanoid loco-manipulation is particularly chal-lenging because it requires coordinating locomotion, balance, and object interaction, making it difficult to learn from limited demonstrations or from scratch through Reinforcement Learning (RL). We introduce DiPLO (self-distilled Diffusion Planning for Loco-manipulation), a framework that combines a self-distilled diffusion planner with a low-level whole-body tracking policy. Our planner is pretrained via supervised learning on motions derived from human-to-humanoid retargeting, while the tracker is trained via RL to execute them. DiPLO centers around two complementary post-training stages. First, we introduce Self-Distillation Diffusion Policy Optimisation (SD:DPO) to remove the planner’s dependence on strong task conditioning, which we identify as a crucial ingredient for effective pretraining, as downstream fine-tuning does not recover comparable per-formance when it is omitted.. We then fine-tune this distilled model with Diffusion-Augmented Proximal Policy Optimization (DA:PPO), a maximum-entropy RL method for diffusion models, to improve task success and align generated plans with the frozen tracker’s execution capabilities. Together, these stages enable motion generation through state-history and goal con-ditioning alone, enabling ∼ 99% task success in pick-carry-place tasks, compared to just 45% for the pretrained model. The resulting planner also generates motions for unseen object goals, with further evaluations on kicking and pushing/pulling 
+
+> 1
+
+Technical University of Munich (TUM), Munich, Germany. 
+
+> 2
+
+McGill University, Montreal, Canada. 
+
+> 3
+
+INRIA, Paris, France. 
+
+> 4
+
+Institute for Advanced Study (IAS), Technical University of Munich, Munich, Germany. 
+
+tasks. Finally, we deploy our pipeline on the hardware, using our DA:PPO planner-tracker on a Unitree G1, achieving repeated successful executions without any real-world fine-tuning. Video: https://youtu.be/rDrdnYQUYoM 
+
+Index Terms —Humanoid Robots, Diffusion Models, Reinforce-ment Learning, Post-Training, Generalisation 
+
+I. I NTRODUCTION 
+
+Humanoid loco-manipulation requires coordinating loco-motion, balance, and object interaction. Human motion data provides useful supervision for learning these behaviors, but collecting large datasets is costly [1], [2]. Our goal is to learn from a small dataset of retargeted motions while keeping task specification simple: the user provides the desired object position and orientation, and the robot determines how to reach it. This requires a planner that can generate trackable motions for different object goals, including goals beyond those represented in the demonstrated behaviours. We introduce DiPLO (self-distilled Diffusion Planning for Loco-manipulation), which combines a diffusion motion plan-ner with an RL-trained tracker. Starting from 29 retargeted robot–object motion sequences from an existing dataset [3] (which amounts to just 2.7 mins of data), we use trajectory op-timization [4] and augmentation to generate dynamically fea-sible training motions for both components. During execution, the diffusion planner generates motion chunks and replans arXiv:2610.24847v1 [cs.RO] 17 Oct 2026 2
+
+Fig. 2: Overview of the pipeline. (a) SBTO turns each IK-retargeted demonstration sIK into a set of dynamically feasible motions sD , and symmetries further enlarge the data corpus. (b) The diffusion motion generator Gϕ is pretrained to generate an 
+
+n-step feasible motion conditioned on the IK-retargeted motion prior, the state history and the goal, while the tracking policy 
+
+πθ is trained separately with RL to track sD . (c) Self-distillation with SD:DPO removes the need for the task prior: the student 
+
+Gϕ, with the prior token nulled, rolls out with the frozen tracker πθ ; each plan it produces is noised to a random denoising step k and denoised twice by the same network, with and without sIK , and the student’s reverse kernel pϕ is matched to the self-teacher’s stop-gradient kernel sg( pϕ). (d) The distilled Gϕ is then post-trained with DA:PPO, conditioned on the state history and the goal alone. In closed loop, Gϕ plans n steps, πθ executes the first m ≤ n of them, and Gϕ re-plans from the reached state. DA:PPO credits the rollout reward Renv to every denoising step of Gϕ while πθ stays fixed; the deployed pipeline runs the same loop without the reward. from the measured state as the tracker executes them. Such a pretrained planner still relies strongly on kinematic reference conditioning, which limits its ability to generate motions to new goals. To remove this dependence after pretraining, we propose Self-Distillation Diffusion Policy Optimization (SD:DPO). SD:DPO transfers guidance from a reference-conditioned teacher to a student conditioned only on state history and the object goal. The student learns to match the teacher’s denoising predictions at states encountered during environment rollouts with the tracker. These rollouts expose the student to the consequences of planning and tracking er-rors, extending its supervision beyond the contexts represented in the training data. SD:DPO thereby enables high survival without requiring a kinematic reference at deployment. Trackable motions alone, however, do not ensure that the object reaches its goal. We therefore follow self-distillation with planner fine-tuning using DA:PPO [5], a maximum-entropy RL method for diffusion models. With the tracker fixed, DA:PPO improves task completion through closed-loop interaction while encouraging diversity in generated plans. SD:DPO and DA:PPO thus address complementary require-ments: removing dependence on reference conditioning and improving task success. Our main contributions are:  
+
+> •
+
+We introduce DiPLO, a framework that combines aself-distilled diffusion-based planner for humanoid loco-manipulation that jointly generates whole-body and ob-3
+
+ject motion for execution by a single generalist RL tracking policy.  
+
+> •
+
+We propose SD:DPO, which distills a reference-conditioned diffusion planner into a goal-conditioned planner, removing the need for kinematic reference con-ditioning at deployment. We further apply DA:PPO fine-tuning through closed-loop interaction with a fixed gen-ralist tracker, improving object-goal completion while maintaining diverse, trackable plans.  
+
+> •
+
+We provide extensive ablations across a diverse set of loco-manipulation tasks, demonstrating the effectiveness of DiPLO and its components compared with state-of-the-art baselines, together with zero-shot transfer to a real humanoid robot. II. R ELATED WORK 
+
+1) Learning from retargeted motion data: Retargeted mo-tions provide supervision for learning whole-body tracking policies [6]–[8], but kinematic retargeting [3], [9] alone does not ensure physically feasible robot–object interaction. DynaRetarget [4] addresses this limitation through sampling-based trajectory optimization (SBTO), which refines a kine-matic reference into a dynamically feasible motion. To scale demonstrations beyond those recorded, HumanoidMim-icGen [10] augments loco-manipulation data by adapting object-centric skill segments of a source demonstration to new object poses. However, it plans kinematically and decouples locomotion from stationary manipulation, so dynamic feasibil-ity is not enforced during generation. In contrast, we repurpose SBTO, originally proposed to refine individual demonstra-tions, for data augmentation: starting from perturbed initial conditions, we exploit the stochasticity of the sampling-based optimizer to synthesize locally diverse, dynamically feasible robot–object motions in which locomotion and manipulation remain coupled. 
+
+2) Diffusion planning for loco-manipulation: Diffusion Policy [11] models multimodal action sequences for robotic manipulation. In humanoid locomotion, however, maintaining balance while accomplishing the task motivates delegating execution to a low-level controller [12]. PDP [13] learns action generation from expert policies, while BeyondMimic [14] uses guided state–action diffusion to generate goal-directed behaviors. An alternative is to separate motion generation from execution: [15] combine a diffusion motion generator with a tracking policy for terrain locomotion. Recent works have shown the success of this separation in loco-manipulation settings [16], [17]. REFINE-DP [16] is closest to our ap-proach in combining diffusion planning with RL fine-tuning for humanoid loco-manipulation. Its planner generates motion commands for separate upper- and lower-body controllers. DiPLO instead jointly plans whole-body and object motion for a single generalist tracking policy. Our post-training procedure also differs. We first use SD:DPO to remove the dependence on kinematic reference conditioning introduced during pretraining on retargeted motions. We then apply maximum-entropy fine-tuning with DA:PPO while keeping the tracker fixed. Finally, our generalization evaluation examines whether the same trained planner can reach different requested object positions and orientations that are absent from the retargeted dataset. Our planner also treats rotational features through diffusion on SO(3) . Such processes have been developed for rotational alignment [18], [19], while DiffDock [20] combines diffusion over translational, rotational, and torsional degrees of freedom. We apply this geometric formulation to humanoid–object motion, evaluate its effect on closed-loop survival, and retain it during planner post-training. 
+
+3) Distillation in Robot Learning: Teacher–student distil-lation allows policies to benefit from information unavailable at deployment [21]. Following such a recipe, OmniH2O [8] distills a controller with privileged observations into a policy using deployable observations and sparse motion commands. Our objective concerns the high-level task specification: re-moving the diffusion planner’s dependence on strong task conditioning (kinematic reference trajectory). The closest methodological precedent is Self-Distillation Policy Optimization (SDPO) [22], which uses a language model conditioned on additional feedback as a self-teacher and distills its next-token predictions into a student. Inspired by SDPO, we propose SD:DPO for diffusion motion planning. A teacher with access to privileged task-prior conditioning su-pervises the student’s denoising predictions on states encoun-tered during closed-loop environment rollouts with the tracker, enabling reward-free credit assignment through denoising-step matching. This distills the guidance provided by the privileged task prior into a planner conditioned only on the robot’s state history and object goal, allowing the task prior to be removed at deployment. We evaluate both the resulting improvement in survival and the ability of the distilled planner to generate motions for object goals absent from the retargeted dataset. 
+
+4) Fine-tuning of diffusion planners: Diffusion-Policy Pol-icy Optimization (DPPO) [23] enables reinforcement learn-ing for diffusion policies by treating denoising transitions as decisions with tractable likelihoods and applying PPO to the resulting augmented process. REFINE-DP [16] applies diffusion-policy fine-tuning to humanoid loco-manipulation, considering both a fixed controller and alternating updates of the planner and controllers. However, DPPO promotes ex-ploration by truncating the denoising process during training, which can lead to jittery motions. Such behavior is particularly undesirable for real-world humanoid control, where smooth and dynamically consistent motions are essential. Diffusion-Augmented MDPs [5] instead provide amaximum-entropy formulation in which ratios of reverse and forward transition densities yield tractable entropy regularization at each denoising step. We use their PPO instantiation, DA:PPO, to fine-tune the planner after SD:DPO. Our setting combines Euclidean and SO(3) diffusion and evaluates generated motions through a frozen generalist tracker. DA:PPO optimizes task completion after kinematic reference conditioning has been removed, while entropy regularization encourages diversity in the generated plans. We separately evaluate tracker adaptation to distinguish improvements due to planner fine-tuning from those obtained by adapting the tracker. 4
+
+III. P RELIMINARIES 
+
+A. Motion Planning and Tracking 
+
+We consider humanoid loco-manipulation with a high-level motion planner and a low-level tracking policy. The planner generates desired whole-body and object motion over a finite horizon, while the tracker executes this motion by adjusting joint actions based on the measured robot and object states. This hierarchical decomposition is motivated by the underac-tuated nature of humanoid robots and the need to maintain balance while tracking task-level motions. Let st denote the measured robot–object motion state and gt
+
+the desired object pose expressed relative to its current pose. At planning step t, the planner Gϕ receives the state history 
+
+st−h:t over h steps and the goal gt. It may additionally receive a kinematic reference sIK τ obtained by inverse-kinematics (IK) retargeting. These inputs condition the generation of an n-frame motion chunk over τ = t + 1 : t + n:
+
+ct = ( st−h:t, g t),
+
+ˆsDτ ∼ Gϕ(· | ct, s IK τ ). (1) Here, ˆsDτ denotes a generated motion chunk whereas sDτ
+
+denotes a motion chunk from the dataset. When the kinematic reference is unavailable, its input is replaced by a null token ∅.We use zτ to collect the planner’s conditioning: zτ = ( ct, s IK τ )
+
+with the reference and zτ = ct without it. Section IV-A specifies the motion state st.The generated chunk provides the reference motion for the tracker. At control step j, the policy πθ receives robot and object observations oj , its previous action aj−1, and planned motion features Rj (ˆ sDτ ). Here Rj extracts reference robot and object states at specified future offsets from j. The policy predicts a residual correction to the reference joint positions 
+
+qref  
+
+> j
+
+. Denoting the scaled residual by aj , the joint controller’s target is 
+
+aj ∼ πθ
+
+ · | oj , a j−1, Rj (ˆ sDτ ) ,qPD  
+
+> j
+
+= qref  
+
+> j
+
++ aj . (2) A proportional–derivative (PD) controller uses qPD  
+
+> j
+
+as its joint-position target. The tracker executes the first m ≤ n
+
+frames of the chunk, at control steps j = t, . . . , t + m − 1.The planner then generates a new chunk from the updated measured history. Replanning thus accounts for the motion actually executed, including tracking errors. To train the tracker, reference motions are sampled from a dataset D and executed in simulation [6], [14]. We train a policy via PPO [24] to learn to follow these motions by maximizing the expected tracking return: 
+
+Jtrack (θ) = EsD ∼D , π θ
+
+ 
+
+> T−1
+
+X
+
+> j=0
+
+γj
+
+> track
+
+rtrack ,j 
+
+ . (3) Where the expectation is over sampled references and sim-ulated rollouts over the whole episode length T , and γtrack 
+
+discounts the control steps. The reward rtrack ,j measures how closely the executed robot and object motions follow the reference, with additional contact and regularization terms. During this training stage, the reference comes from the dataset; during planner execution, it comes from the generated chunk. 
+
+B. Conditional Diffusion Models 
+
+We use a conditional diffusion model as a planner to learn to generate motion by reversing a prescribed noising process [25], [26]. For training, a clean chunk sD, 0 
+
+> τ
+
+= sDτ and its conditioning zτ are drawn from the dataset. The forward transitions sD,k τ ∼ qk(· | sD,k −1 
+
+> τ
+
+, z τ ) progressively corrupt the motion over K diffusion levels. At the final level, the distribution approximately matches a prescribed diffusion prior 
+
+p(· | zτ ). This prior supplies the initial noise for the denoising process. Learned reverse transitions then progressively denoise it using the conditioning zτ :
+
+ˆsD,K τ ∼ p(· | zτ ),
+
+ˆsD,k −1 
+
+> τ
+
+∼ pϕ
+
+ · | ˆsD,k τ , z τ
+
+ , k = K, . . . , 1. (4) The complete chain defines the planner Gϕ; each kernel 
+
+pϕ describes one denoising step which is parameterized by a neural network which receives the noisy chunk, diffusion level k, and conditioning zτ . The final sample ˆsD, 0 
+
+> τ
+
+= ˆ sDτ is passed to the tracking policy. Pretraining uses dataset chunks corrupted at sampled noise levels to construct supervised targets for the network. See Section IV-B for more details. 
+
+C. Diffusion-Augmented MDPs and DA:PPO 
+
+The planner receives an environment reward when the tracker executes the first m frames of a generated chunk. To improve the planner with RL, this reward must guide the denoising decisions that produced the chunk. A Diffusion-Augmented Markov Decision Process (DA-MDP) [5] makes these decisions explicit: the diffusion augmented state ˜sk
+
+contains the planner’s conditioning z, the current noisy chunk 
+
+˜ak, and its diffusion level k; the action is the next, less noisy chunk ˜ak−1. Writing ˜ak = ˆ sD,k τ and suppressing the window subscript τ , we obtain 
+
+˜sk = ( z, ˜ak, k ), ˜ak−1 ∼ pϕ(· | ˜sk). (5) Each action has the tractable density pϕ(˜ ak−1 | ˜sk), even though the marginal density of the completed chunk is in-tractable. For k > 1, the environment remains unchanged and the next state contains the updated noisy chunk at level k − 1.At k = 1 , the tracker executes the first m frames, the planner’s conditioning is updated, and a fresh prior sample starts the next denoising chain. For a successor state ˜s′ = ( z′, a ′, k ′), these two cases give 
+
+pDA (˜ s′ | ˜sk, ˜ak−1)=
+
+(
+
+δz (z′) δ˜ak−1 (a′) δk−1(k′), k > 1,Pm(z′ | z, ˜a0) p(a′ | z′) δK (k′), k = 1 .
+
+(6) Here δx denotes a point mass at x, and Pm is the transition induced by executing the first m frames with a fixed tracker. The resulting observations update the history and goal direc-tion in z′ and optionally the kinematic reference. Only the final denoising decision receives the reward r accumulated during 5
+
+execution, so ˜rk = 1{k=1 }r. The discount likewise applies only when execution advances the environment: ¯γk = γ for 
+
+k = 1 and one otherwise, where γ discounts planning steps. The maximum-entropy formulation also regularizes the de-noising decisions. Its action-value function QDA and state-value function VDA satisfy the soft Bellman equations 
+
+QDA (˜ s, ˜a) = E[˜ r + ¯ γkVDA (˜ s′) | ˜s, ˜a] ,VDA (˜ s) = E˜a∼pϕ(·| ˜s)[QDA (˜ s, ˜a) − T ℓϕ(˜ s, ˜a)] , (7) with zero continuation value at terminal states. ℓϕ(˜ sk, ˜ak−1) = log pϕ(˜ ak−1 | ˜sk)/q kϕ(˜ ak | ˜ak−1, z ) is a diffusion regulariza-tion term and given by the log ratio of the reverse transition density to the corresponding forward density. It replaces the action log-likelihood in the usual soft Bellman equations [27]. Thus, QDA combines the current environment reward with the value of the next augmented state, while VDA also includes the current diffusion regularization term. These recursions propagate the reward from execution through all preceding denoising decisions. −T ℓϕ encourages entropy in the reverse process while favoring denoising paths that are plausible under forward noising. Retaining this diversity during fine-tuning encourages exploration whose temperature T controls the strength of the regularization. DA:PPO applies PPO [24] to these individual denoising decisions. Let i index transitions collected under pϕold , and let the critic Vψ approximate VDA . Generalized advantage estimation [28] computes Aold  
+
+> i
+
+from the residuals δi = ˜ ri −T ℓold  
+
+> i
+
++ ¯ γiVψ (˜ si+1 ) − Vψ (˜ si), where ℓold  
+
+> i
+
+= ℓϕold (˜ si, ˜ai). The advantage therefore accounts for both execution rewards and the log-ratio contributions along the rollout. Because the log ratio changes as the policy is updated, DA:PPO replaces its current-step contribution in the stored advantage: bAi(ϕ) = sg Aold  
+
+> i
+
+− T (ℓi(ϕ) − ℓold  
+
+> i
+
+). The stop-gradient operator sg holds this quantity fixed when differenti-ating the policy loss. With the reverse-kernel importance ratio 
+
+ρi = pϕ(˜ ai | ˜si)/p ϕold (˜ ai | ˜si), the loss is 
+
+L(ϕ) = Ei
+
+ − min  ρi bAi, clip( ρi, 1 − ϵ, 1 + ϵ) bAi
+
+
+
+− T sg( χiρi) log qi(ϕ). (8) The first term is the clipped PPO objective, with clipping range set by ϵ. The second accounts for optionally learned diffusion coefficients in the forward density qi(ϕ), evaluated on transi-tion i; it contributes no gradient if diffusion coefficients are fixed. The mask χi applies this correction only where the PPO objective is not clipped: it is zero when bAi ≥ 0 and ρi > 1+ ϵ,or when bAi < 0 and ρi < 1 − ϵ, and one otherwise. IV. M ETHOD 
+
+DiPLO learns a diffusion motion planner and a single generalist tracking policy from dynamically feasible motions constructed from retargeted data. After pretraining, we hold the tracker fixed and improve the planner in two stages. SD:DPO removes its dependence on kinematic reference con-ditioning; subsequent DA:PPO fine-tuning optimizes towards better task completion through closed-loop execution. 
+
+A. Robot–Object Motion Representation 
+
+The planner represents observed and generated motion through the same robot–object state: 
+
+st =   ∆pxy t , ∆ψt, h t, R t, q t
+
+| {z }
+
+> robot motion
+
+, pot , R ot
+
+| {z } 
+
+> object motion
+
+. (9) The robot states comprise planar root displacement ∆pxy t ∈
+
+R2, heading change ∆ψt ∈ R, root height ht, heading-invariant root orientation Rt ∈ SO(3) , and joint positions 
+
+qt ∈ R29 . The object states are its position pot ∈ R3 and orientation Rot ∈ SO(3) . Planar displacements and object orientations are expressed in the current robot heading frame, while heights remain absolute. The representation therefore removes dependence on global planar position and heading. At the network input, each rotation is encoded in the continuous 6D representation, giving 48 features per time-frame. 
+
+B. Pretraining from Retargeted Motions 1) Training motions: Kinematic retargeting provides mo-tion references but does not enforce the robot’s dynamics or contact constraints. We refine these references with sampling-based trajectory optimization (SBTO) [4]. By perturbing the initial conditions and varying the optimization seeds we gen-erate several dynamically feasible variations of each motion. Additionally, we expand this dataset by mirroring robot and object motions across the sagittal plane and applying the box’s quarter-turn rotational symmetries (Fig. 3). Each training pair contains a kinematic reference sIK τ and a feasible target motion sDτ .
+
+2) Motion planner: We use a Diffusion Transformer (DiT) [29] as the denoiser. It receives the noisy chunk, diffusion level k, state history and goal ct, and kinematic reference sIK τ . During pretraining, we replace the reference with the null token ∅ in 50% of examples, so the network learns to denoise with either form of conditioning. Appendix A provides additional architecture details. We use separate diffusion processes for Euclidean features and rotations. Grouping these features across the chunk, we write sD,k τ = ( xk, R k) for noised training data and ˆsD,k τ =(ˆ xk, ˆRk) for a generated sample. Conditioning is omitted below for readability. 
+
+Euclidean features. After normalization, the Euclidean fea-tures follow discrete time variance-preserving (VP) diffusion with a cosine noise schedule [30]. Each forward step scales down the signal and adds Gaussian noise: 
+
+q(xk | xk−1) = N  √αk xk−1, β kI , (10) where αk = 1 − βk and ¯αk = Qkj=1 αj , with ¯α0 = 1 .This choice preserves unit marginal variance for initially normalized features. For training, we sample any noise level directly as xk = √¯αkx0 + √1 − ¯αkϵ, where ϵ ∼ N (0 , I ). As 
+
+¯αK approaches zero, the terminal distribution approaches the diffusion prior N (0 , I ).Denoising requires the optimal score u∗
+
+> k
+
+(sD,k τ ) =
+
+∇xk log qk(xk, R k), which describes how the noisy data den-sity changes with the Euclidean features [31]. A learned 6
+
+estimate uϕ,k determines the mean of the DDPM reverse kernel: 
+
+pϕ(ˆ xk−1 | ˆsD,k τ ) = N (μkϕ, ˜βkI),μkϕ = ˆxk + βkuϕ,k (ˆ sD,k τ )
+
+√αk
+
+, (11) where ˜βk = βk(1 − ¯αk−1)/(1 − ¯αk). The score term provides the denoising correction, and the variance controls the remaining noise. This Gaussian kernel approximates the finite-step reverse distribution. Although the data score is unknown, the clean sample and sampled noise provide a computable training target. We use 
+
+v-prediction [32], with target vk = √¯αkϵ − √1 − ¯αkx0. The network output ˆvkϕ is converted to a score estimate by 
+
+uϕ,k (ˆ sD,k τ ) = −ˆxk −
+
+r ¯αk
+
+1 − ¯αk
+
+ˆvkϕ. (12) Substituting this estimate into (11) gives the mean used for denoising. With squared-error regression, the optimal predictor is the conditional mean of vk, and this conversion recovers the data score at noise level k. We use smooth-L1 regression in practice (see Appendix B for more details). 
+
+Rotational features. We use a discrete time analogue of VP diffusion on SO(3) , contracting root and object rotations towards a reference orientation A ∈ SO(3) while increasing rotational noise. We set A = I for the root and use the current measured object orientation for the object. Each reference remains fixed throughout the chunk’s diffusion process. To express these operations, let v = ( v1, v 2, v 3)⊤ ∈ R3 be a rotation vector whose direction defines the rotation axis and whose norm is the rotation angle. The map v 7 → [v]× ∈ so (3) 
+
+forms the corresponding skew-symmetric matrix, and its cor-responding rotation matrix can be computed with Exp( v) = exp([ v]×) ∈ SO(3) . Conversely, Log( R) ∈ R3 inverts this operation back to its rotation vector and the corresponding matrix logarithm is defined as log R = [Log( R)] ×.We model rotational noise with the isotropic IG SO(3) dis-tribution [18], [19]. A perturbation of an orientation M is obtained by sampling a noise rotation E ∼ IG SO(3) (I, σ 2)
+
+centred at the identity and composing the two rotations as 
+
+R = M E . The resulting distribution is centred at M , with spread controlled by σ. The rotational diffusion prior is given by p(RK ) = IG SO(3) (A, σ 2 
+
+> K
+
+) and it depends on the observed state through the current state reference A.For training, a clean rotation R0 is corrupted directly at level k by first computing the contracted centre M k and then adding a sampled noise rotation: 
+
+M k = A Exp  √¯αk Log( A⊤R0) ,Ek ∼ IG SO(3) (I, σ 2
+
+> k
+
+), Rk = M kEk, (13) where σ2 
+
+> k
+
+= σ2max (1 − ¯αk). To interpret the first line, note that 
+
+R0 = A(A⊤R0): A⊤R0 is the rotation relative to A, and Log 
+
+expresses it as an axis–angle vector. Multiplication by √¯αk
+
+reduces its angle. The exponential map converts the scaled vector back to a rotation matrix, which is composed with A
+
+to obtain M k. The second line adds noise by composing M k
+
+with Ek. As ¯αk approaches zero, the centre approaches A and the noise scale approaches σmax , yielding the prescribed prior in the limit. For each rotation and frame, the network outputs ˆϵR,k ϕ ∈ R3,trained to predict the standardized angular noise ϵR,k =Log(( M k)⊤Rk)/σ k. Scaling the prediction by −σk gives the axis–angle correction that cancels the predicted noise. The exponential map converts this vector, through its skew-symmetric matrix in so (3) , into a rotation matrix. Applying this correction gives, before clipping, 
+
+ˆM k = ˆRk Exp( −σk ˆϵR,k ϕ ). (14) This estimates the contracted centre M k. To recover an estimate of the clean rotation relative to A, we divide 
+
+Log( A⊤ ˆM k) by √¯αk. We then combine this vector with the current noisy rotation in the same coordinates, using the DDPM coefficients: 
+
+pϕ( ˆRk−1 | ˆsD,k τ ) = IG SO(3) (μR,k , σ 2max ˜βk),μR,k = A Exp 
+
+ ak
+
+√¯αk
+
+Log( A⊤ ˆM k)+ bk Log( A⊤ ˆRk)
+
+
+
+,
+
+(15) where ak = √¯αk−1βk/(1 − ¯αk) and bk = √αk(1 −
+
+¯αk−1)/(1 − ¯αk). The resulting kernel is an approximation constructed in axis–angle coordinates. Sampling a reverse step amounts to multiplying its centre μR,k by a new identity-centred noise rotation. More details are provided in Ap-pendix B. At deployment, we use the predicted reverse means for both feature groups without adding noise at each step; generation remains stochastic through the initial prior sample. 
+
+3) Generalist tracking policy: We train a single tracking policy on the feasible robot–object motions, optimizing (3) with PPO in mjlab [33]. The tracker operates at 50 Hz using the residual joint targets in (2). Its reference observations include motion features at future offsets of {1, 2, 4, 8} frames. Appendix D specifies the observations and motion-sampling strategy; the rewards and termination conditions are defined in Appendices F and E. 
+
+C. Removing Task Conditioning with SD:DPO 
+
+Although pretraining includes examples without reference conditioning through masking, removing the reference sub-stantially reduces closed-loop survival (Section V-B) since planning and tracking errors can lead the system into states poorly represented in the training data. Thus, at such states, the data provides limited guidance on how to continue the motion. To mitigate this problem we propose Self-Distillation Diffusion Policy Optimization (SD:DPO) to supply this super-vision, where a student that receives only state history and the object goal learns to match the task-prior-conditioned teacher at states reached during environment rollout. The student Gϕ receives ct and the null reference token ∅,whereas the teacher G ¯ϕ additionally receives the kinematic reference sIK τ . Both are initialized from the pretrained planner. At each planning step, both generate a chunk. We choose either proposal with probability 1/2 and execute its first m frames with the frozen tracker. The resulting measured states update the history used to generate the next chunk. 7
+
+At every planning step, we store the student’s proposal, its starting context, and the corresponding kinematic reference in a buffer B, regardless of which proposal was executed. Failed rollouts terminate and reset, but all previously collected proposals remain in the buffer, including those associated with failure. The tracker supplies the execution contexts used for learning while the teacher supplies the denoising targets. Let ϕold denote the student weights held fixed during collection. For each training update, we draw a stored proposal and corrupt it at a uniformly sampled diffusion level: 
+
+ˆsD, 0 
+
+> τ
+
+∼ Gϕold (· | ct, ∅), k ∼ U{ 1, . . . , K },
+
+ˆsD,k τ ∼ qk
+
+ · | sg(ˆ sD, 0 
+
+> τ
+
+), c t
+
+. (16) Here qk denotes direct corruption to level k using the processes in Section IV-B. Teacher and student receive the same noisy chunk, diffusion level, and stored context. The teacher also receives the kinematic reference, which provides guidance for predicting a continuation from that context. We transfer this guidance to the student by matching their Euclidean and rotational denoising predictions: 
+
+Ldistill (ϕ) = EB,k,q 
+
+h
+
+MSE  ˆvk, ∅ 
+
+> ϕ
+
+, sg(ˆ vk,IK  
+
+> ¯ϕ
+
+)
+
++ MSE  ˆϵR,k, ∅ 
+
+> ϕ
+
+, sg(ˆ ϵR,k,IK  
+
+> ¯ϕ
+
+)i
+
+.
+
+(17) The superscripts ∅ and IK indicate absent and present refer-ence conditioning, respectively and each mean-squared error (MSE) averages the squared prediction differences over frames and features. The expectation is over buffered proposals, diffusion levels, and sampled noise. Importantly, gradients pass only through the student’s predictions whereas teacher targets, buffered proposals, and noisy inputs are held fixed, so learning does not differentiate through collection, simulation, or noise sampling. We train with (17) alongside the original data-based pre-training loss and an anchor loss. The anchor loss compares the student’s reference-conditioned predictions with those of a frozen pretrained copy on the same noisy chunk. It penalizes deviations from the pretrained model, restricting changes to the reference-conditioned behavior. The teacher is updated through an exponential moving average of the student weights, while the pretrained copy remains fixed. Further details are provided in Appendix J. 
+
+D. Improving Task Completion with DA:PPO 
+
+SD:DPO improves generation without a kinematic refer-ence, but producing trackable motion does not by itself ensure that the object reaches its goal. We therefore fine-tune the distilled planner with DA:PPO. The frozen tracker executes its plans in simulation, and the resulting task rewards guide the planner’s updates. The planner continues to receive only state history and the object goal, with the reference token set to ∅.We instantiate DA-MDPs as explained in Section III-C with planner state zτ = ct and noisy action ˜akτ = ˆ sD,k τ . The reward 
+
+rτ collected during execution of the first m frames is assigned to the final denoising decision. The Bellman recursion then propagates this reward through the decisions that produced the chunk. If the episode continues, the planner generates a new chunk over τ ′ = t + m + 1 : t + m + n from the updated measured history. We optimize (8) to increase the execution return while retaining the log-ratio regularization. The tracker remains fixed throughout. Details on hyperparameters and rewards are provided in Appendices G and H. IK-retargeted references can optionally be used to compute training rewards, but do not need to be used to condition the planner (see Sec. V-E). V. E XPERIMENTS AND RESULTS 
+
+We evaluate our pipeline on humanoid loco-manipulation tasks and organise the evaluations around the design choices. In our experiments, we report the Survival Rate which we define as the fraction of rollouts where the robot neither falls nor drops the object. Additionally we define the Task success as the fraction of survived rollouts whose realized final object pose lies within 15 cm and 30 ◦ of the goal position the motion generator was conditioned on. We also report 
+
+MPKPE , which is the mean per-keypoint position error of the executed robot motion against the generated motion from the diffusion model, and Obj. pos. / Obj. ori. the corresponding object position errors aggregated over the whole trajectory. Both metrics measure the trackability of the generated motions of the robot and object. All simulation results are reported as mean ± standard error of the mean (SEM) over distinct reference motions. Each motion is rolled out 100 times and averaged computing the error over different motions. 
+
+A. Choice of Pretraining Data Augmentations 
+
+To identify important design choices during pretraining, we evaluate the individual and combined contributions of SBTO motion variations and symmetry augmentation in our pipeline (see Fig. 3). To test this, we pretrain diffusion models under the same training budget under four different settings: (i) using datasets containing a single motion per demonstration, (ii) additionally using symmetry augmentations, (iii) augment-ing each motion with SBTO variations and (iv) combining each motion with both augmentations. SBTO variations are generated by repeating trajectory optimization with slightly perturbed initial conditions, producing dynamically feasible realizations of each demonstration with slight diversity. The resulting pretrained models are then evaluated in closed-loop simulation with the same pretrained tracking policy. As shown in Table I for the pretrained models, SBTO variations improve survival more than symmetry augmentation alone, while combining both yields the highest survival rate. These results indicate that diversity among dynamically feasi-ble motions yields large individual benefit, with symmetries providing an additional improvement. Table I additionally shows that this advantage carries through post-training: using both augmentations, the survival rate reaches 100% , while substantially improving tracking performance and task success over not using any augmentations or just using symmetry augmentation. We also observe that, compared to DPPO [23]-style updates, DA:PPO [5] yields a higher survival rate and better-tracking metrics, indicating that the maximum-entropy 8
+
+TABLE I: Post-Training for Alignment on different pretraining corpora, evaluated in closed-loop using motions in the Single 
+
+dataset. Each generator is finetuned for 500 iterations on its own pretraining corpus, with 2048 parallel environments. The last two rows involve no learned planner: the same tracker is tasked to track the IK-retargeted motion or its SBTO solution. 
+
+Pretraining corpus Reference source Survival Task success MPKPE Obj. pos. Obj. ori. (%) ↑ (%) ↑ (cm) ↓ (cm) ↓ (◦) ↓
+
+SBTO Aug + Symmetry Pretrained planner 96.5 ± 1.5 51.9 ± 4.5 8.5 ± 0.6 12.6 ± 2.4 14.0 ± 1.3 
+
++ DPPO-style ( T = 0 ) 99.1 ± 0.1 94.0 ± 3.5 4.9 ± 0.3 5.2 ± 2.1 6.3 ± 1.2 
+
++ DA:PPO 100.0 ± 0.0 96.4 ± 3.4 4.3 ± 0.2 5.0 ± 2.0 5.8 ± 1.0 
+
+SBTO Aug Pretrained planner 92.3 ± 4.0 47.5 ± 6.3 8.6 ± 0.7 14.7 ± 3.9 14.9 ± 1.5 
+
++ DA:PPO 100.0 ± 0.0 92.5 ± 4.7 4.1 ± 0.1 4.9 ± 1.9 5.8 ± 1.1 
+
+Single + Symmetry Pretrained planner 90.7 ± 4.9 49.1 ± 7.8 8.8 ± 0.8 18.7 ± 5.2 16.4 ± 1.8 
+
++ DA:PPO 100.0 ± 0.0 89.4 ± 5.0 6.1 ± 0.3 7.2 ± 1.6 9.8 ± 1.3 
+
+Single Pretrained planner 90.0 ± 5.5 57.1 ± 7.8 9.0 ± 1.3 20.8 ± 6.7 18.3 ± 2.3 
+
++ DA:PPO 93.3 ± 4.4 72.3 ± 7.5 8.8 ± 1.3 18.0 ± 6.8 15.0 ± 2.2 
+
+None IK-retargeted motion 93.5 ± 4.5 53.0 ± 8.3 8.2 ± 0.7 11.0 ± 3.4 31.4 ± 4.5 SBTO solution 100.0 ± 0.0 61.6 ± 8.0 6.6 ± 0.4 9.1 ± 2.4 20.3 ± 3.5 −1 0 1X (m)        
+
+> −101Y (m)
+> 29 motions Start End
+> −101X (m)
+> 898 motions Start End
+> −101X (m)
+> 7184 motions Start End
+
+Fig. 3: Planar robot trajectories aligned at the origin illustrating data augmentation for pick-carry-place task. Left: the original motions. Middle: dynamically feasible variations generated by SBTO from perturbed initial conditions. Right: the dataset after symmetry augmentation. extension of DPPO to DA:PPO indeed improves performance. Furthermore, the results show that the pretrained planner achieves 51.9% task success, while fine-tuning with DA:PPO improves this result to 96.4%. The trackability of the IK-retargeted/SBTO motions are lower (see last row in Table I) which yield a survival rate of 93 .5% and Task success of 
+
+53 .0% . Thus, the same pretrained tracking policy yields sub-stantially higher task success when supplied with improved references from the finetuned planner. 
+
+B. Importance of Task Conditioning During Pretraining 
+
+During pretraining, we find that using the IK-retargeted robot and object motion as conditioning for the diffusion planner, which provides a prior on how to solve the task, is important to obtain strong results after pretraining. To ablate this choice, we pretrain seven diffusion models on different task prior choices. The task priors range from using the full IK-retargeted motion down to not using retargeted conditioning at all. Each model is evaluated in closed-loop simulation using the same pretrained tracking policy. As shown in Fig. 4, the strongest performance is obtained when using the IK-retargeted robot and object motion as task conditioning as derived from OmniRetarget dataset [3]. We also directly compare against using the corresponding human pose and object pose from the OMOMO [2] dataset without any retargeting and observe a roughly 9% drop in survival rate. Using sparse end-effector and object motion references (only every 5 frames), we do not observe a significant drop in performance, compared to using dense end-effector and object motion conditioning. Removing the remaining priors lowers the closed-loop survival rate further, to ∼70% with only the object motion, and to ∼45% with no task priors. These results suggest that, in our limited data regime, strong task priors are required during pretraining. 050 100 
+
+> Survival (%)  →
+> 96.3
+> Robot motion
+> 87.0
+> Human motion
+> 89.1
+> Root + EE
+> 85.4
+> EE
+> 84.3
+> Sparse EE
+> 70.6
+> Object only
+> 45.3
+> None
+
+Fig. 4: Closed-loop survival rates of the pretrained generator under different conditioning priors. Each pictogram marks in blue what the prior specifies; hollow markers indicate sparse frames. Later, in Section V-G, we show that SD:DPO post-training removes the need for a strong task prior at deployment, enabling goal-conditioned motion generation without any per-formance sacrifice. 
+
+C. SO(3) Diffusion Improves Performance 
+
+Standard diffusion models add Gaussian noise in Euclidean space and ignore the geometry of the manifold , whereas the root and object orientations in our motion representation lie on 9
+
+TABLE II: Comparison of diffusing the rotational components of the generated motion (root orientation, object orientation) on SO(3) vs. treating their 6D coordinates as Euclidean. Evaluated closed-loop with the frozen tracker.                            
+
+> Rotation Survival Task success Obj. ori. diffusion (%) ↑(%) ↑(◦)↓
+> SO(3) 96.5 ±1.5 51.9 ±4.5 14.0 ±1.3
+> Euclidean 85.9 ±5.0 46.4 ±5.7 19.6 ±2.5
+
+SO(3) . We therefore ablate on the choice of diffusion process for the rotational features. Table II compares two pretrained generators that differ only in this choice: one uses a VP-SO(3) 
+
+diffusion process as described in Section IV-B, the other one uses a VP-diffusion process in Euclidean space. Our results show that diffusing on SO(3) raises the closed-loop survival rate from 85 .9% to 96 .5% , while also improving across other tracking metrics. 
+
+D. Motion-Level vs. Action-Level Diffusion 
+
+Our pipeline separates motion generation from feedback control: a diffusion planner proposes whole-body and object trajectories, and an RL-trained tracking policy executes them. Alternatively, diffusion models can predict actions directly, either alone [13] or jointly with future states [14], [34]. We train these action-level baselines by behaviour cloning on state–action data collected by tracking the SBTO- and symmetry-augmented motions. Although this dataset includes perturbed states and corrective actions, the learned feedback behaviour depends on the coverage of a fixed dataset. Our planner also learns from a limited motion corpus, but its tracker learns via RL in simulation, where it can learn to respond to disturbances and errors encountered during its own execution. This separation allows us to learn motion structure from the available data while optimizing feedback control through interaction. The learning objectives also favour different behaviours. From a maximum-likelihood perspective, generative learning corresponds to forward-KL fitting, which encourages coverage of the data distribution. Under imperfect approximation, a model may cover multiple action modes while also assigning probability to low-density regions between them [35]. For an action-level model, such samples become joint commands and may disrupt balance or contact. Maximum-entropy RL instead admits a reverse-KL for-mulation with a reward-weighted target distribution [36]. This objective discourages probability mass on low-return behaviours and can favour concentrating on a subset of suc-cessful behaviours. Although this mode-seeking tendency can hinder exploration of alternative behaviours, it favours reliable execution when failures receive low reward. This motivates combining a generative motion planner with an RL-trained tracker: the planner represents motion diversity, while the tracker learns to select actions according to their consequences in the environment. We therefore compare motion-level and action-level diffu-sion using the same underlying motion corpus and evaluation tasks to assess whether separating planning from feedback control improves closed-loop survival and task success. TABLE III: Diffusion motion generator with tracking policy vs. diffusion action generators executing joint PD targets directly for loco-manipulation tasks. The state-action diffusion baseline is an unconditioned prior that is steered at test time.                       
+
+> Model Survival (%) ↑Task success (%) ↑
+> State Diffusion + Tracker 96.5 ±1.5 51.9 ±4.5
+> Action Diffusion [13] 87.5 ±3.7 45.3 ±4.8 State-Action Diffusion [14] 58.2 ±7.1 8.2 ±3.6
+
+We consider two baselines that output robot joint PD targets directly, with no tracker in the loop: an action-only diffusion policy as in PDP [13], and a state–action diffusion model as in BeyondMimic [14] for humanoid control. Both are trained via behaviour cloning on rollouts collected by our pretrained generalist tracking policy over the SBTO- and symmetry-augmented data corpus, and both replan at every control step (50 Hz), executing only the first action. In this comparison all approaches receive the same task information which consist of states, the goal object pose and the IK-retargeted robot and object motion. We also compare to [14], where a state-action diffusion model is instead an unconditioned prior that is steered at inference. We adopt this by steering the diffusion model towards the IK-retargeted motion with keyframe in-betweening. See Appendix K for more details. The results are presented in Table III, where the PDP-style policy is the strongest action-diffusion baseline, with a survival rate of 87 .5% compared to 96 .5% for our pretrained diffusion planner combined with the tracker. Our approach also achieves significantly better task success. State-action diffusion is overall the weakest baseline: the steered prior reaches a survival rate of only 58 .2% and a task success of 
+
+8.2% . On both metrics, our hierarchical approach, a state-only diffusion model for motion generation paired with a high-frequency tracking policy, performs best, even before fine-tuning. Furthermore, inference of the diffusion model on our hard-ware setup, with the tracker running in a parallel process, runs at 12.5 Hz. Although action/state-action diffusion models can plan actions over a longer horizon, the generated actions operate open-loop until the next plan arrives, making it ex-tremely challenging for legged robots to stabilise at such low frequencies, compared to having a separate high-frequency low-level tracking policy as we do. 
+
+E. RL fine-tuning reward design 
+
+Next, we investigate how the design of the rewards for diffusion RL finetuning with DA:PPO affects the performance of the overall pipeline. A natural choice is a dense reward that encourages resulting rollouts to stay close to the IK-retargeted motion. Such a reward is similar to the whole-body and object-tracking rewards used to train the tracking policy, but it can only be computed where a retargeted demonstration is avail-able. An alternative approach is a simpler goal-driven reward, which does not need a corresponding kinematic trajectory. 10 
+
+TABLE IV: DA:PPO finetuning with the IK-motion tracking reward rkin vs. a goal-driven reward rgoal .
+
++ DA:PPO Metric Pretrained rkin rgoal 
+
+Survival (%) ↑ 96.5 ± 1.5 100.0 ± 0.0 100.0 ± 0.0 
+
+Task success (%) ↑ 51.9 ± 4.5 96.4 ± 3.4 92.9 ± 4.7 MPKPE (cm) ↓ 8.5 ± 0.6 4.3 ± 0.2 8.0 ± 0.4 Obj. pos. (cm) ↓ 12.6 ± 2.4 5.0 ± 2.0 7.2 ± 2.0 Obj. ori. ( ◦) ↓ 14.0 ± 1.3 5.8 ± 1.0 7.5 ± 1.3 
+
+In Table IV, we compare finetuning with DA:PPO as described in Section IV-D, starting from the same pretrained diffusion motion generator using the two different rewards described above: rkin , which rewards staying close to the dense IK-retargeted motion at every step, and rgoal , which rewards approaching the goal combined with a survival bonus (see Ap-pendix G for details). Both reward sets improve survival and task success relative to the pretrained model. rkin furthermore reduces all reported tracking errors with respect to generated motions over using rgoal . rgoal achieves 92.9% task success, compared with 96.4% for using rkin , but increases MPKPE and other tracking errors. Although, we stick to using rkin for our experiments, rgoal could also be used for finetuning towards unseen goals using a curriculum and where demonstrations are unavailable. 
+
+F. Effect of Maximum-Entropy Fine-Tuning 
+
+In Table I, we also compare the finetuning capabilities of DA:PPO against a DPPO-style update, which ablates on using DA:PPO without temperature (see Section IV-D). The original DPPO [23] uses additional tricks, such as injecting more diffusion noise for exploration, which we removed because they led to unstable and untrackable behaviour. While the DPPO-style update improves overall metrics compared to the pretrained model, we find that using the temperature in DA:PPO updates improves the survival rate to 100% and significantly improves all other metrics when finetuned under identical settings and hyperparameters. These improvements can be attributed to the maximum entropy RL formulation of DA:PPO which encourages exploration while the DPPO-style objective suffers under severe mode collapse [5]. 
+
+G. Removing the need for strong task conditioning 
+
+We have demonstrated in Sec. V-B that pretraining without any task prior yields significantly lower task performance compared to using the task priors. However, this might limit the applicability of our method as it requires IK retargeted references from human motions, which is not always available. To mitigate this we show in Table V that SD:DPO (see Sec. IV-C) enables us to achieve high survival rates and high task success, without relying on the IK-retargeted task prior. Table V separates the effects of self-distillation and sub-sequent finetuning via diffusion-RL. For pick-place, SD:DPO raises survival of the Student model from 57% to 100%. While finetuning the pretrained Student via DA:PPO increases the TABLE V: Diffusion motion generators post-trained using SD:DPO on different tasks. Self-Teacher and Student are the same pretrained generator, evaluated with the IK-retargeted task prior and with the null token ∅ in its place, respectively. 
+
+No-prior is a separate motion generator described in Sec-tion V-B that doesn’t receive any task prior upon pretraining.                                                                                                                       
+
+> Task Generator Survival Task success (%) ↑(%) ↑
+> Pick-place No-prior (pretrained) 46.9 ±8.3 32.2 ±6.8 No-prior +DA:PPO ( rkin )74.1 ±8.0 67.0 ±8.6
+> Self-Teacher (pretrained) 96.5 ±1.5 51.9 ±4.5 Student (pretrained) 57.7 ±9.2 45.4 ±9.0 Student +DA:PPO 92.1 ±4.8 92.1 ±4.8 Student +SD:DPO 100.0 ±0.0 55.1 ±6.0 Student +SD:DPO +DA:PPO 99.5 ±0.5 98.8 ±1.2
+> Kick
+> Self-Teacher (pretrained) 99.9 ±0.1 34.4 ±7.2 Student (pretrained) 100.0 ±0.0 1.2 ±0.7 Student +SD:DPO 100.0 ±0.0 31.9 ±7.1 Student +SD:DPO +DA:PPO 100.0 ±0.0 68.1 ±8.3
+> Push/Pull
+> Self-Teacher (pretrained) 100.0 ±0.0 23.3 ±4.9 Student (pretrained) 98.7 ±1.3 12.8 ±3.9 Student +SD:DPO 100.0 ±0.0 21.7 ±4.8 Student +SD:DPO +DA:PPO 100.0 ±0.0 52.7 ±6.5
+
+task success to 92%, further finetuning of the self-distilled 
+
+Student increases the task success to ∼99%. We also show that the no-prior model cannot improve significantly via finetuning compared to finetuning the self-distilled student, highlighting the importance of using the task conditioning during pretrain-ing. Additionally, we reproduce our experiments on an alternate set of challenging motions that involve kicking the object or pushing/pulling towards a target goal pose. For each of these, we pretrain a diffusion motion generator only on the corresponding motions, following Section IV-B, then post-train via self-distillation (SD:DPO) to eliminate conditioning on task priors, and finally post-train for fine-tuning to further improve task performance. We observe trends similar to those when using only pick-carry-place task motions, confirming that our method is general and can also be applied to very different tasks. By removing dependence on task conditioning, we can also plan motions using new goal poses that are unseen in our dataset. To measure this generalisation systematically, in Figure 5, we place goals for the object on a polar grid around the robot’s start at distances ranging from 0.5 to 5 m, and each position has 0◦/90 ◦/180 ◦/270 ◦ rotations of the goal. The farthest goal in our demonstration set is at 1.9 from the origin (marked with dashed circle). We find that we can achieve these goals with ∼100% survival rates and a high task success rate of 88% on this grid test for generalisation. Further plots in Appendix M show the same evaluation for the pretrained 
+
+Student and Student + SD:DPO , along with example robot trajectories for individual new goals. 11 0 0.1 0.2 0.3     
+
+> Mean position error (m)
+> 015 30 45
+> Mean orientation error (°) demonstrated goal robot start
+
+Fig. 5: Mean final position error (left) and orientation error (right) of the object for Student + SD:DPO + DA:PPO, with goals placed around the robot’s start. The robot starts at the center facing right; black arrowheads are the 29 demonstrated goals, pointing along the goal yaw, and the dashed circle marks the farthest of them ( 1.9 m). Each goal pose is evaluated using 
+
+100 rollouts, with the objects’s initial pose randomised up to 
+
+5 cm and 12 ◦.
+
+H. Planner Finetuning beats Tracker Finetuning 
+
+Instead of finetuning the diffusion planner with DA:PPO to close the plan–execution gap, it is also possible to finetune the tracking policy towards better execution of the diffusion plan, as done in [15]. As we show in this section, however, we observe that diffusion planner finetuning leads to better task success and better survival rates. To ablate on this we finetune the pretrained tracking policy while keeping the motion generator frozen (see Appendix I). We fine-tune the tracking policy with and without the goal term, which yield similar results. We also ablate only finetuning the tracker on the pretrained diffusion motion generator against finetuning the tracker using the finetuned diffusion motion generator. TABLE VI: Comparison of fine-tuning the motion generator against fine-tuning the tracker. In the top block we use the pretrained diffusion model, and in the bottom block the dif-fusion model post-trained with DA:PPO. Tracker fine-tuning updates all parameters of the tracking policy with PPO for 1000 learning iterations, using the reward for tracking the generated reference ( rgen ), with or without an additional goal term ( rgoal ); see Appendix G.                                  
+
+> Motion Tracker Survival Task success generator (%) ↑(%) ↑
+> Pretrained Pretrained 96.8 ±2.2 51.9 ±4.5 PPO ( rgen )99.0 ±1.0 87.9 ±4.9 PPO ( rgen +rgoal )99.5 ±0.3 89.3 ±5.2
+> +DA:PPO ( rkin )Pretrained 100.0 ±0.0 96.5 ±1.5
+
+As shown in Table VI, with the pretrained tracker fixed, planner fine-tuning increases task success from 51% to 96%. Fine-tuning the tracker with the pretrained planner reaches at most 89%. These results show that finetuning the diffusion planner alone already recovers large improvement in task success, with the tracker left unchanged. 
+
+I. Real-World Deployment 
+
+TABLE VII: Real-robot execution on the Unitree G1, for ten executions of a single goal ( repeated ) and one execution of distinct goals ( distinct ). Success is the number of successful over attempted executions; the remaining values are mean ±
+
+sample standard deviation over executions.                               
+
+> Motions Success MPKPE Final obj. pos. Final obj. ori.
+> ↑(cm) ↓(cm) ↓(◦)↓
+> Repeated 10/10 6.5 ±0.7 1.8 ±0.8 3.4 ±1.1 Distinct 5/5 6.8 ±1.1 5.7 ±5.0 12.8 ±12.5
+
+We evaluate our diffusion motion generator and tracking policy on a 29 -DoF Unitree G1 humanoid performing pick-carry-place tasks as shown in Fig. 1. The motion generator runs on the GPU in a separate process, while the tracking executes on the CPU through ONNX Runtime. Joint encoders and the onboard IMU provide proprioceptive states, whereas a motion-capture system tracks the robot base and object, providing robot position and object pose for closed-loop execution. The tracking policy runs at 50 Hz and outputs residual joint positions that are added to the generated reference to form joint-level PD targets, which are tracked by a PD controller running at 200 Hz. The generator uses 10 denoising steps to predict a chunk of 64 robot–object motion, corresponding to a 1.28 s horizon. The tracker continues executing the current chunk from the generator during inference, until a new chunk arrives from the generator process. In our setup, the motion generator can run at a maximum frequency of ∼ 12 .5 Hz, accounting for communication latency and diffusion sampling. Table VII reports two groups of experiments: (a) ten repeated executions of the same final goal pose, and (b) one execution for distinct final goal poses. Every attempted execution succeeds: ten out of ten times for the repeated motion, and five out of five across the distinct motions. VI. C ONCLUSION AND FUTURE WORK 
+
+We presented DiPLO and established a key finding for limited-data humanoid loco-manipulation: strong task condi-tioning can be crucial for effective pretraining, while post-training can remove this dependency for deployment. Start-ing from only 29 retargeted pick-carry-place demonstrations, dynamically feasible data augmentation and strong kinematic conditioning enable the diffusion planner to learn trackable whole-body and object motions. Removing this conditioning directly causes a substantial performance drop, while training from scratch without it cannot recover comparable perfor-mance through downstream fine-tuning alone. We address this dependence with SD:DPO, which distills a reference-conditioned self-teacher into a planner conditioned only 12 
+
+on state history and the object goal. This recovers goal-conditioned motion generation and enables the planner to op-erate on goals unseen in pretraining demonstrations. Comple-mentary to this, DA:PPO further optimises the planner through closed-loop interaction with the frozen tracker, aligning gen-erated motions with what the robot can successfully execute. Together, SD:DPO and DA:PPO achieve approximately 99% survival and 99% goal success during pick-carry-place roll-outs, while the same training recipe transfers to substantially different skills, including kicking and pushing/pulling. The resulting planner-tracker also transfers directly to the Unitree G1 without any real-world fine-tuning. These results suggest a broader principle for robot learning: privileged or expensive supervision may be most valuable as a scaffold for pretraining rather than as a permanent deployment requirement. Future work will investigate whether this principle extends to asingle model trained jointly across multiple loco-manipulation skills, more diverse objects and environments, and onboard perception, thereby removing the current reliance on external motion capture. REFERENCES [1] A. Khazatsky, K. Pertsch, S. Nair, A. Balakrishna, S. Dasari, S. Karam-cheti, S. Nasiriany, M. K. Srirama, L. Y. Chen, K. Ellis et al. , “DROID: A large-scale in-the-wild robot manipulation dataset,” in Proceedings of Robotics: Science and Systems (RSS) , 2024. [2] J. Li, J. Wu, and C. K. Liu, “Object motion guided human motion synthesis,” ACM Transactions on Graphics , vol. 42, no. 6, Dec. 2023, Art. no. 197. [3] L. Yang, X. Huang, Z. Wu, A. Kanazawa, P. Abbeel, C. Sferrazza, C. K. Liu, R. Duan, and G. Shi, “OmniRetarget: Interaction-preserving data generation for humanoid whole-body loco-manipulation and scene interaction,” in Proceedings of the IEEE International Conference on Robotics and Automation (ICRA) , 2026, pp. 11 691–11 698. [4] V. Dh´ edin, I. Taouil, S. Omar, D. Yu, K. Tao, A. Dai, and M. Khadiv, “DynaRetarget: Dynamically-feasible retargeting using sampling-based trajectory optimization,” arXiv:2602.06827, 2026. [5] S. Sanokowski, K. Patil, and M. Khadiv, “Diffusion-augmented Markov decision processes for maximum entropy reinforcement learning,” arXiv:2512.02019, 2026. [6] X. B. Peng, P. Abbeel, S. Levine, and M. van de Panne, “DeepMimic: Example-guided deep reinforcement learning of physics-based character skills,” ACM Transactions on Graphics , vol. 37, no. 4, Aug. 2018, Art. no. 143. [7] Z. Luo, J. Cao, A. Winkler, K. Kitani, and W. Xu, “Perpetual humanoid control for real-time simulated avatars,” in Proceedings of the IEEE/CVF International Conference on Computer Vision (ICCV) , 2023, pp. 10 861– 10 870. [8] T. He, Z. Luo, X. He, W. Xiao, C. Zhang, W. Zhang, K. M. Kitani, C. Liu, and G. Shi, “OmniH2O: Universal and dexterous human-to-humanoid whole-body teleoperation and learning,” in Proceedings of the Conference on Robot Learning (CoRL) , 2024, pp. 1516–1540. [9] Y. Ze, J. P. Ara´ ujo, J. Wu, and C. K. Liu, “GMR: General motion re-targeting,” GitHub repository, https://github.com/YanjieZe/GMR, 2025. [10] K. Lin, A. Mandlekar, C. R. Garrett, N. Chernyadev, Y. Fang, R. Ding, Y. Xie, J. Tran, L. Fan, and Y. Zhu, “HumanoidMimicGen: Data genera-tion for loco-manipulation via whole-body planning,” arXiv:2605.27724, 2026. [11] C. Chi, Z. Xu, S. Feng, E. Cousineau, Y. Du, B. Burchfiel, R. Tedrake, and S. Song, “Diffusion policy: Visuomotor policy learning via action diffusion,” The International Journal of Robotics Research , vol. 44, no. 10–11, pp. 1684–1704, Sep. 2025. [12] S. Ha, J. Lee, M. van de Panne, Z. Xie, W. Yu, and M. Khadiv, “Learning-based legged locomotion: State of the art and future perspec-tives,” The International Journal of Robotics Research , vol. 44, no. 8, pp. 1396–1427, Jul. 2025. [13] T. E. Truong, M. Piseno, Z. Xie, and C. K. Liu, “PDP: Physics-based character animation via diffusion policy,” in SIGGRAPH Asia 2024 Conference Papers , 2024, Art. no. 86. [14] Q. Liao, T. E. Truong, X. Huang, Y. Gao, G. Tevet, K. Sreenath, and C. K. Liu, “BeyondMimic: From motion tracking to versatile humanoid control via guided diffusion,” Science Robotics , vol. 11, no. 117, Aug. 2026, Art. no. eadx8924. [15] Z. Zhang, K. Wen, M. Xu, J. He, C. Li, T. Miki, C. Schwarke, C. Zhang, X. B. Peng, and M. Hutter, “Learning whole-body humanoid locomotion via motion generation and motion tracking,” IEEE Robotics and Automation Letters , vol. 11, no. 9, pp. 10 194–10 201, Sep. 2026. [16] Z. Gu, Y. Chen, Z. Chai, A. Cueva, T. Nguyen, Y. Wu, H. Xue, M. Kim, I. Legene, F. Liu, K. Kim, A. Barula, Y. Chen, and Y. Zhao, “REFINE-DP: Diffusion policy fine-tuning for humanoid loco-manipulation via reinforcement learning,” IEEE Robotics and Automation Letters , vol. 11, no. 10, pp. 11 617–11 624, Oct. 2026. [17] P. Debbad, K. Thiagarajan, V. Dh´ edin, S. Omar, and M. Khadiv, “Humanoid-DART: Humanoid loco-manipulation using diffusion-guided augmentation through relabeling and tracking,” arXiv:2606.26855, 2026. [18] A. Leach, S. M. Schmon, M. T. Degiacomi, and C. G. Willcocks, “Denoising diffusion probabilistic models on SO(3) for rotational align-ment,” in ICLR Workshop on Geometrical and Topological Representa-tion Learning , 2022. [19] Y. Jagvaral, F. Lanusse, and R. Mandelbaum, “Unified framework for diffusion generative models in SO(3): Applications in computer vision and astrophysics,” in Proceedings of the AAAI Conference on Artificial Intelligence , vol. 38, no. 11, 2024, pp. 12 754–12 762. [20] G. Corso, H. St¨ ark, B. Jing, R. Barzilay, and T. Jaakkola, “DiffDock: Diffusion steps, twists, and turns for molecular docking,” in Proceedings of the International Conference on Learning Representations (ICLR) ,2023. [21] J. Lee, J. Hwangbo, L. Wellhausen, V. Koltun, and M. Hutter, “Learning quadrupedal locomotion over challenging terrain,” Science Robotics ,vol. 5, no. 47, Oct. 2020, Art. no. eabc5986. [22] J. H¨ ubotter, F. L¨ ubeck, L. D. Behric, A. Baumann, M. Bagatella, D. Marta, I. Hakimi, I. Shenfeld, T. Kleine Buening, C. Guestrin, and A. Krause, “Reinforcement learning via self-distillation,” in Proceedings of the International Conference on Machine Learning (ICML) , 2026, pp. 48 677–48 721. [23] A. Z. Ren, J. Lidard, L. L. Ankile, A. Simeonov, P. Agrawal, A. Ma-jumdar, B. Burchfiel, H. Dai, and M. Simchowitz, “Diffusion policy policy optimization,” in Proceedings of the International Conference on Learning Representations (ICLR) , 2025. [24] J. Schulman, F. Wolski, P. Dhariwal, A. Radford, and O. Klimov, “Proximal policy optimization algorithms,” arXiv:1707.06347, 2017. [25] J. Sohl-Dickstein, E. Weiss, N. Maheswaranathan, and S. Ganguli, “Deep unsupervised learning using nonequilibrium thermodynamics,” in Proceedings of the International Conference on Machine Learning (ICML) , 2015, pp. 2256–2265. [26] J. Ho, A. Jain, and P. Abbeel, “Denoising diffusion probabilistic models,” in Advances in Neural Information Processing Systems (NeurIPS) , 2020, pp. 6840–6851. [27] T. Haarnoja, A. Zhou, P. Abbeel, and S. Levine, “Soft actor-critic: Off-policy maximum entropy deep reinforcement learning with a stochastic actor,” in Proceedings of the International Conference on Machine Learning (ICML) , 2018, pp. 1861–1870. [28] J. Schulman, P. Moritz, S. Levine, M. I. Jordan, and P. Abbeel, “High-dimensional continuous control using generalized advantage estimation,” in Proceedings of the International Conference on Learning Represen-tations (ICLR) , 2016. [29] W. Peebles and S. Xie, “Scalable diffusion models with transformers,” in Proceedings of the IEEE/CVF International Conference on Computer Vision (ICCV) , 2023, pp. 4172–4182. [30] A. Q. Nichol and P. Dhariwal, “Improved denoising diffusion probabilis-tic models,” in Proceedings of the International Conference on Machine Learning (ICML) , 2021, pp. 8162–8171. [31] Y. Song, C. Durkan, I. Murray, and S. Ermon, “Maximum likelihood training of score-based diffusion models,” in Advances in Neural Infor-mation Processing Systems (NeurIPS) , 2021, pp. 1415–1428. [32] T. Salimans and J. Ho, “Progressive distillation for fast sampling of diffusion models,” in Proceedings of the International Conference on Learning Representations (ICLR) , 2022. [33] K. Zakka, Q. Liao, B. Yi, L. Le Lay, K. Sreenath, and P. Abbeel, “mjlab: A lightweight framework for GPU-accelerated robot learning,” arXiv:2601.22074, 2026. [34] X. Huang, T. Truong, Y. Zhang, F. Yu, J. P. Sleiman, J. Hodgins, K. Sreenath, and F. Farshidian, “Diffuse-CLoC: Guided diffusion for physics-based character look-ahead control,” ACM Transactions on Graphics , vol. 44, no. 4, Aug. 2025, Art. no. 132. 13 
+
+[35] T. Minka, “Divergence measures and message passing,” Microsoft Research, Cambridge, U.K., Tech. Rep. MSR-TR-2005-173, 2005. [36] S. Levine, “Reinforcement learning and control as probabilistic infer-ence: Tutorial and review,” arXiv:1805.00909, 2018. [37] T. Hang, S. Gu, C. Li, J. Bao, D. Chen, H. Hu, X. Geng, and B. Guo, “Efficient diffusion training via Min-SNR weighting strategy,” in Proceedings of the IEEE/CVF International Conference on Computer Vision (ICCV) , 2023, pp. 7407–7417. 14 
+
+APPENDIX 
+
+A. Denoiser Network Architecture 
+
+Figure 6 shows the denoiser network of the diffusion motion generator (Section IV-B). Each input is tokenised by embed-ding to the same dimension using an MLP and accompanied with positional encoding for time series data. The denoising step k enters the network through adaptive layer normalization as in [29]. 
+
+B. Diffusion Motion Generator Pretraining Euclidean training loss. Each training example consists of a dataset motion chunk with its conditioning, a uniformly sampled diffusion level k ∈ { 1, . . . , K }, and forward noise drawn from q. The denoiser predicts the v-target defined in Section III-B. We penalize each scalar prediction error r using smooth-L1 with a unit transition threshold: 
+
+ℓSL1 (r) = 
+
+( 12 r2, |r| ≤ 1,
+
+|r| − 12 , |r| > 1. (18) For small errors, the quadratic penalty gives a gradient propor-tional to the error. For larger errors, the penalty grows linearly and its derivative has magnitude one, limiting the influence of large errors on the scalar loss gradient. Both the penalty and its derivative are continuous at the transition. The threshold is measured in v-prediction units, computed from normalized features. Let CE denote the Euclidean feature groups and Nc the number of scalar entries across all frames and features in group 
+
+c. For errors rc,j = ˆ vkϕ,c,j −vkc,j , we average within each group: 
+
+SmoothL1(ˆ vkϕ,c , vkc ) = 1
+
+NcNcX
+
+> j=1
+
+ℓSL1 (rc,j ).
+
+The resulting Euclidean objective is 
+
+LE(ϕ) = EsDτ ,k,q 
+
+"
+
+ωk
+
+X
+
+> c∈C E
+
+λc SmoothL1(ˆ vkϕ,c , vkc )
+
+#
+
+. (19) The expectation averages over dataset chunks, diffusion levels, and forward noise. Averaging within groups makes their relative importance depend on the weights λc in Table VIII, rather than their number of entries. The diffusion-level weight is ωk = 1 without noise-level reweighting. When Min-SNR weighting [37] is enabled, we use ωk = min(SNR k, γ SNR )/(1 + SNR k), where SNR k =¯αk/(1 − ¯αk) is the signal-to-noise ratio and γSNR is its clipping threshold. These weights adjust the contribution of different diffusion levels. Smooth-L1 changes the regression objective: its optimal prediction need not equal the conditional mean of vk. The exact score-recovery argument for squared-error regression therefore does not apply to this loss. 
+
+Rotational training and sampling. To sample the forward noise Ek in (13), we draw an axis uniformly on the unit sphere and an angle from a numerically tabulated IG SO(3) 
+
+angle distribution at scale σk. Multiplying the axis by the angle gives a vector whose exponential is Ek.Table VIII lists the full configuration used to pretrain the diffusion motion generator (Section IV-B). TABLE VIII: Pretraining configuration of the diffusion motion generator. 
+
+Parameter Value 
+
+Representation 
+
+Data rate 50 Hz History / prediction horizon 
+
+nh / n
+
+2 / 64 frames Per-frame feature dimension 48 
+
+Goal dimension gt 10 
+
+Feature normalization per-channel mean/std 
+
+Denoiser 
+
+Layers / heads 4 / 4
+
+Width / feed-forward width 256 / 1024 
+
+Dropout 0.1
+
+Conditioning tokens (no cross-attention) history / current frames 2 / 1
+
+kinematic reference frames 64 
+
+goal token 1
+
+Sequence length (condition-ing + target) 
+
+68 + 64 
+
+Query/key normalization RMS, per head Block modulation AdaLN-Zero (timestep only) Timestep embedding sinusoidal Trainable parameters 5.1M
+
+Diffusion process 
+
+Denoising steps K (train and inference) 
+
+10 
+
+Euclidean schedule cosine VP Prediction target (Euclidean) v
+
+Reverse sampler DDPM (kernel mean at deployment) Predicted clean-sample clip-ping 
+
+±5σ
+
+Rotation forward kernel IG SO(3) , VP Prediction target (rotations) tangent noise 
+
+σmax root residual (anchor: identity) 
+
+0.4 rad 
+
+σmax object rotation (anchor: current) 
+
+0.2 rad 
+
+Loss weights λc
+
+Joint positions 20 
+
+Root displacement 10 
+
+Root height / object position / orientation 
+
+5
+
+Root residual orientation 3
+
+Heading change 2
+
+Optimization 
+
+Optimizer AdamW Learning rate / weight decay 10 −4 / 0.05 
+
+LR schedule cosine, 1000 warmup, → 1% 
+
+Batch size (windows) 1024 
+
+Gradient steps 150 kGradient-norm clip 0.5
+
+EMA decay 0.9995 
+
+C. Goal Representation 
+
+gt =
+
+h ˆdt, φ (∆ Rt), min(1 .0, ∥∆pt∥)
+
+i
+
+∈ R10 15 
+
+Fig. 6: Architecture of the denoiser network of the diffusion-based motion generator Gϕ, based on L-layers of Diffusion Transformer (DiT) blocks. At each denoising step k, along with the noised target tokens sD,k τ (the motion chunk over the frames τ = t+1: t+n at denoising step k) and the denoising step k via adaptive layer norm, the network is also conditioned on the goal token, the current state and history tokens, and the IK-retargeted motion token which serves as the prior to solve the task. The output is the denoised target sD,k −1 
+
+> τ
+
+, and Gϕ iterates the network from k = K down to k = 1 , whose output 
+
+sD, 0 
+
+> τ
+
+is the fully denoised motion. Here ∆pt = poT − pot is the displacement of the object towards its final pose, ˆdt ∈ R3 is its unit direction expressed in the robot base frame, ∥∆pt∥ is clipped at 1 m, and φ(∆ Rt) ∈
+
+R6 is the 6D representation of the relative object rotation 
+
+∆Rt = ( Rot )−1RoT , i.e. the rotation that still has to be applied to the object expressed in its own current frame. Expressing the goal as a displacement from the current object pose rather than as an absolute target keeps it on the same relative footing as the motion representation of Section IV-B, and makes it a residual that shrinks to zero as the task is completed. TABLE IX: Domain randomization ranges used during fine-tuning of the diffusion motion generator. Values denote sym-metric half-widths of uniform perturbations.                                 
+
+> Stage Quantity Range
+> Reset Object position (x, y, z )(±0.05 ,±0.05 ,±0.0125) mObject orientation (r,p,y) (±0.05 ,±0.05 ,±0.2) rad Robot root pose (p, r )(±0.05 ,±0.1) m, rad Robot root height / yaw ±0.01 m / ±0.2rad Robot joint positions ±0.1rad Push Robot linear / angular velocity ±0.3m/s / ±0.45 rad/s Object linear / angular velocity ±0.35 m/s / ±0.9rad/s Push interval U(2 ,5) s
+
+D. Tracking Controller Training Details 
+
+This appendix gives the observation layout and the reset strategy used to pretrain the generalist tracking controller (Section IV-B3). 
+
+Observations. The reference observations of the actor con-sist of reference joint states, body poses, and object-tracking features at future trajectory steps {1, 2, 4, 8} frames (20 –
+
+160 ms). We use an asymmetric actor–critic: the critic addi-tionally receives object velocities, reference contact indicators, and a wider temporal window of reference motion to track. 
+
+Reset sampling. Training resets select both a reference motion and a starting phase, then initialize the robot and object from that reference state with perturbations. These two sampling decisions use separate mechanisms. For the starting phase, we use adaptive reference-state initialization as in [14] during the first 25 ,000 learning iterations and uniform phase sampling thereafter. For motion selection, we retain evaluation-based reweighting throughout training, including after the phase-sampling switch. Every 1000 learning itera-tions, each GPU evaluates the motions in its local shard from the first frame without any domain randomization, distributing its environments across those motions. A motion is classified as failed if any of its evaluation trig-gers a non-timeout termination which entails robot and object terminations based on tracking as described in Appendix E. Let Sg be the motion shard on GPU g, Ng = |S g |, and F (m)
+
+> i
+
+indicate failure at evaluation m. Starting from unit weights, the update is 
+
+w(m+1)  
+
+> i
+
+=
+
+
+
+1, F (m) 
+
+> i
+
+= 1 ,
+
+max 
+
+
+
+γs w(m) 
+
+> i
+
+, N −1
+
+> g
+
+
+
+, F (m) 
+
+> i
+
+= 0 , (20) and subsequent resets sample motions within that shard ac-cording to 
+
+P (i | g) = wi
+
+P 
+
+> j∈S g
+
+wj
+
+. (21) Thus, repeated success reduces a motion’s weight, while a failure restores its priority. The weight floor preserves anonzero sampling probability for every motion. 16 
+
+E. Survival Rate and Termination Conditions 
+
+The survival rate reported in the results tables is the per-centage of evaluation rollouts in which neither a robot fall nor an object drop occurs. As such, the survival rates for kicking and push/pull tasks are high because the object is always on the ground. Task success separately measures whether the final object pose satisfies the goal tolerances. The full set of failure conditions below governs episode termination during tracking controller pretraining (Section IV-B3) and evaluation-based motion reweighting (Appendix D): 1) Robot fall: the absolute height error of the torso or any wrist or ankle exceeds 0.25 m. 2) Object drop: the absolute object-height error exceeds 
+
+1 m. 3) The absolute difference between the z-components of gravity projected into the actual and reference torso frames exceeds 0.8.4) Any component of the base angular velocity exceeds 
+
+8.73 rad/s in magnitude. The object-height threshold follows a piecewise-linear sched-ule through 1.0, 0.3, 0.6, and 0.3 m at iterations 5000 , 15 ,000 ,
+
+20 ,000 , and 25 ,000 , respectively, and is held fixed during each evaluation. Reaching the end of the reference motion or the 
+
+10 s episode limit without a failure is treated as a timeout and counts towards the survival rate. 
+
+F. Tracking Controller Reward Terms 
+
+Table X lists the reward terms used to pretrain the generalist tracking controller (Section IV-B3). TABLE X: Reward terms used by the robot-object multi-motion tracking controller. 
+
+Reward Term Equation Weight 
+
+Motion Tracking 
+
+Root Position exp  −5∥pt − ˆpD 
+
+> t
+
+∥2 0.5 Root Orientation exp  −3∥qt − ˆqD 
+
+> t
+
+∥2 0.5 Body Position exp  −5∥pbody ,t − ˆpDbody ,t ∥2 1.0 Body Orientation exp 
+
+
+
+−3∥θbody ,t − ˆθDbody ,t ∥2
+
+
+
+1.0 Body Linear Velocity exp  −0.5∥vt − ˆvD 
+
+> t
+
+∥2 1.0 Body Angular Velocity exp  −0.05 ∥ωt − ˆωD 
+
+> t
+
+∥2 1.0 Joint Pos Tracking exp  −5∥ut − ˆuD 
+
+> t
+
+∥2 2.0 
+
+Object Tracking 
+
+Contact Match I(c = ˆ cD) · exp( −0.1 ( ∥F t∥ − 10)) 1.25 Object Position exp  −8∥pobj ,t − ˆpDobj ,t ∥2 1.0 Object Orientation exp 
+
+
+
+−5∥θobj ,t − ˆθDobj ,t ∥2
+
+
+
+1.0 Object Linear Velocity exp  −2∥vobj ,t − ˆvDobj ,t ∥2 1.0 Object Angular Velocity exp  −0.2∥ωobj ,t − ˆωDobj ,t ∥2 1.0 
+
+Regularization 
+
+Action Rate −∥ at − at−1∥2 0.1
+
+Joint Limit − P 
+
+> i
+
+ϕ(qi, q i, min , q i, max ) 10 .0
+
+Self-collisions P 
+
+> c∈C self
+
+1 −1.0
+
+G. Post-Training Reward Terms 
+
+Table XI lists the reward terms used to finetune the diffusion motion generator (Section IV-D). 
+
+Tracker fine-tuning rewards. The tracker fine-tuning base-lines of Table VI (Section V-H) compares tracker finetuning against different sets of rewards: rkin , rkin +rgoal , and rgen . rgen 
+
+is a tracking reward of the same form as rkin , but it measures the error of the realised motion against the reference generated by the diffusion motion generator, ˆsDτ , which is the motion the tracker is commanded to follow, instead of against the IK-retargeted motion sIK τ .TABLE XI: Post-training reward terms for the diffusion mo-tion generator over a chunk of T steps. (ˆ ·): realised motion; 
+
+(·)IK : IK-retargeted motion; (·)G: goal object pose the gen-erator is conditioned on. All squared-norm errors below are averaged over the chunk: e ≡ 1
+
+> T
+
+PTt=1 et. In the goal terms, θt
+
+is the angle between the realised and goal object orientations, with σp = 7 .8 cm and σθ = 0 .244 rad. 
+
+Reward Set Equation Weight 
+
+Kinematic Fidelity ( rkin )
+
+Anchor Position exp( −5∥ˆpt − pIK t ∥2) 0.25 Anchor Orientation exp( −3∥ˆqt − qIK t ∥2) 0.25 Body Position exp( −5∥ˆpbody ,t − pIK 
+
+> body ,t
+
+∥2) 0.50 Body Orientation exp( −3∥ˆqbody ,t − qIK 
+
+> body ,t
+
+∥2) 0.50 Object Position exp( −8∥ˆpobj ,t − pIK 
+
+> obj ,t
+
+∥2) 0.25 Object Orientation exp( −5∥ˆqobj ,t − qIK 
+
+> obj ,t
+
+∥2) 0.25 Termination 1[terminated during chunk ] −5.0
+
+Goal ( rgoal )
+
+Object Goal Pose exp( −∥ ˆpobj ,t − pG
+
+> obj
+
+∥2/σ 2 
+
+> p
+
+− θ2 
+
+> t
+
+/σ 2 
+
+> θ
+
+) 5.00 Survival 1
+
+> T
+
+PTt=1 1[alive at step t] 1.00 
+
+H. DA:PPO Post-Training Hyperparameters 
+
+Table XII lists the configuration used to post-train the diffusion motion generator with DA:PPO (Section IV-D). The DPPO-style baseline uses the same configuration with T = 0 
+
+and fixed step variances. 
+
+I. Tracker Fine-Tuning Hyperparameters 
+
+Table XIII lists the configuration used to fine-tune the tracking policy in Table VI (Section V-H). The motion gen-erator stays frozen, and the rollouts are collected in the same closed loop as the evaluation; the reward sets are those of Appendix G. 
+
+J. SD:DPO Objective and its Weighting 
+
+SD:DPO adapts the objective of SDPO [22]. For a prompt x
+
+and a response y sampled from the student, SDPO minimises 
+
+LSDPO (θ) = X
+
+> t
+
+KL  πθ (· | x, y <t ) sg  πθ (· | x, f, y <t ) ,
+
+the KL divergence at every position t between the student’s next-token distribution and that of a self-teacher, the same 17 
+
+TABLE XII: DA:PPO post-training configuration of the diffu-sion motion generator. 
+
+Parameter Value 
+
+DA-MDP 
+
+Chunk horizon n / executed frames 
+
+m
+
+64 / 56 
+
+Denoising steps finetuned all K = 10 
+
+Temperature T 10 −4
+
+Discount γ / GAE λ 1.0 / 0.95 
+
+Step-variance multipliers learned, initialized at 1
+
+shared with the forward kernel yes Reward normalization running return std, clip ±10 
+
+DA:PPO update 
+
+Clipping range ϵ 0.2
+
+Epochs per iteration 2
+
+Minibatch size (denoising transitions) 1024 
+
+Chunks per environment per iteration 16 
+
+Iterations 500 
+
+Parallel environments 2048 
+
+Advantage normalization per rollout Gradient-norm clip 1.0
+
+Optimization 
+
+Optimizer AdamW Learning rate, generator / step vari-ances 
+
+10 −6 / 10 −6
+
+Learning rate, critic 10 −4
+
+Critic 
+
+Architecture residual MLP, 3 × 256 , Mish Value-loss coefficient / clip 1.0 / 0.2
+
+Critic-only warm-up 10 iterations × 4 epochs 
+
+TABLE XIII: Configuration of tracker fine-tuning with PPO. 
+
+Parameter Value 
+
+Rollouts 
+
+Executed frames per re-plan m 56 
+
+Parallel environments 2048 
+
+Iterations 1000 
+
+PPO update 
+
+Discount γ / GAE λ 0.99 / 0.95 
+
+Clipping range ϵ 0.2
+
+Epochs per iteration 5
+
+Minibatch size (frames) 16 ,384 
+
+Early stop of the epochs (approx. KL) 0.02 
+
+Entropy bonus 0
+
+Gradient-norm clip 1.0
+
+Critic 
+
+Initialization pretrained asymmetric critic Learning rate 10 −3
+
+model additionally conditioned on feedback f . Mapping to-kens to denoising steps, prefixes to noisy chunks with their context, next-token distributions to reverse kernels, and the feedback f to the kinematic reference sIK τ , and sampling ˆsD,k τ
+
+and k as in (16), gives 
+
+LKL (ϕ) = EB,k,q 
+
+h
+
+KL  p∅ 
+
+> ϕ
+
+sg( pIK ϕ )i
+
+, (22) where p∅ 
+
+> ϕ
+
+= pϕ(· | ˆsD,k τ , c t, ∅) and pIK ϕ = pϕ(· |
+
+ˆsD,k τ , c t, s IK τ ) are the student’s and the teacher’s reverse ker-nels over (ˆ xk−1, ˆRk−1) given by (11) and (15). As in SDPO, the stop-gradient keeps the teacher from drifting towards the student, and in practice the teacher is evaluated with the exponential moving average weights ¯ϕ, as in (17). Because the Euclidean and rotational parts of each kernel are sampled independently given ˆsD,k τ , the KL splits into a Euclidean and a rotational term. The remainder of this appendix relates (22) to the regression of (17) that is minimised in practice. At denoising step k, we use a noisy motion ˆsD,k τ obtained via the forward kernel from the student’s rollout in closed-loop, where 
+
+ˆxk corresponds to the corresponding noisy Euclidean features. The student and the teacher evaluate the same network at the same (ˆ sD,k τ , c, k ) and differ only in the prior token ( ∅ or sIK τ ); we mark their reverse kernels of ˆxk−1, their v-predictions and their clean estimates with the corresponding superscript. By (11) both kernels are Gaussian with covariance ˜βkI and mean ak ˆx0|k + bk ˆxk, and ˆx0|k = √¯αk ˆxk − √1 − ¯αk ˆvk, so that 
+
+KL  p∅ 
+
+> ϕ
+
+pIK ϕ
+
+ = a2
+
+> k
+
+2 ˜βk
+
+ˆx0|k, ∅ − ˆx0|k,IK 2
+
+= wk ˆvk, ∅ − ˆvk,IK 2,wk = a2 
+
+> k
+
+(1 − ¯αk)2 ˜βk
+
+= βk
+
+2¯αk−1
+
+1 − ¯αk−1
+
+.
+
+(23) The KL is therefore the squared difference of the two network predictions, scaled by a weight that depends only on the diffusion step. The same holds for the rotational features to first order in the tangent space, with the tangent-noise predictions in place of ˆvk and another step-dependent weight. We set wk = 1 for two reasons. First, wk cannot be used as it stands. Since ¯α0 = 1 , it is infinite at k = 1 , where the reverse kernel is deterministic. Over the remaining steps in our schedule, the exact weighting would also concentrate the loss on the least-noisy steps. Second, the weights do not change what is learned. For any positive weights, the objective is non-negative and vanishes only when the student’s prediction equals the teacher’s at every step, which is also where (22) attains its minimum; the weights only decide how errors at different noise levels are traded off before that point is reached. Equal weights are the choice of the simplified diffusion objective [26], and they are applied here in the space the network regresses in, where the v-target has a comparable scale at every noise level [32]. Setting wk = 1 for the Euclidean and the rotational features gives the distillation term of (17). 
+
+K. Action-Level Diffusion Baselines 
+
+This appendix describes the action-level baselines of Sec-tion V-D: an action-only diffusion policy in the style of PDP [13], and a state–action diffusion model in the style of BeyondMimic [14]. Both output robot joint PD targets directly, with no tracker in the loop. Table XIV lists their configuration. 18 
+
+Training data. Both baselines are trained via behaviour cloning on rollouts of our pretrained generalist tracking policy over every motion of the SBTO- and symmetry-augmented data corpus, under the randomisation of Table IX. As in PDP [13], the joint targets applied to the robot are perturbed using temporally correlated Ornstein–Uhlenbeck noise as used in [14], while the tracker’s unperturbed output is stored as the label, so that the data pairs off-nominal states with the actions that correct them. We collect full-length rollouts and 
+
+5 s rollouts started from random frames of each motion, and discard every rollout that fails, generating 15 M frames ( 85 h) of state–action data. 
+
+Models. The state-action diffusion baseline uses the dif-fusion transformer (DiT) architecture of [34], for a faithful reproduction of the results. Here, a DiT learns to denoise a chunk of joint state–action tokens, each with its own noise level, given the current state and a history of state–action pairs; state tokens attend to all states and to no action, and action tokens attend only to states and actions up to their own step (causal attention). PDP [13] only learns to diffuse the action distribution. For the PDP-style baseline, we therefore drop the state prediction from the same network and exclude it from the loss, leaving an action diffusion policy conditioned on the state–action history and the task. Both models replan at every control step ( 50 Hz) with 20 denoising steps and execute only the first action. The network, the diffusion process, the optimizer and the collection of expert rollouts follow Diffuse-CLoC [34] and the first version of BeyondMimic [14], which applies Diffuse-CLoC to the robot we use. Where the two differ (attention heads, horizons, state features) we take the BeyondMimic values. We depart from both works in the following places: 1) The state additionally contains the object’s observations such as its position, orientation and linear velocity. 2) The conditioned models receive the goal and the IK-retargeted motion as additional context tokens. 3) Later versions of BeyondMimic diffuse the latent of an action autoencoder. We diffuse joint targets directly, as Diffuse-CLoC and the first version of BeyondMimic do. 
+
+Unconditioned prior. In [14], [34] the state-action diffusion model is not conditioned on the task: it is an unconditioned prior that is steered at inference using a task-specific guidance cost. Hence, we train a separate diffusion model without the conditioning tokens and evaluate it at test time by steering with the IK-retargeted motion. Unlike the conditioned models, it takes its horizons and its sampling of noise levels from Diffuse-CLoC; these levels include zero, so that the clean keyframes of in-betweening are seen in training. 
+
+Test-time steering. The guidance cost sums, over the pre-dicted states of the horizon, the squared position error and the orientation error 1−⟨ q, q IK ⟩2 of the root and of the object with respect to the IK-retargeted motion, with q a unit quaternion. At every denoising step the predicted clean states are moved against the gradient of this cost, scaled by the guidance weight. Keyframe in-betweening instead inpaints a single state ahead in time: the keyframe is the state of the IK-retargeted motion at the given lookahead, expressed relative to the measured planar position and heading of the robot, and the waypoint cost of [14] pulls the planar root position toward that of the keyframe. The steered row of Table III uses in-betweening with the waypoint cost. A lookahead of 0.32 s gave the highest survival rate among 0.08 , 0.24 , 0.32 , 0.64 and 0.96 s. TABLE XIV: Configuration of the action-level diffusion base-lines. Where two values are separated by a bar, the first holds for the two conditioned models and the second for the unconditioned prior.                                                                        
+
+> Parameter Value
+> Expert rollouts
+> Expert Pretrained Tracking Policy Randomization Table IX Noise on applied joint targets Ornstein–Uhlenbeck, θ= 0 .8
+> scale σ(normalized action units) 0.1and 0.25
+> Stored action tracker output without noise Rollout length full motion, or 5sRollouts kept / frames 59 .8k / 15 .4M
+> Representation
+> Control and data rate 50 Hz History 4state–action pairs State / action horizon (steps) 16 /8|48 /16
+> State dimension 192
+> root position, velocity, orientation 9
+> body positions and velocities 174
+> object pose and velocity 9
+> Action 29 joint position targets
+> Denoiser and diffusion process
+> Layers / heads / width 6/4/512
+> Attention dropout 0.3
+> Trainable parameters 20 .2MDenoising steps / schedule 20 / cosine Prediction target / loss clean sample / MSE Training noise levels (per token) 1–20 |0–20
+> Action-loss weight 1|13
+> Reverse sampler DDPM
+> Optimization
+> Optimizer AdamW Learning rate / weight decay 10 −4/10 −3
+> LR schedule cosine, 2000 warmup Batch size (windows) 512
+> Gradient-norm clip / EMA decay 1.0/0.999
+> Gradient steps 300 k
+> Test-time steering
+> Guidance weight 0.003 –0.1
+> Keyframe lookahead 16 steps ( 0.32 s) Waypoint guidance weight 10
+> Rolling noise levels, states / actions 14 /4
+
+L. Ablation on Diffusion Prediction Horizon 
+
+This appendix examines how far into the future the diffusion motion generator can plan. We pretrain five generators that differ only in the prediction horizon n ∈ { 20 , 32 , 48 , 64 , 100 }
+
+frames, i.e. 0.4 s to 2.0 s of motion at 50 Hz. The denoiser remains unchanged; only its input sequence grows, since the 19 
+
+prior and the generated chunk each contribute n tokens. The tracker reads its reference up to 8 frames ahead (Appendix D), so the last 8 frames of a chunk are kept as its lookahead, and the first m = n − 8 frames are executed, as in our default of n = 64 and m = 56 . A longer horizon, therefore, also means that a longer segment is executed before the generator re-plans from the reached state: the number of generator calls per second of motion falls from 4.2 at n = 20 to 0.54 at 
+
+n = 100 .All other settings follow Table VIII, and the absolute numbers below should not be compared with those of the main experiments. TABLE XV: Closed-loop performance of pretrained diffusion motion generators that differ only in the prediction horizon n,with m = n − 8 frames executed per re-plan. Evaluated with the frozen tracker over 16 rollouts on each motion. Values are mean ± SEM over motions.                                                                                                                                                                                
+
+> nmSurvival Task success MPKPE Obj. pos. Obj. ori. (%) ↑(%) ↑(cm) ↓(cm) ↓(◦)↓
+> Without randomization
+> 20 12 97.6 ±2.3 89.7 ±5.1 5.9 ±0.4 4.6 ±1.3 9.0 ±2.7
+> 32 24 100.0 ±0.0 92.9 ±4.7 5.6 ±0.3 3.6 ±0.4 6.6 ±1.7
+> 48 40 97.4 ±2.5 87.7 ±5.5 5.8 ±0.5 5.2 ±1.8 8.9 ±3.0
+> 64 56 100.0 ±0.0 93.1 ±4.7 5.0 ±0.2 3.4 ±0.4 7.0 ±1.8
+> 100 92 100.0 ±0.0 91.8 ±4.7 5.1 ±0.3 3.2 ±0.4 6.0 ±1.8
+> With the randomization of Table IX
+> 20 12 99.6 ±0.3 90.5 ±4.5 6.6 ±0.3 4.9 ±0.5 9.4 ±1.8
+> 32 24 99.1 ±0.8 92.0 ±3.8 6.7 ±0.3 5.2 ±0.7 9.5 ±1.8
+> 48 40 99.6 ±0.4 89.9 ±4.9 6.4 ±0.3 4.9 ±0.6 9.7 ±2.1
+> 64 56 100.0 ±0.0 91.8 ±4.4 6.2 ±0.2 4.6 ±0.4 8.9 ±1.7
+> 100 92 99.6 ±0.4 91.4 ±4.1 6.3 ±0.3 4.6 ±0.5 8.8 ±1.8
+
+Table XV reports the closed-loop performance with the frozen tracker. Predicting up to 2.0 s and executing up to 
+
+1.84 s per re-plan does not measurably degrade any metric in simulation. The survival rate remains above 97% for every horizon, and task success varies by at most 5.4 points across horizons, which is about one SEM, with no trend in n. The tracking errors do not grow with the horizon either: MPKPE and object position error are lowest for n = 64 and n = 100 
+
+in both settings. 
+
+M. Goal Generalization Before DA:PPO Finetuning 
+
+Fig. 7 repeats the goal-grid evaluation of Sec. V-G for the two checkpoints that precede the final one in Table V: the pretrained Student and Student + SD:DPO , from which DA:PPO starts. All three checkpoints are evaluated on the same episodes, i.e. the same goal poses, initial object poses and evaluation seed, and the plots share their color scales. The pretrained student has the highest position errors since the diffusion sampling is ill-conditioned. Self-distillation mit-igates the position error a bit, but still struggles with object orientations. However, as shown in Fig. 5, the finetuning on top of the distilled student unlocks the final leg of performance, pushing diffusion sampling towards high reward samples. In Fig. 8, we vary the goal position from our demonstration by ±0.5 m and ±1 m along the x and y axes (a,c) and rotate 0 0.1 0.2 0.3     
+
+> Mean position error (m)
+> 015 30 45
+> Mean orientation error (°) demonstrated goal robot start
+
+(a) Student (pretrained) 0 0.1 0.2 0.3     
+
+> Mean position error (m)
+> 015 30 45
+> Mean orientation error (°) demonstrated goal robot start
+
+(b) Student + SD:DPO 
+
+Fig. 7: Goal grid for (a) the pretrained Student and (b) Student 
+
++ SD:DPO, on the same episodes and color scales. Each map shows the mean final position error (left) and orientation error (right) of the object over the rollouts in which it was lifted by more than 12 cm: 83% in (a) and 78% in (b), against 90% 
+
+for the final checkpoint. An arrow at the end of a color bar marks goal positions whose mean lies beyond its range, up to 
+
+0.48 m in (a) and 46 .6◦ in (b). it in place by ±90 ◦ (b,d), and roll out our final post-trained checkpoint, which is crucially only conditioned on the state-history and goal. We find that our self-distilled model can generate consistent motions to achieve the desired object goal pose. 20 1 m        
+
+> (a) Goal moved (b) Goal rotated in place (c) Goal moved (d) Goal rotated in place
+> Demonstrated goal Initial box pose Final box pose Robot start Robot path, to where it ends
+
+Fig. 8: Robot x − y trajectories for new goals chosen outside the demonstration set, for two different motions (a, b and c, d). In (a,c), we displace the goal by 0.5m-1.0m along x and y directions, while in (b,d), we rotate the goal pose around z
+
+axis by ±90 deg . We use different colors for new goals chosen away from the goal in the demonstration goal. The plots were generated using the Student + SD:DPO + DA:PPO model.

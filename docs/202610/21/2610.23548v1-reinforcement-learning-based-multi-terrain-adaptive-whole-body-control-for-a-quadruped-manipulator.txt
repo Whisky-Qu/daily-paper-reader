@@ -1,0 +1,1209 @@
+This is the accepted version of an article in IEEE Transactions on Industrial Electronics, 2026.
+Final published version: DOI coming soon.
+Multimedia: https://youtu.be/Y7SBvGf0Ah8
+Reinforcement Learning Based Multi-Terrain
+Adaptive Whole-Body Control for a Quadruped
+Manipulator
+Yanzhou Jin1, Fei Suo1, Chang Liu1, Yasuhisa Hasegawa2, Member, IEEE, Liming Chen3, Senior Member,
+IEEE, Yusuke Iwasawa1, Yutaka Matsuo1 and Yaonan Zhu1,∗, Member, IEEE
+Abstract—Legged robots equipped with manipulators
+offer promising capabilities for loco-manipulation tasks
+in unstructured environments. However, achieving task-
+consistent end-effector behavior during locomotion re-
+mains challenging due to terrain-induced disturbances
+and the strong coupling between locomotion and ma-
+nipulation, particularly for small-scale quadruped plat-
+forms. A reinforcement-learning-based whole-body control
+framework is proposed for quadruped loco-manipulation
+on complex terrain. The proposed framework combines
+a hybrid task representation with task-prioritized whole-
+body learning to coordinate locomotion and manipulation
+while preserving task-consistent end-effector behavior. A
+lightweight quadruped manipulator platform is further de-
+veloped to validate the proposed framework on a small-
+scale quadruped system. Real-world experiments demon-
+strate successful deployment on complex terrains such
+as slopes up to 30 degrees, stairs, and deformable ter-
+rain. These results demonstrate the feasibility of deploying
+a learned whole-body control policy for quadruped loco-
+manipulation in real-world environments and highlight the
+importance of task-consistent whole-body coordination for
+terrain-adaptive loco-manipulation.
+Index Terms—Robots, Learning Control Systems, Intelli-
+gent Control
+I. INTRODUCTION
+Recent advances in quadruped locomotion have enabled
+robust traversal across challenging terrains. By integrating on-
+board manipulators, quadruped robots are expected to perform
+loco-manipulation tasks that require both mobility and ob-
+ject interaction, such as inspection, maintenance, search-and-
+rescue, and operation in unstructured environments. However,
+combining locomotion and manipulation introduces strong
+coupling between base motion and end-effector (EE) behavior,
+making precise task execution substantially more challenging
+than pure locomotion [1]–[3].
+This work was supported in part by JST PRESTO, Japan, under Grant
+JPMJPR25T5; JST SICORP, Japan, under Grant JPMJSC24C5; JSPS
+KAKENHI under Grant JP24K17236; and the Nagamori Foundation.
+(*Corresponding author: Yaonan Zhu)
+1Graduate
+School
+of
+Engineering,
+The
+University
+of
+Tokyo,
+Japan. (email: {yanzhou.jin, fei.suo, chang.liu, iwasawa, matsuo,
+yaonan.zhu}@weblab.t.u-tokyo.ac.jp)
+2Department
+of
+Micro-Nano
+Mechanical
+Science
+and
+Engineering, Nagoya University, Nagoya, 464-8603, Japan. (email:
+hasegawa@mein.nagoya-u.ac.jp)
+3Department of Mathematics and Informatics, Ecole Centrale de Lyon,
+France. (email: liming.chen@ec-lyon.fr)
+Compared with larger mobile manipulators, small-scale
+quadruped manipulators operate under significantly tighter
+payload constraints [4]–[6]. Commercially available arms used
+on such platforms can occupy a substantial portion of the
+quadruped payload capacity and act as moving loads during
+locomotion [7], [8]. Their static mass, configuration-dependent
+center-of-mass shifts, and dynamic reactions may increase leg
+actuator demands and reduce the performance of terrain traver-
+sal. Conversely, terrain irregularities and changing foothold
+contacts can induce body motions that are transmitted to the
+end effector, thereby compromising manipulation performance
+[3]. Existing loco-manipulation systems often adjust body
+posture to expand the manipulator workspace and improve
+end-effector reachability [9], [10]. Although effective on flat
+terrain, such posture adjustments may conflict with the body
+regulation required for terrain traversal [11], whereas body
+motions required for terrain adaptation may disturb end-
+effector tracking [12], [13]. Accordingly, maintaining task-
+relevant end-effector behavior while preserving locomotion
+feasibility on challenging terrain remains a central challenge
+for quadruped loco-manipulation.
+Reliable locomotion requires adequate body regulation [11],
+while manipulation depends on maintaining locomotion feasi-
+bility. These dependencies motivate the state-dependent pri-
+oritization of body regulation, locomotion, and manipula-
+tion. Existing loco-manipulation approaches commonly co-
+ordinate locomotion and manipulation through unified op-
+timization frameworks [14]–[16], hierarchical locomotion-
+manipulation architectures [17], or learning-based whole-
+body control (WBC) policies [18], [19]. Optimization-based
+approaches can explicitly incorporate whole-body dynamics
+and physical constraints [20], but their application to rough
+terrain depends on sufficiently accurate modeling of coupled
+robot dynamics, changing contacts, and terrain interactions,
+together with repeated online optimization. Reinforcement-
+learning (RL) is well suited to this setting because it allows
+closed-loop whole-body coordination to be optimized offline
+over randomized terrain, contact, and loading conditions,
+while deployment requires only fixed-cost policy inference.
+Recent learning-based studies have demonstrated whole-body
+trajectory tracking [8], object interaction [21], [22], and mo-
+bile manipulation [23]–[25]. However, explicit state-dependent
+coordination among body regulation, locomotion, and manip-
+ulation has received limited attention, particularly regarding
+how manipulation should be modulated when body regulation
+© 2026 IEEE. Personal use of this material is permitted. Permission from IEEE must be obtained for all other uses, in any current or future media, including reprinting/republishing this material for advertising or
+promotional purposes, creating new collective works, for resale or redistribution to servers or lists, or reuse of any copyrighted component of this work in other works.
+arXiv:2610.23548v1  [cs.RO]  16 Oct 2026
+
+
+This is the accepted version of an article in IEEE Transactions on Industrial Electronics, 2026.
+Final published version: DOI coming soon.
+Multimedia: https://youtu.be/Y7SBvGf0Ah8
+or locomotion deteriorates. Incorporating these objective de-
+pendencies into a unified learned policy therefore remains an
+open challenge for rough-terrain loco-manipulation.
+Beyond objective coordination, end-effector position and
+orientation play different roles in manipulation tasks. Posi-
+tional deviations can often be compensated through robot
+repositioning or locomotion planning, whereas orientation
+tracking frequently has a direct impact on task execution.
+Examples include container transportation, tool manipulation,
+and other disturbance-sensitive tasks in which the end-effector
+orientation must remain consistent relative to the environment
+[26]. Consequently, treating end-effector position and orienta-
+tion identically may lead to unnecessary compromises between
+task consistency and locomotion feasibility. Effective task
+representations that balance these competing requirements,
+therefore, remain another key challenge for rough-terrain loco-
+manipulation.
+To address these challenges, a reinforcement-learning-based
+whole-body loco-manipulation framework combining task-
+prioritized learning with a hybrid task-space representation
+is proposed. The policy is optimized using Proximal Policy
+Optimization (PPO [27]) because its clipped update objective
+supports stable training, while its rollout-based formulation is
+compatible with large-scale parallel simulation for continuous
+18-DoF control under randomized terrain and contact condi-
+tions. Task-prioritized learning modulates the contributions of
+lower-priority objectives according to the current performance
+of body regulation and locomotion. The hybrid representation
+regulates end-effector orientation relative to gravity to preserve
+task consistency, while expressing end-effector position in
+the body frame to maintain tracking feasibility under terrain-
+induced body motions. A lightweight quadruped manipulator
+is further constructed by integrating a custom-designed 1.5-
+kg Lite Arm with a Unitree Go1 (Fig. 1). The lightweight
+design reduces manipulator-induced loading, while the whole-
+body policy coordinates the arm and base under the remain-
+ing configuration- and motion-dependent coupling. Extensive
+simulation and real-world experiments demonstrate consistent
+end-effector tracking on challenging terrains, including slopes,
+stairs, and deformable surfaces. The contributions of this work
+are summarized as follows:
+• A lightweight quadruped manipulator platform integrat-
+ing a custom-designed Lite Arm and a Unitree Go1 is
+developed, together with a hybrid task-space representa-
+tion that enables rough-terrain loco-manipulation while
+preserving task-consistent end-effector behavior.
+• A
+reinforcement-learning-based
+whole-body
+control
+framework with task-prioritized learning is proposed,
+enabling
+coordinated
+loco-manipulation
+while
+maintaining end-effector task tracking under challenging
+terrain.
+A
+systematic
+ablation
+study
+validates
+the
+effectiveness of the proposed objective hierarchy.
+• The proposed whole-body control framework is validated
+through simulation and real-world experiments on chal-
+lenging terrains, including slopes, stairs, and deformable
+surfaces. The controller is further integrated into an
+autonomous loco-manipulation pipeline, demonstrating
+practical deployment in real-world tasks.
+Fig. 1.
+Manipulator-induced mass shifts and complex terrain inter-
+action jointly challenge rough-terrain loco-manipulation on small-scale
+quadruped robots. The proposed whole-body control framework enables
+coordinated terrain traversal and manipulation while preserving task-
+consistent end-effector behavior.
+II. METHOD
+A. System Configuration and Problem Formulation
+The key problem is to preserve both locomotion feasibility
+and task-consistent end-effector behavior during rough-terrain
+traversal. To reduce manipulator-induced interference with
+locomotion at the hardware level, a lightweight 6-DoF manip-
+ulator was developed, as shown in Fig. 2 (a). The manipulator
+weighs only 1.5 kg and provides a maximum reach exceeding
+60 cm. Its structure combines PLA-CF components with
+embedded carbon-fiber tubes to provide sufficient stiffness
+without imposing excessive additional mass. Based on this
+platform, rough-terrain loco-manipulation is formulated as a
+unified whole-body control problem involving body regulation,
+locomotion tracking, and end-effector regulation.
+The
+control
+problem
+is
+formulated
+as
+a
+command-
+conditioned Markov decision process (MDP), where the policy
+follows a whole-body command cWBC
+t
+. A whole-body policy
+πθ is optimized by PPO to maximize the expected cumulative
+objective J(θ):
+maximize
+θ
+J(θ) = Eπθ
+"
+T−1
+∑
+t=0
+rpri
+t
+#
+.
+(1)
+The whole-body command cWBC
+t
+and the task-prioritized
+reward rpri
+t
+address objective conflicts at different levels. At the
+task-definition level, cWBC
+t
+combines the locomotion command
+with a hybrid EE task representation that balances local
+reachability and task consistency. At the learning level, rpri
+t
+provides a stepwise learning signal that scales the contribu-
+tions of locomotion and manipulation based on the current
+performance of higher-priority objectives. The resulting reward
+sequence is used to compute the returns and advantages for
+the PPO policy update.
+B. Hybrid Manipulation Task Representation
+Many manipulation tasks require the end-effector (EE) to
+maintain a task-consistent pose with respect to the environ-
+© 2026 IEEE. Personal use of this material is permitted. Permission from IEEE must be obtained for all other uses, in any current or future media, including reprinting/republishing this material for advertising or
+promotional purposes, creating new collective works, for resale or redistribution to servers or lists, or reuse of any copyrighted component of this work in other works.
+
+
+This is the accepted version of an article in IEEE Transactions on Industrial Electronics, 2026.
+Final published version: DOI coming soon.
+Multimedia: https://youtu.be/Y7SBvGf0Ah8
+Fig. 2. Overview of the proposed framework. (a) Customized lightweight 6-DoF manipulator and the quadruped manipulator system for challenging
+terrain loco-manipulation. (b)-(d) Comparison of body-frame, world-frame, and hybrid task representations for rough-terrain loco-manipulation. (e)
+System architecture comprising semantic perception, hybrid task representation, prioritized whole-body learning, and real-world deployment.
+ment. For example, when carrying containers or fragile ob-
+jects, the EE orientation should remain approximately aligned
+with gravity, which favors a world-frame representation. How-
+ever, defining the entire manipulation task in the world frame
+requires reliable global pose estimation and may compromise
+kinematic feasibility as body motion changes the manipulator
+workspace relative to the target. This issue is particularly
+significant for lightweight 6-DoF manipulators with limited
+workspace and without kinematic redundancy.
+Conversely, defining the entire manipulation task in the
+body frame improves kinematic feasibility but sacrifices task
+consistency. For example, when the robot traverses a 30◦slope,
+an EE orientation defined purely in the body frame would tilt
+together with the robot body, which is undesirable for many
+practical manipulation tasks (Fig. 2(b)–(d)).
+To address this trade-off, the complete command provided
+to the WBC policy comprises a locomotion command and a
+hybrid EE command:
+cWBC
+t
+=
+
+cloco
+t
+,cEE
+t
+
+,
+cEE
+t
+=
+ Bpt,qt
+
+.
+(2)
+Here, cloco
+t
+specifies the desired linear velocities along the x-
+and y-axes and the desired yaw angular velocity, while cEE
+t
+specifies the hybrid EE command. Specifically, Bpt denotes
+the EE position command expressed in the robot body frame,
+whereas qt denotes the desired EE orientation, represented as
+a unit quaternion, such that the EE z-axis is aligned with the
+world vertical direction obtained from gravity. Expressing the
+position target in the body frame allows the robot body to
+perform large-scale locomotion while the manipulator focuses
+on local task execution. It also helps maintain local reacha-
+bility during terrain traversal without requiring global position
+estimation. Meanwhile, the gravity-referenced orientation pre-
+vents the EE from tilting together with the robot body.
+Although the hybrid EE representation reduces the con-
+flict between local reachability and task consistency at the
+task-definition level, multiple whole-body objectives can still
+impose conflicting demands during policy learning. The fol-
+lowing subsection addresses these remaining conflicts through
+task-prioritized whole-body learning.
+C. Task-Prioritized Whole-Body Learning
+The hybrid manipulation task representation specifies the
+desired end-effector behavior, but body regulation, locomo-
+tion, and manipulation may still produce competing learning
+objectives. Locomotion feasibility depends on adequate body
+regulation, while manipulation during terrain traversal depends
+on maintaining sufficient locomotion performance. Based on
+these dependencies, the whole-body objectives are organized
+according to the following hierarchy:
+Body Regulation ≻Locomotion ≻Manipulation
+(3)
+The
+hierarchy
+is
+implemented
+through
+performance-
+conditioned
+activation
+factors
+that
+scale
+lower-priority
+objective-group rewards at each control step. For two ob-
+jectives A ≻B, the current performance of A determines the
+activation factor applied to B. Thus, B is attenuated when the
+performance of A is insufficient and becomes fully active once
+the required level is reached.
+1) Priority I: Body Regulation: The body-regulation ob-
+jective Rbody has the highest priority because excessive roll or
+pitch can compromise terrain traversability and the execution
+of the two lower-priority objectives. Its current condition
+determines the activation factor λupright, which regulates both
+locomotion and manipulation:
+λupright = min
+ 
+max
+ −g⊤ez, 0
+
+c0
+, 1
+!
+(4)
+© 2026 IEEE. Personal use of this material is permitted. Permission from IEEE must be obtained for all other uses, in any current or future media, including reprinting/republishing this material for advertising or
+promotional purposes, creating new collective works, for resale or redistribution to servers or lists, or reuse of any copyrighted component of this work in other works.
+
+
+This is the accepted version of an article in IEEE Transactions on Industrial Electronics, 2026.
+Final published version: DOI coming soon.
+Multimedia: https://youtu.be/Y7SBvGf0Ah8
+where g denotes the projected gravity vector expressed in
+the robot body frame, ez = [0,0,1]⊤denotes the body-frame
+vertical direction, and c0 > 0 is the upright-alignment threshold
+applied to the nonnegative score max(−g⊤ez,0). Rather than
+an additional task objective, λupright ∈[0,1] regulates the con-
+tributions of locomotion and manipulation at each control step.
+As the body deviates from the desired upright configuration,
+both contributions are reduced accordingly.
+2) Priority II: Locomotion Regulation: The locomotion
+objective Rloco has the second priority because manipulation
+during terrain traversal relies on sufficient locomotion perfor-
+mance. Its current value determines the activation factor λloco,
+which further regulates manipulation:
+λloco = min(Rloco/c1, 1)
+(5)
+where Rloco denotes the current nonnegative locomotion-
+performance
+objective,
+and
+c1 > 0
+is
+the
+locomotion-
+performance threshold at which λloco saturates at one. Ac-
+cordingly, λloco ∈[0,1] reduces the influence of manipulation
+when locomotion performance is insufficient, while retaining
+its full contribution when the required locomotion capability
+is maintained.
+3) Priority III: End-Effector Behavior Regulation: The ma-
+nipulation objective Rmani regulates the end-effector behavior
+specified by the hybrid task representation and is defined as
+Rmani = Rcoarse
+pos
++ Rfine
+pos + Rori, where Rcoarse
+pos
+provides a coarse
+target-reaching objective based on the Euclidean distance
+between the commanded and measured end-effector positions,
+denoted by epos. To further improve local tracking accuracy,
+Rfine
+pos is defined as
+Rfine
+pos = 1−tanh
+epos
+σ
+
+,
+
+∂Rfine
+pos
+∂epos
+ = 1
+σ sech2 epos
+σ
+
+, (6)
+where σ > 0 determines the effective range of the fine
+objective. Its sensitivity to epos decreases rapidly as the error
+increases, concentrating its effect near the target. Thus, Rfine
+pos
+provides the fine-position regulation within Priority III.
+4) Prioritized Objective Integration: The three objective
+groups are integrated through the state-dependent priority
+vector
+Λ =
+
+1, λupright, λuprightλloco
+⊤
+(7)
+whose elements correspond to body regulation, locomotion,
+and manipulation, respectively. The stepwise prioritized ob-
+jective is used as the reward signal and is defined as
+rpri
+t
+= Λ⊤R,
+R =
+
+Rbody, Rloco, Rmani
+⊤,
+(8)
+where each objective group R(·) is constructed from the
+corresponding task-specific reward components described in
+Section III-B. Since Λ is updated from the current body con-
+dition and locomotion performance, it schedules the relative
+contributions of the objective groups throughout each rollout.
+The resulting sequence of rpri
+t
+is used to compute the returns
+and advantages through which PPO updates a single shared
+policy.
+By maximizing the expected return defined by rpri
+t , PPO
+encourages the shared policy to coordinate the three objective
+groups under the prescribed hierarchy. The resulting priority
+is soft rather than a strict non-interference constraint. When
+higher-priority performance falls below the required level,
+the corresponding activation factor decreases, reducing the
+influence of dependent lower-priority objectives in rpri
+t .
+The integration of the hybrid task representation and ob-
+jective prioritization within the overall WBC framework is
+summarized in Fig. 2(e).
+III. TRAINING AND IMPLEMENTATION
+A. Observation and Action Space
+The PPO policy is employed with an asymmetric input
+scheme, where the actor and the critic receive different ob-
+servations.
+The actor observes a 70-dimensional vector Oactor ∈R70,
+consisting of joint positions Oq pos ∈R18, joint velocities
+Oq vel ∈R18, previous action Opre act ∈R18, WBC command
+observation OWBC-cmd = cWBC
+t
+∈R3+7, base angular velocity
+Oang vel ∈R3, and projected gravity vector Ograv ∈R3.
+During training, the critic additionally receives privileged
+observations Opriv, including base linear velocity Olin vel ∈
+R3, linear and angular accelerations of the end effector
+(OEE lin acc,OEE ang acc ∈R3), orientation deviation from grav-
+ity, Euclidean distance to the commanded end effector pose,
+and a local terrain height map Oheight ∈R17×11. These are used
+only during training to stabilize value estimation.
+The action space is a ∈R18, corresponding to normalized
+target joint positions for 18 actuated joints (12 for the legs, 6
+for the arm).
+B. Objective Components
+The objective groups Rbody, Rloco, and Rmani introduced in
+Section II-C are constructed from the following task-specific
+components.
+Body objective terms: Rbody includes regularization terms
+on body behaviors. Examples include undesired-contact avoid-
+ance, foot clearance, foot contact force regulation, body pose
+regulation, action smoothing, joint limit avoidance, and penal-
+ties on torque usage and joint accelerations.
+Locomotion objective terms: Rloco follows the standard
+Isaac Lab formulation [28], including exponential tracking
+reward of base linear and angular velocity.
+Manipulation objective terms: Rmani follows the decom-
+position introduced in Section II-C and consists of coarse
+position tracking, fine position tracking, and orientation regu-
+lation terms. The position tracking terms are implemented as
+described in the previous section. The orientation objective in-
+cludes a yaw-alignment term rEE-yaw and an upright-orientation
+term rEE-z-align. The yaw-alignment term is defined as
+rEE-yaw = exp
+ −ke2
+yaw
+
+(9)
+dW
+EE = WREEex,
+dW
+cmd = WRB BRcmdex
+(10)
+eyaw = atan2
+
+ˆdW
+EE,x ˆdW
+cmd,y −ˆdW
+EE,y ˆdW
+cmd,x,
+(ˆdW
+EE)⊤ˆdW
+cmd
+
+(11)
+where dW
+EE and dW
+cmd denote the end-effector and commanded
+forward directions in the world frame, respectively, ex =
+[1,0,0]⊤is the local forward axis and ˆd denotes the horizontal
+© 2026 IEEE. Personal use of this material is permitted. Permission from IEEE must be obtained for all other uses, in any current or future media, including reprinting/republishing this material for advertising or
+promotional purposes, creating new collective works, for resale or redistribution to servers or lists, or reuse of any copyrighted component of this work in other works.
+
+
+This is the accepted version of an article in IEEE Transactions on Industrial Electronics, 2026.
+Final published version: DOI coming soon.
+Multimedia: https://youtu.be/Y7SBvGf0Ah8
+projection normalized to unit length, with ˆd(·),x and ˆd(·),y its
+components. The yaw error is computed from the signed
+angle between their normalized horizontal projections. Here,
+R denotes a rotation matrix. The EE upright-orientation term
+is defined as
+rEE−z−align = exp(−k ¯θ 2),
+¯θ = arccos
+
+z⊤eW
+z
+
+,
+(12)
+where z denotes the end-effector local z-axis expressed in the
+world frame, and eW
+z = [0,0,1]⊤is the world-frame vertical
+direction. The term encourages gravity-aligned end-effector
+orientation.
+C. Training Protocol
+The policy is trained using PPO with the asymmetric actor–
+critic architecture in Isaac Lab. Training is performed in 4096
+parallel environments on a NVIDIA 5090 GPU. Each episode
+runs for 1000 policy steps at 50 Hz (20 s; physics timestep
+0.005 s, decimation = 4), without early termination.
+The base-velocity and end-effector-pose commands remain
+fixed during the first half of each episode and are jointly
+resampled once at the midpoint to represent a change in
+task intent. End-effector target sampling is conditioned on the
+base-velocity command. Under stationary commands, target
+positions are sampled from the full reachable workspace of
+the manipulator to encourage broad manipulation capability
+and diverse arm configurations. During locomotion, targets are
+sampled from a locomotion-oriented region within the reach-
+able workspace, favoring targets that remain feasible under
+continuous body motion and terrain disturbances while retain-
+ing sufficient freedom for task-relevant end-effector regulation.
+This strategy concentrates training samples on locomotion-
+compatible targets while retaining task diversity.
+Training uses procedurally generated terrains, including flat
+ground, slopes, stairs, boxes, and random obstacles. A terrain-
+level curriculum strategy gradually increases terrain difficulty
+from completely flat ground (difficulty 0.0) to the highest
+challenging terrain configuration (difficulty 1.0), as illustrated
+in Fig. 3(a–h).
+Domain randomization is applied to dynamics parameters,
+payload conditions, and external disturbances to facilitate sim-
+to-real transfer. In particular, the PD stiffness and damping are
+scaled by [0.8,1.3] and [0.5,1.5], each arm-link mass is scaled
+by 1.0–1.8x, and an additional mass of 0–0.5 kg is randomly
+attached to the end-effector to simulate varying payloads. An
+action delay of 0–3 control steps (0–60 ms) is also applied.
+External disturbances include an episode-long trunk wrench
+with each force and torque component sampled from [−2,2]
+N and [−2,2] N·m, respectively, together with horizontal base-
+velocity perturbations in [−0.5,0.5] m/s applied every 10–15s.
+IV. EXPERIMENTS AND RESULTS
+A. Simulation Experiments
+1) Ablation Study on Prioritized Whole-Body Objectives:
+To evaluate the proposed task-priority hierarchy, we conduct
+an ablation study on the prioritized whole-body objectives.
+The regulation components at different priority levels are
+selectively disabled to assess their contributions to whole-body
+performance.
+All policies are trained under identical settings and evalu-
+ated on the most challenging terrain configuration using 1024
+parallel simulation rollouts. The evaluation metrics include
+linear and angular base velocity tracking errors, end-effector
+position error, and end-effector orientation error.
+For compact visualization, locomotion and manipulation
+performance are summarized using normalized composite
+metrics. For example, the Normalized EE Tracking Error is
+defined as
+eEE =
+s epos
+epos,ref
+2
++
+ eori
+eori,ref
+2
+,
+(13)
+where epos and eori denote the end-effector position and ori-
+entation tracking errors, respectively, and the reference terms
+are normalization constants computed from the evaluation
+dataset. The Base Motion Error is computed similarly using
+normalized linear and angular velocity tracking errors. These
+composite metrics are used only for compact visualization; the
+individual error terms are reported separately in Fig. 3(j–m).
+Fig. 3 (m) summarizes the overall trade-off between loco-
+motion and manipulation using the composite Base Motion
+Error and EE Tracking Error metrics. The full policy achieves
+low errors in both metrics and lies closest to the lower-left
+corner, indicating the best overall balance among all variants.
+Disabling Priority II component reduces the composite EE
+Tracking Error but substantially increases the composite Base
+Motion Error. This suggests that, without locomotion-priority
+objectives, the policy sacrifices mobility to maintain a stable
+end-effector pose. Although tracking performance remains
+favorable, the resulting policy lacks the locomotion capability
+required for complex terrain traversal.
+In contrast, disabling Priority III component has little effect
+on locomotion performance but significantly increases end-
+effector tracking error. As shown in Fig. 3 (k–l), the position
+error rises sharply while the orientation error remains relatively
+low. This indicates that the policy can satisfy orientation
+constraints while staying near locally comfortable arm con-
+figurations, but fails to actively approach the target. Without
+Priority III component disabled, the manipulator does not fully
+exploit its workspace for goal-directed behavior, resulting in
+poor position tracking. This highlights the role of Priority III
+in promoting effective end-effector tracking.
+Disabling Priority I component degrades both locomotion
+and manipulation performance, indicating that body regula-
+tion and contact-related objectives provide the foundation for
+higher-level behaviors. Without this layer, both mobility and
+end-effector performance deteriorate.
+2) Performance under Terrain and Manipulator Variations:
+The effects of terrain difficulty and manipulator-related factors
+were evaluated in two tests, each using 1024 parallel environ-
+ments per condition.
+Terrain difficulty. Four configurations were evaluated
+across terrain difficulty levels ranging from 0.2 to 1.0: the pro-
+posed whole-body control policy with the Lite Arm (WBC),
+a locomotion-only baseline without manipulation (Base), a
+hierarchical framework combining locomotion control with
+© 2026 IEEE. Personal use of this material is permitted. Permission from IEEE must be obtained for all other uses, in any current or future media, including reprinting/republishing this material for advertising or
+promotional purposes, creating new collective works, for resale or redistribution to servers or lists, or reuse of any copyrighted component of this work in other works.
+
+
+This is the accepted version of an article in IEEE Transactions on Industrial Electronics, 2026.
+Final published version: DOI coming soon.
+Multimedia: https://youtu.be/Y7SBvGf0Ah8
+Fig. 3. Ablation and performance evaluation of the proposed framework. Left: (a)-(h) Representative behaviors of the full policy across terrains at
+difficulty 1.0. (i)-(l) Distribution of locomotion and manipulation errors for different ablated variants (No P1-P3: corresponding Priority I-III regulation
+components disabled.). (m) locomotion-manipulation trade-off for the full policy and its ablations. Right: Base Motion Error, EE Tracking Error, and
+joint overload exposure across terrain difficulty for WBC and the baselines. Lower values indicate better performance.
+IK-based arm tracking (Hier), and a whole-body policy trained
+with the manipulator mass scaled to 3 kg (WBC-heavy). Per-
+formance was assessed using Base Motion Error, EE Tracking
+Error, and joint overload exposure. The first two are the
+composite metrics defined in Section IV-A1, while joint over-
+load exposure measures the percentage of near-limit actuator
+torque (|τ| ≥95%τmax). As shown in the right side of Fig. 3,
+all methods exhibit increasing errors and actuator load as
+terrain difficulty increases, indicating stronger terrain-induced
+disturbances and more challenging locomotion conditions. The
+degradation is more pronounced for the manipulation-enabled
+configurations, indicating the additional demands associated
+with the manipulator and end-effector tracking task. This effect
+is particularly evident in joint overload exposure. Compared
+with the locomotion-only baseline, the manipulation-enabled
+configurations experience more frequent near-limit actuator
+operation, and the gap widens on more challenging terrains.
+Among the manipulation-enabled methods, WBC consistently
+achieves lower base-motion error, EE tracking error, and
+joint overload exposure than Hier, indicating that coordinated
+whole-body control reduces the effects of arm–body coupling
+and terrain-induced disturbances. WBC-heavy exhibits higher
+joint overload exposure than WBC, particularly on difficult ter-
+rains, suggesting that reducing manipulator mass can alleviate
+actuator loading under the evaluated conditions.
+Arm-motion speed and payload. Repeated lateral end-
+effector motions were evaluated at 0.4 and 0.8 m/s with
+payloads of 0.2 and 0.5 kg. For Hier, the failure rate rose
+from 8.50% under the slow/light condition to 13.77% under
+the fast/heavy condition, while the EE root-mean-square error
+(RMSE) over successful rollouts increased from 0.070 to 0.108
+m. In comparison, WBC produced only two failures over all
+4096 rollouts and maintained an EE RMSE of 0.057–0.069
+m. These results indicate that WBC is less sensitive to arm-
+motion speed and payload.
+B. Real-World Experiments
+1) Representative Terrain Traversal Demonstrations: To
+provide representative real-world demonstrations of the pro-
+posed framework, the robot was tested on challenging uneven
+terrains, including a 30◦slope and a sequence of 10 cm stairs,
+while carrying a container with two 36 mm elastic balls.
+The carried object serves as a visual indicator of end-effector
+disturbance during locomotion. The WBC policy runs onboard
+on an NVIDIA Jetson Xavier NX at 49.9 Hz, with a mean
+inference time of 1.53 ms and a sensor-to-command latency
+of 2.76 ms, while low-level joint control runs at 500 Hz.
+As shown in Fig. 4, the robot traverses both terrain types
+while maintaining coordinated locomotion and manipulation
+behaviors. During slope ascent, descent, and stair traversal, the
+end-effector remains approximately upright despite substantial
+body pitch and roll variations. The observed behavior is
+consistent with the proposed hybrid task-space formulation,
+where end-effector orientation is regulated with respect to
+gravity while position targets are represented in a body-centric
+coordinate system.
+© 2026 IEEE. Personal use of this material is permitted. Permission from IEEE must be obtained for all other uses, in any current or future media, including reprinting/republishing this material for advertising or
+promotional purposes, creating new collective works, for resale or redistribution to servers or lists, or reuse of any copyrighted component of this work in other works.
+
+
+This is the accepted version of an article in IEEE Transactions on Industrial Electronics, 2026.
+Final published version: DOI coming soon.
+Multimedia: https://youtu.be/Y7SBvGf0Ah8
+Fig. 4. Representative rough-terrain traversal demonstrations. Blue lines indicate the horizontal direction of the end-effector. The proposed whole-
+body controller maintains a nearly level end-effector orientation during stair and slope traversal under different arm configurations, whereas the
+built-in MPC baseline exhibits larger orientation deviations and degraded terrain traversal performance.
+Fig. 5. End-effector tracking on stairs and under manual disturbances. EE tracking errors are estimated via FK using measured joint states, with
+body and foot-plane tilts estimated from projected gravity and FK-based foot positions, respectively.
+The stair demonstrations further illustrate the interaction
+between locomotion and manipulation objectives under vary-
+ing arm configurations. Similar end-effector behavior is ob-
+served across different arm configurations, including forward-
+reaching and centered postures, despite the corresponding
+changes in robot mass distribution and body dynamics.
+For comparison, the built-in MPC controller with a fixed
+arm posture exhibits larger body oscillations and noticeable
+lateral drift during terrain traversal. These body motions are
+directly reflected in the motion of the carried object, resulting
+in more pronounced end-effector disturbances.
+Overall, these demonstrations qualitatively illustrate the
+behavior of the proposed whole-body controller during real-
+world terrain traversal. The observed results show coordinated
+locomotion and manipulation under complex terrain and vary-
+ing arm configurations, providing representative examples of
+the proposed framework operating on challenging terrains.
+2) Quantitative Tracking and Whole-Body Compensation:
+Fig. 5 quantitatively evaluates end-effector tracking and whole-
+body compensation during on-stair trajectory tracking and
+repeated manual pitching disturbances. The body-frame end-
+effector position is reconstructed by forward kinematics from
+the measured joint states, while its gravity-referenced orien-
+tation combines forward kinematics with the IMU-measured
+body attitude. Body and foot-plane tilts are obtained from
+projected gravity and a plane fitted to the forward-kinematics-
+based foot positions, respectively. During on-stair trajectory
+tracking at a mean foot-plane tilt of 0.421 rad, the end-
+effector position and orientation errors were 0.016 ± 0.004 m
+and 0.045 ± 0.017 rad, respectively. Across the five manual
+disturbances, the average peak foot-plane tilt reached 0.752 ±
+0.031 rad, while leg compensation limited the peak body tilt to
+© 2026 IEEE. Personal use of this material is permitted. Permission from IEEE must be obtained for all other uses, in any current or future media, including reprinting/republishing this material for advertising or
+promotional purposes, creating new collective works, for resale or redistribution to servers or lists, or reuse of any copyrighted component of this work in other works.
+
+
+This is the accepted version of an article in IEEE Transactions on Industrial Electronics, 2026.
+Final published version: DOI coming soon.
+Multimedia: https://youtu.be/Y7SBvGf0Ah8
+Fig. 6. Autonomous rough-terrain grasping task demonstrations. Left: execution sequences for the four target objects, each showing the robot
+traversing the terrain, approaching the table, and lifting the object; the top row is the deformable terrain, the bottom row the lateral stair descent,
+where the four feet occupy footholds at different heights. Right: Sankey diagram of the eight failed trials, grouped by failure stage.
+0.499 ± 0.037 rad. The arm further accommodated the residual
+pitching motion primarily through the z direction: the mean
+absolute x- and y-axis errors remained below 0.009 m, whereas
+the z-axis error was 0.034 ± 0.029 m. Meanwhile, the end-
+effector orientation error remained at 0.039 ± 0.024 rad. These
+results demonstrate coordinated compensation across the legs,
+body, and arm, preserving end-effector orientation under large
+pitching disturbances.
+3) Grasping on Deformable and Uneven Terrains:
+a) Semantic-Guided Autonomous Grasping Pipeline: To
+demonstrate the practical applicability of the proposed frame-
+work, we integrate the learned whole-body controller into a
+semantic-guided autonomous grasping pipeline running on an
+external workstation (NVIDIA RTX 5090). Given a natural
+language instruction, a Vision-Language Model (Qwen3-VL-
+32B) is queried once at task onset with the current RGB obser-
+vation as additional input. It returns a short target description
+containing scene-specific attributes, such as color and shape,
+that distinguish the target from other objects. This phrase
+serves as the text prompt for GroundingDINO [29], which
+localizes the object at 10 Hz; the corresponding onboard depth
+measurement yields its three-dimensional position, which is
+transformed into the robot body frame and used as the task
+objective.
+A reachability-aware planner then continuously outputs a
+whole-body command cWBC
+t
+, consisting of a desired base
+velocity v and an end-effector target pose x, corresponding
+to cloco
+t
+and cEE
+t , respectively:
+cWBC
+t
+=
+
+
+
+
+0,xgrasp
+
+,
+sreach(Bpo) = 1,
+
+vapproach,xhold
+
+,
+sreach(Bpo) = 0,
+(14)
+where sreach(·) is the reachability test. While the target
+is unreachable the robot approaches it under vapproach while
+holding the end-effector. Once reachability is confirmed over
+consecutive observations, the planner switches to grasp exe-
+cution. The command is interpolated to the 50 Hz control rate
+of the WBC policy, which runs onboard and generates the
+coordinated leg and arm motions.
+The WBC policy receives a base-velocity command and
+an end-effector command but no visual input. The perception
+pipeline affects the policy only through the body-frame target
+position. This target is sampled independently of any percep-
+tion pipeline during policy training. Replacing the upstream
+perception module therefore does not by itself require retrain-
+ing the WBC policy, provided that the replacement produces
+the same target representation within the policy’s training
+range and at a comparable update rate. This modularity
+concerns the controller interface and does not imply equivalent
+end-to-end performance across different perception systems.
+b) Grasping Trials and Failure Analysis: To evaluate the
+proposed framework in realistic task settings, we conducted
+autonomous semantic-guided grasping experiments on two
+challenging terrain categories: deformable terrain and lateral
+stair descent, as shown in Fig. 6. The target object is specified
+through a natural-language query (e.g., ’hand over paper cup’
+or ’give me the electric screwdriver’). Each trial starts several
+meters away from the target object, traverses the terrain, ap-
+proaches the target, and autonomously executes the grasp once
+the object enters the reachable workspace. A trial is successful
+only if the robot both traverses the terrain and lifts the target
+object clear of the surface. Four everyday objects with diverse
+geometries and appearances are involved, including a paper
+cup, a transparent glass container, a transparent tube, and a
+600 g electric screwdriver. Twenty trials were performed under
+each terrain condition, for a total of 40 trials.
+The deformable terrain is built from sandbags and sponges,
+introducing compliant contacts and contact uncertainty that
+were not encountered during simulation training; 17/20 trials
+succeeded. In the lateral stair descent, the four feet continu-
+ously occupy footholds at different heights, producing large
+pitch and roll variations of the support polygon; 15/20 trials
+succeeded. The overall success rate is 80% (32/40).
+The eight failures (Fig. 6, right) are distributed across
+distinct stages of the task rather than concentrated in a single
+subsystem. Two occurred during traversal, where the robot
+lost balance on the steepest footholds. The other six occurred
+after the terrain had been crossed: four from inaccurate target
+localization on the transparent tube and container, one where
+the base did not stop in time and contacted the table edge,
+and one from a grasp that closed but did not retain the object
+during the lift. Grouped by cause, three failures involve motion
+control (the two falls and the collision with the table), while
+the remaining five stem from localization or grasp execution.
+© 2026 IEEE. Personal use of this material is permitted. Permission from IEEE must be obtained for all other uses, in any current or future media, including reprinting/republishing this material for advertising or
+promotional purposes, creating new collective works, for resale or redistribution to servers or lists, or reuse of any copyrighted component of this work in other works.
+
+
+This is the accepted version of an article in IEEE Transactions on Industrial Electronics, 2026.
+Final published version: DOI coming soon.
+Multimedia: https://youtu.be/Y7SBvGf0Ah8
+TABLE I
+QUALITATIVE COMPARISON WITH REPRESENTATIVE QUADRUPED LOCO-MANIPULATION SYSTEMS.
+Ref
+Terrain Demonstration
+Task-space Formulation
+System Scale (kg)
+Manipulation on Rough Terrain
+RAKOMO [15]
+Flat Ground
+World-oriented
+∼90
+×
+RoLoMa [4]
+Ramp
+World-oriented
+>50
+×
+DeepWBC [23]
+Rough Terrain
+Body-oriented
+∼14.8
+×
+Visual WBC [21]
+Rough Terrain
+Body-oriented
+∼60
+×
+MLM [22]
+Stairs / Obstacles
+World-oriented
+19.9
+✓
+UMI-on-Legs [8]
+Outdoor Terrain
+World-oriented
+∼18.4
+△
+RoboDuet [30]
+Gravel / Small Slope
+Spherical
+15.35
+×
+Ours
+30◦Slope / Stairs / Complex Terrain
+Hybrid (World + Body)
+13.5
+✓
+✓: manipulation tasks reported during terrain traversal; △: manipulation on mild outdoor scenario without explicit terrain-traversal evaluation.
+C. Positioning Among Loco-Manipulation Systems
+Table
+I
+compares
+representative
+quadruped
+loco-
+manipulation systems in terms of terrain demonstrations,
+task-space formulation, system scale, and manipulation during
+terrain traversal.
+Recent quadruped loco-manipulation systems have demon-
+strated increasingly capable whole-body control. However,
+most are evaluated on flat ground, mild outdoor environments,
+or manipulation-focused tasks [8], [21]–[23], [30]. In contrast,
+the proposed system emphasizes task-consistent whole-body
+loco-manipulation during challenging terrain traversal. As
+summarized in Table I, few existing quadruped manipulation
+systems report task execution on steep slopes or highly com-
+plex terrains. Our platform demonstrates loco-manipulation on
+slopes up to 30◦and complex terrain while maintaining task-
+consistent end-effector behavior.
+From the perspective of task-space representation, exist-
+ing approaches typically formulate manipulation objectives
+either in body-centric coordinates [23] or world-centric coor-
+dinates [8], [22]. The proposed hybrid task-space formulation
+instead combines body-frame position tracking with world-
+frame-aligned orientation regulation, keeping the end-effector
+z-axis parallel to the world z-axis, and provides a practical
+compromise between kinematic feasibility and task consis-
+tency under terrain-induced disturbances.
+Compared with existing quadruped manipulation systems
+summarized in Table I, the proposed system achieves terrain-
+adaptive loco-manipulation on a compact 13.5 kg platform
+while maintaining task-consistent end-effector behavior on
+challenging terrain.
+V. CONCLUSION
+This paper presents a reinforcement-learning-based whole-
+body control framework for quadruped manipulators operating
+on challenging terrain. By combining a hybrid task-space
+representation with task-prioritized whole-body learning, the
+proposed framework enables coordinated locomotion and ma-
+nipulation while preserving task-consistent end-effector behav-
+ior. Simulation and real-world experiments on slopes, stairs,
+and deformable terrain demonstrate that coordinated whole-
+body control enables terrain-adaptive loco-manipulation while
+maintaining task-consistent end-effector behavior and terrain
+traversal capability on small-scale quadruped manipulators.
+Several limitations remain. Because external motion-capture
+coverage was unavailable in the uneven-terrain test area, the
+quantitative real-robot evaluation was based on onboard iner-
+tial and joint measurements together with forward kinematics.
+In addition, the current validation is limited to a single robot
+platform and a representative but limited set of terrain and
+manipulation conditions.
+Future work will focus on large-scale loco-manipulation
+data collection, improving hardware design, and extending the
+framework to more complex manipulation and transportation
+tasks in dynamic environments.
+REFERENCES
+[1] T. An, F. De Vincenti, Y. Ma, M. Hutter, and S. Coros, “Collabora-
+tive loco-manipulation for pick-and-place tasks with dynamic reward
+curriculum,” arXiv preprint arXiv:2509.13239, 2025.
+[2] Y. Ma, A. Cramariuc, F. Farshidian, and M. Hutter, “Learning coor-
+dinated badminton skills for legged manipulators,” Science robotics,
+vol. 10, no. 102, p. eadu3922, 2025.
+[3] M. H. Rahman, M. F. Mysorewala, M. M. Gulzar, S. El-Ferik, and
+T. S. Haque, “Loco-manipulation with quadruped robots: Modeling, task
+taxonomy, and control methods-a critical review,” IEEE Access, 2026.
+[4] H. Ferrolho, V. Ivan, W. Merkt, I. Havoutis, and S. Vijayakumar,
+“Roloma: Robust loco-manipulation for quadruped robots with arms,”
+Autonomous Robots, vol. 47, no. 8, pp. 1463–1481, 2023.
+[5] I. Dadiotis, A. Laurenzi, and N. Tsagarakis, “Whole-body mpc for highly
+redundant legged manipulators: Experimental evaluation with a 37 dof
+dual-arm quadruped,” in 2023 IEEE-RAS 22nd International Conference
+on Humanoid Robots (Humanoids), pp. 1–8.
+IEEE, 2023.
+[6] R. S. Sambhus, K. K. Mehta, A. M. Sadeghi, B. M. Imran, J. Kim,
+T. Chunawala, V. Pastore, S. Vijayan, and K. A. Hamed, “A nonlin-
+ear mpc framework for loco-manipulation of quadrupedal robots with
+non-negligible manipulator dynamics,” IEEE Robotics and Automation
+Letters, 2026.
+[7] K. Wang, L. Lu, M. Liu, J. Jiang, Z. Li, B. Zhang, W. Zheng, X. Yu,
+H. Chen, and C. Shen, “Odyssey: Open-world quadrupeds exploration
+and manipulation for long-horizon tasks,” 2025. [Online]. Available:
+https://arxiv.org/abs/2508.08240
+[8] H. Ha, Y. Gao, Z. Fu, J. Tan, and S. Song, “Umi on legs: Making
+manipulation policies mobile with manipulation-centric whole-body
+controllers,” arXiv preprint arXiv:2407.10353, 2024.
+[9] T. Portela, G. B. Margolis, Y. Ji, and P. Agrawal, “Learning force control
+for legged manipulation,” in 2024 IEEE International Conference on
+Robotics and Automation (ICRA), pp. 15 366–15 372.
+IEEE, 2024.
+[10] A. Xie, T. Chen, G. Zhang, Y. Li, and X. Rong, “Manipulability
+enhancement of legged manipulators by adaptive motion distribution,”
+IEEE Transactions on Industrial Electronics, vol. 72, no. 1, pp. 724–733,
+2024.
+[11] Y. H. Lee, Y. H. Lee, H. Lee, H. Kang, J. H. Lee, J. M. Park, Y. B. Kim,
+H. Moon, J. C. Koo, and H. R. Choi, “Whole-body control and angular
+momentum regulation using torque sensors for quadrupedal robots,”
+Journal of Intelligent & Robotic Systems, vol. 102, no. 3, p. 66, 2021.
+[12] C. Zhou, C. Peers, Y. Wan, R. Richardson, and D. Kanoulas, “Teleman:
+Teleoperation for legged robot loco-manipulation using wearable imu-
+based motion capture,” arXiv preprint arXiv:2209.10314, 2022.
+[13] T. Zhang, S. Guo, X. Xiong, W. Li, Z. Qi, and Y. Lou, “Dynamic
+object tracking for quadruped manipulator with spherical image-based
+approach,” in 2023 IEEE/RSJ International Conference on Intelligent
+Robots and Systems (IROS), pp. 727–734.
+IEEE, 2023.
+[14] L. Molnar, J. Cheng, G. Fadini, D. Kang, F. Zargarbashi, and S. Coros,
+“Whole-body inverse dynamics mpc for legged loco-manipulation,”
+IEEE Robotics and Automation Letters, 2025.
+© 2026 IEEE. Personal use of this material is permitted. Permission from IEEE must be obtained for all other uses, in any current or future media, including reprinting/republishing this material for advertising or
+promotional purposes, creating new collective works, for resale or redistribution to servers or lists, or reuse of any copyrighted component of this work in other works.
+
+
+This is the accepted version of an article in IEEE Transactions on Industrial Electronics, 2026.
+Final published version: DOI coming soon.
+Multimedia: https://youtu.be/Y7SBvGf0Ah8
+[15] M. Risiglione, A. Abdalla, V. Barasuol, K. T. Ly, I. Havoutis, and
+C. Semini, “Rakomo: Reachability-aware k-order markov path optimiza-
+tion for quadrupedal loco-manipulation,” in 2025 IEEE International
+Conference on Advanced Robotics (ICAR), pp. 1–7.
+IEEE, 2025.
+[16] J.-P. Sleiman, F. Farshidian, M. V. Minniti, and M. Hutter, “A unified
+mpc framework for whole-body dynamic locomotion and manipulation,”
+IEEE Robotics and Automation Letters, vol. 6, no. 3, pp. 4688–4695,
+2021.
+[17] G. Turrisi, A. Bratta, G. Minelli, G. F. Abati, A. H. Rad, J. C. V.
+Soares, and C. Semini, “Binwalker: Development and field evaluation
+of a quadruped manipulator platform for sustainable litter collection,”
+in 2026 IEEE/ASME International Conference on Advanced Intelligent
+Mechatronics (AIM), pp. 1–8.
+IEEE, 2026.
+[18] D. Hou, C. Zhu, Z. Zhang, Z. Li, C. Guo, and Y. Liu, “Efficient learning
+of a unified policy for whole-body manipulation and locomotion skills,”
+in 2025 IEEE/RSJ International Conference on Intelligent Robots and
+Systems (IROS), pp. 5455–5461.
+IEEE, 2025.
+[19] K. Jiang, Z. Fu, J. Guo, W. Zhang, and H. Chen, “Learning whole-body
+loco-manipulation for omni-directional task space pose tracking with
+a wheeled-quadrupedal-manipulator,” IEEE Robotics and Automation
+Letters, vol. 10, no. 2, pp. 1481–1488, 2024.
+[20] C. D. Bellicoso, F. Jenelten, P. Fankhauser, C. Gehring, J. Hwangbo,
+and M. Hutter, “Dynamic locomotion and whole-body control for
+quadrupedal robots,” in 2017 IEEE/RSJ International Conference on
+Intelligent Robots and Systems (IROS), pp. 3359–3365.
+IEEE, 2017.
+[21] M. Liu, Z. Chen, X. Cheng, Y. Ji, R.-Z. Qiu, R. Yang, and X. Wang, “Vi-
+sual whole-body control for legged loco-manipulation,” arXiv preprint
+arXiv:2403.16967, 2024.
+[22] X. Liu, B. Ma, C. Qi, Y. Ding, N. Xu, G. Zhang, P. Chen, K. Liu,
+Z. Jia, C. Guan et al., “Mlm: Learning multi-task loco-manipulation
+whole-body control for quadruped robot with arm,” IEEE Robotics and
+Automation Letters, vol. 11, no. 1, pp. 81–88, 2025.
+[23] Z. Fu, X. Cheng, and D. Pathak, “Deep whole-body control: learning
+a unified policy for manipulation and locomotion,” in Conference on
+Robot Learning, pp. 138–149.
+PMLR, 2023.
+[24] H. Zhang, H. Yu, L. Zhao, A. Choi, Q. Bai, Y. Yang, and W. Xu,
+“Learning multi-stage pick-and-place with a legged mobile manipulator,”
+IEEE Robotics and Automation Letters, 2025.
+[25] Q. Liang, B. Cai, R. He, H. Li, T. Teng, H. Duan, C. Huang, and R. Zeng,
+“Whole-body coordination for dynamic object grasping with legged
+manipulators,” in Proceedings of the AAAI Conference on Artificial
+Intelligence, vol. 40, no. 22, pp. 18 434–18 442, 2026.
+[26] A. Heins and A. P. Schoellig, “Keep it upright: Model predictive
+control for nonprehensile object transportation with obstacle avoidance
+on a mobile manipulator,” IEEE Robotics and Automation Letters,
+vol. 8, DOI 10.1109/lra.2023.3324520, no. 12, pp. 7986–7993, Dec.
+2023. [Online]. Available: http://dx.doi.org/10.1109/LRA.2023.3324520
+[27] J. Schulman, F. Wolski, P. Dhariwal, A. Radford, and O. Klimov,
+“Proximal policy optimization algorithms,” 2017. [Online]. Available:
+https://arxiv.org/abs/1707.06347
+[28] M. Mittal, C. Yu, Q. Yu, J. Liu, N. Rudin, D. Hoeller, J. L. Yuan,
+R. Singh, Y. Guo, H. Mazhar, A. Mandlekar, B. Babich, G. State,
+M. Hutter, and A. Garg, “Orbit: A unified simulation framework for
+interactive robot learning environments,” IEEE Robotics and Automation
+Letters, vol. 8, DOI 10.1109/LRA.2023.3270034, no. 6, pp. 3740–3747,
+2023.
+[29] S. Liu, Z. Zeng, T. Ren, F. Li, H. Zhang, J. Yang, Q. Jiang, C. Li,
+J. Yang, H. Su et al., “Grounding dino: Marrying dino with grounded
+pre-training for open-set object detection,” in European conference on
+computer vision, pp. 38–55.
+Springer, 2024.
+[30] G. Pan, Q. Ben, Z. Yuan, G. Jiang, Y. Ji, S. Li, J. Pang, H. Liu, and
+H. Xu, “Roboduet: Learning a cooperative policy for whole-body legged
+loco-manipulation,” IEEE Robotics and Automation Letters, 2025.
+Yanzhou Jin received the B.Eng. degree from
+Beijing Institute of Technology, Beijing, China,
+in 2023, and the M.Sc. degree from Imperial
+College London, U.K., in 2024. He is currently
+pursuing a Ph.D. degree at the University of
+Tokyo, Japan. His research interests include re-
+inforcement learning, whole-body control, and
+legged loco-manipulation.
+Fei Suo received the B.E. degree in mechatron-
+ics engineering from Beijing Institute of Technol-
+ogy, Beijing, China, in 2023. His research inter-
+ests focus on soft robotics and, in particular, on
+their design, modeling, control, and perception.
+Chang Liu received the M.S. degree from Kyoto
+University, and is currently pursuing the Ph.D.
+degree in The University of Tokyo, where his
+research interests include robot learning, rein-
+forcement learning, and world models.
+Yasuhisa Hasegawa (Member, IEEE) received
+the
+Ph.D.
+degree
+from
+Nagoya
+University,
+Nagoya, Japan, in 2001. He is currently a Pro-
+fessor with Nagoya University, Nagoya, Japan.
+His research interests include physical human-
+robot interaction, assistive technology, and mo-
+tion control.
+Liming Chen (Senior Member, IEEE) received
+the M.S. and Ph.D. degrees in computer science
+from the University of Paris, Paris, France, in
+1986 and 1989, respectively. He joined Ecole
+Centrale de Lyon, University of Lyon, Ecully,
+France, in 1998, where he is currently a Dis-
+tinguished Professor. His research interests in-
+clude machine learning, computer vision, pat-
+tern recognition, and multimedia analysis.
+Yusuke Iwasawa received the Ph.D. degree in
+engineering from The University of Tokyo, Tokyo,
+Japan, in 2017. He is currently an Associate Pro-
+fessor with the Graduate School of Engineering,
+The University of Tokyo. His research interests
+include machine learning, foundation models,
+and robot learning.
+Yutaka Matsuo received the Ph.D. degree in en-
+gineering from The University of Tokyo, Japan.
+He is currently a Professor with the Graduate
+School of Engineering, The University of Tokyo,
+where he leads the Matsuo-Iwasawa Laboratory.
+His research interests include deep learning,
+foundation models, and embodied AI.
+Yaonan Zhu (Member, IEEE) received the B.S.
+degree from Northeastern University in 2015,
+the M.S. degree from the University of Science
+and Technology of China in 2018, and the Ph.D.
+degree in robotics from Nagoya University in
+2021. He is currently a Project Lecturer at the
+University of Tokyo, Japan. His research inter-
+ests include embodied AI, humanoid robotics,
+robot learning, and teleoperation. He received
+Best Paper Awards at IEEE ICMA 2024, MHS
+2023, IEEE RO-MAN 2023, and the Best Paper
+Award Finalist at IEEE CBS 2023.
+© 2026 IEEE. Personal use of this material is permitted. Permission from IEEE must be obtained for all other uses, in any current or future media, including reprinting/republishing this material for advertising or
+promotional purposes, creating new collective works, for resale or redistribution to servers or lists, or reuse of any copyrighted component of this work in other works.

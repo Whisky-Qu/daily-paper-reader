@@ -4093,6 +4093,19 @@ article.markdown-section {
   box-shadow: 0 -8px 24px rgba(38, 55, 86, 0.08);
 }
 
+/* Keep subscriptions usable when the daily controls exceed the dialog height. */
+#arxiv-search-panel:not(.is-conference-tab):not(.is-topic-tab) #arxiv-search-panel-body {
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-gutter: stable;
+}
+#arxiv-search-panel:not(.is-conference-tab):not(.is-topic-tab) #arxiv-search-panel-main {
+  flex: 0 0 clamp(180px, 30vh, 260px);
+}
+#arxiv-search-panel:not(.is-conference-tab):not(.is-topic-tab) #arxiv-search-quick-run-side {
+  position: static;
+}
+
 .dpr-bulk-bar-head {
   display: flex;
   align-items: center;

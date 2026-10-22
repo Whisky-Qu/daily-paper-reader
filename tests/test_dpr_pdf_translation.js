@@ -1,5 +1,5 @@
 const assert = require('node:assert/strict');
-const { chunks, paragraphs, layoutBlocks, imageBounds, fitText, translateDocument } = require('../app/dpr-pdf-translation.js');
+const { chunks, paragraphs, layoutBlocks, imageBounds, fitText, wrapLines, translateDocument } = require('../app/dpr-pdf-translation.js');
 
 async function test() {
   const text = 'Sentence for a wearable robot. '.repeat(300).trim();
@@ -28,7 +28,12 @@ async function test() {
     block.box.y<floatingImage.y+floatingImage.height && block.box.y+block.box.height>floatingImage.y)));
   const fit=fitText('这是需要适应原来文字框的较长中文翻译。'.repeat(8),{width:130,height:22},10,
     {font:'',measureText(value){const size=parseFloat(this.font.match(/([\d.]+)px/)[1]);return {width:value.length*size};}});
-  assert.ok(fit.lines.length*fit.size*1.16<=22.3);assert.ok(fit.size<=10);
+  assert.ok(fit.lines.length*fit.size*fit.leading<=22.3);assert.ok(fit.size<=10);
+  const indented=layoutBlocks({items:[positioned('An indented paragraph starts here',40,700,120),positioned('The same paragraph continues here',30,688,130),
+    positioned('Another body paragraph for column detection',30,650,130)],styles:{}},viewport);
+  assert.equal(indented[0].rows,2);assert.equal(indented[0].indent,2);assert.equal(indented[0].box.x,30);
+  const chinese=wrapLines('正文第一句。正文第二句。',6,value=>Array.from(value).length,2);
+  assert.ok(chinese[0].startsWith('\u3000\u3000'));assert.ok(chinese.every(line=>!/^\s*[。，]/.test(line)));
   const images=await imageBounds({async getOperatorList(){return {fnArray:[1,2,3,4],argsArray:[[],[100,0,0,50,200,600],[],[]]};}},viewport,
     {save:1,transform:2,paintImageXObject:3,restore:4,paintInlineImageXObject:5,paintImageMaskXObject:6});
   assert.deepEqual(images,[{x:200,y:150,width:100,height:50}]);

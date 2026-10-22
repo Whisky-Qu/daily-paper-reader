@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
   "provider": "EasyScholar",
-  "generated_at": "2026-10-22T15:51:37Z",
-  "status": "partial",
+  "generated_at": "2026-10-22T21:51:45Z",
+  "status": "ready",
   "papers": {
     "2610.26043": {
       "kind": "preprint",
@@ -30,7 +30,7 @@
       "doi": null,
       "issns": [],
       "source": "https://arxiv.org/abs/2610.17999v1",
-      "checkedAt": "2026-10-22T15:40:30Z",
+      "checkedAt": "2026-10-22T21:51:46Z",
       "title": "TRACE: Efficient Transfer Learning for Neural Whole-Body Control Across Humanoid Embodiments",
       "authors": [
         "Qingyu Lan",
@@ -38,8 +38,8 @@
         "Zifan Wang",
         "Junwei Liang"
       ],
-      "note": "arXiv 记录暂无期刊参考或正式 DOI，不据此断言尚未发表。 Crossref 查询暂不可用，尚未完成核对。",
-      "lookupStatus": "unavailable"
+      "note": "arXiv 记录暂无期刊参考或正式 DOI，不据此断言尚未发表。 Crossref 未找到标题与作者一致的正式出版记录。",
+      "lookupStatus": "unmatched"
     },
     "2610.17930": {
       "kind": "preprint",
@@ -47,15 +47,15 @@
       "doi": null,
       "issns": [],
       "source": "https://arxiv.org/abs/2610.17930v1",
-      "checkedAt": "2026-10-22T15:40:30Z",
+      "checkedAt": "2026-10-22T21:51:46Z",
       "title": "Locomotion with Online Awareness of Dynamics for Precision Footholds",
       "authors": [
         "Kunzhao Ren",
         "Zhishuo Zhu",
         "Xiaobin Xiong"
       ],
-      "note": "arXiv 记录暂无期刊参考或正式 DOI，不据此断言尚未发表。 作者备注：8 pages, 8 figures Crossref 查询暂不可用，尚未完成核对。",
-      "lookupStatus": "unavailable"
+      "note": "arXiv 记录暂无期刊参考或正式 DOI，不据此断言尚未发表。 作者备注：8 pages, 8 figures Crossref 未找到标题与作者一致的正式出版记录。",
+      "lookupStatus": "unmatched"
     },
     "2610.26170": {
       "kind": "conference",
@@ -104,7 +104,7 @@
       "doi": null,
       "issns": [],
       "source": "https://arxiv.org/abs/2610.25628v1",
-      "checkedAt": "2026-10-22T15:40:30Z",
+      "checkedAt": "2026-10-22T21:51:46Z",
       "title": "Humanoid SRL: Augmenting Humanoids with Supernumerary Limbs for Coordinated Loco-Manipulation",
       "authors": [
         "Fukang Liu",
@@ -123,8 +123,8 @@
         "Tony G. Chen",
         "Ye Zhao"
       ],
-      "note": "arXiv 记录暂无期刊参考或正式 DOI，不据此断言尚未发表。 Crossref 查询暂不可用，尚未完成核对。",
-      "lookupStatus": "unavailable"
+      "note": "arXiv 记录暂无期刊参考或正式 DOI，不据此断言尚未发表。 Crossref 未找到标题与作者一致的正式出版记录。",
+      "lookupStatus": "unmatched"
     },
     "2610.27688": {
       "kind": "preprint",
@@ -132,13 +132,13 @@
       "doi": null,
       "issns": [],
       "source": "https://arxiv.org/abs/2610.27688v1",
-      "checkedAt": "2026-10-22T15:40:30Z",
+      "checkedAt": "2026-10-22T21:51:46Z",
       "title": "Adaptive Traversal Tubes for Posture-Aware Navigation of Bipedal Humanoids",
       "authors": [
         "Zijian Ge"
       ],
-      "note": "arXiv 记录暂无期刊参考或正式 DOI，不据此断言尚未发表。 Crossref 查询暂不可用，尚未完成核对。",
-      "lookupStatus": "unavailable"
+      "note": "arXiv 记录暂无期刊参考或正式 DOI，不据此断言尚未发表。 Crossref 未找到标题与作者一致的正式出版记录。",
+      "lookupStatus": "unmatched"
     },
     "2610.21590": {
       "kind": "preprint",
@@ -183,7 +183,7 @@
       "doi": null,
       "issns": [],
       "source": "https://arxiv.org/abs/2610.15833v1",
-      "checkedAt": "2026-10-22T15:40:30Z",
+      "checkedAt": "2026-10-22T21:51:46Z",
       "title": "P-BFM: Perceptive Behavioral Foundation Models for Humanoid Control via Unsupervised Reinforcement Learning",
       "authors": [
         "Xue Wang",
@@ -197,8 +197,8 @@
         "Hao Zhao",
         "Qingdu Li"
       ],
-      "note": "arXiv 记录暂无期刊参考或正式 DOI，不据此断言尚未发表。 作者备注：Project page: https://roboparty.github.io/P-BFM/ Crossref 查询暂不可用，尚未完成核对。",
-      "lookupStatus": "unavailable"
+      "note": "arXiv 记录暂无期刊参考或正式 DOI，不据此断言尚未发表。 作者备注：Project page: https://roboparty.github.io/P-BFM/ Crossref 未找到标题与作者一致的正式出版记录。",
+      "lookupStatus": "unmatched"
     },
     "2610.22176": {
       "kind": "preprint",
@@ -239,15 +239,15 @@
       "doi": null,
       "issns": [],
       "source": "https://arxiv.org/abs/2610.27271v1",
-      "checkedAt": "2026-10-22T15:40:30Z",
+      "checkedAt": "2026-10-22T21:51:46Z",
       "title": "XoNav: An Exoskeleton as a Personalized Haptic Interface for Assisted Navigation",
       "authors": [
         "Debadrata Sarkar",
         "Soumen Sen",
         "Aman Arora"
       ],
-      "note": "arXiv 记录暂无期刊参考或正式 DOI，不据此断言尚未发表。 作者备注：A supplementary video illustrating the XoNav hardware, haptic cues, Wizard-of-Oz trials and autonomous navigation is available at https://doi.org/10.6084/m9.figshare.34701648 Crossref 查询暂不可用，尚未完成核对。",
-      "lookupStatus": "unavailable"
+      "note": "arXiv 记录暂无期刊参考或正式 DOI，不据此断言尚未发表。 作者备注：A supplementary video illustrating the XoNav hardware, haptic cues, Wizard-of-Oz trials and autonomous navigation is available at https://doi.org/10.6084/m9.figshare.34701648 Crossref 未找到标题与作者一致的正式出版记录。",
+      "lookupStatus": "unmatched"
     },
     "2610.19494": {
       "kind": "preprint",
@@ -826,5 +826,5 @@
     "reference": 0,
     "total": 36
   },
-  "message": "部分服务暂不可用，保留已有缓存。"
+  "message": "EasyScholar 指标已同步；未确认期刊的论文不套用分区。"
 }

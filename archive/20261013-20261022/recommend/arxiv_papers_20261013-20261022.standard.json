@@ -1,0 +1,54 @@
+{
+  "mode": "standard",
+  "generated_at": "2026-10-22T05:27:07.783277+00:00",
+  "stats": {
+    "mode": "standard",
+    "tag_count": 1,
+    "deep_divecandidates": 0,
+    "deep_cap": 6,
+    "deep_selected": 0,
+    "quick_candidates": 1,
+    "quick_skim_target": 11,
+    "quick_selected": 1
+  },
+  "deep_dive": [],
+  "quick_skim": [
+    {
+      "id": "2610.17930v1",
+      "source": "arxiv",
+      "title": "Locomotion with Online Awareness of Dynamics for Precision Footholds",
+      "abstract": "Unknown payloads alter robot dynamics and make precise contact execution difficult when foothold margins are small. We present LOAD, a perceptive locomotion framework that combines explicit inertial estimates with implicit dynamics features for narrow-beam traversal. Separate recurrent modules infer torso inertial changes and task-relevant history from proprioception, while a height-map teacher is distilled into a depth-based student. We extensively evaluate LOAD and its variants in simulation and on hardware across beam widths and payload configurations. The results show that implicit dynamics features accelerate training, while explicit inertial estimation further improves traversal success; combining both enables LOAD to approach the performance of a privileged policy supplied with ground-truth inertial parameters. Hardware experiments demonstrate traversal with unilateral payloads of 6 kg on a 10 cm beam and 9 kg on a 15 cm beam, and an evenly distributed 11 kg payload on a 15 cm beam. These results support combining physical estimates and history features for precision locomotion under unknown loads.",
+      "authors": [
+        "Kunzhao Ren",
+        "Zhishuo Zhu",
+        "Xiaobin Xiong"
+      ],
+      "primary_category": "cs.RO",
+      "categories": [
+        "cs.RO"
+      ],
+      "published": "2026-10-13T08:16:56+00:00",
+      "link": "https://arxiv.org/pdf/2610.17930v1",
+      "tags": [
+        "keyword:exo-vision",
+        "query:exo-vision"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "depth-based perceptive locomotion student with inertial estimation for terrain traversal",
+      "llm_evidence_cn": "深度感知行走策略与惯性估计结合用于地形通过",
+      "llm_evidence": "深度感知行走策略与惯性估计结合用于地形通过",
+      "canonical_evidence": "深度感知行走策略与惯性估计结合用于地形通过",
+      "llm_tldr_en": "LOAD combines explicit inertial dynamics estimates with implicit proprioceptive features and distills a height-map teacher into a depth-based student for narrow-beam foothold traversal under unknown payloads.",
+      "llm_tldr_cn": "未知负载会改变机器人动力学，使窄足印地形上的精确落脚变得困难。作者提出LOAD感知式行走框架，用循环模块从本体感觉推断躯干惯性变化与任务历史，并将高度图教师策略蒸馏为基于深度输入的策略，融合显式惯性估计与隐式动力学特征。仿真与硬件实验表明，隐式动力学特征加速训练，显式惯性估计进一步提升通过成功率，为感知与动力学融合的地形自适应行走提供了可借鉴方案。",
+      "llm_tldr": "未知负载会改变机器人动力学，使窄足印地形上的精确落脚变得困难。作者提出LOAD感知式行走框架，用循环模块从本体感觉推断躯干惯性变化与任务历史，并将高度图教师策略蒸馏为基于深度输入的策略，融合显式惯性估计与隐式动力学特征。仿真与硬件实验表明，隐式动力学特征加速训练，显式惯性估计进一步提升通过成功率，为感知与动力学融合的地形自适应行走提供了可借鉴方案。",
+      "llm_tags": [
+        "query:exo-vision"
+      ],
+      "matched_query_tag": "query:exo-vision",
+      "matched_query_text": "Fusion of depth camera vision and inertial sensors for terrain aware adaptive exoskeleton control",
+      "matched_requirement_id": "req-4",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    }
+  ]
+}

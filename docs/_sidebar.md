@@ -1,6 +1,9 @@
 * <a class="dpr-sidebar-root-link" href="#/">首页</a>
 * <a class="dpr-sidebar-root-link dpr-sidebar-noactive-link" href="javascript:void(0)" data-dpr-hash="#/tutorial/README">使用教程</a>
 * Daily Papers
+  * 2026-10-13 ~ 2026-10-22 <!--dpr-date:20261013-20261022-->
+    * 速读区
+      * <a class="dpr-sidebar-item-link dpr-sidebar-item-structured" href="#/20261013-20261022/2610.17930v1-locomotion-with-online-awareness-of-dynamics-for-precision-footholds" data-sidebar-item="{&quot;title&quot;: &quot;Locomotion with Online Awareness of Dynamics for Precision Footholds&quot;, &quot;link&quot;: &quot;https://arxiv.org/abs/2610.17930v1-locomotion-with-online-awareness-of-dynamics-for-precision-footholds&quot;, &quot;score&quot;: &quot;6.0&quot;, &quot;tags&quot;: [{&quot;kind&quot;: &quot;query&quot;, &quot;label&quot;: &quot;exo-vision&quot;}], &quot;evidence&quot;: &quot;深度感知行走策略与惯性估计结合用于地形通过&quot;}">Locomotion with Online Awareness of Dynamics for Precision Footholds</a>
   * 2026-10-21 <!--dpr-date:20261021-->
     * 精读区
       * <a class="dpr-sidebar-item-link dpr-sidebar-item-structured" href="#/202610/21/2610.28480v1-supermimic-scaling-humanoid-whole-body-control-with-one-differentiable-world-model" data-sidebar-item="{&quot;title&quot;: &quot;SuperMimic: Scaling Humanoid Whole-Body Control with One Differentiable World Model&quot;, &quot;link&quot;: &quot;https://arxiv.org/abs/2610.28480v1-supermimic-scaling-humanoid-whole-body-control-with-one-differentiable-world-model&quot;, &quot;score&quot;: &quot;8.0&quot;, &quot;tags&quot;: [{&quot;kind&quot;: &quot;query&quot;, &quot;label&quot;: &quot;humanoid&quot;}], &quot;evidence&quot;: &quot;人形机器人运动模仿与全身跟踪策略学习&quot;}">SuperMimic: Scaling Humanoid Whole-Body Control with One Differentiable World Model</a>

@@ -1,0 +1,25 @@
+{
+  "date": "20261013-20261022",
+  "date_label": "2026-10-13 ~ 2026-10-22",
+  "generated_at": "2026-10-22 05:27:24 UTC",
+  "recommend_exists": true,
+  "run_count": 1,
+  "papers": [
+    {
+      "paper_id": "2610.17930v1",
+      "route": "20261013-20261022/2610.17930v1-locomotion-with-online-awareness-of-dynamics-for-precision-footholds",
+      "title": "Locomotion with Online Awareness of Dynamics for Precision Footholds",
+      "section": "quick",
+      "tags": [
+        {
+          "kind": "query",
+          "label": "exo-vision"
+        }
+      ],
+      "score": 6.0,
+      "evidence": "深度感知行走策略与惯性估计结合用于地形通过",
+      "first_seen_at": "2026-10-22 05:27:24 UTC",
+      "updated_at": "2026-10-22 05:27:24 UTC"
+    }
+  ]
+}

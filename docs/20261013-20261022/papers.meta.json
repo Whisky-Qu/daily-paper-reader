@@ -1,0 +1,24 @@
+{
+  "label": "2026-10-13 ~ 2026-10-22",
+  "date": "2026-10-13 ~ 2026-10-22",
+  "generated_at": "2026-10-22T05:27:25",
+  "count": 1,
+  "papers": [
+    {
+      "paper_id": "20261013-20261022/2610.17930v1-locomotion-with-online-awareness-of-dynamics-for-precision-footholds",
+      "section": "quick",
+      "title_en": "Locomotion with Online Awareness of Dynamics for Precision Footholds",
+      "authors": "Kunzhao Ren, Zhishuo Zhu, Xiaobin Xiong",
+      "date": "2026-10-13",
+      "pdf": "https://arxiv.org/pdf/2610.17930v1",
+      "score": "6.0",
+      "evidence": "深度感知行走策略与惯性估计结合用于地形通过",
+      "tldr": "未知负载会改变机器人动力学，在狭窄落脚边界上难以精确接触。LOAD将显式惯性估计与隐式动力学特征结合，用循环模块从本体感知推断躯干惯性变化和任务历史，并将高度图教师蒸馏为深度学生策略。仿真与硬件实验显示隐式特征加速训练、显式估计提升成功率，二者结合接近特权策略，并实现单侧负载6 kg通过10 cm横梁、9 kg通过15 cm横梁及均布11 kg通过15 cm横梁。",
+      "tags": "query:exo-vision",
+      "abstract_en": "Unknown payloads alter robot dynamics and make precise contact execution difficult when foothold margins are small. We present LOAD, a perceptive locomotion framework that combines explicit inertial estimates with implicit dynamics features for narrow-beam traversal. Separate recurrent modules infer torso inertial changes and task-relevant history from proprioception, while a height-map teacher is distilled into a depth-based student. We extensively evaluate LOAD and its variants in simulation and on hardware across beam widths and payload configurations. The results show that implicit dynamics features accelerate training, while explicit inertial estimation further improves traversal success; combining both enables LOAD to approach the performance of a privileged policy supplied with ground-truth inertial parameters. Hardware experiments demonstrate traversal with unilateral payloads of 6 kg on a 10 cm beam and 9 kg on a 15 cm beam, and an evenly distributed 11 kg payload on a 15 cm beam. These results support combining physical estimates and history features for precision locomotion under unknown loads.",
+      "source": "arxiv",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "errors": []
+}

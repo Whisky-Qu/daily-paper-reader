@@ -1,6 +1,6 @@
 {
-  "generated_at": "2026-10-21T22:14:56.030035+00:00",
-  "updated_date": "20261021",
+  "generated_at": "2026-10-22T05:27:07.784164+00:00",
+  "updated_date": "20261013-20261022",
   "carryover_days": 9,
   "tag_states": {
     "hip-exo": {
@@ -9,7 +9,7 @@
       "items": []
     },
     "exo-vision": {
-      "updated_date": "20261021",
+      "updated_date": "20261013-20261022",
       "carryover_days": 9,
       "items": []
     },

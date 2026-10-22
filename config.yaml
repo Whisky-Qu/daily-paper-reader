@@ -289,4 +289,4 @@ source_backends:
     sync_table: arxiv_sync_status
     sync_success_value: success
 daily_update:
-  mode: auto
+  mode: manual

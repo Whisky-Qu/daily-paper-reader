@@ -34,6 +34,8 @@ async function test() {
   assert.equal(indented[0].rows,2);assert.equal(indented[0].indent,2);assert.equal(indented[0].box.x,30);
   const chinese=wrapLines('正文第一句。正文第二句。',6,value=>Array.from(value).length,2);
   assert.ok(chinese[0].startsWith('\u3000\u3000'));assert.ok(chinese.every(line=>!/^\s*[。，]/.test(line)));
+  const references=wrapLines('这是第[15]项数值96.3%的结论。',8,value=>Array.from(value).length);
+  assert.ok(references.some(line=>line.includes('[15]')));assert.ok(references.some(line=>line.includes('96.3%')));
   const images=await imageBounds({async getOperatorList(){return {fnArray:[1,2,3,4],argsArray:[[],[100,0,0,50,200,600],[],[]]};}},viewport,
     {save:1,transform:2,paintImageXObject:3,restore:4,paintInlineImageXObject:5,paintImageMaskXObject:6});
   assert.deepEqual(images,[{x:200,y:150,width:100,height:50}]);

@@ -145,12 +145,12 @@
     });
   }
   function wrapLines(text, width, measure, indent=0) {
-    const tokens=String(text).match(/[\p{Script=Han}]|[A-Za-z0-9]+|\s+|./gu)||[], lines=[];
+    const tokens=String(text).match(/\[\d+(?:[–,\-\s]\d+)*\]|\d+(?:\.\d+)?[%％]?|[\p{Script=Han}]|[A-Za-z0-9]+|\s+|./gu)||[], lines=[];
     let line='\u3000'.repeat(indent);
     for (let token of tokens) {
       if (!line) token=token.trimStart();
       if (measure(line+token)>width && line.trim()) {
-        if(/^[，。！？；：、）】》」』”’.,!?;:%％)]$/.test(token)) {
+        if(/^[，。！？；：、）】》」』”’.,!?;:%％)\]]$/.test(token)) {
           const last=Array.from(line).pop();lines.push(line.slice(0,-last.length).trimEnd());line=last;
         }else {lines.push(line.trimEnd());line='';token=token.trimStart();}
       }

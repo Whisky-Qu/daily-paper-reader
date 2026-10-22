@@ -4,7 +4,9 @@
   if (!root || !root.document) return;
   var promise;
   function load() {
-    if (!promise) promise = root.fetch(new URL('docs/assets/journal-metrics.json', root.document.baseURI), { credentials: 'omit', cache: 'no-cache' })
+    var url = new URL('docs/assets/journal-metrics.json', root.document.baseURI);
+    url.searchParams.set('v', String(Date.now()));
+    if (!promise) promise = root.fetch(url, { credentials: 'omit', cache: 'no-cache' })
       .then(function (r) { if (!r.ok) throw new Error('unavailable'); return r.json(); })
       .catch(function () { return { status: 'not_configured', papers: {}, metrics: [], message: 'EasyScholar 指标暂未同步。' }; });
     return promise;

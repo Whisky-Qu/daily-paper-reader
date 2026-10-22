@@ -56,13 +56,24 @@ class PagesBuildTests(unittest.TestCase):
     def test_failed_and_timed_out_builds_fail_workflow(self):
         with self.assertRaises(RuntimeError):
             pages.request_build(
-                self.api([{"commit": "a" * 40, "status": "errored"}]),
+                self.api([{"commit": "a" * 40, "status": "errored"}] * 3),
                 "owner/repo",
                 "main",
                 "a" * 40,
+                sleep=lambda _: None,
             )
         with self.assertRaises(TimeoutError):
             pages.request_build(self.api([]), "owner/repo", "main", "a" * 40, timeout=0)
+
+    def test_cancelled_push_build_can_be_replaced_for_same_commit(self):
+        api = self.api([
+            {"commit": "a" * 40, "status": "errored"},
+            {"commit": "a" * 40, "status": "building"},
+            {"commit": "a" * 40, "status": "built"},
+        ])
+        result = pages.request_build(api, "owner/repo", "main", "a" * 40, sleep=lambda _: None)
+        self.assertEqual(result["status"], "built")
+        self.assertEqual(sum(c.args[0] == "POST" for c in api.call_args_list), 1)
 
     def test_workflow_explicit_pages_and_narrow_hidden_artifact(self):
         text = (ROOT / ".github/workflows/starter-pack.yml").read_text()

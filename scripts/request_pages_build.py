@@ -32,6 +32,7 @@ def request_build(api, repository, branch, commit, *, timeout=600, sleep=time.sl
         raise RuntimeError("Pages REST 构建要求默认分支，当前分支不匹配；未改变配置")
     api("POST", base + "/pages/builds")
     deadline = time.monotonic() + timeout
+    terminal_failures = 0
     while time.monotonic() < deadline:
         build = api("GET", base + "/pages/builds/latest")
         # POST 仅返回 latest 地址，旧版本构建完成不等于本次提交已发布。
@@ -41,9 +42,18 @@ def request_build(api, repository, branch, commit, *, timeout=600, sleep=time.sl
                 print(f"Pages 构建已完成，提交 {commit[:12]}", flush=True)
                 return build
             if status in {"errored", "failed", "cancelled"}:
-                raise RuntimeError(
-                    "本次提交的 Pages 构建失败，请查看仓库 Pages 构建日志"
-                )
+                # The push build can be cancelled while POST's replacement build
+                # is being created. Both share a commit; latest can briefly still
+                # refer to the cancelled build. Confirm a stable failure first.
+                terminal_failures += 1
+                if terminal_failures >= 3:
+                    raise RuntimeError(
+                        "本次提交的 Pages 构建失败，请查看仓库 Pages 构建日志"
+                    )
+            else:
+                terminal_failures = 0
+        else:
+            terminal_failures = 0
         print("等待 Pages 构建本次提交……", flush=True)
         sleep(min(10, max(0, deadline - time.monotonic())))
     raise TimeoutError("等待 Pages 本次提交构建超时；代码已推送，但未确认线上更新")

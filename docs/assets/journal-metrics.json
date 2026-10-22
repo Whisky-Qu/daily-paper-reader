@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
   "provider": "EasyScholar",
-  "generated_at": "2026-10-22T12:15:59Z",
-  "status": "ready",
+  "generated_at": "2026-10-22T15:40:30Z",
+  "status": "partial",
   "papers": {
     "2610.26043": {
       "kind": "preprint",
@@ -10,8 +10,19 @@
       "doi": null,
       "issns": [],
       "source": "https://arxiv.org/abs/2610.26043v2",
-      "checkedAt": "2026-10-22T12:15:59Z",
-      "note": "arXiv 记录暂无期刊参考或正式 DOI，不据此断言尚未发表。"
+      "checkedAt": "2026-10-22T15:40:30Z",
+      "title": "OmniInteract: Towards Unified Whole-Body Interaction Control for Dual Humanoids",
+      "authors": [
+        "Yinghao Li",
+        "Tianyu Zhang",
+        "Zhuohao Li",
+        "Yi-Lin Wei",
+        "Fa-Ting Hong",
+        "Qing Zhang",
+        "Wei-Shi Zheng"
+      ],
+      "note": "arXiv 记录暂无期刊参考或正式 DOI，不据此断言尚未发表。 作者备注：30 pages including appendix, 11 figures. Project page: https://calvinyhli.github.io/omniinteract.github.io/ Crossref 未找到标题与作者一致的正式出版记录。",
+      "lookupStatus": "unmatched"
     },
     "2610.17999": {
       "kind": "preprint",
@@ -19,8 +30,16 @@
       "doi": null,
       "issns": [],
       "source": "https://arxiv.org/abs/2610.17999v1",
-      "checkedAt": "2026-10-22T12:15:59Z",
-      "note": "arXiv 记录暂无期刊参考或正式 DOI，不据此断言尚未发表。"
+      "checkedAt": "2026-10-22T15:40:30Z",
+      "title": "TRACE: Efficient Transfer Learning for Neural Whole-Body Control Across Humanoid Embodiments",
+      "authors": [
+        "Qingyu Lan",
+        "Zhihao Tian",
+        "Zifan Wang",
+        "Junwei Liang"
+      ],
+      "note": "arXiv 记录暂无期刊参考或正式 DOI，不据此断言尚未发表。 Crossref 查询暂不可用，尚未完成核对。",
+      "lookupStatus": "unavailable"
     },
     "2610.17930": {
       "kind": "preprint",
@@ -28,17 +47,35 @@
       "doi": null,
       "issns": [],
       "source": "https://arxiv.org/abs/2610.17930v1",
-      "checkedAt": "2026-10-22T12:15:59Z",
-      "note": "arXiv 记录暂无期刊参考或正式 DOI，不据此断言尚未发表。"
+      "checkedAt": "2026-10-22T15:40:30Z",
+      "title": "Locomotion with Online Awareness of Dynamics for Precision Footholds",
+      "authors": [
+        "Kunzhao Ren",
+        "Zhishuo Zhu",
+        "Xiaobin Xiong"
+      ],
+      "note": "arXiv 记录暂无期刊参考或正式 DOI，不据此断言尚未发表。 作者备注：8 pages, 8 figures Crossref 查询暂不可用，尚未完成核对。",
+      "lookupStatus": "unavailable"
     },
     "2610.26170": {
-      "kind": "preprint",
-      "venue": null,
+      "kind": "conference",
+      "venue": "IEEE ISAIA 2026",
       "doi": null,
       "issns": [],
       "source": "https://arxiv.org/abs/2610.26170v1",
-      "checkedAt": "2026-10-22T12:15:59Z",
-      "note": "arXiv 记录暂无期刊参考或正式 DOI，不据此断言尚未发表。"
+      "checkedAt": "2026-10-22T15:40:30Z",
+      "title": "Data-Efficient Learning from Demonstration for Humanoid Robots via Feature-Level Perception and Prompt-Based Object Detection",
+      "authors": [
+        "Keyhan Rayati",
+        "AliReza Beigy",
+        "Anoosheh Saadati",
+        "Pourya Shahverdi",
+        "Mehdi Tale Masouleh",
+        "Ahmad Kalhor",
+        "Wing-Yue Geoffrey Louie"
+      ],
+      "note": "arXiv 作者备注明确接收或报告：6 pages, 4 figures, 2 tables. Presented at IEEE ISAIA 2026",
+      "lookupStatus": "author_reported"
     },
     "2610.25711": {
       "kind": "preprint",
@@ -46,8 +83,20 @@
       "doi": null,
       "issns": [],
       "source": "https://arxiv.org/abs/2610.25711v1",
-      "checkedAt": "2026-10-22T12:15:59Z",
-      "note": "arXiv 记录暂无期刊参考或正式 DOI，不据此断言尚未发表。"
+      "checkedAt": "2026-10-22T15:40:30Z",
+      "title": "SWAP: Test-Time Steerable Humanoid Whole-Body Collision Avoidance",
+      "authors": [
+        "Zeji Yi",
+        "Guanqi He",
+        "Xiaofeng Guo",
+        "Guannan Qu",
+        "Pieter Abbeel",
+        "Yan Duan",
+        "Karen Liu",
+        "Guanya Shi"
+      ],
+      "note": "arXiv 记录暂无期刊参考或正式 DOI，不据此断言尚未发表。 作者备注：20 pages, 11 figures, 4 tables. Project website: https://iscoyizj.github.io/SWAP-steerable-humanoid-oa-website/ Crossref 未找到标题与作者一致的正式出版记录。",
+      "lookupStatus": "unmatched"
     },
     "2610.25628": {
       "kind": "preprint",
@@ -55,8 +104,27 @@
       "doi": null,
       "issns": [],
       "source": "https://arxiv.org/abs/2610.25628v1",
-      "checkedAt": "2026-10-22T12:15:59Z",
-      "note": "arXiv 记录暂无期刊参考或正式 DOI，不据此断言尚未发表。"
+      "checkedAt": "2026-10-22T15:40:30Z",
+      "title": "Humanoid SRL: Augmenting Humanoids with Supernumerary Limbs for Coordinated Loco-Manipulation",
+      "authors": [
+        "Fukang Liu",
+        "Feiyang Wu",
+        "Paul Barsa",
+        "Jaehwi Jang",
+        "Akshat Jain",
+        "Zhigen Zhao",
+        "Yipu Chen",
+        "Zhaoyuan Gu",
+        "Nikhil Vemuri",
+        "Anshul Chandaliya",
+        "Kaijie Zhu",
+        "Sean Lublinsky",
+        "Matthew Zhu",
+        "Tony G. Chen",
+        "Ye Zhao"
+      ],
+      "note": "arXiv 记录暂无期刊参考或正式 DOI，不据此断言尚未发表。 Crossref 查询暂不可用，尚未完成核对。",
+      "lookupStatus": "unavailable"
     },
     "2610.27688": {
       "kind": "preprint",
@@ -64,8 +132,13 @@
       "doi": null,
       "issns": [],
       "source": "https://arxiv.org/abs/2610.27688v1",
-      "checkedAt": "2026-10-22T12:15:59Z",
-      "note": "arXiv 记录暂无期刊参考或正式 DOI，不据此断言尚未发表。"
+      "checkedAt": "2026-10-22T15:40:30Z",
+      "title": "Adaptive Traversal Tubes for Posture-Aware Navigation of Bipedal Humanoids",
+      "authors": [
+        "Zijian Ge"
+      ],
+      "note": "arXiv 记录暂无期刊参考或正式 DOI，不据此断言尚未发表。 Crossref 查询暂不可用，尚未完成核对。",
+      "lookupStatus": "unavailable"
     },
     "2610.21590": {
       "kind": "preprint",
@@ -73,8 +146,17 @@
       "doi": null,
       "issns": [],
       "source": "https://arxiv.org/abs/2610.21590v1",
-      "checkedAt": "2026-10-22T12:15:59Z",
-      "note": "arXiv 记录暂无期刊参考或正式 DOI，不据此断言尚未发表。"
+      "checkedAt": "2026-10-22T15:40:30Z",
+      "title": "A Flow-Theoretic Multimodal Control Framework Fusing Mental and Physical Engagement for Upper-Limb Rehabilitation",
+      "authors": [
+        "Jun Leng",
+        "Pengcheng Li",
+        "Hanze Wang",
+        "Shuxiang Guo",
+        "Junlin Jiang"
+      ],
+      "note": "arXiv 记录暂无期刊参考或正式 DOI，不据此断言尚未发表。 作者备注：10 pages Crossref 未找到标题与作者一致的正式出版记录。",
+      "lookupStatus": "unmatched"
     },
     "2610.21534": {
       "kind": "preprint",
@@ -82,8 +164,18 @@
       "doi": null,
       "issns": [],
       "source": "https://arxiv.org/abs/2610.21534v1",
-      "checkedAt": "2026-10-22T12:15:59Z",
-      "note": "arXiv 记录暂无期刊参考或正式 DOI，不据此断言尚未发表。"
+      "checkedAt": "2026-10-22T15:40:30Z",
+      "title": "Attribution-Gated Joint Estimation of Intention and Capability for Assist-as-Needed Upper-Limb Robots",
+      "authors": [
+        "Pengcheng Li",
+        "Shuxiang Guo",
+        "Hanze Wang",
+        "Jun Leng",
+        "Bin Wang",
+        "Mingchao Ding"
+      ],
+      "note": "arXiv 记录暂无期刊参考或正式 DOI，不据此断言尚未发表。 作者备注：31 pages, 7 figures Crossref 未找到标题与作者一致的正式出版记录。",
+      "lookupStatus": "unmatched"
     },
     "2610.15833": {
       "kind": "preprint",
@@ -91,8 +183,22 @@
       "doi": null,
       "issns": [],
       "source": "https://arxiv.org/abs/2610.15833v1",
-      "checkedAt": "2026-10-22T12:15:59Z",
-      "note": "arXiv 记录暂无期刊参考或正式 DOI，不据此断言尚未发表。"
+      "checkedAt": "2026-10-22T15:40:30Z",
+      "title": "P-BFM: Perceptive Behavioral Foundation Models for Humanoid Control via Unsupervised Reinforcement Learning",
+      "authors": [
+        "Xue Wang",
+        "Yitang Li",
+        "Yiming Zhang",
+        "Siqin Wang",
+        "Junhan Sun",
+        "Zhihao Liu",
+        "Yaojie Shen",
+        "Jingbo Yuan",
+        "Hao Zhao",
+        "Qingdu Li"
+      ],
+      "note": "arXiv 记录暂无期刊参考或正式 DOI，不据此断言尚未发表。 作者备注：Project page: https://roboparty.github.io/P-BFM/ Crossref 查询暂不可用，尚未完成核对。",
+      "lookupStatus": "unavailable"
     },
     "2610.22176": {
       "kind": "preprint",
@@ -100,8 +206,16 @@
       "doi": null,
       "issns": [],
       "source": "https://arxiv.org/abs/2610.22176v1",
-      "checkedAt": "2026-10-22T12:15:59Z",
-      "note": "arXiv 记录暂无期刊参考或正式 DOI，不据此断言尚未发表。"
+      "checkedAt": "2026-10-22T15:40:30Z",
+      "title": "Inertially Significant Humanoid Teleoperation via Whole Body Model Predictive Control and Online Parameter Estimation",
+      "authors": [
+        "James Foster",
+        "Beomyeong Park",
+        "Luigi Penco",
+        "Robert Griffin"
+      ],
+      "note": "arXiv 记录暂无期刊参考或正式 DOI，不据此断言尚未发表。 Crossref 未找到标题与作者一致的正式出版记录。",
+      "lookupStatus": "unmatched"
     },
     "2610.24675": {
       "kind": "preprint",
@@ -109,8 +223,15 @@
       "doi": null,
       "issns": [],
       "source": "https://arxiv.org/abs/2610.24675v2",
-      "checkedAt": "2026-10-22T12:15:59Z",
-      "note": "arXiv 记录暂无期刊参考或正式 DOI，不据此断言尚未发表。"
+      "checkedAt": "2026-10-22T15:40:30Z",
+      "title": "Action-Aligned Latent Planning for Versatile Humanoid Loco-Manipulation",
+      "authors": [
+        "Yutang Lin",
+        "Guanya Shi",
+        "C. Karen Liu"
+      ],
+      "note": "arXiv 记录暂无期刊参考或正式 DOI，不据此断言尚未发表。 作者备注：Project page: https://fiberaa.github.io/ Crossref 未找到标题与作者一致的正式出版记录。",
+      "lookupStatus": "unmatched"
     },
     "2610.27271": {
       "kind": "preprint",
@@ -118,8 +239,15 @@
       "doi": null,
       "issns": [],
       "source": "https://arxiv.org/abs/2610.27271v1",
-      "checkedAt": "2026-10-22T12:15:59Z",
-      "note": "arXiv 记录暂无期刊参考或正式 DOI，不据此断言尚未发表。"
+      "checkedAt": "2026-10-22T15:40:30Z",
+      "title": "XoNav: An Exoskeleton as a Personalized Haptic Interface for Assisted Navigation",
+      "authors": [
+        "Debadrata Sarkar",
+        "Soumen Sen",
+        "Aman Arora"
+      ],
+      "note": "arXiv 记录暂无期刊参考或正式 DOI，不据此断言尚未发表。 作者备注：A supplementary video illustrating the XoNav hardware, haptic cues, Wizard-of-Oz trials and autonomous navigation is available at https://doi.org/10.6084/m9.figshare.34701648 Crossref 查询暂不可用，尚未完成核对。",
+      "lookupStatus": "unavailable"
     },
     "2610.19494": {
       "kind": "preprint",
@@ -127,8 +255,17 @@
       "doi": null,
       "issns": [],
       "source": "https://arxiv.org/abs/2610.19494v1",
-      "checkedAt": "2026-10-22T12:15:59Z",
-      "note": "arXiv 记录暂无期刊参考或正式 DOI，不据此断言尚未发表。"
+      "checkedAt": "2026-10-22T15:40:30Z",
+      "title": "Robust Real-Time Monocular Human Pose Estimation with Insole-Based Sensor Fusion",
+      "authors": [
+        "Liang Yu",
+        "Tao Zhu",
+        "Xiangqing Lu",
+        "Wenjian Luo",
+        "Liming Chen"
+      ],
+      "note": "arXiv 记录暂无期刊参考或正式 DOI，不据此断言尚未发表。 Crossref 未找到标题与作者一致的正式出版记录。",
+      "lookupStatus": "unmatched"
     },
     "2610.20255": {
       "kind": "preprint",
@@ -136,8 +273,15 @@
       "doi": null,
       "issns": [],
       "source": "https://arxiv.org/abs/2610.20255v1",
-      "checkedAt": "2026-10-22T12:15:59Z",
-      "note": "arXiv 记录暂无期刊参考或正式 DOI，不据此断言尚未发表。"
+      "checkedAt": "2026-10-22T15:40:30Z",
+      "title": "Safe Reinforcement Learning with Receding-Horizon Safety Critic and Differentiable Action Shields",
+      "authors": [
+        "Siwei Ju",
+        "Jan Peters",
+        "Oleg Arenz"
+      ],
+      "note": "arXiv 记录暂无期刊参考或正式 DOI，不据此断言尚未发表。 Crossref 未找到标题与作者一致的正式出版记录。",
+      "lookupStatus": "unmatched"
     },
     "2610.19067": {
       "kind": "preprint",
@@ -145,8 +289,15 @@
       "doi": null,
       "issns": [],
       "source": "https://arxiv.org/abs/2610.19067v1",
-      "checkedAt": "2026-10-22T12:15:59Z",
-      "note": "arXiv 记录暂无期刊参考或正式 DOI，不据此断言尚未发表。"
+      "checkedAt": "2026-10-22T15:40:30Z",
+      "title": "Tread: A Visuo-Inertial Framework for Terrain and Locomotion Context-Aware Gait-Phase and Speed Estimation in Wearable Robotics",
+      "authors": [
+        "Debadrata Sarkar",
+        "Akash Bachhar",
+        "Aman Arora"
+      ],
+      "note": "arXiv 记录暂无期刊参考或正式 DOI，不据此断言尚未发表。 作者备注：Supplementary video: A video demonstrating real-time operation of the complete visuo-inertial inference pipeline is available at https://doi.org/10.6084/m9.figshare.34442622 Crossref 未找到标题与作者一致的正式出版记录。",
+      "lookupStatus": "unmatched"
     },
     "2610.18991": {
       "kind": "preprint",
@@ -154,8 +305,17 @@
       "doi": null,
       "issns": [],
       "source": "https://arxiv.org/abs/2610.18991v1",
-      "checkedAt": "2026-10-22T12:15:59Z",
-      "note": "arXiv 记录暂无期刊参考或正式 DOI，不据此断言尚未发表。"
+      "checkedAt": "2026-10-22T15:40:30Z",
+      "title": "Contact-UAN: Unsupervised Actuator Networks as a Residual World Model for Humanoid Control",
+      "authors": [
+        "Nolan Fey",
+        "Khai Nguyen",
+        "Yash Prabhu",
+        "Gabriel B. Margolis",
+        "Pulkit Agrawal"
+      ],
+      "note": "arXiv 记录暂无期刊参考或正式 DOI，不据此断言尚未发表。 作者备注：Project website: https://contact-uan.csail.mit.edu/ Crossref 未找到标题与作者一致的正式出版记录。",
+      "lookupStatus": "unmatched"
     },
     "2610.23127": {
       "kind": "preprint",
@@ -163,8 +323,26 @@
       "doi": null,
       "issns": [],
       "source": "https://arxiv.org/abs/2610.23127v1",
-      "checkedAt": "2026-10-22T12:15:59Z",
-      "note": "arXiv 记录暂无期刊参考或正式 DOI，不据此断言尚未发表。"
+      "checkedAt": "2026-10-22T15:40:30Z",
+      "title": "BeJEPA: A Goal-Conditioned Humanoid Behavior World Model via Unsupervised RL",
+      "authors": [
+        "Liyun Yan",
+        "Haoyang Li",
+        "Yang Zhang",
+        "Jialing Zhu",
+        "Zhanxiang Cao",
+        "Zihao Zhou",
+        "Keqi Zhu",
+        "Yizhi Chen",
+        "Huang Chuxuan",
+        "Shengcheng Fu",
+        "Zhong Jiangwei",
+        "Qiao Sun",
+        "Chen Zhang",
+        "Yue Gao"
+      ],
+      "note": "arXiv 记录暂无期刊参考或正式 DOI，不据此断言尚未发表。 Crossref 未找到标题与作者一致的正式出版记录。",
+      "lookupStatus": "unmatched"
     },
     "2610.25288": {
       "kind": "preprint",
@@ -172,8 +350,17 @@
       "doi": null,
       "issns": [],
       "source": "https://arxiv.org/abs/2610.25288v1",
-      "checkedAt": "2026-10-22T12:15:59Z",
-      "note": "arXiv 记录暂无期刊参考或正式 DOI，不据此断言尚未发表。"
+      "checkedAt": "2026-10-22T15:40:30Z",
+      "title": "Vision as Proprioception: Estimating Humanoid Robot Pose from Video",
+      "authors": [
+        "Jiaxi Jiang",
+        "Matthias Heyrman",
+        "René Zurbrügg",
+        "Marco Hutter",
+        "Christian Holz"
+      ],
+      "note": "arXiv 记录暂无期刊参考或正式 DOI，不据此断言尚未发表。 作者备注：Code: https://github.com/eth-siplab/HumanoidPose Crossref 未找到标题与作者一致的正式出版记录。",
+      "lookupStatus": "unmatched"
     },
     "2610.19183": {
       "kind": "preprint",
@@ -181,17 +368,36 @@
       "doi": null,
       "issns": [],
       "source": "https://arxiv.org/abs/2610.19183v1",
-      "checkedAt": "2026-10-22T12:15:59Z",
-      "note": "arXiv 记录暂无期刊参考或正式 DOI，不据此断言尚未发表。"
+      "checkedAt": "2026-10-22T15:40:30Z",
+      "title": "A Mode-Unified, Continuous, and Biomimetic Control Strategy of a Robotic Lower Limb Prosthesis",
+      "authors": [
+        "Hanjun Kim",
+        "Sixu Zhou",
+        "John Shim",
+        "Xinyuan Guo",
+        "Kinsey R. Herrin",
+        "Aaron J. Young"
+      ],
+      "note": "arXiv 记录暂无期刊参考或正式 DOI，不据此断言尚未发表。 作者备注：This work has been submitted to the IEEE for possible publication. Copyright may be transferred without notice, after which this version may no longer be accessible Crossref 未找到标题与作者一致的正式出版记录。",
+      "lookupStatus": "unmatched"
     },
     "2610.20318": {
-      "kind": "preprint",
-      "venue": null,
+      "kind": "conference",
+      "venue": "NeurIPS 2026",
       "doi": null,
       "issns": [],
       "source": "https://arxiv.org/abs/2610.20318v1",
-      "checkedAt": "2026-10-22T12:15:59Z",
-      "note": "arXiv 记录暂无期刊参考或正式 DOI，不据此断言尚未发表。"
+      "checkedAt": "2026-10-22T15:40:30Z",
+      "title": "Efficient Test-Time Adaptation For Robot Policies",
+      "authors": [
+        "Motasem Alfarra",
+        "Pietro Mazzaglia",
+        "Markus Peschl",
+        "Daniel Dijkman",
+        "Christos Louizos"
+      ],
+      "note": "arXiv 作者备注明确接收或报告：Accepted to NeurIPS 2026",
+      "lookupStatus": "author_reported"
     },
     "2610.18872": {
       "kind": "preprint",
@@ -199,8 +405,26 @@
       "doi": null,
       "issns": [],
       "source": "https://arxiv.org/abs/2610.18872v1",
-      "checkedAt": "2026-10-22T12:15:59Z",
-      "note": "arXiv 记录暂无期刊参考或正式 DOI，不据此断言尚未发表。"
+      "checkedAt": "2026-10-22T15:40:30Z",
+      "title": "EgoExplorer: A Vision-Motion-Touch Observatory for Human Loco-Manipulation In Situ",
+      "authors": [
+        "Yunsong Zhou",
+        "Xuekun Jiang",
+        "Haiqi Shen",
+        "Hangxu Liu",
+        "Chaojian Shi",
+        "Yujie Liu",
+        "Jingyuan Li",
+        "Haoran Yang",
+        "Jiafei Cao",
+        "Dongzhan Zhou",
+        "Dong Wang",
+        "Yao Mu",
+        "Chunhua Shen",
+        "Weinan Zhang"
+      ],
+      "note": "arXiv 记录暂无期刊参考或正式 DOI，不据此断言尚未发表。 作者备注：Project page: internrobotics.github.io/egoexplorer.github.io/ Crossref 未找到标题与作者一致的正式出版记录。",
+      "lookupStatus": "unmatched"
     },
     "2610.17232": {
       "kind": "preprint",
@@ -208,8 +432,14 @@
       "doi": null,
       "issns": [],
       "source": "https://arxiv.org/abs/2610.17232v1",
-      "checkedAt": "2026-10-22T12:15:59Z",
-      "note": "arXiv 记录暂无期刊参考或正式 DOI，不据此断言尚未发表。"
+      "checkedAt": "2026-10-22T15:40:30Z",
+      "title": "LiDAR-based Humanoid Navigation in Dynamic, Non-Convex Environments via Spatio-Temporal Safe Corridors",
+      "authors": [
+        "Shubham S. Kumbhar",
+        "Panagiotis Artemiadis"
+      ],
+      "note": "arXiv 记录暂无期刊参考或正式 DOI，不据此断言尚未发表。 Crossref 未找到标题与作者一致的正式出版记录。",
+      "lookupStatus": "unmatched"
     },
     "2610.22119": {
       "kind": "preprint",
@@ -217,8 +447,16 @@
       "doi": null,
       "issns": [],
       "source": "https://arxiv.org/abs/2610.22119v1",
-      "checkedAt": "2026-10-22T12:15:59Z",
-      "note": "arXiv 记录暂无期刊参考或正式 DOI，不据此断言尚未发表。"
+      "checkedAt": "2026-10-22T15:40:30Z",
+      "title": "Compliant GMT: Making General Motion Tracking Compliant via Residual Reference Adaptation",
+      "authors": [
+        "Venki Parsuram",
+        "Michelle Wang",
+        "Jin-Hyuk Hong",
+        "Pulkit Agrawal"
+      ],
+      "note": "arXiv 记录暂无期刊参考或正式 DOI，不据此断言尚未发表。 作者备注：Project website: https://venki1899.github.io/c-gmt/ Crossref 未找到标题与作者一致的正式出版记录。",
+      "lookupStatus": "unmatched"
     },
     "2610.23548": {
       "kind": "preprint",
@@ -226,8 +464,20 @@
       "doi": null,
       "issns": [],
       "source": "https://arxiv.org/abs/2610.23548v1",
-      "checkedAt": "2026-10-22T12:15:59Z",
-      "note": "arXiv 记录暂无期刊参考或正式 DOI，不据此断言尚未发表。"
+      "checkedAt": "2026-10-22T15:40:30Z",
+      "title": "Reinforcement Learning Based Multi-Terrain Adaptive Whole-Body Control for a Quadruped Manipulator",
+      "authors": [
+        "Yanzhou Jin",
+        "Fei Suo",
+        "Chang Liu",
+        "Yasuhisa Hasegawa",
+        "Liming Chen",
+        "Yusuke Iwasawa",
+        "Yutaka Matsuo",
+        "Yaonan Zhu"
+      ],
+      "note": "arXiv 记录暂无期刊参考或正式 DOI，不据此断言尚未发表。 Crossref 未找到标题与作者一致的正式出版记录。",
+      "lookupStatus": "unmatched"
     },
     "2610.24847": {
       "kind": "preprint",
@@ -235,8 +485,19 @@
       "doi": null,
       "issns": [],
       "source": "https://arxiv.org/abs/2610.24847v1",
-      "checkedAt": "2026-10-22T12:15:59Z",
-      "note": "arXiv 记录暂无期刊参考或正式 DOI，不据此断言尚未发表。"
+      "checkedAt": "2026-10-22T15:40:30Z",
+      "title": "DiPLO: Self-distilled Diffusion Planning for Loco-manipulation",
+      "authors": [
+        "Shafeef Omar",
+        "Sebastian Sanokowski",
+        "Elham Daneshmand",
+        "Dian Yu",
+        "Daniel Cremers",
+        "Cordelia Schmid",
+        "Majid Khadiv"
+      ],
+      "note": "arXiv 记录暂无期刊参考或正式 DOI，不据此断言尚未发表。 Crossref 未找到标题与作者一致的正式出版记录。",
+      "lookupStatus": "unmatched"
     },
     "2610.24779": {
       "kind": "preprint",
@@ -244,8 +505,15 @@
       "doi": null,
       "issns": [],
       "source": "https://arxiv.org/abs/2610.24779v1",
-      "checkedAt": "2026-10-22T12:15:59Z",
-      "note": "arXiv 记录暂无期刊参考或正式 DOI，不据此断言尚未发表。"
+      "checkedAt": "2026-10-22T15:40:30Z",
+      "title": "Learning Structured Locomotion References for Optimization-Based Whole-Body Control",
+      "authors": [
+        "Ömer Tarık Banuş",
+        "Uluç Saranlı",
+        "M. Mert Ankaralı"
+      ],
+      "note": "arXiv 记录暂无期刊参考或正式 DOI，不据此断言尚未发表。 作者备注：8 pages, 6 figures Crossref 未找到标题与作者一致的正式出版记录。",
+      "lookupStatus": "unmatched"
     },
     "2610.28470": {
       "kind": "preprint",
@@ -253,8 +521,16 @@
       "doi": null,
       "issns": [],
       "source": "https://arxiv.org/abs/2610.28470v1",
-      "checkedAt": "2026-10-22T12:15:59Z",
-      "note": "arXiv 记录暂无期刊参考或正式 DOI，不据此断言尚未发表。"
+      "checkedAt": "2026-10-22T15:40:30Z",
+      "title": "Fast Motion Retargeting Pipeline for Scalable Humanoid Robot Learning",
+      "authors": [
+        "Daniel Marew",
+        "Sangjun Park",
+        "Nisal Perera",
+        "Donghyun Kim"
+      ],
+      "note": "arXiv 记录暂无期刊参考或正式 DOI，不据此断言尚未发表。 Crossref 未找到标题与作者一致的正式出版记录。",
+      "lookupStatus": "unmatched"
     },
     "2610.15548": {
       "kind": "preprint",
@@ -262,8 +538,18 @@
       "doi": null,
       "issns": [],
       "source": "https://arxiv.org/abs/2610.15548v1",
-      "checkedAt": "2026-10-22T12:15:59Z",
-      "note": "arXiv 记录暂无期刊参考或正式 DOI，不据此断言尚未发表。"
+      "checkedAt": "2026-10-22T15:40:30Z",
+      "title": "PointWalker: Mapless Quadruped Locomotion Directly From Raw LiDAR Point Clouds",
+      "authors": [
+        "Sicen Li",
+        "Zhen Chu",
+        "Chao Li",
+        "Jun Zheng",
+        "Qiuguo Zhu",
+        "Jun Wu"
+      ],
+      "note": "arXiv 记录暂无期刊参考或正式 DOI，不据此断言尚未发表。 作者备注：8 pages, 15 figures, 5 tables. Submitted to IEEE Robotics and Automation Letters (RA-L) Crossref 未找到标题与作者一致的正式出版记录。",
+      "lookupStatus": "unmatched"
     },
     "2610.19615": {
       "kind": "preprint",
@@ -271,8 +557,20 @@
       "doi": null,
       "issns": [],
       "source": "https://arxiv.org/abs/2610.19615v1",
-      "checkedAt": "2026-10-22T12:15:59Z",
-      "note": "arXiv 记录暂无期刊参考或正式 DOI，不据此断言尚未发表。"
+      "checkedAt": "2026-10-22T15:40:30Z",
+      "title": "PolyMorph: Learning Locomotion Policy for Cross-Embodiment Adaptation",
+      "authors": [
+        "Hyunsik Oh",
+        "Seunghun Jeon",
+        "Donghoon Youm",
+        "Jungwoo Hur",
+        "Hyeongjun Kim",
+        "Jeong Hyun Lee",
+        "Moonkyu Jung",
+        "Jemin Hwangbo"
+      ],
+      "note": "arXiv 记录暂无期刊参考或正式 DOI，不据此断言尚未发表。 Crossref 未找到标题与作者一致的正式出版记录。",
+      "lookupStatus": "unmatched"
     },
     "2610.19393": {
       "kind": "preprint",
@@ -280,8 +578,21 @@
       "doi": null,
       "issns": [],
       "source": "https://arxiv.org/abs/2610.19393v1",
-      "checkedAt": "2026-10-22T12:15:59Z",
-      "note": "arXiv 记录暂无期刊参考或正式 DOI，不据此断言尚未发表。"
+      "checkedAt": "2026-10-22T15:40:30Z",
+      "title": "Beyond Kinematic Tracking: Preserving Expressive Characteristics in Humanoid Whole-Body Control",
+      "authors": [
+        "Lingfan Bao",
+        "Hanshang Zhu",
+        "Yan Pan",
+        "Jincheng Wang",
+        "Jingyang Yu",
+        "Tianhu Peng",
+        "Yiyang Jia",
+        "Dimitrios Kanoulas",
+        "Chengxu Zhou"
+      ],
+      "note": "arXiv 记录暂无期刊参考或正式 DOI，不据此断言尚未发表。 作者备注：Under Review Crossref 未找到标题与作者一致的正式出版记录。",
+      "lookupStatus": "unmatched"
     },
     "2610.21152": {
       "kind": "preprint",
@@ -289,8 +600,23 @@
       "doi": null,
       "issns": [],
       "source": "https://arxiv.org/abs/2610.21152v1",
-      "checkedAt": "2026-10-22T12:15:59Z",
-      "note": "arXiv 记录暂无期刊参考或正式 DOI，不据此断言尚未发表。"
+      "checkedAt": "2026-10-22T15:40:30Z",
+      "title": "KODA: Kinematics--Observation Data Alignment for Humanoid Learning from Human Egocentric Demonstration",
+      "authors": [
+        "Zibo Zhou",
+        "Yueru Chen",
+        "Junsong Wu",
+        "Weiji Xie",
+        "Qingyao Xu",
+        "Sheng Yin",
+        "Shiqing Wang",
+        "Jiyuan Shi",
+        "Siheng Chen",
+        "Chenjia Bai",
+        "Xuelong Li"
+      ],
+      "note": "arXiv 记录暂无期刊参考或正式 DOI，不据此断言尚未发表。 Crossref 未找到标题与作者一致的正式出版记录。",
+      "lookupStatus": "unmatched"
     },
     "2610.24235": {
       "kind": "preprint",
@@ -298,8 +624,15 @@
       "doi": null,
       "issns": [],
       "source": "https://arxiv.org/abs/2610.24235v1",
-      "checkedAt": "2026-10-22T12:15:59Z",
-      "note": "arXiv 记录暂无期刊参考或正式 DOI，不据此断言尚未发表。"
+      "checkedAt": "2026-10-22T15:40:30Z",
+      "title": "Multimodal Interaction Estimation for Contact-Aware Adaptive Impedance Control",
+      "authors": [
+        "Mateusz Jaszczuk",
+        "Paris Perdikaris",
+        "Nadia Figueroa"
+      ],
+      "note": "arXiv 记录暂无期刊参考或正式 DOI，不据此断言尚未发表。 Crossref 未找到标题与作者一致的正式出版记录。",
+      "lookupStatus": "unmatched"
     },
     "2610.26855": {
       "kind": "preprint",
@@ -307,17 +640,47 @@
       "doi": null,
       "issns": [],
       "source": "https://arxiv.org/abs/2610.26855v1",
-      "checkedAt": "2026-10-22T12:15:59Z",
-      "note": "arXiv 记录暂无期刊参考或正式 DOI，不据此断言尚未发表。"
+      "checkedAt": "2026-10-22T15:40:30Z",
+      "title": "Ropedia W0: Scaling Loco-Manipulation World Models across Embodiments with Human Experience",
+      "authors": [
+        "Tianqi Liu",
+        "Hanfei Zhao",
+        "Qifeng Liang",
+        "Hui En Pang",
+        "Jiarui Xu",
+        "Sayang Mu",
+        "Penghao Qiu",
+        "YingSheng Zhang",
+        "Jun Wang",
+        "Ziang Cao",
+        "Mingze Sun",
+        "Yukang Cao",
+        "Fangzhou Hong",
+        "Zhaoxi Chen",
+        "Ziwei Liu"
+      ],
+      "note": "arXiv 记录暂无期刊参考或正式 DOI，不据此断言尚未发表。 作者备注：Project page: https://ropedia.github.io/ropedia-w0/ ; Code: https://github.com/Ropedia/ropedia-w0 Crossref 未找到标题与作者一致的正式出版记录。",
+      "lookupStatus": "unmatched"
     },
     "2610.28480": {
-      "kind": "preprint",
-      "venue": null,
+      "kind": "conference",
+      "venue": "CoRL 2026",
       "doi": null,
       "issns": [],
       "source": "https://arxiv.org/abs/2610.28480v1",
-      "checkedAt": "2026-10-22T12:15:59Z",
-      "note": "arXiv 记录暂无期刊参考或正式 DOI，不据此断言尚未发表。"
+      "checkedAt": "2026-10-22T15:40:30Z",
+      "title": "SuperMimic: Scaling Humanoid Whole-Body Control with One Differentiable World Model",
+      "authors": [
+        "Qiayuan Liao",
+        "Yiyang Shao",
+        "Junfeng Long",
+        "Kevin Zakka",
+        "Roberto Horowitz",
+        "Pieter Abbeel",
+        "Koushil Sreenath"
+      ],
+      "note": "arXiv 作者备注明确接收或报告：Accepted at CoRL 2026 (Oral). Project website: https://supermimic.github.io",
+      "lookupStatus": "author_reported"
     },
     "2610.18950": {
       "kind": "preprint",
@@ -325,8 +688,29 @@
       "doi": null,
       "issns": [],
       "source": "https://arxiv.org/abs/2610.18950v2",
-      "checkedAt": "2026-10-22T12:15:59Z",
-      "note": "arXiv 记录暂无期刊参考或正式 DOI，不据此断言尚未发表。"
+      "checkedAt": "2026-10-22T15:40:30Z",
+      "title": "$λ_0$: Scaling Open-World Egocentric Human Data for Humanoid Loco-Manipulation",
+      "authors": [
+        "Lambda-humanoid Team",
+        ":",
+        "Chongyang Xu",
+        "Jin Chen",
+        "Jinhui Ye",
+        "Yilun Chen",
+        "Yiming Jiang",
+        "Zhao Wu",
+        "Hu Wei",
+        "Lin Qu",
+        "Shifeng Zhang",
+        "Yisheng He",
+        "Yuming Jiang",
+        "Zenan Meng",
+        "Zheng Wu",
+        "Mu Xu",
+        "Steven Hoi"
+      ],
+      "note": "arXiv 记录暂无期刊参考或正式 DOI，不据此断言尚未发表。 作者备注：Tech report, 24 pages Crossref 未找到标题与作者一致的正式出版记录。",
+      "lookupStatus": "unmatched"
     }
   },
   "journals": {
@@ -434,5 +818,13 @@
       "provider_field": "sci"
     }
   ],
-  "message": "EasyScholar 指标已同步；未确认期刊的论文不套用分区。"
+  "resolver_version": 2,
+  "coverage": {
+    "journal": 0,
+    "conference": 3,
+    "preprint": 33,
+    "reference": 0,
+    "total": 36
+  },
+  "message": "部分服务暂不可用，保留已有缓存。"
 }

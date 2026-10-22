@@ -1,52 +1,295 @@
 {
   "mode": "standard",
-  "generated_at": "2026-10-22T05:27:07.783277+00:00",
+  "generated_at": "2026-10-22T06:36:09.182544+00:00",
   "stats": {
     "mode": "standard",
-    "tag_count": 1,
+    "tag_count": 3,
     "deep_divecandidates": 0,
-    "deep_cap": 6,
+    "deep_cap": 8,
     "deep_selected": 0,
-    "quick_candidates": 1,
-    "quick_skim_target": 11,
-    "quick_selected": 1
+    "quick_candidates": 6,
+    "quick_skim_target": 13,
+    "quick_selected": 6
   },
   "deep_dive": [],
   "quick_skim": [
     {
-      "id": "2610.17930v1",
+      "id": "2610.25628v1",
       "source": "arxiv",
-      "title": "Locomotion with Online Awareness of Dynamics for Precision Footholds",
-      "abstract": "Unknown payloads alter robot dynamics and make precise contact execution difficult when foothold margins are small. We present LOAD, a perceptive locomotion framework that combines explicit inertial estimates with implicit dynamics features for narrow-beam traversal. Separate recurrent modules infer torso inertial changes and task-relevant history from proprioception, while a height-map teacher is distilled into a depth-based student. We extensively evaluate LOAD and its variants in simulation and on hardware across beam widths and payload configurations. The results show that implicit dynamics features accelerate training, while explicit inertial estimation further improves traversal success; combining both enables LOAD to approach the performance of a privileged policy supplied with ground-truth inertial parameters. Hardware experiments demonstrate traversal with unilateral payloads of 6 kg on a 10 cm beam and 9 kg on a 15 cm beam, and an evenly distributed 11 kg payload on a 15 cm beam. These results support combining physical estimates and history features for precision locomotion under unknown loads.",
+      "title": "Humanoid SRL: Augmenting Humanoids with Supernumerary Limbs for Coordinated Loco-Manipulation",
+      "abstract": "Humanoid robots are envisioned to perform diverse human-level tasks through their anthropomorphic morphology. Their dual-arm configuration enables a broad range of everyday actions. Yet, as in humans, this morphology can constrain loco-manipulation when both arms are occupied or additional contacts are required beyond their reach. Supernumerary robotic limbs (SRLs) offer a way to extend these capabilities, but their integration requires the added limb to be coordinated with whole-body motion and balance. In this study, we develop and integrate a supernumerary arm into a humanoid platform to investigate how morphological augmentation reshapes its feasible action space. Through quantitative analysis and hardware experiments across two configurations, we show how the additional limb expands whole-body interaction capabilities by enabling manipulation and support to be coordinated beyond the constraints of the native dual-arm configuration. To control this augmented morphology, we leverage model-based trajectory optimization (TO) to generate dynamically feasible motions for goal-conditioned reinforcement learning (RL) controllers. The controllers are trained in simulation and transferred to hardware in a zero-shot manner, enabling coordinated whole-body skills for contact-rich tri-arm loco-manipulation. We further show vision-guided autonomous execution on selected tasks using diffusion policies trained from hardware demonstrations. Our findings suggest that humanoid morphology need not be restricted to human-like forms, but can be reimagined as an extensible design space for robotic augmentation.",
       "authors": [
-        "Kunzhao Ren",
-        "Zhishuo Zhu",
-        "Xiaobin Xiong"
+        "Fukang Liu",
+        "Feiyang Wu",
+        "Paul Barsa",
+        "Jaehwi Jang",
+        "Akshat Jain",
+        "Zhigen Zhao",
+        "Yipu Chen",
+        "Zhaoyuan Gu",
+        "Nikhil Vemuri",
+        "Anshul Chandaliya",
+        "Kaijie Zhu",
+        "Sean Lublinsky",
+        "Matthew Zhu",
+        "Tony G. Chen",
+        "Ye Zhao"
       ],
       "primary_category": "cs.RO",
       "categories": [
         "cs.RO"
       ],
-      "published": "2026-10-13T08:16:56+00:00",
-      "link": "https://arxiv.org/pdf/2610.17930v1",
+      "published": "2026-10-19T01:08:24+00:00",
+      "link": "https://arxiv.org/pdf/2610.25628v1",
       "tags": [
         "keyword:exo-vision",
-        "query:exo-vision"
+        "keyword:hip-exo",
+        "keyword:humanoid",
+        "query:exo-vision",
+        "query:hip-exo",
+        "query:humanoid"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "humanoid whole-body coordination and balance with an added supernumerary limb",
+      "llm_evidence_cn": "通过超限肢体实现人形机器人全身协调与平衡",
+      "llm_evidence": "通过超限肢体实现人形机器人全身协调与平衡",
+      "canonical_evidence": "通过超限肢体实现人形机器人全身协调与平衡",
+      "llm_tldr_en": "Integrates a supernumerary arm into a humanoid robot and analyzes how added morphology reshapes feasible action space while coordinating the limb with whole-body motion and balance for loco-manipulation.",
+      "llm_tldr_cn": "针对人形机器人双臂被占用或需要超出臂展的额外接触时移动操作能力受限的问题，将超限机械臂集成到人形平台，研究形态增强如何改变可行动作空间。通过量化分析与硬件实验，协调新增肢体与全身运动和平衡，实现更灵活的移动操作，为复杂人形全身控制提供新思路。",
+      "llm_tldr": "针对人形机器人双臂被占用或需要超出臂展的额外接触时移动操作能力受限的问题，将超限机械臂集成到人形平台，研究形态增强如何改变可行动作空间。通过量化分析与硬件实验，协调新增肢体与全身运动和平衡，实现更灵活的移动操作，为复杂人形全身控制提供新思路。",
+      "llm_tags": [
+        "query:humanoid"
+      ],
+      "matched_query_tag": "query:humanoid",
+      "matched_query_text": "Whole body motion control balance and coordination for humanoid robots",
+      "matched_requirement_id": "req-12",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2610.19615v1",
+      "source": "arxiv",
+      "title": "PolyMorph: Learning Locomotion Policy for Cross-Embodiment Adaptation",
+      "abstract": "Reinforcement learning has enabled robust locomotion for legged robots, but learned policies are typically tied to a specific robot morphology and require additional engineering when the number of legs, actuators, or mechanical properties change. We present PolyMorph, a morphology-conditioned framework that learns a single locomotion policy for heterogeneous legged robots. PolyMorph converts each robot's URDF into joint-link modules and combines a recurrent encoder, graph-based Transformer, and per-joint decoder to generate actions across variable leg counts and joint configurations. To improve training stability, PolyMorph uses morphology-normalized rewards, adaptive robot sampling, and URDF-derived PD-gain initialization. We evaluate PolyMorph in simulation across bipedal, tripedal, and quadrupedal robots, including unseen morphology variants and platforms, and deploy the policy on real quadruped platforms operated in multiple configurations. The results show that a single PolyMorph policy generalizes across diverse robot morphologies without per-robot policy retraining.",
+      "authors": [
+        "Hyunsik Oh",
+        "Seunghun Jeon",
+        "Donghoon Youm",
+        "Jungwoo Hur",
+        "Hyeongjun Kim",
+        "Jeong Hyun Lee",
+        "Moonkyu Jung",
+        "Jemin Hwangbo"
+      ],
+      "primary_category": "cs.RO",
+      "categories": [
+        "cs.RO"
+      ],
+      "published": "2026-10-14T05:36:59+00:00",
+      "link": "https://arxiv.org/pdf/2610.19615v1",
+      "tags": [
+        "keyword:exo-vision",
+        "keyword:hip-exo",
+        "keyword:humanoid",
+        "query:exo-vision",
+        "query:hip-exo",
+        "query:humanoid"
       ],
       "llm_score": 6.0,
-      "llm_evidence_en": "depth-based perceptive locomotion student with inertial estimation for terrain traversal",
-      "llm_evidence_cn": "深度感知行走策略与惯性估计结合用于地形通过",
-      "llm_evidence": "深度感知行走策略与惯性估计结合用于地形通过",
-      "canonical_evidence": "深度感知行走策略与惯性估计结合用于地形通过",
-      "llm_tldr_en": "LOAD combines explicit inertial dynamics estimates with implicit proprioceptive features and distills a height-map teacher into a depth-based student for narrow-beam foothold traversal under unknown payloads.",
-      "llm_tldr_cn": "未知负载会改变机器人动力学，使窄足印地形上的精确落脚变得困难。作者提出LOAD感知式行走框架，用循环模块从本体感觉推断躯干惯性变化与任务历史，并将高度图教师策略蒸馏为基于深度输入的策略，融合显式惯性估计与隐式动力学特征。仿真与硬件实验表明，隐式动力学特征加速训练，显式惯性估计进一步提升通过成功率，为感知与动力学融合的地形自适应行走提供了可借鉴方案。",
-      "llm_tldr": "未知负载会改变机器人动力学，使窄足印地形上的精确落脚变得困难。作者提出LOAD感知式行走框架，用循环模块从本体感觉推断躯干惯性变化与任务历史，并将高度图教师策略蒸馏为基于深度输入的策略，融合显式惯性估计与隐式动力学特征。仿真与硬件实验表明，隐式动力学特征加速训练，显式惯性估计进一步提升通过成功率，为感知与动力学融合的地形自适应行走提供了可借鉴方案。",
+      "llm_evidence_en": "morphology-conditioned reinforcement learning locomotion policy for legged robots",
+      "llm_evidence_cn": "面向多形态腿足机器人的形态条件强化学习运动策略",
+      "llm_evidence": "面向多形态腿足机器人的形态条件强化学习运动策略",
+      "canonical_evidence": "面向多形态腿足机器人的形态条件强化学习运动策略",
+      "llm_tldr_en": "RL locomotion policies are usually tied to one morphology and need re-engineering when legs or actuators change; PolyMorph uses URDF joint-link modules with a recurrent encoder, graph Transformer and per-joint decoder to learn one policy across heterogeneous legged robots.",
+      "llm_tldr_cn": "强化学习虽让腿足机器人运动更稳健，但策略通常绑定单一形态，改变腿数或关节即需重新工程化。PolyMorph将机器人URDF解析为关节—连杆模块，结合循环编码器、图Transformer与逐关节解码器生成跨形态动作，并用形态归一化奖励与自适应采样稳定训练。结果表明单一策略可适配多种异构腿足平台，降低了跨形态部署成本。",
+      "llm_tldr": "强化学习虽让腿足机器人运动更稳健，但策略通常绑定单一形态，改变腿数或关节即需重新工程化。PolyMorph将机器人URDF解析为关节—连杆模块，结合循环编码器、图Transformer与逐关节解码器生成跨形态动作，并用形态归一化奖励与自适应采样稳定训练。结果表明单一策略可适配多种异构腿足平台，降低了跨形态部署成本。",
       "llm_tags": [
-        "query:exo-vision"
+        "query:humanoid"
       ],
-      "matched_query_tag": "query:exo-vision",
-      "matched_query_text": "Fusion of depth camera vision and inertial sensors for terrain aware adaptive exoskeleton control",
-      "matched_requirement_id": "req-4",
+      "matched_query_tag": "query:humanoid",
+      "matched_query_text": "Robust humanoid locomotion using reinforcement learning model predictive control and sim to real transfer",
+      "matched_requirement_id": "req-11",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2610.28470v1",
+      "source": "arxiv",
+      "title": "Fast Motion Retargeting Pipeline for Scalable Humanoid Robot Learning",
+      "abstract": "While large-scale human motion capture datasets provide a rich source of demonstrations for humanoid robot learning, retargeting the diverse motions to different humanoid robots remains a nontrivial challenge. Existing kinodynamic trajectory optimization pipelines are computationally expensive and often require manual adjustments per motion. We present FRDV (Fast Retargeting with Dynamics Validation), a scalable framework consisting of rapid constrained kinematic retargeting and an additional dynamics validation pipeline. Its kinematic stage integrates a custom Sequential Quadratic Programming solver, Real-Time Iteration, and parallel chunk-based processing, achieving up to 9,156 frames per second, approximately up to 136 times faster than GMR and ProtoMotions, while robot-specific constraints are incorporated into the optimization to reduce common retargeting artifacts, such as ground penetration and self-collision. For motions requiring additional verification, a contact implicit iLQR controller is utilized to test the retargeted reference under full rigid body dynamics. This dynamics-based validation identifies dynamically infeasible motions and refines contact-related artifacts such as foot floating and foot skating. We evaluate retargeting quality by training motion tracking reinforcement learning policies using several state-of-the-art pipelines and comparing their tracking fidelity and success rates. Furthermore, sim-to-real transfer is demonstrated on a Unitree G1 humanoid. Videos and code are available at: https://daroslab.github.io/frdv/.",
+      "authors": [
+        "Daniel Marew",
+        "Sangjun Park",
+        "Nisal Perera",
+        "Donghyun Kim"
+      ],
+      "primary_category": "cs.RO",
+      "categories": [
+        "cs.RO"
+      ],
+      "published": "2026-10-20T16:22:00+00:00",
+      "link": "https://arxiv.org/pdf/2610.28470v1",
+      "tags": [
+        "keyword:exo-vision",
+        "keyword:hip-exo",
+        "keyword:humanoid",
+        "query:exo-vision",
+        "query:hip-exo",
+        "query:humanoid"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "fast motion retargeting pipeline enabling humanoid imitation learning",
+      "llm_evidence_cn": "支撑人形模仿学习的快速运动重定向流水线",
+      "llm_evidence": "支撑人形模仿学习的快速运动重定向流水线",
+      "canonical_evidence": "支撑人形模仿学习的快速运动重定向流水线",
+      "llm_tldr_en": "FRDV is a scalable human-to-humanoid motion retargeting framework combining fast constrained kinematic retargeting with dynamics validation, reaching up to 9156 frames per second.",
+      "llm_tldr_cn": "大规模人体动捕数据是人形学习的重要示范来源，但将多样动作重定向到不同人形机器人计算昂贵且需逐动作人工调整。作者提出FRDV框架，将快速约束运动学重定向与动力学验证结合，采用自定义序列二次规划求解器与并行分块处理。系统可达每秒9156帧，比GMR等方法快约136倍，为规模化人形模仿学习提供高效数据前处理工具。",
+      "llm_tldr": "大规模人体动捕数据是人形学习的重要示范来源，但将多样动作重定向到不同人形机器人计算昂贵且需逐动作人工调整。作者提出FRDV框架，将快速约束运动学重定向与动力学验证结合，采用自定义序列二次规划求解器与并行分块处理。系统可达每秒9156帧，比GMR等方法快约136倍，为规模化人形模仿学习提供高效数据前处理工具。",
+      "llm_tags": [
+        "query:humanoid"
+      ],
+      "matched_query_tag": "query:humanoid",
+      "matched_query_text": "Humanoid motion imitation and reinforcement learning for robust whole body control on uneven terrain",
+      "matched_requirement_id": "req-14",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2610.20318v1",
+      "source": "arxiv",
+      "title": "Efficient Test-Time Adaptation For Robot Policies",
+      "abstract": "Reinforcement-learning policies for robot locomotion can fail at deployment when operating conditions shift (e.g., rough or slippery terrain, payload changes, sensing degradation), and retraining or manual recalibration is often infeasible under on-device latency and memory constraints. We study test-time adaptation (TTA) for robotic control: adapting a pretrained policy online and in a self-supervised manner during execution, without access to rewards. Our starting point is a lightweight baseline that updates only the actor using a frozen pretrained critic as a deployment-time performance surrogate. Building on this, we introduce TEMPO, a test-time entropy-regularized, memory-guided policy optimization method that stabilizes critic-driven updates under severe shift. TEMPO combines (i) an entropy-promoting regularizer on the critic's predictive distribution to mitigate overconfident extrapolation, and (ii) a score-based memory, inspired by prioritized replay, that prioritizes low-value (\"hard\") observations and applies importance sampling to focus limited computation on the most informative deployment conditions. Across Go1, Go2, and G1 in MuJoCo Playground under four representative shifts and multiple architectures, TEMPO yields consistent gains, reaching up to 80% improvement in a single-device setting. We further validate on a physical Unitree Go2 with an added calf payload, where fully on-device adaptation improves performance over the non-adapted baseline across real-world episodes.",
+      "authors": [
+        "Motasem Alfarra",
+        "Pietro Mazzaglia",
+        "Markus Peschl",
+        "Daniel Dijkman",
+        "Christos Louizos"
+      ],
+      "primary_category": "cs.RO",
+      "categories": [
+        "cs.RO",
+        "cs.LG"
+      ],
+      "published": "2026-10-14T15:05:24+00:00",
+      "link": "https://arxiv.org/pdf/2610.20318v1",
+      "tags": [
+        "keyword:exo-vision",
+        "keyword:hip-exo",
+        "keyword:humanoid",
+        "query:exo-vision",
+        "query:hip-exo",
+        "query:humanoid"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "test-time adaptation of RL locomotion policies under terrain and payload shift",
+      "llm_evidence_cn": "在地形与负载变化下对强化学习运动策略进行测试时自适应",
+      "llm_evidence": "在地形与负载变化下对强化学习运动策略进行测试时自适应",
+      "canonical_evidence": "在地形与负载变化下对强化学习运动策略进行测试时自适应",
+      "llm_tldr_en": "Studies test-time adaptation for RL locomotion policies, updating only the actor with a frozen critic as surrogate and proposing TEMPO, an entropy-regularized memory-guided method that stabilizes updates under severe distribution shift.",
+      "llm_tldr_cn": "强化学习运动策略在粗糙或湿滑地形、负载变化与传感退化等部署条件下容易失效，而重训练或人工校准在机载时延与内存限制下难以实现。本文研究无需奖励的在线自监督测试时自适应，先以冻结评论家网络作为部署性能代理仅更新执行者，再提出TEMPO方法，通过熵正则与记忆引导稳定剧烈偏移下的更新。结果提升了策略在新条件下的鲁棒性，为真实地形下的运动控制部署提供思路。",
+      "llm_tldr": "强化学习运动策略在粗糙或湿滑地形、负载变化与传感退化等部署条件下容易失效，而重训练或人工校准在机载时延与内存限制下难以实现。本文研究无需奖励的在线自监督测试时自适应，先以冻结评论家网络作为部署性能代理仅更新执行者，再提出TEMPO方法，通过熵正则与记忆引导稳定剧烈偏移下的更新。结果提升了策略在新条件下的鲁棒性，为真实地形下的运动控制部署提供思路。",
+      "llm_tags": [
+        "query:humanoid"
+      ],
+      "matched_query_tag": "query:humanoid",
+      "matched_query_text": "Robust humanoid locomotion using reinforcement learning model predictive control and sim to real transfer",
+      "matched_requirement_id": "req-11",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2610.24779v1",
+      "source": "arxiv",
+      "title": "Learning Structured Locomotion References for Optimization-Based Whole-Body Control",
+      "abstract": "Quadruped locomotion requires coordinating body motion,contact forces, foothold placement, and gait timing. We present a hierarchical controller in which reinforcement learning adapts these structured locomotion references while a gait scheduler, reactive footstep planner, and whole-body impulse controller retain responsibility for high-frequency execution. The model-based backbone can sustain a nominal trot independently, allowing the policy to focus on when and how to modify an already functional locomotion controller. We train the complete hierarchy in a vectorized controller-in-the-loop environment using a six-direction disturbance curriculum. Under a common simulator and evaluation protocol, the proposed controller achieves 77.29% mean survival across the tested disturbance grid, compared with 50.35% for the model-based reference controller. Training-time channel ablations identify adaptive foothold placement as the largest marginal contributor to grid survival and reveal direction-dependent effects of gait-rate adaptation. Together, these results demonstrate the viability of the proposed hierarchical controller architecture for integrating learned adaptation with optimization-based whole-body control through structured locomotion references.",
+      "authors": [
+        "Ömer Tarık Banuş",
+        "Uluç Saranlı",
+        "M. Mert Ankaralı"
+      ],
+      "primary_category": "cs.RO",
+      "categories": [
+        "cs.RO"
+      ],
+      "published": "2026-10-17T16:47:46+00:00",
+      "link": "https://arxiv.org/pdf/2610.24779v1",
+      "tags": [
+        "keyword:exo-vision",
+        "keyword:hip-exo",
+        "keyword:humanoid",
+        "query:exo-vision",
+        "query:hip-exo",
+        "query:humanoid"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "hierarchical RL plus model-based whole-body control for legged locomotion",
+      "llm_evidence_cn": "分层强化学习结合模型式全身控制用于足式运动",
+      "llm_evidence": "分层强化学习结合模型式全身控制用于足式运动",
+      "canonical_evidence": "分层强化学习结合模型式全身控制用于足式运动",
+      "llm_tldr_en": "A hierarchical controller lets RL adapt structured locomotion references while model-based gait scheduling and whole-body impulse control handle execution, reaching 77.29% mean performance under disturbances.",
+      "llm_tldr_cn": "针对四足运动需同时协调躯干、接触力、落足点与步态时序、单一方法难以兼顾鲁棒性与高频执行的难题，论文提出分层控制器：强化学习负责调整结构化运动参考，模型驱动的步态调度、反应式落足规划与全身冲量控制器负责高频执行。在统一仿真协议与六向扰动课程下，控制器平均性能达77.29%。其意义在于把学习限制在修正已可用的模型控制骨干上，兼顾鲁棒性与可解释性。",
+      "llm_tldr": "针对四足运动需同时协调躯干、接触力、落足点与步态时序、单一方法难以兼顾鲁棒性与高频执行的难题，论文提出分层控制器：强化学习负责调整结构化运动参考，模型驱动的步态调度、反应式落足规划与全身冲量控制器负责高频执行。在统一仿真协议与六向扰动课程下，控制器平均性能达77.29%。其意义在于把学习限制在修正已可用的模型控制骨干上，兼顾鲁棒性与可解释性。",
+      "llm_tags": [
+        "query:humanoid"
+      ],
+      "matched_query_tag": "query:humanoid",
+      "matched_query_text": "Robust humanoid locomotion using reinforcement learning model predictive control and sim to real transfer",
+      "matched_requirement_id": "req-11",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2610.26855v1",
+      "source": "arxiv",
+      "title": "Ropedia W0: Scaling Loco-Manipulation World Models across Embodiments with Human Experience",
+      "abstract": "World models enable embodied agents to anticipate action consequences, yet jointly modeling locomotion and manipulation across diverse embodiments remains challenging due to heterogeneous action spaces and limited multimodal supervision. We present Ropedia W0, the first egocentric loco-manipulation world foundation model spanning humans and robots with diverse embodiments. We curate Xp-Data, comprising 10k hours of egocentric human data and 3k hours of robot data with unified multimodal annotations and systematic quality control. A unified kinematic representation encodes locomotion through camera poses and manipulation through projected skeletons, with robot skeletons combining embodiment-specific forward kinematics with extensive manual keypoint annotation and correction. We also introduce Xp-Teleop, a long-horizon loco-manipulation benchmark based on high-quality dexterous humanoid teleoperation data. Evaluations demonstrate state-of-the-art performance across five cross-embodiment benchmarks (DreamDojo, $Ψ_0$, $ω$-HOME, Xp-Teleop, and AgiBot) and on held-out human egocentric video, from zero-shot inference to few-shot and full-data post-training. Scaling human pre-training data improves performance on both human and robot evaluations. After distillation, our model supports real-time, minute-long rollouts, enabling live VR interaction. Applications in policy evaluation, model-based planning, and world-action modeling further demonstrate the model's utility for embodied decision-making.",
+      "authors": [
+        "Tianqi Liu",
+        "Hanfei Zhao",
+        "Qifeng Liang",
+        "Hui En Pang",
+        "Jiarui Xu",
+        "Sayang Mu",
+        "Penghao Qiu",
+        "YingSheng Zhang",
+        "Jun Wang",
+        "Ziang Cao",
+        "Mingze Sun",
+        "Yukang Cao",
+        "Fangzhou Hong",
+        "Zhaoxi Chen",
+        "Ziwei Liu"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV",
+        "cs.RO"
+      ],
+      "published": "2026-10-19T17:59:55+00:00",
+      "link": "https://arxiv.org/pdf/2610.26855v1",
+      "tags": [
+        "keyword:exo-vision",
+        "keyword:hip-exo",
+        "keyword:humanoid",
+        "query:exo-vision",
+        "query:hip-exo",
+        "query:humanoid"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "egocentric loco-manipulation world model across human and robot embodiments",
+      "llm_evidence_cn": "跨人类与机器人具身的第一视角移动操作世界模型",
+      "llm_evidence": "跨人类与机器人具身的第一视角移动操作世界模型",
+      "canonical_evidence": "跨人类与机器人具身的第一视角移动操作世界模型",
+      "llm_tldr_en": "Introduces Ropedia W0, an egocentric loco-manipulation world foundation model spanning humans and robots, with unified multimodal data and kinematic representations for anticipating action consequences across embodiments.",
+      "llm_tldr_cn": "针对跨具身移动操作中动作空间异构、多模态监督有限的问题，构建Ropedia W0第一视角移动操作世界基础模型，统一人类与机器人数据，并用相机位姿和投影骨架表示移动与操作。该模型在大规模多模态数据上学习动作后果预测，可跨具身泛化，为具身智能的视觉运动建模与状态预测提供基础。",
+      "llm_tldr": "针对跨具身移动操作中动作空间异构、多模态监督有限的问题，构建Ropedia W0第一视角移动操作世界基础模型，统一人类与机器人数据，并用相机位姿和投影骨架表示移动与操作。该模型在大规模多模态数据上学习动作后果预测，可跨具身泛化，为具身智能的视觉运动建模与状态预测提供基础。",
+      "llm_tags": [
+        "query:humanoid"
+      ],
+      "matched_query_tag": "query:humanoid",
+      "matched_query_text": "Visual perception object recognition and state estimation for humanoid robot motion and loco manipulation",
+      "matched_requirement_id": "req-13",
       "selection_source": "fresh_fetch",
       "quick_tier": "6"
     }

@@ -51,14 +51,14 @@
       <span class="dpr-home-dashboard-kicker">2026-10-13 ~ 2026-10-22</span>
       <h3 class="dpr-home-dashboard-title">今日汇总</h3>
     </div>
-    <strong class="dpr-home-dashboard-count">共 1 篇</strong>
+    <strong class="dpr-home-dashboard-count">共 7 篇</strong>
   </div>
   <dl class="dpr-home-dashboard-stats">
-    <div class="dpr-home-dashboard-stat"><dt>累计更新</dt><dd>1 次</dd></div>
+    <div class="dpr-home-dashboard-stat"><dt>累计更新</dt><dd>2 次</dd></div>
     <div class="dpr-home-dashboard-stat"><dt>精读</dt><dd>0</dd></div>
-    <div class="dpr-home-dashboard-stat"><dt>速读</dt><dd>1</dd></div>
+    <div class="dpr-home-dashboard-stat"><dt>速读</dt><dd>7</dd></div>
   </dl>
-  <p class="dpr-home-dashboard-body">最近更新：2026-10-22 05:27:24 UTC<br>状态：成功</p>
+  <p class="dpr-home-dashboard-body">最近更新：2026-10-22 06:37:07 UTC<br>状态：成功</p>
 </section>
 <section class="dpr-home-dashboard-card dpr-home-brief-card">
   <div class="dpr-home-dashboard-header">
@@ -69,7 +69,9 @@
     <strong class="dpr-home-dashboard-count">AI</strong>
   </div>
   <div class="dpr-home-dashboard-body">
-<p>10月13日至22日仅速读1篇6.0分论文，关注机器人精准落脚中的在线动力学感知移动。该方向值得关注的是如何让机器人在移动中实时感知动力学变化，从而稳定选择落脚点。普通读者可先看这类论文中的落脚点选择与实时感知机制，再判断是否值得精读。</p>
+<p>2026-10-13至10-22共筛出7篇机器人学习论文，全部为速读，暂无精读。</p>
+<p>最值得先看的是两篇7.0分工作：一篇讲人形机器人借助“额外肢体”完成协调移动与操作，另一篇给出可扩展人形机器人学习的快速动作重定向流程。</p>
+<p>普通读者可从这两篇入手，先建立对人形机器人动作迁移与全身协调控制的直观认识，再按兴趣扩展到跨形态适应方向。</p>
   </div>
 </section>
 <section class="dpr-home-dashboard-card dpr-home-deep-card">
@@ -91,12 +93,12 @@
       <span class="dpr-home-dashboard-kicker">今日累计</span>
       <h3 class="dpr-home-dashboard-title">速读推荐</h3>
     </div>
-    <strong class="dpr-home-dashboard-count">1 篇</strong>
+    <strong class="dpr-home-dashboard-count">7 篇</strong>
   </div>
   <div class="dpr-home-dashboard-body">
-<ul class="dpr-home-dashboard-paper-list"><li><span class="dpr-home-dashboard-paper-title" title="Locomotion with Online Awareness of Dynamics for Precision Footholds">Locomotion with Online Awareness of Dynamics for Precision Footholds</span></li></ul>
+<ul class="dpr-home-dashboard-paper-list"><li><span class="dpr-home-dashboard-paper-title" title="Humanoid SRL: Augmenting Humanoids with Supernumerary Limbs for Coordinated Loco-Manipulation">Humanoid SRL: Augmenting Humanoids with Supernumerary Limbs for Coordinated Loco-Manipulation</span></li><li><span class="dpr-home-dashboard-paper-title" title="Fast Motion Retargeting Pipeline for Scalable Humanoid Robot Learning">Fast Motion Retargeting Pipeline for Scalable Humanoid Robot Learning</span></li><li><span class="dpr-home-dashboard-paper-title" title="PolyMorph: Learning Locomotion Policy for Cross-Embodiment Adaptation">PolyMorph: Learning Locomotion Policy for Cross-Embodiment Adaptation</span></li></ul>
   </div>
-  <div class="dpr-home-dashboard-tags"><span class="dpr-home-dashboard-tag">exo-vision <strong>1</strong></span></div>
+  <div class="dpr-home-dashboard-tags"><span class="dpr-home-dashboard-tag">humanoid <strong>6</strong></span><span class="dpr-home-dashboard-tag">exo-vision <strong>1</strong></span></div>
 </section>
 </div>
 

@@ -1,10 +1,10 @@
 {
-  "generated_at": "2026-10-22T05:27:07.784164+00:00",
+  "generated_at": "2026-10-22T06:36:09.183678+00:00",
   "updated_date": "20261013-20261022",
   "carryover_days": 9,
   "tag_states": {
     "hip-exo": {
-      "updated_date": "20261021",
+      "updated_date": "20261013-20261022",
       "carryover_days": 9,
       "items": []
     },
@@ -14,7 +14,7 @@
       "items": []
     },
     "humanoid": {
-      "updated_date": "20261021",
+      "updated_date": "20261013-20261022",
       "carryover_days": 9,
       "items": []
     }

@@ -1,10 +1,106 @@
 {
   "date": "20261013-20261022",
   "date_label": "2026-10-13 ~ 2026-10-22",
-  "generated_at": "2026-10-22 05:27:24 UTC",
+  "generated_at": "2026-10-22 06:37:07 UTC",
   "recommend_exists": true,
-  "run_count": 1,
+  "run_count": 2,
   "papers": [
+    {
+      "paper_id": "2610.25628v1",
+      "route": "20261013-20261022/2610.25628v1-humanoid-srl-augmenting-humanoids-with-supernumerary-limbs-for-coordinated-loco-manipulation",
+      "title": "Humanoid SRL: Augmenting Humanoids with Supernumerary Limbs for Coordinated Loco-Manipulation",
+      "section": "quick",
+      "tags": [
+        {
+          "kind": "query",
+          "label": "humanoid"
+        }
+      ],
+      "score": 7.0,
+      "evidence": "通过超限肢体实现人形机器人全身协调与平衡",
+      "first_seen_at": "2026-10-22 06:37:07 UTC",
+      "updated_at": "2026-10-22 06:37:07 UTC"
+    },
+    {
+      "paper_id": "2610.28470v1",
+      "route": "20261013-20261022/2610.28470v1-fast-motion-retargeting-pipeline-for-scalable-humanoid-robot-learning",
+      "title": "Fast Motion Retargeting Pipeline for Scalable Humanoid Robot Learning",
+      "section": "quick",
+      "tags": [
+        {
+          "kind": "query",
+          "label": "humanoid"
+        }
+      ],
+      "score": 7.0,
+      "evidence": "支撑人形模仿学习的快速运动重定向流水线",
+      "first_seen_at": "2026-10-22 06:37:07 UTC",
+      "updated_at": "2026-10-22 06:37:07 UTC"
+    },
+    {
+      "paper_id": "2610.19615v1",
+      "route": "20261013-20261022/2610.19615v1-polymorph-learning-locomotion-policy-for-cross-embodiment-adaptation",
+      "title": "PolyMorph: Learning Locomotion Policy for Cross-Embodiment Adaptation",
+      "section": "quick",
+      "tags": [
+        {
+          "kind": "query",
+          "label": "humanoid"
+        }
+      ],
+      "score": 6.0,
+      "evidence": "面向多形态腿足机器人的形态条件强化学习运动策略",
+      "first_seen_at": "2026-10-22 06:37:07 UTC",
+      "updated_at": "2026-10-22 06:37:07 UTC"
+    },
+    {
+      "paper_id": "2610.20318v1",
+      "route": "20261013-20261022/2610.20318v1-efficient-test-time-adaptation-for-robot-policies",
+      "title": "Efficient Test-Time Adaptation For Robot Policies",
+      "section": "quick",
+      "tags": [
+        {
+          "kind": "query",
+          "label": "humanoid"
+        }
+      ],
+      "score": 6.0,
+      "evidence": "在地形与负载变化下对强化学习运动策略进行测试时自适应",
+      "first_seen_at": "2026-10-22 06:37:07 UTC",
+      "updated_at": "2026-10-22 06:37:07 UTC"
+    },
+    {
+      "paper_id": "2610.24779v1",
+      "route": "20261013-20261022/2610.24779v1-learning-structured-locomotion-references-for-optimization-based-whole-body-control",
+      "title": "Learning Structured Locomotion References for Optimization-Based Whole-Body Control",
+      "section": "quick",
+      "tags": [
+        {
+          "kind": "query",
+          "label": "humanoid"
+        }
+      ],
+      "score": 6.0,
+      "evidence": "分层强化学习结合模型式全身控制用于足式运动",
+      "first_seen_at": "2026-10-22 06:37:07 UTC",
+      "updated_at": "2026-10-22 06:37:07 UTC"
+    },
+    {
+      "paper_id": "2610.26855v1",
+      "route": "20261013-20261022/2610.26855v1-ropedia-w0-scaling-loco-manipulation-world-models-across-embodiments-with-human-experience",
+      "title": "Ropedia W0: Scaling Loco-Manipulation World Models across Embodiments with Human Experience",
+      "section": "quick",
+      "tags": [
+        {
+          "kind": "query",
+          "label": "humanoid"
+        }
+      ],
+      "score": 6.0,
+      "evidence": "跨人类与机器人具身的第一视角移动操作世界模型",
+      "first_seen_at": "2026-10-22 06:37:07 UTC",
+      "updated_at": "2026-10-22 06:37:07 UTC"
+    },
     {
       "paper_id": "2610.17930v1",
       "route": "20261013-20261022/2610.17930v1-locomotion-with-online-awareness-of-dynamics-for-precision-footholds",

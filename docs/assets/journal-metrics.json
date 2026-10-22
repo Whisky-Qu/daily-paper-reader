@@ -1,0 +1,438 @@
+{
+  "schema_version": 1,
+  "provider": "EasyScholar",
+  "generated_at": "2026-10-22T12:15:59Z",
+  "status": "ready",
+  "papers": {
+    "2610.26043": {
+      "kind": "preprint",
+      "venue": null,
+      "doi": null,
+      "issns": [],
+      "source": "https://arxiv.org/abs/2610.26043v2",
+      "checkedAt": "2026-10-22T12:15:59Z",
+      "note": "arXiv 记录暂无期刊参考或正式 DOI，不据此断言尚未发表。"
+    },
+    "2610.17999": {
+      "kind": "preprint",
+      "venue": null,
+      "doi": null,
+      "issns": [],
+      "source": "https://arxiv.org/abs/2610.17999v1",
+      "checkedAt": "2026-10-22T12:15:59Z",
+      "note": "arXiv 记录暂无期刊参考或正式 DOI，不据此断言尚未发表。"
+    },
+    "2610.17930": {
+      "kind": "preprint",
+      "venue": null,
+      "doi": null,
+      "issns": [],
+      "source": "https://arxiv.org/abs/2610.17930v1",
+      "checkedAt": "2026-10-22T12:15:59Z",
+      "note": "arXiv 记录暂无期刊参考或正式 DOI，不据此断言尚未发表。"
+    },
+    "2610.26170": {
+      "kind": "preprint",
+      "venue": null,
+      "doi": null,
+      "issns": [],
+      "source": "https://arxiv.org/abs/2610.26170v1",
+      "checkedAt": "2026-10-22T12:15:59Z",
+      "note": "arXiv 记录暂无期刊参考或正式 DOI，不据此断言尚未发表。"
+    },
+    "2610.25711": {
+      "kind": "preprint",
+      "venue": null,
+      "doi": null,
+      "issns": [],
+      "source": "https://arxiv.org/abs/2610.25711v1",
+      "checkedAt": "2026-10-22T12:15:59Z",
+      "note": "arXiv 记录暂无期刊参考或正式 DOI，不据此断言尚未发表。"
+    },
+    "2610.25628": {
+      "kind": "preprint",
+      "venue": null,
+      "doi": null,
+      "issns": [],
+      "source": "https://arxiv.org/abs/2610.25628v1",
+      "checkedAt": "2026-10-22T12:15:59Z",
+      "note": "arXiv 记录暂无期刊参考或正式 DOI，不据此断言尚未发表。"
+    },
+    "2610.27688": {
+      "kind": "preprint",
+      "venue": null,
+      "doi": null,
+      "issns": [],
+      "source": "https://arxiv.org/abs/2610.27688v1",
+      "checkedAt": "2026-10-22T12:15:59Z",
+      "note": "arXiv 记录暂无期刊参考或正式 DOI，不据此断言尚未发表。"
+    },
+    "2610.21590": {
+      "kind": "preprint",
+      "venue": null,
+      "doi": null,
+      "issns": [],
+      "source": "https://arxiv.org/abs/2610.21590v1",
+      "checkedAt": "2026-10-22T12:15:59Z",
+      "note": "arXiv 记录暂无期刊参考或正式 DOI，不据此断言尚未发表。"
+    },
+    "2610.21534": {
+      "kind": "preprint",
+      "venue": null,
+      "doi": null,
+      "issns": [],
+      "source": "https://arxiv.org/abs/2610.21534v1",
+      "checkedAt": "2026-10-22T12:15:59Z",
+      "note": "arXiv 记录暂无期刊参考或正式 DOI，不据此断言尚未发表。"
+    },
+    "2610.15833": {
+      "kind": "preprint",
+      "venue": null,
+      "doi": null,
+      "issns": [],
+      "source": "https://arxiv.org/abs/2610.15833v1",
+      "checkedAt": "2026-10-22T12:15:59Z",
+      "note": "arXiv 记录暂无期刊参考或正式 DOI，不据此断言尚未发表。"
+    },
+    "2610.22176": {
+      "kind": "preprint",
+      "venue": null,
+      "doi": null,
+      "issns": [],
+      "source": "https://arxiv.org/abs/2610.22176v1",
+      "checkedAt": "2026-10-22T12:15:59Z",
+      "note": "arXiv 记录暂无期刊参考或正式 DOI，不据此断言尚未发表。"
+    },
+    "2610.24675": {
+      "kind": "preprint",
+      "venue": null,
+      "doi": null,
+      "issns": [],
+      "source": "https://arxiv.org/abs/2610.24675v2",
+      "checkedAt": "2026-10-22T12:15:59Z",
+      "note": "arXiv 记录暂无期刊参考或正式 DOI，不据此断言尚未发表。"
+    },
+    "2610.27271": {
+      "kind": "preprint",
+      "venue": null,
+      "doi": null,
+      "issns": [],
+      "source": "https://arxiv.org/abs/2610.27271v1",
+      "checkedAt": "2026-10-22T12:15:59Z",
+      "note": "arXiv 记录暂无期刊参考或正式 DOI，不据此断言尚未发表。"
+    },
+    "2610.19494": {
+      "kind": "preprint",
+      "venue": null,
+      "doi": null,
+      "issns": [],
+      "source": "https://arxiv.org/abs/2610.19494v1",
+      "checkedAt": "2026-10-22T12:15:59Z",
+      "note": "arXiv 记录暂无期刊参考或正式 DOI，不据此断言尚未发表。"
+    },
+    "2610.20255": {
+      "kind": "preprint",
+      "venue": null,
+      "doi": null,
+      "issns": [],
+      "source": "https://arxiv.org/abs/2610.20255v1",
+      "checkedAt": "2026-10-22T12:15:59Z",
+      "note": "arXiv 记录暂无期刊参考或正式 DOI，不据此断言尚未发表。"
+    },
+    "2610.19067": {
+      "kind": "preprint",
+      "venue": null,
+      "doi": null,
+      "issns": [],
+      "source": "https://arxiv.org/abs/2610.19067v1",
+      "checkedAt": "2026-10-22T12:15:59Z",
+      "note": "arXiv 记录暂无期刊参考或正式 DOI，不据此断言尚未发表。"
+    },
+    "2610.18991": {
+      "kind": "preprint",
+      "venue": null,
+      "doi": null,
+      "issns": [],
+      "source": "https://arxiv.org/abs/2610.18991v1",
+      "checkedAt": "2026-10-22T12:15:59Z",
+      "note": "arXiv 记录暂无期刊参考或正式 DOI，不据此断言尚未发表。"
+    },
+    "2610.23127": {
+      "kind": "preprint",
+      "venue": null,
+      "doi": null,
+      "issns": [],
+      "source": "https://arxiv.org/abs/2610.23127v1",
+      "checkedAt": "2026-10-22T12:15:59Z",
+      "note": "arXiv 记录暂无期刊参考或正式 DOI，不据此断言尚未发表。"
+    },
+    "2610.25288": {
+      "kind": "preprint",
+      "venue": null,
+      "doi": null,
+      "issns": [],
+      "source": "https://arxiv.org/abs/2610.25288v1",
+      "checkedAt": "2026-10-22T12:15:59Z",
+      "note": "arXiv 记录暂无期刊参考或正式 DOI，不据此断言尚未发表。"
+    },
+    "2610.19183": {
+      "kind": "preprint",
+      "venue": null,
+      "doi": null,
+      "issns": [],
+      "source": "https://arxiv.org/abs/2610.19183v1",
+      "checkedAt": "2026-10-22T12:15:59Z",
+      "note": "arXiv 记录暂无期刊参考或正式 DOI，不据此断言尚未发表。"
+    },
+    "2610.20318": {
+      "kind": "preprint",
+      "venue": null,
+      "doi": null,
+      "issns": [],
+      "source": "https://arxiv.org/abs/2610.20318v1",
+      "checkedAt": "2026-10-22T12:15:59Z",
+      "note": "arXiv 记录暂无期刊参考或正式 DOI，不据此断言尚未发表。"
+    },
+    "2610.18872": {
+      "kind": "preprint",
+      "venue": null,
+      "doi": null,
+      "issns": [],
+      "source": "https://arxiv.org/abs/2610.18872v1",
+      "checkedAt": "2026-10-22T12:15:59Z",
+      "note": "arXiv 记录暂无期刊参考或正式 DOI，不据此断言尚未发表。"
+    },
+    "2610.17232": {
+      "kind": "preprint",
+      "venue": null,
+      "doi": null,
+      "issns": [],
+      "source": "https://arxiv.org/abs/2610.17232v1",
+      "checkedAt": "2026-10-22T12:15:59Z",
+      "note": "arXiv 记录暂无期刊参考或正式 DOI，不据此断言尚未发表。"
+    },
+    "2610.22119": {
+      "kind": "preprint",
+      "venue": null,
+      "doi": null,
+      "issns": [],
+      "source": "https://arxiv.org/abs/2610.22119v1",
+      "checkedAt": "2026-10-22T12:15:59Z",
+      "note": "arXiv 记录暂无期刊参考或正式 DOI，不据此断言尚未发表。"
+    },
+    "2610.23548": {
+      "kind": "preprint",
+      "venue": null,
+      "doi": null,
+      "issns": [],
+      "source": "https://arxiv.org/abs/2610.23548v1",
+      "checkedAt": "2026-10-22T12:15:59Z",
+      "note": "arXiv 记录暂无期刊参考或正式 DOI，不据此断言尚未发表。"
+    },
+    "2610.24847": {
+      "kind": "preprint",
+      "venue": null,
+      "doi": null,
+      "issns": [],
+      "source": "https://arxiv.org/abs/2610.24847v1",
+      "checkedAt": "2026-10-22T12:15:59Z",
+      "note": "arXiv 记录暂无期刊参考或正式 DOI，不据此断言尚未发表。"
+    },
+    "2610.24779": {
+      "kind": "preprint",
+      "venue": null,
+      "doi": null,
+      "issns": [],
+      "source": "https://arxiv.org/abs/2610.24779v1",
+      "checkedAt": "2026-10-22T12:15:59Z",
+      "note": "arXiv 记录暂无期刊参考或正式 DOI，不据此断言尚未发表。"
+    },
+    "2610.28470": {
+      "kind": "preprint",
+      "venue": null,
+      "doi": null,
+      "issns": [],
+      "source": "https://arxiv.org/abs/2610.28470v1",
+      "checkedAt": "2026-10-22T12:15:59Z",
+      "note": "arXiv 记录暂无期刊参考或正式 DOI，不据此断言尚未发表。"
+    },
+    "2610.15548": {
+      "kind": "preprint",
+      "venue": null,
+      "doi": null,
+      "issns": [],
+      "source": "https://arxiv.org/abs/2610.15548v1",
+      "checkedAt": "2026-10-22T12:15:59Z",
+      "note": "arXiv 记录暂无期刊参考或正式 DOI，不据此断言尚未发表。"
+    },
+    "2610.19615": {
+      "kind": "preprint",
+      "venue": null,
+      "doi": null,
+      "issns": [],
+      "source": "https://arxiv.org/abs/2610.19615v1",
+      "checkedAt": "2026-10-22T12:15:59Z",
+      "note": "arXiv 记录暂无期刊参考或正式 DOI，不据此断言尚未发表。"
+    },
+    "2610.19393": {
+      "kind": "preprint",
+      "venue": null,
+      "doi": null,
+      "issns": [],
+      "source": "https://arxiv.org/abs/2610.19393v1",
+      "checkedAt": "2026-10-22T12:15:59Z",
+      "note": "arXiv 记录暂无期刊参考或正式 DOI，不据此断言尚未发表。"
+    },
+    "2610.21152": {
+      "kind": "preprint",
+      "venue": null,
+      "doi": null,
+      "issns": [],
+      "source": "https://arxiv.org/abs/2610.21152v1",
+      "checkedAt": "2026-10-22T12:15:59Z",
+      "note": "arXiv 记录暂无期刊参考或正式 DOI，不据此断言尚未发表。"
+    },
+    "2610.24235": {
+      "kind": "preprint",
+      "venue": null,
+      "doi": null,
+      "issns": [],
+      "source": "https://arxiv.org/abs/2610.24235v1",
+      "checkedAt": "2026-10-22T12:15:59Z",
+      "note": "arXiv 记录暂无期刊参考或正式 DOI，不据此断言尚未发表。"
+    },
+    "2610.26855": {
+      "kind": "preprint",
+      "venue": null,
+      "doi": null,
+      "issns": [],
+      "source": "https://arxiv.org/abs/2610.26855v1",
+      "checkedAt": "2026-10-22T12:15:59Z",
+      "note": "arXiv 记录暂无期刊参考或正式 DOI，不据此断言尚未发表。"
+    },
+    "2610.28480": {
+      "kind": "preprint",
+      "venue": null,
+      "doi": null,
+      "issns": [],
+      "source": "https://arxiv.org/abs/2610.28480v1",
+      "checkedAt": "2026-10-22T12:15:59Z",
+      "note": "arXiv 记录暂无期刊参考或正式 DOI，不据此断言尚未发表。"
+    },
+    "2610.18950": {
+      "kind": "preprint",
+      "venue": null,
+      "doi": null,
+      "issns": [],
+      "source": "https://arxiv.org/abs/2610.18950v2",
+      "checkedAt": "2026-10-22T12:15:59Z",
+      "note": "arXiv 记录暂无期刊参考或正式 DOI，不据此断言尚未发表。"
+    }
+  },
+  "journals": {
+    "IEEE Transactions on Robotics": {
+      "queried_at": "2026-10-22T12:16:01Z",
+      "metrics": [
+        {
+          "journal": "IEEE Transactions on Robotics",
+          "issn": "",
+          "kind": "中科院升级版",
+          "value": "1区",
+          "year": null,
+          "category": "计算机科学",
+          "source": "https://www.easyscholar.cc/console/user/open",
+          "origin": "EasyScholar 开放接口",
+          "yearLabel": "接口未提供数据年份",
+          "provider_field": "sciUp"
+        },
+        {
+          "journal": "IEEE Transactions on Robotics",
+          "issn": "",
+          "kind": "中科院基础版",
+          "value": "2区",
+          "year": null,
+          "category": "工程技术",
+          "source": "https://www.easyscholar.cc/console/user/open",
+          "origin": "EasyScholar 开放接口",
+          "yearLabel": "接口未提供数据年份",
+          "provider_field": "sciBase"
+        },
+        {
+          "journal": "IEEE Transactions on Robotics",
+          "issn": "",
+          "kind": "JIF",
+          "value": "11.1",
+          "year": null,
+          "category": "",
+          "source": "https://www.easyscholar.cc/console/user/open",
+          "origin": "EasyScholar 开放接口",
+          "yearLabel": "接口未提供数据年份",
+          "provider_field": "sciif"
+        },
+        {
+          "journal": "IEEE Transactions on Robotics",
+          "issn": "",
+          "kind": "JCR",
+          "value": "Q1",
+          "year": null,
+          "category": "SCI",
+          "source": "https://www.easyscholar.cc/console/user/open",
+          "origin": "EasyScholar 开放接口",
+          "yearLabel": "接口未提供数据年份",
+          "provider_field": "sci"
+        }
+      ]
+    }
+  },
+  "metrics": [
+    {
+      "journal": "IEEE Transactions on Robotics",
+      "issn": "",
+      "kind": "中科院升级版",
+      "value": "1区",
+      "year": null,
+      "category": "计算机科学",
+      "source": "https://www.easyscholar.cc/console/user/open",
+      "origin": "EasyScholar 开放接口",
+      "yearLabel": "接口未提供数据年份",
+      "provider_field": "sciUp"
+    },
+    {
+      "journal": "IEEE Transactions on Robotics",
+      "issn": "",
+      "kind": "中科院基础版",
+      "value": "2区",
+      "year": null,
+      "category": "工程技术",
+      "source": "https://www.easyscholar.cc/console/user/open",
+      "origin": "EasyScholar 开放接口",
+      "yearLabel": "接口未提供数据年份",
+      "provider_field": "sciBase"
+    },
+    {
+      "journal": "IEEE Transactions on Robotics",
+      "issn": "",
+      "kind": "JIF",
+      "value": "11.1",
+      "year": null,
+      "category": "",
+      "source": "https://www.easyscholar.cc/console/user/open",
+      "origin": "EasyScholar 开放接口",
+      "yearLabel": "接口未提供数据年份",
+      "provider_field": "sciif"
+    },
+    {
+      "journal": "IEEE Transactions on Robotics",
+      "issn": "",
+      "kind": "JCR",
+      "value": "Q1",
+      "year": null,
+      "category": "SCI",
+      "source": "https://www.easyscholar.cc/console/user/open",
+      "origin": "EasyScholar 开放接口",
+      "yearLabel": "接口未提供数据年份",
+      "provider_field": "sci"
+    }
+  ],
+  "message": "EasyScholar 指标已同步；未确认期刊的论文不套用分区。"
+}

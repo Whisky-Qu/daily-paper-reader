@@ -284,10 +284,11 @@
         const updateScale=()=>surface.style.setProperty('--dpr-pdf-scale',String(surface.clientWidth/page.viewport.width));
         updateScale();const observer=new win.ResizeObserver(updateScale);observer.observe(surface);observers.set(page.number,observer);
       }
-      overlay.replaceChildren();
-      const mask=doc.createElement('canvas');mask.className='dpr-pdf-text-mask';mask.width=original.width;mask.height=original.height;
-      overlay.appendChild(mask);
-      const context=mask.getContext('2d');context.setTransform(mask.width/page.viewport.width,0,0,mask.height/page.viewport.height,0,0);
+      overlay.querySelectorAll('.dpr-pdf-positioned-zh').forEach(node=>node.remove());
+      let mask=overlay.querySelector('.dpr-pdf-text-mask');
+      if(!mask){mask=doc.createElement('canvas');mask.className='dpr-pdf-text-mask';mask.width=original.width;mask.height=original.height;overlay.appendChild(mask);}
+      const context=mask.getContext('2d');context.setTransform(1,0,0,1,0,0);context.clearRect(0,0,mask.width,mask.height);
+      context.setTransform(mask.width/page.viewport.width,0,0,mask.height/page.viewport.height,0,0);
       for(const block of page.blocks) {
         if(!block.zh)continue;
         const colors=block.colors || (block.colors=sourceColors(original,block.box,page.viewport));

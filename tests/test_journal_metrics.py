@@ -68,3 +68,27 @@ def test_explicit_doi_must_match():
             return json.dumps({'message': {'DOI': '10.1000/wrong', 'type': 'journal-article', 'container-title': ['Journal']}}).encode()
     with pytest.raises(RuntimeError):
         m.resolve_doi(Stub(), {'doi': '10.1000/right'})
+
+def test_accepted_conference_is_not_an_unresolved_preprint():
+    assert m.conference_from_comment('Accepted to NeurIPS 2026') == 'NeurIPS 2026'
+    assert m.conference_from_comment('Accepted at CoRL 2026 (Oral). Project website: example.org') == 'CoRL 2026'
+    assert m.conference_from_comment('6 pages. Presented at IEEE ISAIA 2026') == 'IEEE ISAIA 2026'
+    assert m.conference_from_comment('Submitted to IEEE Robotics and Automation Letters (RA-L)') is None
+    assert m.conference_from_comment('Submitted to NeurIPS 2026') is None
+
+def test_crossref_discovery_requires_title_authors_and_unique_doi():
+    record = {'kind': 'preprint', 'title': 'A robust wearable robot control framework for walking assistance',
+              'authors': ['Jane Doe', 'John Smith'], 'source': 'https://arxiv.org/abs/2601.12345'}
+    work = {'DOI': '10.1000/example', 'title': [record['title']], 'type': 'journal-article',
+            'container-title': ['Verified Journal'], 'author': [{'given': 'Jane', 'family': 'Doe'}, {'given': 'John', 'family': 'Smith'}], 'ISSN': ['1234-5678']}
+    class Stub:
+        def __init__(self, items): self.items = items
+        def get(self, url):
+            return json.dumps({'message': {'items': self.items}}).encode()
+    assert m.discover_publication(Stub([work]), record)['kind'] == 'journal'
+    wrong = dict(work, author=[{'given': 'Other', 'family': 'Author'}])
+    assert m.discover_publication(Stub([wrong]), record)['kind'] == 'preprint'
+    ambiguous = dict(work, DOI='10.1000/another')
+    assert m.discover_publication(Stub([work, ambiguous]), record)['kind'] == 'preprint'
+    preprint = dict(work, type='posted-content')
+    assert m.discover_publication(Stub([preprint]), record)['kind'] == 'preprint'

@@ -1,0 +1,22 @@
+.dpr-pdf-translation-toolbar{padding:12px 14px;background:#fff;border-bottom:1px solid #dde2eb;color:#283347;flex:none}
+.dpr-pdf-language-row{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px}
+.dpr-pdf-language-switch{display:flex;gap:2px;padding:3px;background:#eff1f6;border-radius:9px}
+.dpr-pdf-translation-toolbar button{font:inherit;font-size:12px;min-height:36px;border:0;border-radius:7px;padding:7px 10px;cursor:pointer}
+.dpr-pdf-language-switch button{color:#4a5568;background:transparent}
+.dpr-pdf-language-switch button[aria-pressed=true]{background:white;color:#303e97;box-shadow:0 1px 4px #13204418;font-weight:600}
+.dpr-pdf-translation-toolbar .dpr-pdf-translate-start{background:#4351aa;color:white;font-weight:600}
+.dpr-pdf-translation-toolbar button:focus-visible,.dpr-pdf-translation-toolbar summary:focus-visible{outline:2px solid #4a61c6;outline-offset:3px}
+.dpr-pdf-translation-status{font-size:12px;line-height:1.5;margin:9px 0 4px;overflow-wrap:anywhere;color:#525e70}
+.dpr-pdf-translation-status.is-error{color:#9e402d}
+.dpr-pdf-translation-help{font-size:11px;color:#586477;line-height:1.6}
+.dpr-pdf-translation-help summary{cursor:pointer;width:fit-content}
+.dpr-pdf-translation-help p{margin:6px 0}
+.dpr-pdf-translation-help a{color:#4351aa}
+.dpr-pdf-translated-page{padding:24px 26px;margin:0 auto 16px;max-width:720px;background:#fff;border:1px solid #e1e5ec;border-radius:10px;color:#243146}
+.dpr-pdf-translated-page h3{font-size:12px;color:#657187;letter-spacing:.04em;margin:0 0 20px}
+.dpr-pdf-text-pair{margin-bottom:20px;overflow-wrap:anywhere}
+.dpr-pdf-text-pair p{font-size:15px;line-height:1.9;margin:0 0 10px;white-space:pre-wrap}
+.dpr-pdf-text-pair .dpr-pdf-text-en{font-size:13px;line-height:1.75;color:#687388;border-left:2px solid #d5dbea;padding-left:12px}
+.dpr-pdf-translated-pages[data-mode=chinese] .dpr-pdf-text-en{display:none}
+.dpr-pdf-preview-pages[hidden],.dpr-pdf-translated-pages[hidden]{display:none!important}
+@media(max-width:600px){.dpr-pdf-translation-toolbar button{min-height:44px;padding:6px 9px}.dpr-pdf-translated-page{padding:18px 16px}.dpr-pdf-language-row{gap:7px}.dpr-pdf-preview-panel{min-width:0;max-width:100vw}}

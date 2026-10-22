@@ -7,6 +7,7 @@ import os
 from pathlib import Path
 import re
 import time
+import unicodedata
 import urllib.parse
 import urllib.request
 import xml.etree.ElementTree as ET
@@ -14,6 +15,7 @@ import xml.etree.ElementTree as ET
 PROVIDER = 'https://www.easyscholar.cc/open/getPublicationRank'
 SOURCE = 'https://www.easyscholar.cc/console/user/open'
 FIELDS = {'sciUp': '中科院升级版', 'sciBase': '中科院基础版', 'sciif': 'JIF', 'sci': 'JCR', 'ssci': 'JCR'}
+RESOLVER_VERSION = 2
 
 def now():
     return dt.datetime.now(dt.timezone.utc).replace(microsecond=0).isoformat().replace('+00:00', 'Z')
@@ -93,6 +95,48 @@ def collect_papers(root, limit=200):
                 papers.setdefault(canonical(str(p['paper_id'])), p)
     return dict(list(papers.items())[:limit])
 
+def conference_from_comment(comment):
+    # An explicit acceptance/presentation statement is evidence; a submission is not.
+    if re.search(r'\b(?:not accepted|withdrawn|rejected)\b', comment, re.I):
+        return None
+    match = re.search(r'\b(?:accepted\s+(?:at|to|for)|presented\s+at)\s+(?:the\s+)?'
+                      r'((?:NeurIPS|ICLR|ICML|CoRL|ICRA|IROS|IEEE ISAIA)\s+20\d{2})\b', comment, re.I)
+    return match[1] if match else None
+
+def normalized(value):
+    return ''.join(c for c in unicodedata.normalize('NFKD', str(value)).casefold() if c.isalnum())
+
+def discover_publication(client, record):
+    title, authors = record.get('title', ''), record.get('authors', [])
+    if len(normalized(title)) < 30 or not authors:
+        return record
+    url = 'https://api.crossref.org/works?' + urllib.parse.urlencode({
+        'query.title': title, 'rows': 5, 'select': 'DOI,title,author,type,container-title,ISSN'})
+    items = json.loads(client.get(url))['message']['items']
+    names = {normalized(name) for name in authors}
+    matches = {}
+    for item in items:
+        kind = {'journal-article': 'journal', 'proceedings-article': 'conference'}.get(item.get('type'))
+        venue = (item.get('container-title') or [''])[0]
+        doi = str(item.get('DOI', ''))
+        if not kind or not venue or not doi.startswith('10.') or doi.lower().startswith('10.48550/arxiv'):
+            continue
+        if not any(normalized(t) == normalized(title) for t in item.get('title', [])):
+            continue
+        matched_names = set()
+        for author in item.get('author', []):
+            given, family = author.get('given', ''), author.get('family', '')
+            matched_names.update(names & {normalized(given + family), normalized(family + given)})
+        if len(matched_names) < min(2, len(names)):
+            continue
+        matches[doi.lower()] = {'kind': kind, 'venue': venue, 'doi': doi, 'issns': item.get('ISSN', []),
+            'source': 'https://doi.org/' + doi, 'checkedAt': now(), 'lookupStatus': 'confirmed',
+            'note': 'Crossref 标题完全匹配，并核对作者姓名；仅采用唯一出版记录。'}
+    if len(matches) == 1:
+        return next(iter(matches.values()))
+    return dict(record, lookupStatus='unmatched', note=record.get('note', '') +
+                (' Crossref 存在多个同名同作者记录，未自动归属。' if matches else ' Crossref 未找到标题与作者一致的正式出版记录。'))
+
 def arxiv_records(client, ids):
     records = {}
     ids = [i for i in ids if re.fullmatch(r'\d{4}\.\d{4,5}', i)]
@@ -110,9 +154,18 @@ def arxiv_records(client, ids):
                 continue
             ref = entry.findtext('ar:journal_ref', '', ns).strip()
             doi = entry.findtext('ar:doi', '', ns).strip()
+            comment = ' '.join(entry.findtext('ar:comment', '', ns).split())
+            conference = conference_from_comment(comment)
             records[canonical(source)] = {'kind': 'reference' if ref or doi else 'preprint', 'venue': ref or None,
                 'doi': doi or None, 'issns': [], 'source': source, 'checkedAt': now(),
+                'title': ' '.join(entry.findtext('a:title', '', ns).split()),
+                'authors': [a.findtext('a:name', '', ns).strip() for a in entry.findall('a:author', ns)],
                 'note': 'arXiv 作者提供的出版参考，按 DOI 核对正式记录。' if ref or doi else 'arXiv 记录暂无期刊参考或正式 DOI，不据此断言尚未发表。'}
+            if conference and not ref and not doi:
+                records[canonical(source)].update(kind='conference', venue=conference,
+                    note='arXiv 作者备注明确接收或报告：' + comment[:400], lookupStatus='author_reported')
+            elif comment:
+                records[canonical(source)]['note'] += ' 作者备注：' + comment[:400]
     return records
 
 def resolve_doi(client, record):
@@ -140,16 +193,25 @@ def refresh(root, *, key, force=False, probe='', client=None):
     client = client or Client(key)
     errors = 0
     papers = collect_papers(root)
-    missing = [i for i in papers if force or not fresh(result['papers'].get(i, {}).get('checkedAt'))]
+    missing = [i for i in papers if force or previous.get('resolver_version') != RESOLVER_VERSION
+               or result['papers'].get(i, {}).get('lookupStatus') == 'unavailable'
+               or not fresh(result['papers'].get(i, {}).get('checkedAt'))]
+    result['resolver_version'] = RESOLVER_VERSION
     if missing:
         try:
             records = arxiv_records(client, missing)
             for ident, record in records.items():
                 try:
-                    result['papers'][ident] = resolve_doi(client, record)
+                    resolved = resolve_doi(client, record)
+                    if resolved['kind'] not in ('journal', 'conference'):
+                        resolved = discover_publication(client, resolved)
+                        client.sleep(.35)
+                    result['papers'][ident] = resolved
                 except Exception:
                     errors += 1
-                    result['papers'][ident] = record
+                    old = result['papers'].get(ident, {})
+                    result['papers'][ident] = old if old.get('kind') in ('journal', 'conference') else dict(
+                        record, lookupStatus='unavailable', note=record['note'] + ' Crossref 查询暂不可用，尚未完成核对。')
         except Exception:
             errors += 1
     journals = {}
@@ -172,6 +234,9 @@ def refresh(root, *, key, force=False, probe='', client=None):
                 errors += 1
     for journal in result['journals'].values():
         result['metrics'].extend(journal.get('metrics') or [])
+    result['coverage'] = {kind: sum(p.get('kind') == kind for ident, p in result['papers'].items() if ident in papers)
+                          for kind in ('journal', 'conference', 'preprint', 'reference')}
+    result['coverage']['total'] = len(papers)
     if key and errors:
         result['status'] = 'partial'
     result['message'] = 'EasyScholar 尚未配置，请在仓库 Secret 中添加密钥。' if not key else ('部分服务暂不可用，保留已有缓存。' if errors else 'EasyScholar 指标已同步；未确认期刊的论文不套用分区。')

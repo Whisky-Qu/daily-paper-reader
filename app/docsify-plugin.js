@@ -2802,6 +2802,7 @@ window.$docsify = {
 
       const closePdfPreview = () => {
         pdfPreviewRenderSeq += 1;
+        document.getElementById('dpr-pdf-preview-panel')?.dprTranslation?.pause();
         document.body.classList.remove('dpr-pdf-preview-open');
         document.querySelectorAll('[data-pdf-preview-toggle]').forEach((btn) => {
           btn.setAttribute('aria-expanded', 'false');
@@ -2816,6 +2817,7 @@ window.$docsify = {
       const PDF_PREVIEW_MIN_OUTPUT_SCALE = 2;
       const PDF_PREVIEW_TARGET_TOTAL_PIXELS = 40000000;
       let pdfJsLoadPromise = null;
+      let pdfTranslationLoadPromise = null;
       let pdfPreviewRenderSeq = 0;
 
       const resolvePdfCanvasMetrics = (
@@ -2946,6 +2948,25 @@ window.$docsify = {
         message.hidden = !text;
       };
 
+      const loadPdfTranslation = () => {
+        if (window.DPRPdfTranslation) return Promise.resolve(window.DPRPdfTranslation);
+        if (pdfTranslationLoadPromise) return pdfTranslationLoadPromise;
+        pdfTranslationLoadPromise = new Promise((resolve, reject) => {
+          if (!document.querySelector('link[data-dpr-pdf-translation]')) {
+            const css = document.createElement('link');
+            css.rel = 'stylesheet'; css.dataset.dprPdfTranslation = 'true';
+            css.href = new URL('app/dpr-pdf-translation.css', document.baseURI).href;
+            document.head.appendChild(css);
+          }
+          const script = document.createElement('script');
+          script.src = new URL('app/dpr-pdf-translation.js', document.baseURI).href;
+          script.onload = () => window.DPRPdfTranslation ? resolve(window.DPRPdfTranslation) : reject(new Error('Translation module unavailable'));
+          script.onerror = () => { script.remove(); reject(new Error('Translation module unavailable')); };
+          document.head.appendChild(script);
+        }).catch(error => { pdfTranslationLoadPromise = null; throw error; });
+        return pdfTranslationLoadPromise;
+      };
+
       const renderPdfIntoPanel = async (panel, url) => {
         const rawUrl = String(url || '').trim();
         const pagesEl = panel && panel.querySelector('.dpr-pdf-preview-pages');
@@ -2953,6 +2974,8 @@ window.$docsify = {
         if (panel.dataset.renderedPdfUrl === rawUrl && pagesEl.children.length) return;
 
         const renderSeq = ++pdfPreviewRenderSeq;
+        panel.dprTranslation?.dispose(); panel.dprTranslation = null;
+        panel.dprPdfDocument?.destroy().catch(() => {}); panel.dprPdfDocument = null;
         panel.dataset.renderedPdfUrl = '';
         pagesEl.innerHTML = '';
         setPdfPreviewMessage(panel, '正在加载 PDF 预览…', '');
@@ -2962,8 +2985,17 @@ window.$docsify = {
           if (renderSeq !== pdfPreviewRenderSeq) return;
           const loadingTask = pdfjsLib.getDocument({ url: rawUrl });
           const pdf = await loadingTask.promise;
-          if (renderSeq !== pdfPreviewRenderSeq) return;
+          if (renderSeq !== pdfPreviewRenderSeq) { pdf.destroy().catch(() => {}); return; }
+          panel.dprPdfDocument = pdf;
           setPdfPreviewMessage(panel, '', '');
+
+          try {
+            const translation = await loadPdfTranslation();
+            if (renderSeq !== pdfPreviewRenderSeq) return;
+            translation.attach(panel, pdf);
+          } catch (_translationError) {
+            setPdfPreviewMessage(panel, '免费翻译组件暂未加载，请刷新后重试。原 PDF 仍可阅读。', 'error');
+          }
 
           for (let pageNumber = 1; pageNumber <= pdf.numPages; pageNumber += 1) {
             if (renderSeq !== pdfPreviewRenderSeq) return;
@@ -3002,7 +3034,7 @@ window.$docsify = {
               transform: [outputScale, 0, 0, outputScale, 0, 0],
             }).promise;
           }
-          panel.dataset.renderedPdfUrl = rawUrl;
+          if (renderSeq === pdfPreviewRenderSeq) panel.dataset.renderedPdfUrl = rawUrl;
         } catch (err) {
           if (renderSeq !== pdfPreviewRenderSeq) return;
           pagesEl.innerHTML = '';

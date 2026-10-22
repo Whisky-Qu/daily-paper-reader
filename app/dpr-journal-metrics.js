@@ -44,18 +44,27 @@
   function render(data, id) {
     var paper = (data.papers || {})[id];
     var metrics = applicable(data, id);
-    var name = paper?.venue || (paper?.kind === 'preprint' ? 'arXiv 预印本记录 · 期刊待确认' : '期刊信息待核实');
+    var name = paper?.venue || (paper?.kind === 'preprint' ? 'arXiv 预印本记录' : '出版信息尚未确认');
+    var isJournal = paper?.kind === 'journal';
     var tiles = [['中科院升级版', '中科院升级版'], ['JIF', '影响因子 JIF'], ['JCR', 'JCR 分区']].map(function (pair) {
       var found = metrics.filter(function (m) { return m.kind === pair[0]; });
       return '<div class="dpr-journal-tile"><span>' + escape(pair[1]) + '</span>' + (found.length ? found.map(function (m) {
         return '<div class="dpr-journal-value">' + escape(m.value) + '</div><div class="dpr-journal-detail">' + escape(m.category || '') + ' · ' + escape(m.year ? m.year + ' 年数据' : '接口未提供数据年份') + '</div>';
-      }).join('') : '<div class="dpr-journal-value">待核实</div><div class="dpr-journal-detail">' + (paper?.kind === 'journal' ? '接口暂无对应数据' : '待确认正式期刊') + '</div>') + '</div>';
+      }).join('') : '<div class="dpr-journal-value">暂无数据</div><div class="dpr-journal-detail">' + 'EasyScholar 暂未返回此项' + '</div>') + '</div>';
     }).join('');
     var base = metrics.filter(function (m) { return m.kind === '中科院基础版'; }).map(function (m) { return '<p class="dpr-journal-detail">中科院基础版：' + escape(m.category) + ' ' + escape(m.value) + '（接口未提供数据年份）</p>'; }).join('');
-    var state = data.status === 'not_configured' ? 'EasyScholar 尚未配置。' : data.status === 'partial' ? '部分查询暂不可用，以下保留缓存。' : '来源：EasyScholar 开放接口';
-    return '<h3>期刊与分区 · EasyScholar</h3><div class="dpr-journal-venue">' + escape(name) + '</div><div class="dpr-journal-grid">' + tiles + '</div>' + base + '<p class="dpr-journal-detail">' + escape(state) + (data.generated_at ? ' · 同步于 ' + escape(data.generated_at.slice(0, 10)) : '') + '</p>' +
-      (paper?.kind !== 'journal' ? '<p class="dpr-journal-detail">尚未确认正式期刊，不将预印本套用期刊影响因子或分区。</p>' : '') +
-      '<div class="dpr-journal-links"><a href="https://www.easyscholar.cc/console/user/open" target="_blank" rel="noopener noreferrer">EasyScholar 数据来源</a><a href="https://www.fenqubiao.com/" target="_blank" rel="noopener noreferrer">中科院分区</a><a href="https://jcr.clarivate.com/" target="_blank" rel="noopener noreferrer">JCR</a></div>';
+    var state = data.status === 'not_configured' ? 'EasyScholar 尚未配置。' : data.status === 'partial' ? '部分查询暂不可用，已有指标保留。' : 'EasyScholar 已连接';
+    var reason = paper?.kind === 'conference' ? '会议论文：期刊影响因子和中科院 / JCR 分区不适用。' :
+      paper?.lookupStatus === 'unavailable' ? '出版记录查询暂不可用，尚未确认期刊归属。' :
+      paper?.kind === 'preprint' ? '暂无已核实的正式期刊记录，因此没有可归属的期刊影响因子和分区。' : '尚未确认正式发表期刊。';
+    var source = /^https?:\/\//i.test(paper?.source || '') ? '<a href="' + escape(paper.source) + '" target="_blank" rel="noopener noreferrer">查看出版依据</a>' : '';
+    var coverage = data.coverage ? '<p class="dpr-journal-detail">本批 ' + escape(data.coverage.total) + ' 篇 · 已确认期刊 ' + escape(data.coverage.journal) + ' 篇 · 会议 ' + escape(data.coverage.conference) + ' 篇</p>' : '';
+    return '<h3>发表信息与期刊指标</h3><div class="dpr-journal-venue">' + escape(name) + '</div>' +
+      (isJournal ? '<div class="dpr-journal-grid">' + tiles + '</div>' + base : '<p>' + escape(reason) + '</p>') +
+      '<p class="dpr-journal-detail">' + escape(state) + (data.generated_at ? ' · 同步于 ' + escape(data.generated_at.slice(0, 10)) : '') + '</p>' +
+      '<details><summary>出版核对详情</summary><p class="dpr-journal-detail">' + escape(paper?.note || '此论文尚未进入出版记录缓存。') + '</p>' + coverage + '</details>' +
+      '<div class="dpr-journal-links">' + source + '<a href="https://www.easyscholar.cc/console/user/open" target="_blank" rel="noopener noreferrer">EasyScholar 指标来源</a><a href="https://www.fenqubiao.com/" target="_blank" rel="noopener noreferrer">中科院分区</a><a href="https://jcr.clarivate.com/" target="_blank" rel="noopener noreferrer">JCR</a></div>';
+
   }
   return { paperID: paperID, applicable: applicable, render: render };
 });

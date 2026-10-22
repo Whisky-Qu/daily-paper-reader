@@ -300,6 +300,10 @@
           fit=fitText(block.zh,block.box,block.fontSize,context,block.family,block.weight,options);
           if(fit.size<block.fontSize*.82 && options.leading>1.3)
             fit=fitText(block.zh,block.box,block.fontSize,context,block.family,block.weight,{...options,leading:1.3});
+          if(block.role!=='title' && fit.lines.length>=3 && fit.size>=block.fontSize*.9) {
+            const roomy=(block.box.height-fit.size*.2)/(fit.lines.length*fit.size);
+            fit.leading=Math.min(1.6,Math.max(fit.leading,roomy));
+          }
           block.fit=fit;
         }
         const text=doc.createElement('div');text.className='dpr-pdf-positioned-zh';text.textContent=fit.lines.join('\n');text.title=block.en;

@@ -2955,11 +2955,11 @@ window.$docsify = {
           if (!document.querySelector('link[data-dpr-pdf-translation]')) {
             const css = document.createElement('link');
             css.rel = 'stylesheet'; css.dataset.dprPdfTranslation = 'true';
-            css.href = new URL('app/dpr-pdf-translation.css', document.baseURI).href;
+            css.href = new URL('app/dpr-pdf-translation.css?v=20261022-paragraphs', document.baseURI).href;
             document.head.appendChild(css);
           }
           const script = document.createElement('script');
-          script.src = new URL('app/dpr-pdf-translation.js', document.baseURI).href;
+          script.src = new URL('app/dpr-pdf-translation.js?v=20261022-paragraphs', document.baseURI).href;
           script.onload = () => window.DPRPdfTranslation ? resolve(window.DPRPdfTranslation) : reject(new Error('Translation module unavailable'));
           script.onerror = () => { script.remove(); reject(new Error('Translation module unavailable')); };
           document.head.appendChild(script);

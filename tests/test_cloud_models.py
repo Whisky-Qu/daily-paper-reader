@@ -95,7 +95,9 @@ class CloudModelTests(unittest.TestCase):
         for name in ["daily-paper-reader", "conference-paper-retrieval"]:
             path = ROOT / ".github/workflows" / f"{name}.yml"
             workflow = yaml.safe_load(path.read_text())
-            job = next(iter(workflow["jobs"].values()))
+            # The daily workflow first checks the saved update mode without models.
+            job_name = "run" if name == "daily-paper-reader" else "retrieve"
+            job = workflow["jobs"][job_name]
             self.assertEqual(job["env"]["DPR_MODELS_REMOTE_ONLY"], "1")
             self.assertEqual(job["env"]["DPR_EMBED_ALLOW_LOCAL_FALLBACK"], "0")
             self.assertNotIn("torch==", path.read_text())

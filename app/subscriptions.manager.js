@@ -50,6 +50,50 @@ window.SubscriptionsManager = (function () {
   let draftConfig = null;
   let hasUnsavedChanges = false;
   let isSavingDraftConfig = false;
+  let savedUpdateMode = null;
+  let hasSubscriptionChanges = false;
+  let isLoadingSubscriptions = false;
+  let quickRunPending = false;
+  let updateModeStatusEl = null;
+
+  const getUpdateMode = (config) => {
+    const settings = config && config.daily_update;
+    if (settings !== undefined && (!settings || typeof settings !== 'object' || Array.isArray(settings))) {
+      throw new Error('更新模式配置无效，请重新读取配置。');
+    }
+    const mode = settings && settings.mode !== undefined ? settings.mode : 'auto';
+    if (mode !== 'manual' && mode !== 'auto') throw new Error('更新模式只能是手动或自动。');
+    return mode;
+  };
+
+  const syncUpdateModeControls = () => {
+    const mode = draftConfig ? getUpdateMode(draftConfig) : null;
+    if (typeof document.querySelectorAll === 'function') {
+      document.querySelectorAll('input[name="dpr-daily-update-mode"]').forEach(input => {
+        input.checked = input.value === mode;
+        input.disabled = !mode || isSavingDraftConfig;
+      });
+    }
+    if (!updateModeStatusEl) return;
+    if (!mode || !savedUpdateMode) {
+      updateModeStatusEl.textContent = '正在读取云端更新模式…';
+    } else if (mode !== savedUpdateMode) {
+      updateModeStatusEl.textContent = `尚未保存。当前云端仍为${savedUpdateMode === 'manual' ? '手动' : '自动'}更新，请点击右上角「保存」生效。`;
+    } else {
+      updateModeStatusEl.textContent = mode === 'manual'
+        ? '手动更新已生效：只在点击「立即更新」后处理论文；已开始的任务会继续完成。'
+        : '自动更新已生效：每天北京时间约 02:30–03:30 启动，也可随时点击「立即更新」。';
+    }
+  };
+
+  const selectUpdateMode = (mode) => {
+    if (!draftConfig || isSavingDraftConfig || !['manual', 'auto'].includes(mode)) return;
+    draftConfig.daily_update = { ...(draftConfig.daily_update || {}), mode };
+    hasUnsavedChanges = true;
+    syncUpdateModeControls();
+    refreshQuickRunButtons();
+    updateSaveReminder();
+  };
   let conferenceStatsSnapshot = { schema_version: 1, generated_at: '', items: [], byKey: new Map() };
   let conferenceStatsLoadPromise = null;
 
@@ -885,7 +929,7 @@ window.SubscriptionsManager = (function () {
     const profileOverLimit = selectedProfileCount > MAX_CONFERENCE_PROFILES;
     const conferenceStoredTotal = getSelectedConferenceStoredTotal();
     const conferenceTotalOverLimit = conferenceStoredTotal >= MAX_CONFERENCE_STORED_TOTAL;
-    const dailyBlocked = hasUnsavedChanges || dailySelectedProfileCount < 1;
+    const dailyBlocked = hasUnsavedChanges || quickRunPending || dailySelectedProfileCount < 1;
     const conferenceBlocked =
       hasUnsavedChanges
       || selectedProfileCount < 1
@@ -893,6 +937,10 @@ window.SubscriptionsManager = (function () {
       || profileOverLimit
       || conferenceTotalOverLimit;
     renderProfilePickers();
+    if (quickRunStartBtn) {
+      quickRunStartBtn.textContent = quickRunPending ? '提交中…' : '立即更新';
+      quickRunStartBtn.setAttribute('aria-busy', String(quickRunPending));
+    }
     [
       [quickRunStartBtn, dailyBlocked],
       [quickRunConferenceBtn, conferenceBlocked],
@@ -1029,6 +1077,7 @@ window.SubscriptionsManager = (function () {
   };
 
   const runQuickFetch = async (days, msgEl, tipText, runOptions) => {
+    if (quickRunPending) return false;
     if (hasUnsavedChanges) {
       const text = '检测到未保存修改，请先点击“保存”后再发起快速抓取。';
       if (msgEl) {
@@ -1048,7 +1097,18 @@ window.SubscriptionsManager = (function () {
       return false;
     }
     const options = runOptions && typeof runOptions === 'object' ? runOptions : {};
-    const result = await window.DPRWorkflowRunner.runQuickFetchByDays(days, options);
+    let result;
+    quickRunPending = true;
+    refreshQuickRunButtons();
+    try {
+      result = await window.DPRWorkflowRunner.runQuickFetchByDays(days, options);
+    } catch (error) {
+      setQuickRunMessage(`提交失败：${error.message || error}`, '#c00');
+      return false;
+    } finally {
+      quickRunPending = false;
+      refreshQuickRunButtons();
+    }
     if (result === false) {
       const text = '工作流未成功触发，请检查权限或工作流配置。';
       if (msgEl) {
@@ -1524,6 +1584,14 @@ window.SubscriptionsManager = (function () {
             role="tabpanel"
             aria-labelledby="dpr-admin-tab-daily"
           >
+            <fieldset class="dpr-update-mode" aria-describedby="dpr-update-mode-status">
+              <legend>更新方式</legend>
+              <div class="dpr-update-mode-options">
+                <label><input type="radio" name="dpr-daily-update-mode" value="manual" disabled>手动更新</label>
+                <label><input type="radio" name="dpr-daily-update-mode" value="auto" disabled>自动更新</label>
+              </div>
+              <p id="dpr-update-mode-status" role="status" aria-live="polite">正在读取云端更新模式…</p>
+            </fieldset>
             <div class="dpr-bulk-bar-head">
               <div>
                 <div class="chat-quick-run-title">快速抓取</div>
@@ -1555,7 +1623,7 @@ window.SubscriptionsManager = (function () {
                     <span class="dpr-task-action-cost">约 ¥0.50</span>
                   </label>
                 </div>
-                <button id="arxiv-admin-quick-run-start-btn" class="chat-quick-run-run-btn dpr-task-start-btn" type="button">开始检索</button>
+                <button id="arxiv-admin-quick-run-start-btn" class="chat-quick-run-run-btn dpr-task-start-btn" type="button">立即更新</button>
                 <div id="arxiv-admin-quick-run-msg" class="chat-quick-run-msg"></div>
               </div>
 
@@ -1627,6 +1695,7 @@ window.SubscriptionsManager = (function () {
     saveBtn = document.getElementById('arxiv-config-save-btn');
     closeBtn = document.getElementById('arxiv-search-close-btn');
     msgEl = document.getElementById('dpr-smart-msg');
+    updateModeStatusEl = document.getElementById('dpr-update-mode-status');
     adminDailyTabBtn = document.getElementById('dpr-admin-tab-daily');
     adminConferenceTabBtn = document.getElementById('dpr-admin-tab-conference');
     adminDailyPanel = document.getElementById('arxiv-search-quick-run-side');
@@ -1675,22 +1744,31 @@ window.SubscriptionsManager = (function () {
   };
 
   const loadSubscriptions = async () => {
+    if (isLoadingSubscriptions) return;
+    isLoadingSubscriptions = true;
     try {
       if (!window.SubscriptionsGithubToken || !window.SubscriptionsGithubToken.loadConfig) {
         throw new Error('SubscriptionsGithubToken.loadConfig 不可用');
       }
-      const { config } = await window.SubscriptionsGithubToken.loadConfig();
+      const api = window.SubscriptionsGithubToken;
+      const { config } = await (api.loadConfigForUpdate || api.loadConfig)();
+      savedUpdateMode = getUpdateMode(config || {});
       draftConfig = normalizeSubscriptions(config || {});
       hasUnsavedChanges = false;
+      hasSubscriptionChanges = false;
       refreshQuickRunButtons();
       if (window.SubscriptionsSmartQuery && window.SubscriptionsSmartQuery.clearPendingDeletedProfileIds) {
         window.SubscriptionsSmartQuery.clearPendingDeletedProfileIds();
       }
       renderFromDraft();
+      syncUpdateModeControls();
       setMessage('', '#666');
     } catch (e) {
       console.error(e);
       setMessage('加载配置失败，请确认 GitHub Token 可用。', '#c00');
+      if (updateModeStatusEl) updateModeStatusEl.textContent = '读取云端更新模式失败，请关闭设置后重试；当前模式未改变。';
+    } finally {
+      isLoadingSubscriptions = false;
     }
   };
 
@@ -1709,6 +1787,7 @@ window.SubscriptionsManager = (function () {
     }
     try {
       isSavingDraftConfig = true;
+      syncUpdateModeControls();
       if (saveBtn) {
         saveBtn.disabled = true;
       }
@@ -1719,12 +1798,31 @@ window.SubscriptionsManager = (function () {
         return;
       }
       setMessage('正在保存配置...', '#666');
-      await window.SubscriptionsGithubToken.saveConfig(
-        toSave,
-        'chore: save smart query config from dashboard',
-      );
-      draftConfig = toSave;
+      const selectedMode = getUpdateMode(toSave);
+      const modeChanged = selectedMode !== savedUpdateMode;
+      let savedConfig = toSave;
+      const message = 'chore: save dashboard settings\n\nCo-Authored-By: xixi <3495302215@qq.com>';
+      if (window.SubscriptionsGithubToken.updateConfig) {
+        await window.SubscriptionsGithubToken.updateConfig(current => {
+          // A subscription edit must not revert a mode saved by another device.
+          const settings = modeChanged
+            ? { ...(current.daily_update || {}), mode: selectedMode }
+            : current.daily_update;
+          // A mode-only save changes only the mode, preserving newer subscriptions.
+          const next = modeChanged && !hasSubscriptionChanges ? { ...current } : { ...current, ...toSave };
+          if (settings === undefined) delete next.daily_update;
+          else next.daily_update = settings;
+          savedConfig = next;
+          return next;
+        }, message);
+      } else {
+        await window.SubscriptionsGithubToken.saveConfig(toSave, message);
+      }
+      draftConfig = normalizeSubscriptions(savedConfig);
+      savedUpdateMode = getUpdateMode(savedConfig);
       hasUnsavedChanges = false;
+      hasSubscriptionChanges = false;
+      renderFromDraft();
       refreshQuickRunButtons();
       clearQuickRunUnsavedMessage();
       if (window.SubscriptionsSmartQuery && window.SubscriptionsSmartQuery.clearPendingDeletedProfileIds) {
@@ -1737,6 +1835,7 @@ window.SubscriptionsManager = (function () {
       setMessage(`保存配置失败：${msg}`.slice(0, 180), '#c00');
     } finally {
       isSavingDraftConfig = false;
+      syncUpdateModeControls();
       if (saveBtn) {
         saveBtn.disabled = false;
       }
@@ -1760,6 +1859,7 @@ window.SubscriptionsManager = (function () {
       }
       draftConfig = null;
       hasUnsavedChanges = false;
+      hasSubscriptionChanges = false;
       syncRunSelectionMode();
       refreshQuickRunButtons();
     }
@@ -1776,14 +1876,22 @@ window.SubscriptionsManager = (function () {
       });
     });
 
-    if (draftConfig) {
+    if (draftConfig && hasUnsavedChanges) {
       renderFromDraft();
     } else {
+      draftConfig = null;
+      savedUpdateMode = null;
+      syncUpdateModeControls();
       loadSubscriptions();
     }
   };
 
   const bindBaseEvents = () => {
+    document.querySelectorAll('input[name="dpr-daily-update-mode"]').forEach(input => {
+      if (input._bound) return;
+      input._bound = true;
+      input.addEventListener('change', () => { if (input.checked) selectUpdateMode(input.value); });
+    });
     if (closeBtn && !closeBtn._bound) {
       closeBtn._bound = true;
       closeBtn.addEventListener('click', closeOverlay);
@@ -2017,6 +2125,7 @@ window.SubscriptionsManager = (function () {
     loadSubscriptions,
     markConfigDirty: () => {
       hasUnsavedChanges = true;
+      hasSubscriptionChanges = true;
       refreshQuickRunButtons();
       updateSaveReminder();
     },
@@ -2025,6 +2134,7 @@ window.SubscriptionsManager = (function () {
       const next = typeof updater === 'function' ? updater(cloneDeep(base)) || base : base;
       draftConfig = normalizeSubscriptions(next);
       hasUnsavedChanges = true;
+      hasSubscriptionChanges = true;
       refreshQuickRunButtons();
       updateSaveReminder();
     },
@@ -2032,6 +2142,13 @@ window.SubscriptionsManager = (function () {
     validateDraftConfig: () => validateIntentProfiles(draftConfig || {}),
     runProfileQuickFetch: (profileTag, days, runOptions) => runProfileQuickFetch(profileTag, days, runOptions),
     __test: {
+      getUpdateMode,
+      selectUpdateMode,
+      saveDraftConfig,
+      loadSubscriptions,
+      runQuickFetch,
+      __setDraftConfig: config => { draftConfig = config; savedUpdateMode = getUpdateMode(config); hasUnsavedChanges = false; hasSubscriptionChanges = false; },
+      __getUpdateModeState: () => ({ saved: savedUpdateMode, draft: getUpdateMode(draftConfig), dirty: hasUnsavedChanges }),
       initializeTopicSelection,
       setTopicProfileSelection,
       getTopicResearchProfiles,

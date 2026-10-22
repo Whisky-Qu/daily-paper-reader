@@ -961,7 +961,9 @@ window.DPRWorkflowRunner = (function () {
             )}</span>
           </div>
         </div>
-        <div style="flex-shrink:0; display:flex; gap:8px;">
+        <div style="flex-shrink:0; display:flex; flex-wrap:wrap; gap:8px;">
+          ${run.status === 'completed' && run.conclusion === 'success' && jobs.some(job => job.name === 'verify-topic-pages' && job.conclusion === 'success')
+            ? `<a class="arxiv-tool-btn" href="${escapeHtml(window.location.pathname)}?updated=${Date.now()}#/">打开最新日报</a>` : ''}
           <a class="arxiv-tool-btn" style="padding:6px 10px; text-decoration:none;" target="_blank" href="${runUrl}">打开 Actions</a>
         </div>
       </div>

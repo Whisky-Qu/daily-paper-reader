@@ -712,6 +712,7 @@ window.SubscriptionsGithubToken = (function () {
     loadGithubToken,
     loadLocalConfigOverride,
     loadConfig,
+    loadConfigForUpdate: () => isLocalDebugHost() ? loadConfig() : loadConfigFromGithub(),
     updateConfig,
     saveConfig,
     isLocalDebugHost,

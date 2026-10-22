@@ -1,3 +1,13 @@
+// Public EasyScholar cache enhancement; no provider credentials run in the browser.
+(function () {
+  if (typeof document === 'undefined' || !document.head || !document.createElement) return;
+  if (document.querySelector('script[data-dpr-journal-metrics]')) return;
+  const script = document.createElement('script');
+  script.dataset.dprJournalMetrics = 'true';
+  script.src = new URL('app/dpr-journal-metrics.js', document.baseURI).href;
+  script.defer = true;
+  document.head.appendChild(script);
+})();
 // Docsify 配置与公共插件（评论区 + Zotero 元数据）
 // 注意：侧边栏由 app/dpr-sidebar.js 自建接管，这里不再让 docsify 渲染 _sidebar.md
 window.$docsify = {

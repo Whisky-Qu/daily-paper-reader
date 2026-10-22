@@ -293,3 +293,12 @@ QQ 群：583867967（欢迎交流，已有：1151 人）
    <img alt="Star History Chart" src="https://api.star-history.com/chart?repos=ziwenhahaha/daily-paper-reader&type=date&legend=top-left&sealed_token=HZNlFXt8xbwRv5OoiqbjkjDPJoOuXlfSMxuVmHWAdDqfd9IVMab3xcK4VxF3DlJAvaO71PL3smUpfEw-NjNT83w8NqNJ0UPIhoNcxbiPhTMQkoMhkawF1w" />
  </picture>
 </a>
+
+
+## EasyScholar 期刊指标（可选）
+
+在仓库 Settings → Secrets and variables → Actions 中添加 `EASYSCHOLAR_SECRET_KEY`，值为你自己的 EasyScholar 开放接口 SecretKey。密钥只用于 GitHub Actions，不写入网页或公开 JSON。
+
+Actions → journal-metrics → Run workflow 可更新指标；日常论文流水线成功后也会同步。它仅读取出版元数据与期刊指标，不调用模型。公开结果写入 `docs/assets/journal-metrics.json`，网页论文详情和桌面阅读台共用这份缓存。默认缓存七天，EasyScholar 查询串行限速，每秒少于两次。
+
+期刊必须通过明确 DOI 核对后才能关联指标；预印本不会直接套用期刊分区。中科院升级版、基础版与 JCR 分别标注，接口没提供的数据年份明确显示未知，不把查询日期当指标年份。数据来源为 EasyScholar，并不冒充中科院或 Clarivate 官方直接查询。接口暂不可用时保留已有缓存。

@@ -1,0 +1,60 @@
+name: journal-metrics
+on:
+  workflow_dispatch:
+    inputs:
+      force:
+        description: 'Refresh cached publication metadata and EasyScholar results'
+        type: boolean
+        default: false
+      probe_journal:
+        description: 'Optional journal to verify provider connectivity (not assigned to papers)'
+        type: string
+        default: ''
+  workflow_run:
+    workflows: ['daily-paper-reader']
+    types: [completed]
+    branches: [main]
+permissions:
+  contents: write
+  pages: write
+concurrency:
+  group: journal-metrics
+  cancel-in-progress: false
+jobs:
+  sync:
+    if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: main
+          fetch-depth: 0
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.11'
+      - run: python -m pip install requests
+      - name: Update public journal metadata cache
+        env:
+          EASYSCHOLAR_SECRET_KEY: ${{ secrets.EASYSCHOLAR_SECRET_KEY }}
+          FORCE: ${{ inputs.force }}
+          PROBE_JOURNAL: ${{ inputs.probe_journal }}
+        run: |
+          args=()
+          if [ "$FORCE" = "true" ]; then args+=(--force); fi
+          if [ -n "$PROBE_JOURNAL" ]; then args+=(--probe-journal "$PROBE_JOURNAL"); fi
+          python scripts/update_journal_metrics.py "${args[@]}"
+      - name: Publish metadata only
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add docs/assets/journal-metrics.json
+          if ! git diff --cached --quiet; then
+            git commit -m 'chore: refresh journal metadata'
+            git pull --rebase origin main
+            git push origin HEAD:main
+          fi
+      - name: Verify matching Pages build
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: python scripts/request_pages_build.py --timeout 600

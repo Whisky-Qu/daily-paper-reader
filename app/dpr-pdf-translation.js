@@ -47,7 +47,126 @@
     return groups.flatMap(text => chunks(text));
   }
   function checkAbort(signal) { if (signal?.aborted) throw new DOMException('Paused', 'AbortError'); }
-  async function translateDocument({ pdf, translator, signal, cache = new Map(), onPage = () => {}, onProgress = () => {} }) {
+  function transform(a, b) {
+    return [a[0]*b[0]+a[2]*b[1],a[1]*b[0]+a[3]*b[1],a[0]*b[2]+a[2]*b[3],a[1]*b[2]+a[3]*b[3],a[0]*b[4]+a[2]*b[5]+a[4],a[1]*b[4]+a[3]*b[5]+a[5]];
+  }
+  function intersects(a, b) { return a.x < b.x+b.width && a.x+a.width > b.x && a.y < b.y+b.height && a.y+a.height > b.y; }
+  async function imageBounds(page, viewport, ops) {
+    if (!ops || !page.getOperatorList) return [];
+    const list = await page.getOperatorList(), stack = [], result = [];
+    let matrix = [1,0,0,1,0,0];
+    for (let i=0;i<list.fnArray.length;i++) {
+      const fn=list.fnArray[i], args=list.argsArray[i];
+      if (fn===ops.save) stack.push(matrix.slice());
+      else if (fn===ops.restore) matrix=stack.pop() || [1,0,0,1,0,0];
+      else if (fn===ops.transform) matrix=transform(matrix,args);
+      else if ([ops.paintImageXObject,ops.paintInlineImageXObject,ops.paintImageMaskXObject].includes(fn)) {
+        const m=transform(viewport.transform,matrix);
+        const corners=[[0,0],[1,0],[0,1],[1,1]].map(([x,y])=>[m[0]*x+m[2]*y+m[4],m[1]*x+m[3]*y+m[5]]);
+        const xs=corners.map(p=>p[0]),ys=corners.map(p=>p[1]);
+        result.push({x:Math.min(...xs),y:Math.min(...ys),width:Math.max(...xs)-Math.min(...xs),height:Math.max(...ys)-Math.min(...ys)});
+      }
+    }
+    return result;
+  }
+  function layoutBlocks(content, viewport, images = [], fontName = () => '') {
+    const lines=[], protectedY=[];
+    let line=null;
+    const flush=()=>{if(line) lines.push(line);line=null;};
+    for (const item of content.items || []) {
+      if (!item.str?.trim() || !item.transform) continue;
+      const m=transform(viewport.transform,item.transform), size=Math.hypot(m[2],m[3]);
+      const style=content.styles?.[item.fontName] || {}, ascent=style.ascent ?? .85, descent=style.descent ?? -.2;
+      const box={x:m[4],y:m[5]-ascent*size,width:Math.abs(item.width*viewport.scale),height:(ascent-descent)*size};
+      const name=fontName(item.fontName);
+      const math=/(?:CM(?:MI|SY|EX)|Math|Symbol|STIX.*(?:Math|Symbols))/i.test(name) || /[∑∫∏√≤≥≠∈∂∇∞α-ωΑ-Ω]/u.test(item.str);
+      const blocked=Math.abs(m[1])>.2 || Math.abs(m[2])>.2 || images.some(image=>intersects(box,image)) || math;
+      if (blocked) {protectedY.push(m[5]);flush();continue;}
+      if (!box.width || !size) continue;
+      if (line && (Math.abs(line.baseline-m[5])>size*.3 || box.x-line.right>size*2 || box.x<line.right-size)) flush();
+      if (!line) line={en:'',parts:[],x:box.x,y:box.y,right:box.x,bottom:box.y+box.height,baseline:m[5],fontSize:size,fontName:name};
+      line.en+=(line.en && !/\s$/.test(line.en) && !/^[,.;:!?)]/.test(item.str)?' ':'')+item.str;
+      line.parts.push(box);line.x=Math.min(line.x,box.x);line.y=Math.min(line.y,box.y);line.right=Math.max(line.right,box.x+box.width);line.bottom=Math.max(line.bottom,box.y+box.height);
+      if (item.hasEOL) flush();
+    }
+    flush();
+    const blocks=[];
+    for (const row of lines) {
+      if ((row.en.match(/[a-z]/ig)||[]).length<8 || /@/.test(row.en) || /^https?:\/\/\S+$/i.test(row.en.trim())) continue;
+      const isolated=protectedY.some(y=>Math.abs(y-row.baseline)<row.fontSize*.4);
+      const last=blocks[blocks.length-1], gap=last ? row.y-last.bottom : Infinity;
+      const title=row.fontSize>=18 && row.y<viewport.height*.23 && Math.abs((row.x+row.right)/2-viewport.width/2)<30;
+      const combined=last ? {x:Math.min(last.box.x,row.x),y:last.box.y,width:Math.max(last.box.x+last.box.width,row.right)-Math.min(last.box.x,row.x),height:row.bottom-last.box.y} : null;
+      const safeMerge=combined && !images.some(image=>intersects(combined,image));
+      if (last && safeMerge && !isolated && !last.isolated && (Math.abs(last.box.x-row.x)<5 || (title && last.role==='title')) && gap>=-1 && gap<row.fontSize*.8 &&
+          Math.abs(last.fontSize-row.fontSize)<1 && last.en.length<MAX_CHARS-200) {
+        last.en=/[a-z]-$/i.test(last.en)&&/^[a-z]/.test(row.en)?last.en.slice(0,-1)+row.en:last.en+' '+row.en;
+        last.box=combined;last.bottom=row.bottom;
+        last.masks.push(...row.parts);
+      } else blocks.push({en:row.en,zh:'',box:{x:row.x,y:row.y,width:row.right-row.x,height:row.bottom-row.y},bottom:row.bottom,
+        masks:row.parts,fontSize:row.fontSize,fontName:row.fontName,role:title?'title':'body',isolated});
+    }
+    // Restore small-cap words and the leading drop-cap before translation.
+    for(const block of blocks)block.en=block.en.replace(/\b([A-Z])\s+([A-Z]{2,})\b/g,'$1$2');
+    for(const cap of lines.filter(row=>/^[A-Z]$/.test(row.en.trim()) && row.fontSize>=18)) {
+      const block=blocks.find(b=>b.role!=='title' && b.box.x>cap.x && b.box.x-cap.x<cap.fontSize*1.5 &&
+        Math.abs(b.box.y-cap.y)<cap.fontSize && /^[A-Z]{3}/.test(b.en));
+      if(block){block.en=cap.en.trim()+block.en;const right=block.box.x+block.box.width;block.box.x=cap.x;block.box.width=right-cap.x;block.masks.push(...cap.parts);}
+    }
+    return blocks.filter(block=>!(block.box.y<viewport.height*.24 && block.fontSize>10 && block.fontSize<15 &&
+      (block.en.match(/,/g)||[]).length>=2 && Math.abs(block.box.x+block.box.width/2-viewport.width/2)<30)).map(block=>{
+        const expanded={...block.box,height:block.box.height+block.fontSize*.24};
+        if(!images.some(image=>intersects(expanded,image)))block.box=expanded;
+        block.family=/(?:Roman|Times|CMR)/i.test(block.fontName)?'"Songti SC", "Noto Serif CJK SC", serif':'"PingFang SC", "Noto Sans CJK SC", sans-serif';
+        block.weight=/(?:Bold|Medi|CMBX)/i.test(block.fontName)?'600':'400';
+        block.align=block.role==='title'?'center':'left';return block;
+    });
+  }
+  function wrapLines(text, width, measure) {
+    const tokens=String(text).match(/[\p{Script=Han}]|[A-Za-z0-9]+|\s+|./gu)||[], lines=[];
+    let line='';
+    for (let token of tokens) {
+      if (!line) token=token.trimStart();
+      if (measure(line+token)>width && line) {lines.push(line.trimEnd());line='';token=token.trimStart();}
+      while (measure(token)>width && token.length>1) {
+        let i=1;while(i<token.length && measure(token.slice(0,i+1))<=width)i++;
+        if(line){lines.push(line.trimEnd());line='';}lines.push(token.slice(0,i));token=token.slice(i);
+      }
+      line+=token;
+    }
+    if(line.trim())lines.push(line.trimEnd());
+    return lines;
+  }
+  function fitText(text, box, originalSize, context, family='"PingFang SC", "Noto Sans CJK SC", sans-serif', weight='400') {
+    let low=.5,high=originalSize*.95,best;
+    for(let i=0;i<16;i++) {
+      const size=(low+high)/2; context.font=weight+' '+size+'px '+family;
+      const lines=wrapLines(text,Math.max(1,box.width),value=>context.measureText(value).width);
+      if(lines.length*size*1.16<=box.height+.3){best={size,lines,family};low=size;}else high=size;
+    }
+    return best || {size:.5,lines:wrapLines(text,Math.max(1,box.width),value=>context.measureText(value).width),family};
+  }
+  function sourceColors(canvas, box, viewport) {
+    const scale=canvas.width/viewport.width;
+    const x=Math.max(0,Math.floor(box.x*scale)),y=Math.max(0,Math.floor(box.y*scale));
+    const width=Math.min(canvas.width-x,Math.max(1,Math.ceil(box.width*scale))),height=Math.min(canvas.height-y,Math.max(1,Math.ceil(box.height*scale)));
+    const counts=new Map();
+    try {
+      const pixels=canvas.getContext('2d').getImageData(x,y,width,height).data;
+      const step=Math.max(1,Math.floor(Math.sqrt(width*height/4000)));
+      for(let row=0;row<height;row+=step)for(let col=0;col<width;col+=step){
+        const i=(row*width+col)*4,r=pixels[i],g=pixels[i+1],b=pixels[i+2];
+        const key=(r>>2)+','+(g>>2)+','+(b>>2),value=counts.get(key)||{n:0,r,g,b,light:r*.299+g*.587+b*.114};
+        value.n++;counts.set(key,value);
+      }
+      const colors=[...counts.values()].sort((a,b)=>b.n-a.n);
+      const background=colors.find(color=>color.light>150)||{r:255,g:255,b:255,light:255};
+      const foreground=colors.find(color=>color.light<background.light-50)||{r:20,g:20,b:20};
+      const css=color=>'rgb('+color.r+','+color.g+','+color.b+')';
+      return {background:css(background),foreground:css(foreground)};
+    } catch(_){return {background:'#fff',foreground:'#111'};}
+  }
+  async function translateDocument({ pdf, translator, signal, cache = new Map(), preparePage, onPage = () => {}, onProgress = () => {} }) {
     let readablePages = 0;
     for (let number = 1; number <= pdf.numPages; number++) {
       checkAbort(signal);
@@ -56,8 +175,9 @@
         const page = await pdf.getPage(number);
         const text = await page.getTextContent();
         checkAbort(signal);
-        const blocks = paragraphs(text).map(en => ({ en, zh: '' }));
-        result = { number, blocks, complete: false };
+        const prepared = preparePage ? await preparePage(page,text) : {blocks:paragraphs(text).map(en => ({ en, zh: '' }))};
+        checkAbort(signal);
+        result = { number, ...prepared, complete: false };
         cache.set(number, result);
       }
       if (result.blocks.some(block => /[a-z]{2}/i.test(block.en))) readablePages++;
@@ -89,51 +209,71 @@
     const toolbar = doc.createElement('div'); toolbar.className = 'dpr-pdf-translation-toolbar';
     toolbar.innerHTML = '<div class="dpr-pdf-language-row"><div class="dpr-pdf-language-switch" role="group" aria-label="阅读语言">' +
       '<button type="button" data-mode="original" aria-pressed="true">英文原 PDF</button>' +
-      '<button type="button" data-mode="chinese" aria-pressed="false">中文</button>' +
+      '<button type="button" data-mode="chinese" aria-pressed="false">中文原版式</button>' +
       '<button type="button" data-mode="bilingual" aria-pressed="false">中英对照</button></div>' +
       '<button type="button" class="dpr-pdf-translate-start">免费全文翻译</button></div>' +
       '<p class="dpr-pdf-translation-status" role="status" aria-live="polite"></p>' +
       '<details class="dpr-pdf-translation-help"><summary>免费翻译说明</summary>' +
-      '<p>Chrome 在本机翻译，不使用 DeepSeek 或其他付费 API。首次需要下载语言包；译文暂存在当前页面，刷新后需重新翻译。中文按页展示提取的文字，图片、公式和原始排版请切回英文原 PDF。扫描图片暂不支持识别。</p>' +
+      '<p>Chrome 在本机翻译，不使用付费 API。首次下载语言包；译文暂存在当前页面。中文覆盖在原 PDF 对应文字区域，页尺寸、分栏、图片与公式保持原位；中文长度不同，字号会自动适配原文字框。图中标签、公式及扫描图片保留原样，不做 OCR。中英对照按页上下展示。</p>' +
       '<a href="https://developer.chrome.com/docs/ai/translator-api" target="_blank" rel="noopener noreferrer">浏览器支持与官方说明</a></details>';
     panel.insertBefore(toolbar, stage);
-    const reading = doc.createElement('div'); reading.className = 'dpr-pdf-translated-pages'; reading.hidden = true;
-    stage.appendChild(reading);
     const status = toolbar.querySelector('[role="status"]');
     const start = toolbar.querySelector('.dpr-pdf-translate-start');
     const modeButtons = Array.from(toolbar.querySelectorAll('[data-mode]'));
-    const cache = new Map(), sections = new Map();
+    const cache = new Map(), observers = new Map();
     let mode = 'original', controller = null, translator = null, active = false, disposed = false, complete = false;
     function message(text, error = false) { status.textContent = text; status.classList.toggle('is-error', error); }
     function setMode(next) {
-      const current = mode === 'original' ? canvases : reading;
       const top = stage.getBoundingClientRect().top;
       let pageNumber = '1';
-      for (const page of current.querySelectorAll('[data-page]')) {
+      for (const page of canvases.querySelectorAll('[data-page]')) {
         if (page.getBoundingClientRect().top <= top + 32) pageNumber = page.dataset.page;
       }
       mode = next;
-      canvases.hidden = next !== 'original'; reading.hidden = next === 'original';
-      reading.dataset.mode = next;
+      canvases.dataset.translationMode = next;
+      for (const page of canvases.querySelectorAll('[data-page]')) syncOriginalCopy(page);
       modeButtons.forEach(button => button.setAttribute('aria-pressed', String(button.dataset.mode === next)));
-      const target = (next === 'original' ? canvases : reading).querySelector('[data-page="' + pageNumber + '"]');
+      const target = canvases.querySelector('[data-page="' + pageNumber + '"]');
       if (target) stage.scrollTop += target.getBoundingClientRect().top - top;
-      else stage.scrollTop = 0;
+    }
+    function syncOriginalCopy(page) {
+      const surface=page.querySelector('.dpr-pdf-page-surface'), canvas=surface?.querySelector('canvas');
+      let copy=page.querySelector('.dpr-pdf-source-copy');
+      if(mode!=='bilingual'){copy?.remove();return;}
+      if(!canvas || copy || page.dataset.canvasReady!=='true')return;
+      copy=doc.createElement('div');copy.className='dpr-pdf-source-copy';
+      const label=doc.createElement('div');label.className='dpr-pdf-compare-label';label.textContent='EN · 英文原 PDF';
+      const clone=doc.createElement('canvas');clone.width=canvas.width;clone.height=canvas.height;
+      clone.getContext('2d').drawImage(canvas,0,0);copy.append(label,clone);page.insertBefore(copy,surface);
     }
     function renderPage(page) {
-      let section = sections.get(page.number);
-      if (!section) { section = doc.createElement('section'); section.className = 'dpr-pdf-translated-page'; section.dataset.page = String(page.number); sections.set(page.number, section); reading.appendChild(section); }
-      section.replaceChildren();
-      const heading = doc.createElement('h3'); heading.textContent = '第 ' + page.number + ' / ' + pdf.numPages + ' 页'; section.appendChild(heading);
-      if (!page.blocks.length) {
-        const note = doc.createElement('p'); note.textContent = '此页没有可提取文字。图片或扫描页请查看英文原 PDF。'; section.appendChild(note);
+      const wrap=canvases.querySelector('[data-page="'+page.number+'"]');
+      const surface=wrap?.querySelector('.dpr-pdf-page-surface'), original=surface?.querySelector('canvas');
+      if(!surface || !original || !page.viewport)return;
+      let overlay=surface.querySelector('.dpr-pdf-layout-translation');
+      if(!overlay) {
+        overlay=doc.createElement('div');overlay.className='dpr-pdf-layout-translation';overlay.lang='zh-CN';surface.appendChild(overlay);
+        const updateScale=()=>surface.style.setProperty('--dpr-pdf-scale',String(surface.clientWidth/page.viewport.width));
+        updateScale();const observer=new win.ResizeObserver(updateScale);observer.observe(surface);observers.set(page.number,observer);
       }
-      page.blocks.forEach(block => {
-        const pair = doc.createElement('div'); pair.className = 'dpr-pdf-text-pair';
-        const en = doc.createElement('p'); en.className = 'dpr-pdf-text-en'; en.lang = 'en'; en.textContent = block.en;
-        const zh = doc.createElement('p'); zh.className = 'dpr-pdf-text-zh'; zh.lang = 'zh-CN'; zh.textContent = block.zh || '此段正在等待翻译…';
-        pair.append(en, zh); section.appendChild(pair);
-      });
+      overlay.replaceChildren();
+      const mask=doc.createElement('canvas');mask.className='dpr-pdf-text-mask';mask.width=original.width;mask.height=original.height;
+      overlay.appendChild(mask);
+      const context=mask.getContext('2d');context.setTransform(mask.width/page.viewport.width,0,0,mask.height/page.viewport.height,0,0);
+      for(const block of page.blocks) {
+        if(!block.zh)continue;
+        const colors=block.colors || (block.colors=sourceColors(original,block.box,page.viewport));
+        context.fillStyle=colors.background;
+        const padding=Math.max(.8,block.fontSize*.06);
+        for(const rect of block.masks)context.fillRect(rect.x-padding,rect.y-padding,rect.width+padding*2,rect.height+padding*2);
+        const fit=block.fit || (block.fit=fitText(block.zh,block.box,block.fontSize,context,block.family,block.weight));
+        const text=doc.createElement('div');text.className='dpr-pdf-positioned-zh';text.textContent=fit.lines.join('\n');text.title=block.en;
+        Object.assign(text.style,{left:block.box.x/page.viewport.width*100+'%',top:block.box.y/page.viewport.height*100+'%',
+          width:block.box.width/page.viewport.width*100+'%',height:block.box.height/page.viewport.height*100+'%',
+          fontSize:'calc('+fit.size+'px * var(--dpr-pdf-scale, 1))',fontFamily:fit.family,fontWeight:block.weight,color:colors.foreground,textAlign:block.align});
+        overlay.appendChild(text);
+      }
+      syncOriginalCopy(wrap);
     }
     function pause() {
       if (!active) return;
@@ -159,12 +299,22 @@
         if (run.signal.aborted || disposed) { instance.destroy(); return; }
         translator = instance;
         const result = await translateDocument({ pdf, translator: instance, signal: run.signal, cache,
+          async preparePage(page,text) {
+            const viewport=page.getViewport({scale:1});
+            const images=await imageBounds(page,viewport,win.pdfjsLib?.OPS);
+            const name=id=>{try{return page.commonObjs.get(id)?.name || '';}catch(_){return '';}};
+            const blocks=layoutBlocks(text,viewport,images,name);
+            const normalize=value=>String(value||'').toLowerCase().replace(/[^\p{L}\p{N}]/gu,'');
+            const english=doc.querySelector('.paper-title-en')?.textContent,chinese=doc.querySelector('.paper-title-zh')?.textContent;
+            for(const block of blocks)if(block.role==='title' && chinese && normalize(block.en)===normalize(english))block.zh=chinese.trim();
+            return {viewport,blocks};
+          },
           onPage: renderPage,
           onProgress(page, total, part, count) { message('本机翻译中 · 第 ' + page + ' / ' + total + ' 页 · 段落 ' + part + ' / ' + count); }
         });
         checkAbort(run.signal);
         complete = true;
-        message(result.readablePages ? '全文文字翻译完成 · ' + result.pages + ' 页 · 可随时切换中英文' : '此 PDF 未提取到英文正文，可能是扫描件。请查看原 PDF。', !result.readablePages);
+        message(result.readablePages ? '原版式翻译完成 · ' + result.pages + ' 页 · 图片和公式保留原位' : '此 PDF 未提取到可翻译的英文正文，原 PDF 保持显示。', !result.readablePages);
         start.textContent = '翻译已完成';
       } catch (error) {
         if (run.signal.aborted || disposed) return;
@@ -182,10 +332,12 @@
     }));
     if (!win.Translator) {
       message('当前浏览器不支持本地翻译，请使用桌面版 Chrome 138+。不调用付费 API。');
-    } else message('浏览器本地英译中 · 首次下载语言包 · 不使用 API 额度');
-    const api = { pause, dispose() { pause(); disposed = true; toolbar.remove(); reading.remove(); canvases.hidden = false; } };
+    } else message('原版式本地翻译 · 首次下载语言包 · 不使用 API 额度');
+    const api = { pause, pageRendered(number) { const page=cache.get(number);if(page)renderPage(page);const wrap=canvases.querySelector('[data-page="'+number+'"]');if(wrap)syncOriginalCopy(wrap); },
+      dispose() { pause(); disposed = true; toolbar.remove();for(const observer of observers.values())observer.disconnect();
+        canvases.querySelectorAll('.dpr-pdf-layout-translation,.dpr-pdf-source-copy').forEach(node=>node.remove());delete canvases.dataset.translationMode; } };
     panel.dprTranslation = api;
     return api;
   }
-  return { chunks, paragraphs, translateDocument, attach };
+  return { chunks, paragraphs, layoutBlocks, imageBounds, wrapLines, fitText, translateDocument, attach };
 });

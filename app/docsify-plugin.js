@@ -3025,7 +3025,11 @@ window.$docsify = {
             pageLabel.className = 'dpr-pdf-preview-page-label';
             pageLabel.textContent = `${pageNumber} / ${pdf.numPages}`;
             pageWrap.appendChild(pageLabel);
-            pageWrap.appendChild(canvas);
+            const pageSurface = document.createElement('div');
+            pageSurface.className = 'dpr-pdf-page-surface';
+            pageSurface.style.width = `${viewport.width}px`;
+            pageSurface.appendChild(canvas);
+            pageWrap.appendChild(pageSurface);
             pagesEl.appendChild(pageWrap);
 
             await page.render({
@@ -3033,6 +3037,8 @@ window.$docsify = {
               viewport,
               transform: [outputScale, 0, 0, outputScale, 0, 0],
             }).promise;
+            pageWrap.dataset.canvasReady = 'true';
+            panel.dprTranslation?.pageRendered(pageNumber);
           }
           if (renderSeq === pdfPreviewRenderSeq) panel.dataset.renderedPdfUrl = rawUrl;
         } catch (err) {

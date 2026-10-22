@@ -1,0 +1,9 @@
+# Free PDF translation and publication status
+
+The user approved browser-local English to Chinese translation with original PDF, Chinese text, and bilingual modes. Use Chrome Translator, not the paid LLM client or undocumented translation endpoints. The first user click may download a browser language pack. Show progress, partial results, pause/resume, and a clear unsupported-browser message. Extract every PDF page through the existing PDF.js document; explain that scanned images, formulas, figures and PDF typesetting remain in the original. Keep translations only in this page's memory; do not silently upload documents or persist secrets.
+
+Keep the translation engine independent from the docsify shell. Bound translation chunks, preserve page numbers and English paragraphs, reject cancelled work, retain completed pages on resume, and destroy translators when stopped. Test extraction, chunk boundaries, cancellation, retry, and no-text pages; verify a real PDF in Chrome and a visible unsupported state where applicable.
+
+Publication metadata must report what was actually checked. Read arXiv author comments for explicit conference acceptance, never treat submitted/under-review venues as publication. Search Crossref for missing DOIs using exact normalized title plus corroborating author names; ambiguous/mismatched hits stay unresolved. Only verified journals may receive EasyScholar journal metrics. Show concrete preprint/conference/lookup-failure status instead of endless pending tiles. Both desktop and web use the same public cache. Do not change announcements, News, subscriptions or paid processing.
+
+Implementation sequence: add metadata regression fixtures and resolver; add translation module and preview integration; check Node/Python/Swift tests; verify browser and desktop interfaces; publish code, run metadata-only workflow, verify matching Pages output; install the updated desktop bundle.

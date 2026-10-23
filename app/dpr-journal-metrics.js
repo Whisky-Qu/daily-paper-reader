@@ -19,7 +19,7 @@
     var data = await load();
     if (route !== root.location.hash || !anchor.isConnected) return;
     var panel = root.document.getElementById('dpr-journal-metrics');
-    if (!panel) { panel = root.document.createElement('section'); panel.id = 'dpr-journal-metrics'; anchor.insertAdjacentElement('afterend', panel); }
+    if (!panel) { panel = root.document.createElement('section'); panel.id = 'dpr-journal-metrics'; anchor.insertAdjacentElement('beforebegin', panel); }
     panel.setAttribute('aria-label', '期刊、分区、影响因子与被引次数');
     panel.innerHTML = api.render(data, key);
   }

@@ -2020,4 +2020,13 @@ console.log('dpr sidebar v2 tests passed');
   const html=api.renderBodyHtml(model,{search:'exoskeleton',filter:'all',readMap:{}});
   assert.ok(html.includes('已发表期刊') && html.includes(paper.href));
   assert.ok(!api.renderBodyHtml(model,{search:'unrelated',filter:'all',readMap:{}}).includes(paper.title));
+  const expanded={daily:[],conferences:[],journalLibrary:Array.from({length:60},(_,i)=>({...paper,
+    id:'journal-library/journal-'+i.toString(16).padStart(20,'0'),
+    href:'#/journal-library/journal-'+i.toString(16).padStart(20,'0'),title:'Hip exoskeleton study '+i}))};
+  const preview=api.renderBodyHtml(expanded,{});
+  assert.ok(preview.includes('查看全部 60 篇期刊论文'));
+  assert.ok(!preview.includes('Hip exoskeleton study 59'));
+  const search=api.renderBodyHtml(expanded,{search:'exoskeleton'});
+  assert.ok(search.includes('Hip exoskeleton study 59'));
+  assert.equal(api.computeModelReadSummary(expanded,{}).total.papers,60);
 }

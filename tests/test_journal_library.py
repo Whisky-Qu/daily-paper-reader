@@ -94,3 +94,41 @@ def test_exact_lookup_mismatch_cannot_publish(tmp_path):
     with pytest.raises(RuntimeError, match='未找到'):
         library.refresh(tmp_path, fetch=fetch)
     assert not (tmp_path / 'docs/journal-library/_daily_state.json').exists()
+
+
+def test_bulk_target_bypasses_same_day_cache_preserves_notes_and_stops_at_target(tmp_path, monkeypatch):
+    monkeypatch.setattr(library.time, 'sleep', lambda _: None)
+    config='daily_update:\n  mode: manual\nsubscriptions:\n  intent_profiles:\n    - tag: hip\n      keywords: [hip exoskeleton]\n'
+    (tmp_path/'config.yaml').write_text(config)
+    items=[dict(work(),DOI=f'10.3390/example{i}',**{'container-title':[f'Journal {i % 3}']}) for i in range(12)]
+    def fetch(url):
+        if '?' in url: return {'message':{'items':items}}
+        if 'crossref' in url:
+            doi=urllib.parse.unquote(url.split('/works/')[1])
+            return {'message':next(w for w in items if w['DOI']==doi)}
+        return {}
+    first=library.refresh(tmp_path,fetch=fetch)
+    assert len(first['papers'])==3
+    page=tmp_path/'docs'/(first['papers'][0]['route']+'.md')
+    page.write_text(page.read_text()+'\nMY NOTES\n')
+    expanded=library.refresh(tmp_path,fetch=fetch,target_per_topic=9)
+    assert len(expanded['papers'])==9 and expanded['topic_counts']=={'hip':9}
+    assert expanded['journal_count']==3
+    assert 'MY NOTES' in page.read_text()
+    assert (tmp_path/'config.yaml').read_text()==config
+    def no_network(url):raise AssertionError('fulfilled target should reuse today cache')
+    assert library.refresh(tmp_path,fetch=no_network,target_per_topic=9)['papers']==expanded['papers']
+
+
+def test_bulk_per_venue_cap_broadens_coverage_without_inventing_extra_papers(tmp_path, monkeypatch):
+    monkeypatch.setattr(library.time, 'sleep', lambda _: None)
+    (tmp_path/'config.yaml').write_text('subscriptions:\n  intent_profiles:\n    - tag: hip\n      keywords: [hip exoskeleton]\n')
+    items=[dict(work(), DOI=f'10.3390/example{i}') for i in range(12)]
+    def fetch(url):
+        if '?' in url:return {'message':{'items':items}}
+        if 'crossref' in url:
+            doi=urllib.parse.unquote(url.split('/works/')[1])
+            return {'message':next(w for w in items if w['DOI']==doi)}
+        return {}
+    result=library.refresh(tmp_path,fetch=fetch,target_per_topic=10)
+    assert len(result['papers'])==5 and result['topic_counts']['hip']==5

@@ -53,6 +53,8 @@
 .dpr-journal-card .dpr-journal-metrics{padding:0;border:0;margin:.5rem 0;background:transparent}.dpr-journal-card .dpr-journal-metrics h3{display:none}
 #dpr-journal-metrics .dpr-metric-chip,#dpr-journal-catalog .dpr-metric-chip{color:var(--dpr-chip-color)!important}
 #dpr-journal-metrics h3{color:var(--text-color,#34495e)!important}
+#dpr-journal-metrics .dpr-journal-library-link{display:inline-flex;align-items:center;min-height:44px;box-sizing:border-box;margin:.5rem 0;padding:4px 13px;border:1px solid #c6d8fc;border-radius:10px;background:#e9f0ff;color:#244c89!important;font-weight:600;text-decoration:none}
+.dpr-journal-metrics .dpr-journal-library-link:hover,.dpr-journal-metrics .dpr-journal-library-link:focus-visible{background:#dae7ff;outline:2px solid #7b9dd8;outline-offset:2px}
 body.dpr-dark .dpr-journal-metrics .dpr-metric-chip{filter:brightness(.93)}
 @media(max-width:600px){.dpr-journal-metrics{padding:.85rem}.dpr-journal-metrics .dpr-metric-chip{font-size:.8rem;padding:4px 9px}}
 `;
@@ -103,15 +105,19 @@ body.dpr-dark .dpr-journal-metrics .dpr-metric-chip{filter:brightness(.93)}
     var years = metrics.length ? '<p class="dpr-journal-detail">期刊指标：EasyScholar · ' + escape(Array.from(new Set(metrics.map(function (m) { return m.year ? m.year + ' 年数据' : '接口未提供数据年份'; }))).join('；')) + '</p>' : '';
     var counts = citation ? '<p class="dpr-journal-detail">被引来源：' + escape(citation.provider || 'OpenAlex') + (citation.scope ? ' · ' + escape(citation.scope) : '') + (citation.checkedAt ? ' · 查询于 ' + escape(citation.checkedAt.slice(0, 10)) : '') + (hasCount && citation.status !== 'confirmed' ? ' · 本次未取得新值，保留上次查询结果' : '') + '；不同数据库计数可能不同。</p>' : '';
     var coverage = data.coverage ? '<p class="dpr-journal-detail">本批 ' + escape(data.coverage.total) + ' 篇 · 已确认期刊 ' + escape(data.coverage.journal) + ' 篇 · 会议 ' + escape(data.coverage.conference) + ' 篇</p>' : '';
+    var libraryLink = !isJournal ? '<p><a class="dpr-journal-library-link" href="#/journal-library/README">打开已发表期刊库' + (data.coverage?.journal ? ' · ' + escape(data.coverage.journal) + ' 篇' : '') + ' →</a></p>' : '';
     return '<h3>期刊与论文指标</h3><div class="dpr-journal-badges">' + pills + '</div>' +
-      (!isJournal ? '<p class="dpr-journal-detail">' + escape(reason) + '</p>' : '') + years + counts +
+      (!isJournal ? '<p class="dpr-journal-detail">' + escape(reason) + '</p>' : '') + libraryLink + years + counts +
       '<details><summary>来源与出版核对</summary><p class="dpr-journal-detail">' + escape(paper?.note || '此论文尚未进入出版记录缓存。') + '</p>' + coverage +
       '<p class="dpr-journal-detail">元数据同步：' + escape(data.generated_at || '尚未同步') + '</p>' +
       '<div class="dpr-journal-links"><a href="https://www.easyscholar.cc/console/user/open" target="_blank" rel="noopener noreferrer">EasyScholar</a><a href="https://www.fenqubiao.com/" target="_blank" rel="noopener noreferrer">中科院分区</a><a href="https://jcr.clarivate.com/" target="_blank" rel="noopener noreferrer">JCR</a></div></details>';
   }
 
   function catalog(data, report) {
-    return (report.papers || []).filter(function (p) { return /^journal-library\/journal-[a-f0-9]{20}$/.test(p.route || ''); }).map(function (p) {
+    var papers = (report.papers || []).filter(function (p) { return /^journal-library\/journal-[a-f0-9]{20}$/.test(p.route || ''); });
+    var venues = new Set(papers.map(function (p) { return p.venue || ''; }).filter(Boolean));
+    var overview = papers.length ? '<p class="dpr-journal-library-overview">已收录 ' + papers.length + ' 篇 · ' + venues.size + ' 种期刊 · 更新于 ' + escape((report.generated_at || '').slice(0,10)) + '</p>' : '';
+    return overview + papers.map(function (p) {
       return '<article class="dpr-journal-card"><h2><a href="#/' + escape(p.route) + '">' + escape(p.title) + '</a></h2>' +
         '<section class="dpr-journal-metrics">' + render(data, p.paper_id) + '</section>' +
         '<p class="dpr-journal-summary">' + escape(p.evidence || '公开元数据未提供摘要') + '</p>' +

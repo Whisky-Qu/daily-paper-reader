@@ -1878,7 +1878,11 @@
     if (journalPapers.length) {
       renderedGroups += 1;
       html.push('<section class="dpr-sidebar-group dpr-sidebar-panel is-expanded"><div class="dpr-sidebar-panel-header"><a href="#/journal-library/README" class="dpr-sidebar-panel-title">已发表期刊 · ' + journalPapers.length + '</a></div><div class="dpr-sidebar-panel-content"><ul class="dpr-sidebar-paper-list">');
-      journalPapers.forEach(function (paper) { html.push(renderPaper(paper, vs.readMap, resultOptions.currentPaperId)); });
+      var journalPreview = resultMode ? journalPapers : journalPapers.slice(0, 8);
+      var currentJournal = journalPapers.find(function (p) { return paperIdentity(p) === resultOptions.currentPaperId; });
+      if (currentJournal && journalPreview.indexOf(currentJournal) < 0) journalPreview = journalPreview.slice(0, 7).concat([currentJournal]);
+      journalPreview.forEach(function (paper) { html.push(renderPaper(paper, vs.readMap, resultOptions.currentPaperId)); });
+      if (journalPapers.length > journalPreview.length) html.push('<li><a href="#/journal-library/README">查看全部 ' + journalPapers.length + ' 篇期刊论文 →</a></li>');
       html.push('</ul></div></section>');
     }
     if (viewModel && viewModel.conferences && viewModel.conferences.length) {

@@ -10,6 +10,11 @@ on:
         description: 'Optional journal to verify provider connectivity (not assigned to papers)'
         type: string
         default: ''
+      library_target_per_topic:
+        description: '补库：每个研究方向的期刊论文目标数，0 表示常规增量'
+        type: choice
+        options: ['0', '20', '30']
+        default: '0'
   workflow_run:
     workflows: ['daily-paper-reader']
     types: [completed]
@@ -24,7 +29,7 @@ jobs:
   sync:
     if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 35
     steps:
       - uses: actions/checkout@v5
         with:
@@ -41,7 +46,9 @@ jobs:
         run: python scripts/daily_update_policy.py --event "$SOURCE_EVENT"
       - name: Add verified journal articles alongside arXiv
         if: steps.policy.outputs.run_daily == 'true'
-        run: python scripts/update_journal_library.py
+        env:
+          LIBRARY_TARGET: ${{ inputs.library_target_per_topic || '0' }}
+        run: python scripts/update_journal_library.py --target-per-topic "$LIBRARY_TARGET"
       - name: Update public journal metadata cache
         if: steps.policy.outputs.run_daily == 'true'
         env:

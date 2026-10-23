@@ -33,3 +33,4 @@ assert.ok(cards.includes('IF 11.1') && cards.includes('中科院升级版'));
 assert.ok(cards.includes('A &lt;journal&gt; paper') && !cards.includes('id="dpr-journal-metrics"'));
 assert.equal(api.catalog(data,{papers:[{route:'javascript:bad'}]}),'');
 console.log('PASS: journal identity takes precedence over an arXiv OA copy; real route catalog and metric association');
+assert.ok(api.render(data,'2610.25628').includes('href="#/journal-library/README"'), 'an arXiv reader needs a direct route to the separate published collection');

@@ -16,6 +16,12 @@ PROVIDER = 'https://www.easyscholar.cc/open/getPublicationRank'
 SOURCE = 'https://www.easyscholar.cc/console/user/open'
 FIELDS = {'sciUp': '中科院升级版', 'sciBase': '中科院基础版', 'sciif': 'JIF', 'sci': 'JCR', 'ssci': 'JCR'}
 RESOLVER_VERSION = 2
+PROVIDER_FORMAT_VERSION = 2
+
+# Same ISSN, different source-system title. This is a journal identity alias,
+# never a replacement with a similarly named journal or a hard-coded IF.
+# https://ochsner.converis.clarivate.com/converis/portal/detail/Publication/13300753?lang=en_US
+ISSN_ALIASES = {'2306-5354': ['Bioengineering-Basel']}
 
 def now():
     return dt.datetime.now(dt.timezone.utc).replace(microsecond=0).isoformat().replace('+00:00', 'Z')
@@ -50,10 +56,6 @@ class Client:
             raise RuntimeError('未配置 EASYSCHOLAR_SECRET_KEY')
         url = PROVIDER + '?' + urllib.parse.urlencode({'secretKey': self.key, 'publicationName': journal})
         payload = json.loads(self.get(url, provider=True))
-        fields = ((payload.get('data') or {}).get('officialRank') or {}).get('all') or {}
-        diagnostic = json.dumps({field: fields.get(field) for field in FIELDS}, ensure_ascii=False) if isinstance(fields, dict) else '{}'
-        if self.key not in diagnostic:
-            print('[DEBUG-journal-fields] ' + journal + ': ' + diagnostic)
         return normalize_rank(payload, journal)
 
 def normalize_rank(payload, journal, issns=None):
@@ -83,6 +85,30 @@ def normalize_rank(payload, journal, issns=None):
                         'value': value[:160], 'year': None, 'category': category[:160],
                         'source': SOURCE, 'origin': 'EasyScholar 开放接口',
                         'yearLabel': '接口未提供数据年份', 'provider_field': field})
+    return metrics
+
+def rank_journal(client, journal, issns):
+    metrics = client.rank(journal)
+    aliases = []
+    for issn in issns:
+        aliases.extend(ISSN_ALIASES.get(issn.upper(), []))
+    # Punctuation variants retain exactly the same normalized title identity.
+    plain = journal.replace(',', '').replace(': ', '-')
+    if normalized(plain) == normalized(journal) and plain != journal:
+        aliases.extend([plain, plain.upper()])
+    for alias in dict.fromkeys(aliases):
+        if any(m['kind'] == 'JIF' for m in metrics):
+            break
+        try:
+            extra = client.rank(alias)
+        except Exception:
+            continue
+        existing = {m['kind'] for m in metrics}
+        for item in extra:
+            if item['kind'] not in existing:
+                metrics.append(dict(item, journal=journal, query_name=alias))
+    for metric in metrics:
+        metric['issn'] = issns[0] if issns else ''
     return metrics
 
 def collect_papers(root, limit=200):
@@ -301,13 +327,11 @@ def refresh(root, *, key, force=False, probe='', client=None):
     if key:
         for journal, issns in list(journals.items())[:100]:
             cached = result['journals'].get(journal, {})
-            if not force and journal != probe and fresh(cached.get('queried_at')):
+            if not force and journal != probe and cached.get('format_version') == PROVIDER_FORMAT_VERSION and fresh(cached.get('queried_at')):
                 continue
             try:
-                metrics = client.rank(journal)
-                for metric in metrics:
-                    metric['issn'] = issns[0] if issns else ''
-                result['journals'][journal] = {'queried_at': now(), 'metrics': metrics}
+                metrics = rank_journal(client, journal, issns)
+                result['journals'][journal] = {'queried_at': now(), 'format_version': PROVIDER_FORMAT_VERSION, 'metrics': metrics}
             except Exception:
                 errors += 1
     for journal in result['journals'].values():

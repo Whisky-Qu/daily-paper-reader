@@ -19,6 +19,23 @@ def test_provider_contract_keeps_source_and_unknown_year():
     with pytest.raises(RuntimeError):
         m.normalize_rank({'code': 403, 'msg': 'secret URL'}, 'Journal')
 
+def test_verified_issn_alias_fills_missing_fields_without_replacing_cas():
+    calls = []
+    class Provider:
+        def rank(self, name):
+            calls.append(name)
+            fields = {'sciUp':'医学3区'} if name == 'Bioengineering' else {'sciUp':'医学2区', 'sciif':'4.4', 'sci':'Q2'}
+            return m.normalize_rank({'code':200,'data':{'officialRank':{'all':fields}}}, name)
+    result = m.rank_journal(Provider(), 'Bioengineering', ['2306-5354'])
+    assert calls == ['Bioengineering', 'Bioengineering-Basel']
+    assert next(x['value'] for x in result if x['kind']=='中科院升级版') == '3区'
+    assert next(x['value'] for x in result if x['kind']=='JIF') == '4.4'
+    assert all(x['journal']=='Bioengineering' and x['issn']=='2306-5354' for x in result)
+    assert next(x['query_name'] for x in result if x['kind']=='JIF') == 'Bioengineering-Basel'
+    calls.clear()
+    m.rank_journal(Provider(), 'Bioengineering', ['9999-9999'])
+    assert calls == ['Bioengineering']  # No title resemblance guess across journals.
+
 def test_rate_limit_encoding_and_error_redaction():
     calls, sleeps = [], []
     def opener(request, **kwargs):

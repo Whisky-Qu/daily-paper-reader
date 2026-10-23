@@ -2806,7 +2806,7 @@
         state.model.journalLibrary = ((values[3] || {}).papers || []).filter(function (p) {
           return /^journal-library\/journal-[a-f0-9]{20}$/.test(p.route || '');
         }).map(function (p) {
-          return {id:p.route, href:'#/' + p.route, title:p.title, evidence:p.evidence,
+          return {id:p.route, href:'#/' + p.route, title:p.title, evidence:'正式期刊 · ' + (p.publication_date || '日期未提供'),
             tags:p.tags || [], section:'journal', published:p.publication_date, link:'https://doi.org/' + p.doi};
         });
         state.lastFetchAt = Date.now();

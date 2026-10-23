@@ -38,6 +38,7 @@ def test_selection_requires_real_journal_abstract_and_doi_identity(tmp_path, mon
     conference = dict(item, type='proceedings-article')
     unrelated = dict(item, title=['Humanoid vision'], abstract='')
     assert not library.accepted(dict(item, ISSN=['2405-8963']), 'hip exoskeleton', '2026-10-23')
+    assert not library.accepted(dict(item, **{'container-title': ['Journal of Physics: Conference Series']}), 'hip exoskeleton', '2026-10-23')
     def fetch(url):
         if '?' in url:
             return {'message': {'items': [registration, future, conference, unrelated, item]}}
@@ -118,6 +119,14 @@ def test_bulk_target_bypasses_same_day_cache_preserves_notes_and_stops_at_target
     assert (tmp_path/'config.yaml').read_text()==config
     def no_network(url):raise AssertionError('fulfilled target should reuse today cache')
     assert library.refresh(tmp_path,fetch=no_network,target_per_topic=9)['papers']==expanded['papers']
+    # Crossref labels some conference series as journal-article. Repair a
+    # previously imported one without deleting its page or the reader's notes.
+    expanded['papers'][0]['venue']='Journal of Physics: Conference Series'
+    (tmp_path/'docs/journal-library/_daily_state.json').write_text(json.dumps(expanded))
+    corrected=library.refresh(tmp_path,fetch=fetch,target_per_topic=9)
+    assert len(corrected['papers'])==9
+    assert all('Conference Series' not in p['venue'] for p in corrected['papers'])
+    assert 'MY NOTES' in page.read_text()
 
 
 def test_bulk_per_venue_cap_broadens_coverage_without_inventing_extra_papers(tmp_path, monkeypatch):

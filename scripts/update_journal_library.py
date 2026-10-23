@@ -58,6 +58,13 @@ def relevant(work, keyword):
     return bool(terms) and all(re.search(r'\b' + re.escape(t) + r'(?:s)?\b', text) for t in terms)
 
 
+def conference_series(venue, issns=()):
+    # Crossref's journal-article type also covers these proceedings series.
+    # IOP: publishingsupport.iopscience.iop.org/author-guidelines-for-conference-proceedings/
+    return '2405-8963' in issns or bool(re.search(
+        r'\b(?:conference series|web of conferences|conference proceedings|procedia)\b', venue, re.I))
+
+
 def accepted(work, keyword, today):
     date, _ = date_of(work)
     return (work.get('type') == 'journal-article' and bool(work.get('container-title')) and bool(work.get('ISSN'))
@@ -66,7 +73,7 @@ def accepted(work, keyword, today):
             and bool(work.get('author')) and bool(date) and date <= today
             # IFAC identifies this ISSN as its conference proceedings series:
             # https://ifac-control.org/publications/what-is-ifac-papersonline/
-            and '2405-8963' not in (work.get('ISSN') or []) and not work.get('event')
+            and not conference_series(' '.join(work.get('container-title') or []), work.get('ISSN') or []) and not work.get('event')
             and not work.get('update-to') and relevant(work, keyword))
 
 
@@ -121,7 +128,9 @@ def refresh(root, *, per_topic=3, target_per_topic=0, fetch=get):
     root = Path(root)
     target = root / 'docs/journal-library/_daily_state.json'
     previous = json.loads(target.read_text()) if target.exists() else {}
-    papers = {p['doi'].lower(): p for p in previous.get('papers', [])}
+    papers = {p['doi'].lower(): p for p in previous.get('papers', [])
+              if not conference_series(p.get('venue', ''), p.get('issns') or [])}
+    repaired = len(papers) != len(previous.get('papers', []))
     profiles = (yaml.safe_load((root / 'config.yaml').read_text()).get('subscriptions') or {}).get('intent_profiles') or []
     stamp = dt.datetime.now(dt.timezone.utc).replace(microsecond=0).isoformat().replace('+00:00', 'Z')
     today = stamp[:10]
@@ -133,7 +142,7 @@ def refresh(root, *, per_topic=3, target_per_topic=0, fetch=get):
     def topic_count(tag):
         return sum(any(t['label'] == tag for t in p['tags']) for p in papers.values())
     target_reached = not target_per_topic or all(topic_count(p['tag']) >= target_per_topic for p in enabled)
-    if (papers and target_reached and previous.get('status') == 'ready' and previous.get('generated_at', '')[:10] == today
+    if (papers and not repaired and target_reached and previous.get('status') == 'ready' and previous.get('generated_at', '')[:10] == today
             and previous.get('query_signature') == query_signature):
         print(f'Journal library: reuse {len(papers)} verified articles from today')
         return previous
@@ -192,6 +201,8 @@ def refresh(root, *, per_topic=3, target_per_topic=0, fetch=get):
             try:
                 oa = fetch('https://api.openalex.org/works/https://doi.org/' + urllib.parse.quote(doi, safe=''))
                 if str(oa.get('doi', '')).lower() == 'https://doi.org/' + doi:
+                    if oa.get('is_retracted') is True:
+                        continue
                     abstract = abstract or abstract_from_openalex(oa)
                     pdf = safe_url((oa.get('best_oa_location') or {}).get('pdf_url'))
             except Exception:

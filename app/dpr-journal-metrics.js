@@ -13,6 +13,14 @@
   }
   async function render() {
     var route = root.location.hash;
+    var catalog = root.document.getElementById('dpr-journal-catalog');
+    if (catalog) {
+      try {
+        var values = await Promise.all([load(), root.fetch(new URL('docs/journal-library/_daily_state.json', root.document.baseURI), {cache:'no-cache'}).then(function (r) {if (!r.ok) throw new Error('unavailable'); return r.json();})]);
+        if (route === root.location.hash && catalog.isConnected) catalog.innerHTML = api.catalog(values[0], values[1]);
+      } catch (_) { /* Keep the published fallback links readable. */ }
+      return;
+    }
     var anchor = root.document.querySelector('.paper-meta-row');
     if (!anchor) return;
     var key = api.paperID(route, anchor.querySelector('[data-pdf-url]')?.getAttribute('data-pdf-url'));
@@ -20,27 +28,31 @@
     if (route !== root.location.hash || !anchor.isConnected) return;
     var panel = root.document.getElementById('dpr-journal-metrics');
     if (!panel) { panel = root.document.createElement('section'); panel.id = 'dpr-journal-metrics'; anchor.insertAdjacentElement('beforebegin', panel); }
+    panel.classList.add('dpr-journal-metrics');
     panel.setAttribute('aria-label', '期刊、分区、影响因子与被引次数');
     panel.innerHTML = api.render(data, key);
   }
   var style = root.document.createElement('style');
   style.textContent = `
-#dpr-journal-metrics{margin:1.1rem 0 1.5rem;padding:1rem 1.1rem;border:1px solid var(--border-color,#e1e6ef);border-radius:14px;background:var(--sidebar-background,#fafbfe);font-size:.88rem;line-height:1.6}
-#dpr-journal-metrics h3{margin:0 0 .7rem;font-size:.94rem;font-weight:650;color:var(--text-color,#34495e)!important}
-#dpr-journal-metrics .dpr-journal-badges{display:flex;flex-wrap:wrap;align-items:flex-start;gap:8px;margin:.6rem 0}
-#dpr-journal-metrics .dpr-metric-chip{display:inline-flex;align-items:center;gap:5px;max-width:100%;box-sizing:border-box;padding:4px 11px;border-radius:999px;font-size:.85rem;font-weight:600;line-height:1.55;text-decoration:none;white-space:nowrap;background:#e4edff;--dpr-chip-color:#244c89;color:var(--dpr-chip-color)!important;border:1px solid transparent}
-#dpr-journal-metrics .dpr-chip-venue{white-space:normal;overflow-wrap:anywhere;border-radius:12px}
-#dpr-journal-metrics .dpr-chip-cas{background:#ffe3ed;--dpr-chip-color:#9b2853}
-#dpr-journal-metrics .dpr-chip-base,#dpr-journal-metrics .dpr-chip-jcr{background:#fff0ad;--dpr-chip-color:#70500a}
-#dpr-journal-metrics .dpr-chip-if{background:#d9f0f9;--dpr-chip-color:#155775}
-#dpr-journal-metrics .dpr-chip-cited{background:#ede5ff;--dpr-chip-color:#6642a0}
-#dpr-journal-metrics .dpr-chip-unknown{background:#edf0f4;--dpr-chip-color:#536071;font-weight:500}
-#dpr-journal-metrics a.dpr-metric-chip:hover,#dpr-journal-metrics a.dpr-metric-chip:focus-visible{border-color:currentColor}
-#dpr-journal-metrics .dpr-journal-detail{font-size:.78rem;color:var(--text-color,#536071);opacity:.85;overflow-wrap:anywhere}
-#dpr-journal-metrics .dpr-journal-links{display:flex;flex-wrap:wrap;gap:.8rem;margin-top:.7rem}
-#dpr-journal-metrics p{margin:.4rem 0}#dpr-journal-metrics details{margin-top:.55rem}
-body.dpr-dark #dpr-journal-metrics .dpr-metric-chip{filter:brightness(.93)}
-@media(max-width:600px){#dpr-journal-metrics{padding:.85rem}#dpr-journal-metrics .dpr-metric-chip{font-size:.8rem;padding:4px 9px}}
+.dpr-journal-metrics{margin:1.1rem 0 1.5rem;padding:1rem 1.1rem;border:1px solid var(--border-color,#e1e6ef);border-radius:14px;background:var(--sidebar-background,#fafbfe);font-size:.88rem;line-height:1.6}
+.dpr-journal-metrics h3{margin:0 0 .7rem;font-size:.94rem;font-weight:650;color:var(--text-color,#34495e)!important}
+.dpr-journal-metrics .dpr-journal-badges{display:flex;flex-wrap:wrap;align-items:flex-start;gap:8px;margin:.6rem 0}
+.dpr-journal-metrics .dpr-metric-chip{display:inline-flex;align-items:center;gap:5px;max-width:100%;box-sizing:border-box;padding:4px 11px;border-radius:999px;font-size:.85rem;font-weight:600;line-height:1.55;text-decoration:none;white-space:nowrap;background:#e4edff;--dpr-chip-color:#244c89;color:var(--dpr-chip-color)!important;border:1px solid transparent}
+.dpr-journal-metrics .dpr-chip-venue{white-space:normal;overflow-wrap:anywhere;border-radius:12px}
+.dpr-journal-metrics .dpr-chip-cas{background:#ffe3ed;--dpr-chip-color:#9b2853}
+.dpr-journal-metrics .dpr-chip-base,.dpr-journal-metrics .dpr-chip-jcr{background:#fff0ad;--dpr-chip-color:#70500a}
+.dpr-journal-metrics .dpr-chip-if{background:#d9f0f9;--dpr-chip-color:#155775}
+.dpr-journal-metrics .dpr-chip-cited{background:#ede5ff;--dpr-chip-color:#6642a0}
+.dpr-journal-metrics .dpr-chip-unknown{background:#edf0f4;--dpr-chip-color:#536071;font-weight:500}
+.dpr-journal-metrics a.dpr-metric-chip:hover,.dpr-journal-metrics a.dpr-metric-chip:focus-visible{border-color:currentColor}
+.dpr-journal-metrics .dpr-journal-detail{font-size:.78rem;color:var(--text-color,#536071);opacity:.85;overflow-wrap:anywhere}
+.dpr-journal-metrics .dpr-journal-links{display:flex;flex-wrap:wrap;gap:.8rem;margin-top:.7rem}
+.dpr-journal-metrics p{margin:.4rem 0}.dpr-journal-metrics details{margin-top:.55rem}
+.dpr-journal-card{padding:1rem 1.1rem;margin:1.2rem 0;border:1px solid var(--border-color,#e1e6ef);border-radius:14px;background:var(--sidebar-background,#fafbfe)}
+.dpr-journal-card h2{margin:.1rem 0 .7rem;font-size:1.05rem;line-height:1.55}.dpr-journal-card .dpr-journal-summary{font-size:.88rem;line-height:1.75;overflow-wrap:anywhere}
+.dpr-journal-card .dpr-journal-metrics{padding:0;border:0;margin:.5rem 0;background:transparent}.dpr-journal-card .dpr-journal-metrics h3{display:none}
+body.dpr-dark .dpr-journal-metrics .dpr-metric-chip{filter:brightness(.93)}
+@media(max-width:600px){.dpr-journal-metrics{padding:.85rem}.dpr-journal-metrics .dpr-metric-chip{font-size:.8rem;padding:4px 9px}}
 `;
   root.document.head.appendChild(style);
   root.document.addEventListener('dpr-docsify-ready', function () { root.requestAnimationFrame(render); });
@@ -48,7 +60,11 @@ body.dpr-dark #dpr-journal-metrics .dpr-metric-chip{filter:brightness(.93)}
   render();
 })(typeof window !== 'undefined' ? window : null, function () {
   function escape(value) { return String(value == null ? '' : value).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
-  function paperID(route, pdf) { var match = String(pdf || route || '').match(/(?:^|[^\d])(\d{4}\.\d{4,5})(?:v\d+)?/); return match ? match[1] : ''; }
+  function paperID(route, pdf) {
+    var journal = String(route || '').match(/journal-library\/(journal-[a-f0-9]{20})(?:$|[?#])/);
+    if (journal) return journal[1];
+    var match = String(pdf || route || '').match(/(?:^|[^\d])(\d{4}\.\d{4,5})(?:v\d+)?/); return match ? match[1] : '';
+  }
   function applicable(data, id) {
     var publication = (data.papers || {})[id];
     if (!publication || publication.kind !== 'journal' || !publication.venue) return [];
@@ -92,5 +108,13 @@ body.dpr-dark #dpr-journal-metrics .dpr-metric-chip{filter:brightness(.93)}
       '<div class="dpr-journal-links"><a href="https://www.easyscholar.cc/console/user/open" target="_blank" rel="noopener noreferrer">EasyScholar</a><a href="https://www.fenqubiao.com/" target="_blank" rel="noopener noreferrer">中科院分区</a><a href="https://jcr.clarivate.com/" target="_blank" rel="noopener noreferrer">JCR</a></div></details>';
   }
 
-  return { paperID: paperID, applicable: applicable, render: render };
+  function catalog(data, report) {
+    return (report.papers || []).filter(function (p) { return /^journal-library\/journal-[a-f0-9]{20}$/.test(p.route || ''); }).map(function (p) {
+      return '<article class="dpr-journal-card"><h2><a href="#/' + escape(p.route) + '">' + escape(p.title) + '</a></h2>' +
+        '<section class="dpr-journal-metrics">' + render(data, p.paper_id) + '</section>' +
+        '<p class="dpr-journal-summary">' + escape(p.evidence || '公开元数据未提供摘要') + '</p>' +
+        '<a href="#/' + escape(p.route) + '">阅读论文与摘要 →</a></article>';
+    }).join('');
+  }
+  return { paperID: paperID, applicable: applicable, render: render, catalog: catalog };
 });

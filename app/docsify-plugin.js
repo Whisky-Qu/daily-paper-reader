@@ -1558,7 +1558,8 @@ window.$docsify = {
         const f = String(file || '');
         return (
           /^(?:\d{6}\/\d{2}|\d{8}-\d{8})\/(?!README\.md$).+\.md$/i.test(f) ||
-          /^conference\/[^/]+\/(?!README\.md$).+\.md$/i.test(f)
+          /^conference\/[^/]+\/(?!README\.md$).+\.md$/i.test(f) ||
+          /^journal-library\/journal-[a-f0-9]{20}\.md$/i.test(f)
         );
       };
 
@@ -1793,7 +1794,8 @@ window.$docsify = {
         // - 会议路径：#/conference/<conference-year>/slug
         return (
           /^#\/(?:\d{6}\/\d{2}|\d{8}-\d{8})\/(?!README$).+/i.test(h) ||
-          /^#\/conference\/[^/]+\/(?!README$).+/i.test(h)
+          /^#\/conference\/[^/]+\/(?!README$).+/i.test(h) ||
+          /^#\/journal-library\/journal-[a-f0-9]{20}$/i.test(h)
         );
       };
 

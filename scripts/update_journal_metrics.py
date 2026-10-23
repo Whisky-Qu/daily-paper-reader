@@ -93,7 +93,12 @@ def collect_papers(root, limit=200):
         for p in json.loads(source.read_text()).get('papers', []):
             if p.get('paper_id') and p.get('route'):
                 papers.setdefault(canonical(str(p['paper_id'])), p)
-    return dict(list(papers.items())[:limit])
+    library = root / 'docs/journal-library/_daily_state.json'
+    if library.exists():
+        for p in json.loads(library.read_text()).get('papers', []):
+            if p.get('paper_id') and p.get('route') and p.get('doi'):
+                papers.setdefault(str(p['paper_id']), p)
+    return dict(sorted(papers.items(), key=lambda item: not item[0].startswith('journal-'))[:limit])
 
 def conference_from_comment(comment):
     # An explicit acceptance/presentation statement is evidence; a submission is not.
@@ -256,20 +261,27 @@ def refresh(root, *, key, force=False, probe='', client=None):
     if missing:
         try:
             records = arxiv_records(client, missing)
-            for ident, record in records.items():
-                try:
-                    resolved = resolve_doi(client, record)
-                    if resolved['kind'] not in ('journal', 'conference'):
-                        resolved = discover_publication(client, resolved)
-                        client.sleep(.35)
-                    result['papers'][ident] = resolved
-                except Exception:
-                    errors += 1
-                    old = result['papers'].get(ident, {})
-                    result['papers'][ident] = old if old.get('kind') in ('journal', 'conference') else dict(
-                        record, lookupStatus='unavailable', note=record['note'] + ' Crossref 查询暂不可用，尚未完成核对。')
         except Exception:
+            records = {}
             errors += 1
+        # DOI articles do not depend on arXiv availability.
+        for ident in missing:
+            if papers[ident].get('doi'):
+                records[ident] = {'kind': 'reference', 'doi': papers[ident]['doi'],
+                    'source': 'https://doi.org/' + papers[ident]['doi'], 'note': '期刊列表 DOI 待核对。',
+                    'checkedAt': now()}
+        for ident, record in records.items():
+            try:
+                resolved = resolve_doi(client, record)
+                if resolved['kind'] not in ('journal', 'conference'):
+                    resolved = discover_publication(client, resolved)
+                    client.sleep(.35)
+                result['papers'][ident] = resolved
+            except Exception:
+                errors += 1
+                old = result['papers'].get(ident, {})
+                result['papers'][ident] = old if old.get('kind') in ('journal', 'conference') else dict(
+                    record, lookupStatus='unavailable', note=record['note'] + ' Crossref 查询暂不可用，尚未完成核对。')
     result['citations'], citation_failures = refresh_citations(
         client, papers, result['papers'], previous.get('citations') or {}, force=force)
     result['citation_provider'] = 'OpenAlex'

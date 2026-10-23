@@ -2007,3 +2007,14 @@ testExpandedAxisSectionSetSerializesCorrectly();
 testReadStatusNormalization();
 
 console.log('dpr sidebar v2 tests passed');
+
+{
+  const api=loadSidebarForTest('#/journal-library/journal-678a878edcdc94c01adf').__test;
+  const paper={id:'journal-library/journal-678a878edcdc94c01adf',href:'#/journal-library/journal-678a878edcdc94c01adf',title:'Hip exoskeleton study',evidence:'Source abstract',tags:[{kind:'query',label:'hip-exo'}],section:'journal'};
+  const model={daily:[],conferences:[],journalLibrary:[paper]};
+  assert.ok(api.collectPaperHrefsFromModel(model).includes(paper.href));
+  assert.equal(api.computeModelReadSummary(model,{}).total.papers,1);
+  const html=api.renderBodyHtml(model,{search:'exoskeleton',filter:'all',readMap:{}});
+  assert.ok(html.includes('已发表期刊') && html.includes(paper.href));
+  assert.ok(!api.renderBodyHtml(model,{search:'unrelated',filter:'all',readMap:{}}).includes(paper.title));
+}

@@ -264,6 +264,7 @@
       });
     });
     taskPapers(m).forEach(function (paper) { out.push(paper.href); });
+    (m.journalLibrary || []).forEach(function (paper) { out.push(paper.href); });
     return out.filter(Boolean);
   }
   function collectReportHrefsFromModel(model) {
@@ -1036,6 +1037,7 @@
       home: source.home || null,
       tutorial: source.tutorial || null,
       starterPacks: source.starterPacks || [],
+      journalLibrary: source.journalLibrary || [],
       daily: [],
       conferences: [],
     };
@@ -1181,7 +1183,7 @@
     var dailyPapers = flattenDailyPapers(modelForDailyPanel(model, 'daily')).map(function (record) { return record.paper; });
     var backtrackPapers = flattenDailyPapers(modelForDailyPanel(model, 'backtrack')).map(function (record) { return record.paper; });
     var conferencePapers = flattenConferencePapers(model).map(function (record) { return record.paper; });
-    var allPapers = uniquePapersByRoute(dailyPapers.concat(backtrackPapers, conferencePapers, taskPapers(model)));
+    var allPapers = uniquePapersByRoute(dailyPapers.concat(backtrackPapers, conferencePapers, taskPapers(model), model.journalLibrary || []));
     var map = readMap || {};
     return {
       total: {
@@ -1872,6 +1874,13 @@
     };
     var viewModel = normalUnreadFilterMode ? filterModelForPaperResults(model, resultOptions) : model;
     var renderedGroups = 0;
+    var journalPapers = (model.journalLibrary || []).filter(function (paper) { return paperMatchesResult(paper, resultOptions); });
+    if (journalPapers.length) {
+      renderedGroups += 1;
+      html.push('<section class="dpr-sidebar-group dpr-sidebar-panel is-expanded"><div class="dpr-sidebar-panel-header"><a href="#/journal-library/README" class="dpr-sidebar-panel-title">已发表期刊 · ' + journalPapers.length + '</a></div><div class="dpr-sidebar-panel-content"><ul class="dpr-sidebar-paper-list">');
+      journalPapers.forEach(function (paper) { html.push(renderPaper(paper, vs.readMap, resultOptions.currentPaperId)); });
+      html.push('</ul></div></section>');
+    }
     if (viewModel && viewModel.conferences && viewModel.conferences.length) {
       var conferenceView = resultMode
         ? buildConferenceResultView(model, resultOptions)
@@ -2785,14 +2794,21 @@
     }
     var releaseDates = optionalIndex('app/conference-release-dates.json');
     var starterPacks = optionalIndex('docs/starter-pack/index.json');
+    var journalLibrary = optionalIndex('docs/journal-library/_daily_state.json');
     return fetch(SIDEBAR_URL, { cache: 'no-store' })
       .then(function (r) {
         if (!r.ok) throw new Error('sidebar HTTP ' + r.status);
-        return Promise.all([r.text(), releaseDates, starterPacks]);
+        return Promise.all([r.text(), releaseDates, starterPacks, journalLibrary]);
       })
       .then(function (values) {
         state.model = applyConferencePublicationDates(parseSidebar(values[0]), values[1]);
         state.model.starterPacks = parseStarterPackIndex(values[2]);
+        state.model.journalLibrary = ((values[3] || {}).papers || []).filter(function (p) {
+          return /^journal-library\/journal-[a-f0-9]{20}$/.test(p.route || '');
+        }).map(function (p) {
+          return {id:p.route, href:'#/' + p.route, title:p.title, evidence:p.evidence,
+            tags:p.tags || [], section:'journal', published:p.publication_date, link:'https://doi.org/' + p.doi};
+        });
         state.lastFetchAt = Date.now();
         determineInitialExpansion();
         if (!state.rootEl) {

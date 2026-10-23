@@ -26,15 +26,15 @@
   var style = root.document.createElement('style');
   style.textContent = `
 #dpr-journal-metrics{margin:1.1rem 0 1.5rem;padding:1rem 1.1rem;border:1px solid var(--border-color,#e1e6ef);border-radius:14px;background:var(--sidebar-background,#fafbfe);font-size:.88rem;line-height:1.6}
-#dpr-journal-metrics h3{margin:0 0 .7rem;font-size:.94rem;font-weight:650}
+#dpr-journal-metrics h3{margin:0 0 .7rem;font-size:.94rem;font-weight:650;color:var(--text-color,#34495e)!important}
 #dpr-journal-metrics .dpr-journal-badges{display:flex;flex-wrap:wrap;align-items:flex-start;gap:8px;margin:.6rem 0}
-#dpr-journal-metrics .dpr-metric-chip{display:inline-flex;align-items:center;gap:5px;max-width:100%;box-sizing:border-box;padding:4px 11px;border-radius:999px;font-size:.85rem;font-weight:600;line-height:1.55;text-decoration:none;white-space:nowrap;background:#e4edff;color:#244c89;border:1px solid transparent}
+#dpr-journal-metrics .dpr-metric-chip{display:inline-flex;align-items:center;gap:5px;max-width:100%;box-sizing:border-box;padding:4px 11px;border-radius:999px;font-size:.85rem;font-weight:600;line-height:1.55;text-decoration:none;white-space:nowrap;background:#e4edff;--dpr-chip-color:#244c89;color:var(--dpr-chip-color)!important;border:1px solid transparent}
 #dpr-journal-metrics .dpr-chip-venue{white-space:normal;overflow-wrap:anywhere;border-radius:12px}
-#dpr-journal-metrics .dpr-chip-cas{background:#ffe3ed;color:#9b2853}
-#dpr-journal-metrics .dpr-chip-base,#dpr-journal-metrics .dpr-chip-jcr{background:#fff0ad;color:#70500a}
-#dpr-journal-metrics .dpr-chip-if{background:#d9f0f9;color:#155775}
-#dpr-journal-metrics .dpr-chip-cited{background:#ede5ff;color:#6642a0}
-#dpr-journal-metrics .dpr-chip-unknown{background:#edf0f4;color:#536071;font-weight:500}
+#dpr-journal-metrics .dpr-chip-cas{background:#ffe3ed;--dpr-chip-color:#9b2853}
+#dpr-journal-metrics .dpr-chip-base,#dpr-journal-metrics .dpr-chip-jcr{background:#fff0ad;--dpr-chip-color:#70500a}
+#dpr-journal-metrics .dpr-chip-if{background:#d9f0f9;--dpr-chip-color:#155775}
+#dpr-journal-metrics .dpr-chip-cited{background:#ede5ff;--dpr-chip-color:#6642a0}
+#dpr-journal-metrics .dpr-chip-unknown{background:#edf0f4;--dpr-chip-color:#536071;font-weight:500}
 #dpr-journal-metrics a.dpr-metric-chip:hover,#dpr-journal-metrics a.dpr-metric-chip:focus-visible{border-color:currentColor}
 #dpr-journal-metrics .dpr-journal-detail{font-size:.78rem;color:var(--text-color,#536071);opacity:.85;overflow-wrap:anywhere}
 #dpr-journal-metrics .dpr-journal-links{display:flex;flex-wrap:wrap;gap:.8rem;margin-top:.7rem}

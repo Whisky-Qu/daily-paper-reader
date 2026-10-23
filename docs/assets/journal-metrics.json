@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
   "provider": "EasyScholar",
-  "generated_at": "2026-10-23T07:47:51Z",
-  "status": "ready",
+  "generated_at": "2026-10-23T07:50:58Z",
+  "status": "partial",
   "papers": {
     "2610.26043": {
       "kind": "preprint",
@@ -10,7 +10,7 @@
       "doi": null,
       "issns": [],
       "source": "https://arxiv.org/abs/2610.26043v2",
-      "checkedAt": "2026-10-22T15:40:30Z",
+      "checkedAt": "2026-10-23T07:50:58Z",
       "title": "OmniInteract: Towards Unified Whole-Body Interaction Control for Dual Humanoids",
       "authors": [
         "Yinghao Li",
@@ -30,7 +30,7 @@
       "doi": null,
       "issns": [],
       "source": "https://arxiv.org/abs/2610.17999v1",
-      "checkedAt": "2026-10-22T21:51:46Z",
+      "checkedAt": "2026-10-23T07:50:58Z",
       "title": "TRACE: Efficient Transfer Learning for Neural Whole-Body Control Across Humanoid Embodiments",
       "authors": [
         "Qingyu Lan",
@@ -38,8 +38,8 @@
         "Zifan Wang",
         "Junwei Liang"
       ],
-      "note": "arXiv 记录暂无期刊参考或正式 DOI，不据此断言尚未发表。 Crossref 未找到标题与作者一致的正式出版记录。",
-      "lookupStatus": "unmatched"
+      "note": "arXiv 记录暂无期刊参考或正式 DOI，不据此断言尚未发表。 Crossref 查询暂不可用，尚未完成核对。",
+      "lookupStatus": "unavailable"
     },
     "2610.17930": {
       "kind": "preprint",
@@ -47,7 +47,7 @@
       "doi": null,
       "issns": [],
       "source": "https://arxiv.org/abs/2610.17930v1",
-      "checkedAt": "2026-10-22T21:51:46Z",
+      "checkedAt": "2026-10-23T07:50:58Z",
       "title": "Locomotion with Online Awareness of Dynamics for Precision Footholds",
       "authors": [
         "Kunzhao Ren",
@@ -63,7 +63,7 @@
       "doi": null,
       "issns": [],
       "source": "https://arxiv.org/abs/2610.26170v1",
-      "checkedAt": "2026-10-22T15:40:30Z",
+      "checkedAt": "2026-10-23T07:50:58Z",
       "title": "Data-Efficient Learning from Demonstration for Humanoid Robots via Feature-Level Perception and Prompt-Based Object Detection",
       "authors": [
         "Keyhan Rayati",
@@ -83,7 +83,7 @@
       "doi": null,
       "issns": [],
       "source": "https://arxiv.org/abs/2610.25711v1",
-      "checkedAt": "2026-10-22T15:40:30Z",
+      "checkedAt": "2026-10-23T07:50:58Z",
       "title": "SWAP: Test-Time Steerable Humanoid Whole-Body Collision Avoidance",
       "authors": [
         "Zeji Yi",
@@ -104,7 +104,7 @@
       "doi": null,
       "issns": [],
       "source": "https://arxiv.org/abs/2610.25628v1",
-      "checkedAt": "2026-10-22T21:51:46Z",
+      "checkedAt": "2026-10-23T07:50:58Z",
       "title": "Humanoid SRL: Augmenting Humanoids with Supernumerary Limbs for Coordinated Loco-Manipulation",
       "authors": [
         "Fukang Liu",
@@ -132,7 +132,7 @@
       "doi": null,
       "issns": [],
       "source": "https://arxiv.org/abs/2610.27688v1",
-      "checkedAt": "2026-10-22T21:51:46Z",
+      "checkedAt": "2026-10-23T07:50:58Z",
       "title": "Adaptive Traversal Tubes for Posture-Aware Navigation of Bipedal Humanoids",
       "authors": [
         "Zijian Ge"
@@ -146,7 +146,7 @@
       "doi": null,
       "issns": [],
       "source": "https://arxiv.org/abs/2610.21590v1",
-      "checkedAt": "2026-10-22T15:40:30Z",
+      "checkedAt": "2026-10-23T07:50:58Z",
       "title": "A Flow-Theoretic Multimodal Control Framework Fusing Mental and Physical Engagement for Upper-Limb Rehabilitation",
       "authors": [
         "Jun Leng",
@@ -164,7 +164,7 @@
       "doi": null,
       "issns": [],
       "source": "https://arxiv.org/abs/2610.21534v1",
-      "checkedAt": "2026-10-22T15:40:30Z",
+      "checkedAt": "2026-10-23T07:50:58Z",
       "title": "Attribution-Gated Joint Estimation of Intention and Capability for Assist-as-Needed Upper-Limb Robots",
       "authors": [
         "Pengcheng Li",
@@ -183,7 +183,7 @@
       "doi": null,
       "issns": [],
       "source": "https://arxiv.org/abs/2610.15833v1",
-      "checkedAt": "2026-10-22T21:51:46Z",
+      "checkedAt": "2026-10-23T07:50:58Z",
       "title": "P-BFM: Perceptive Behavioral Foundation Models for Humanoid Control via Unsupervised Reinforcement Learning",
       "authors": [
         "Xue Wang",
@@ -197,8 +197,8 @@
         "Hao Zhao",
         "Qingdu Li"
       ],
-      "note": "arXiv 记录暂无期刊参考或正式 DOI，不据此断言尚未发表。 作者备注：Project page: https://roboparty.github.io/P-BFM/ Crossref 未找到标题与作者一致的正式出版记录。",
-      "lookupStatus": "unmatched"
+      "note": "arXiv 记录暂无期刊参考或正式 DOI，不据此断言尚未发表。 作者备注：Project page: https://roboparty.github.io/P-BFM/ Crossref 查询暂不可用，尚未完成核对。",
+      "lookupStatus": "unavailable"
     },
     "2610.22176": {
       "kind": "preprint",
@@ -206,7 +206,7 @@
       "doi": null,
       "issns": [],
       "source": "https://arxiv.org/abs/2610.22176v1",
-      "checkedAt": "2026-10-22T15:40:30Z",
+      "checkedAt": "2026-10-23T07:50:58Z",
       "title": "Inertially Significant Humanoid Teleoperation via Whole Body Model Predictive Control and Online Parameter Estimation",
       "authors": [
         "James Foster",
@@ -223,7 +223,7 @@
       "doi": null,
       "issns": [],
       "source": "https://arxiv.org/abs/2610.24675v2",
-      "checkedAt": "2026-10-22T15:40:30Z",
+      "checkedAt": "2026-10-23T07:50:58Z",
       "title": "Action-Aligned Latent Planning for Versatile Humanoid Loco-Manipulation",
       "authors": [
         "Yutang Lin",
@@ -239,7 +239,7 @@
       "doi": null,
       "issns": [],
       "source": "https://arxiv.org/abs/2610.27271v1",
-      "checkedAt": "2026-10-22T21:51:46Z",
+      "checkedAt": "2026-10-23T07:50:58Z",
       "title": "XoNav: An Exoskeleton as a Personalized Haptic Interface for Assisted Navigation",
       "authors": [
         "Debadrata Sarkar",
@@ -255,7 +255,7 @@
       "doi": null,
       "issns": [],
       "source": "https://arxiv.org/abs/2610.19494v1",
-      "checkedAt": "2026-10-22T15:40:30Z",
+      "checkedAt": "2026-10-23T07:50:58Z",
       "title": "Robust Real-Time Monocular Human Pose Estimation with Insole-Based Sensor Fusion",
       "authors": [
         "Liang Yu",
@@ -273,7 +273,7 @@
       "doi": null,
       "issns": [],
       "source": "https://arxiv.org/abs/2610.20255v1",
-      "checkedAt": "2026-10-22T15:40:30Z",
+      "checkedAt": "2026-10-23T07:50:58Z",
       "title": "Safe Reinforcement Learning with Receding-Horizon Safety Critic and Differentiable Action Shields",
       "authors": [
         "Siwei Ju",
@@ -289,15 +289,15 @@
       "doi": null,
       "issns": [],
       "source": "https://arxiv.org/abs/2610.19067v1",
-      "checkedAt": "2026-10-22T15:40:30Z",
+      "checkedAt": "2026-10-23T07:50:58Z",
       "title": "Tread: A Visuo-Inertial Framework for Terrain and Locomotion Context-Aware Gait-Phase and Speed Estimation in Wearable Robotics",
       "authors": [
         "Debadrata Sarkar",
         "Akash Bachhar",
         "Aman Arora"
       ],
-      "note": "arXiv 记录暂无期刊参考或正式 DOI，不据此断言尚未发表。 作者备注：Supplementary video: A video demonstrating real-time operation of the complete visuo-inertial inference pipeline is available at https://doi.org/10.6084/m9.figshare.34442622 Crossref 未找到标题与作者一致的正式出版记录。",
-      "lookupStatus": "unmatched"
+      "note": "arXiv 记录暂无期刊参考或正式 DOI，不据此断言尚未发表。 作者备注：Supplementary video: A video demonstrating real-time operation of the complete visuo-inertial inference pipeline is available at https://doi.org/10.6084/m9.figshare.34442622 Crossref 查询暂不可用，尚未完成核对。",
+      "lookupStatus": "unavailable"
     },
     "2610.18991": {
       "kind": "preprint",
@@ -305,7 +305,7 @@
       "doi": null,
       "issns": [],
       "source": "https://arxiv.org/abs/2610.18991v1",
-      "checkedAt": "2026-10-22T15:40:30Z",
+      "checkedAt": "2026-10-23T07:50:58Z",
       "title": "Contact-UAN: Unsupervised Actuator Networks as a Residual World Model for Humanoid Control",
       "authors": [
         "Nolan Fey",
@@ -323,7 +323,7 @@
       "doi": null,
       "issns": [],
       "source": "https://arxiv.org/abs/2610.23127v1",
-      "checkedAt": "2026-10-22T15:40:30Z",
+      "checkedAt": "2026-10-23T07:50:58Z",
       "title": "BeJEPA: A Goal-Conditioned Humanoid Behavior World Model via Unsupervised RL",
       "authors": [
         "Liyun Yan",
@@ -350,7 +350,7 @@
       "doi": null,
       "issns": [],
       "source": "https://arxiv.org/abs/2610.25288v1",
-      "checkedAt": "2026-10-22T15:40:30Z",
+      "checkedAt": "2026-10-23T07:50:58Z",
       "title": "Vision as Proprioception: Estimating Humanoid Robot Pose from Video",
       "authors": [
         "Jiaxi Jiang",
@@ -359,8 +359,8 @@
         "Marco Hutter",
         "Christian Holz"
       ],
-      "note": "arXiv 记录暂无期刊参考或正式 DOI，不据此断言尚未发表。 作者备注：Code: https://github.com/eth-siplab/HumanoidPose Crossref 未找到标题与作者一致的正式出版记录。",
-      "lookupStatus": "unmatched"
+      "note": "arXiv 记录暂无期刊参考或正式 DOI，不据此断言尚未发表。 作者备注：Code: https://github.com/eth-siplab/HumanoidPose Crossref 查询暂不可用，尚未完成核对。",
+      "lookupStatus": "unavailable"
     },
     "2610.19183": {
       "kind": "preprint",
@@ -368,7 +368,7 @@
       "doi": null,
       "issns": [],
       "source": "https://arxiv.org/abs/2610.19183v1",
-      "checkedAt": "2026-10-22T15:40:30Z",
+      "checkedAt": "2026-10-23T07:50:58Z",
       "title": "A Mode-Unified, Continuous, and Biomimetic Control Strategy of a Robotic Lower Limb Prosthesis",
       "authors": [
         "Hanjun Kim",
@@ -387,7 +387,7 @@
       "doi": null,
       "issns": [],
       "source": "https://arxiv.org/abs/2610.20318v1",
-      "checkedAt": "2026-10-22T15:40:30Z",
+      "checkedAt": "2026-10-23T07:50:58Z",
       "title": "Efficient Test-Time Adaptation For Robot Policies",
       "authors": [
         "Motasem Alfarra",
@@ -405,7 +405,7 @@
       "doi": null,
       "issns": [],
       "source": "https://arxiv.org/abs/2610.18872v1",
-      "checkedAt": "2026-10-22T15:40:30Z",
+      "checkedAt": "2026-10-23T07:50:58Z",
       "title": "EgoExplorer: A Vision-Motion-Touch Observatory for Human Loco-Manipulation In Situ",
       "authors": [
         "Yunsong Zhou",
@@ -432,7 +432,7 @@
       "doi": null,
       "issns": [],
       "source": "https://arxiv.org/abs/2610.17232v1",
-      "checkedAt": "2026-10-22T15:40:30Z",
+      "checkedAt": "2026-10-23T07:50:58Z",
       "title": "LiDAR-based Humanoid Navigation in Dynamic, Non-Convex Environments via Spatio-Temporal Safe Corridors",
       "authors": [
         "Shubham S. Kumbhar",
@@ -447,7 +447,7 @@
       "doi": null,
       "issns": [],
       "source": "https://arxiv.org/abs/2610.22119v1",
-      "checkedAt": "2026-10-22T15:40:30Z",
+      "checkedAt": "2026-10-23T07:50:58Z",
       "title": "Compliant GMT: Making General Motion Tracking Compliant via Residual Reference Adaptation",
       "authors": [
         "Venki Parsuram",
@@ -464,7 +464,7 @@
       "doi": null,
       "issns": [],
       "source": "https://arxiv.org/abs/2610.23548v1",
-      "checkedAt": "2026-10-22T15:40:30Z",
+      "checkedAt": "2026-10-23T07:50:58Z",
       "title": "Reinforcement Learning Based Multi-Terrain Adaptive Whole-Body Control for a Quadruped Manipulator",
       "authors": [
         "Yanzhou Jin",
@@ -485,7 +485,7 @@
       "doi": null,
       "issns": [],
       "source": "https://arxiv.org/abs/2610.24847v1",
-      "checkedAt": "2026-10-22T15:40:30Z",
+      "checkedAt": "2026-10-23T07:50:58Z",
       "title": "DiPLO: Self-distilled Diffusion Planning for Loco-manipulation",
       "authors": [
         "Shafeef Omar",
@@ -505,7 +505,7 @@
       "doi": null,
       "issns": [],
       "source": "https://arxiv.org/abs/2610.24779v1",
-      "checkedAt": "2026-10-22T15:40:30Z",
+      "checkedAt": "2026-10-23T07:50:58Z",
       "title": "Learning Structured Locomotion References for Optimization-Based Whole-Body Control",
       "authors": [
         "Ömer Tarık Banuş",
@@ -521,7 +521,7 @@
       "doi": null,
       "issns": [],
       "source": "https://arxiv.org/abs/2610.28470v1",
-      "checkedAt": "2026-10-22T15:40:30Z",
+      "checkedAt": "2026-10-23T07:50:58Z",
       "title": "Fast Motion Retargeting Pipeline for Scalable Humanoid Robot Learning",
       "authors": [
         "Daniel Marew",
@@ -538,7 +538,7 @@
       "doi": null,
       "issns": [],
       "source": "https://arxiv.org/abs/2610.15548v1",
-      "checkedAt": "2026-10-22T15:40:30Z",
+      "checkedAt": "2026-10-23T07:50:58Z",
       "title": "PointWalker: Mapless Quadruped Locomotion Directly From Raw LiDAR Point Clouds",
       "authors": [
         "Sicen Li",
@@ -557,7 +557,7 @@
       "doi": null,
       "issns": [],
       "source": "https://arxiv.org/abs/2610.19615v1",
-      "checkedAt": "2026-10-22T15:40:30Z",
+      "checkedAt": "2026-10-23T07:50:58Z",
       "title": "PolyMorph: Learning Locomotion Policy for Cross-Embodiment Adaptation",
       "authors": [
         "Hyunsik Oh",
@@ -578,7 +578,7 @@
       "doi": null,
       "issns": [],
       "source": "https://arxiv.org/abs/2610.19393v1",
-      "checkedAt": "2026-10-22T15:40:30Z",
+      "checkedAt": "2026-10-23T07:50:58Z",
       "title": "Beyond Kinematic Tracking: Preserving Expressive Characteristics in Humanoid Whole-Body Control",
       "authors": [
         "Lingfan Bao",
@@ -600,7 +600,7 @@
       "doi": null,
       "issns": [],
       "source": "https://arxiv.org/abs/2610.21152v1",
-      "checkedAt": "2026-10-22T15:40:30Z",
+      "checkedAt": "2026-10-23T07:50:58Z",
       "title": "KODA: Kinematics--Observation Data Alignment for Humanoid Learning from Human Egocentric Demonstration",
       "authors": [
         "Zibo Zhou",
@@ -624,7 +624,7 @@
       "doi": null,
       "issns": [],
       "source": "https://arxiv.org/abs/2610.24235v1",
-      "checkedAt": "2026-10-22T15:40:30Z",
+      "checkedAt": "2026-10-23T07:50:58Z",
       "title": "Multimodal Interaction Estimation for Contact-Aware Adaptive Impedance Control",
       "authors": [
         "Mateusz Jaszczuk",
@@ -640,7 +640,7 @@
       "doi": null,
       "issns": [],
       "source": "https://arxiv.org/abs/2610.26855v1",
-      "checkedAt": "2026-10-22T15:40:30Z",
+      "checkedAt": "2026-10-23T07:50:58Z",
       "title": "Ropedia W0: Scaling Loco-Manipulation World Models across Embodiments with Human Experience",
       "authors": [
         "Tianqi Liu",
@@ -668,7 +668,7 @@
       "doi": null,
       "issns": [],
       "source": "https://arxiv.org/abs/2610.28480v1",
-      "checkedAt": "2026-10-22T15:40:30Z",
+      "checkedAt": "2026-10-23T07:50:58Z",
       "title": "SuperMimic: Scaling Humanoid Whole-Body Control with One Differentiable World Model",
       "authors": [
         "Qiayuan Liao",
@@ -688,7 +688,7 @@
       "doi": null,
       "issns": [],
       "source": "https://arxiv.org/abs/2610.18950v2",
-      "checkedAt": "2026-10-22T15:40:30Z",
+      "checkedAt": "2026-10-23T07:50:58Z",
       "title": "$λ_0$: Scaling Open-World Egocentric Human Data for Humanoid Loco-Manipulation",
       "authors": [
         "Lambda-humanoid Team",
@@ -721,7 +721,7 @@
       ],
       "source": "https://doi.org/10.1126/scirobotics.aed3973",
       "note": "通过明确 DOI 核对 Crossref 出版记录。",
-      "checkedAt": "2026-10-23T05:46:55Z"
+      "checkedAt": "2026-10-23T07:51:34Z"
     },
     "journal-3b61597ea8bcd700281f": {
       "kind": "journal",
@@ -732,7 +732,7 @@
       ],
       "source": "https://doi.org/10.3390/biomechanics6010015",
       "note": "通过明确 DOI 核对 Crossref 出版记录。",
-      "checkedAt": "2026-10-23T05:46:55Z"
+      "checkedAt": "2026-10-23T07:51:35Z"
     },
     "journal-047845974f2c4a4cc52e": {
       "kind": "journal",
@@ -744,7 +744,7 @@
       ],
       "source": "https://doi.org/10.1109/tie.2026.3672827",
       "note": "通过明确 DOI 核对 Crossref 出版记录。",
-      "checkedAt": "2026-10-23T05:46:55Z"
+      "checkedAt": "2026-10-23T07:51:35Z"
     },
     "journal-0943f093660b0d4716e4": {
       "kind": "journal",
@@ -755,7 +755,7 @@
       ],
       "source": "https://doi.org/10.3390/act13110428",
       "note": "通过明确 DOI 核对 Crossref 出版记录。",
-      "checkedAt": "2026-10-23T05:46:55Z"
+      "checkedAt": "2026-10-23T07:51:36Z"
     },
     "journal-678a878edcdc94c01adf": {
       "kind": "journal",
@@ -766,7 +766,7 @@
       ],
       "source": "https://doi.org/10.3390/bioengineering11070683",
       "note": "通过明确 DOI 核对 Crossref 出版记录。",
-      "checkedAt": "2026-10-23T05:46:55Z"
+      "checkedAt": "2026-10-23T07:51:36Z"
     },
     "journal-f8477ee5c79e0a32f615": {
       "kind": "journal",
@@ -777,7 +777,7 @@
       ],
       "source": "https://doi.org/10.3390/biomimetics9040254",
       "note": "通过明确 DOI 核对 Crossref 出版记录。",
-      "checkedAt": "2026-10-23T05:46:56Z"
+      "checkedAt": "2026-10-23T07:51:37Z"
     },
     "journal-e3d41799908ed14eb708": {
       "kind": "journal",
@@ -788,7 +788,7 @@
       ],
       "source": "https://doi.org/10.1126/scirobotics.adi9579",
       "note": "通过明确 DOI 核对 Crossref 出版记录。",
-      "checkedAt": "2026-10-23T05:46:56Z"
+      "checkedAt": "2026-10-23T07:51:37Z"
     },
     "journal-aa691576d4c5526f5c0e": {
       "kind": "journal",
@@ -799,7 +799,7 @@
       ],
       "source": "https://doi.org/10.3390/act13020054",
       "note": "通过明确 DOI 核对 Crossref 出版记录。",
-      "checkedAt": "2026-10-23T05:46:56Z"
+      "checkedAt": "2026-10-23T07:51:38Z"
     },
     "journal-5bce426b3e8a6b63e046": {
       "kind": "journal",
@@ -811,7 +811,7 @@
       ],
       "source": "https://doi.org/10.1109/tsmc.2019.2932892",
       "note": "通过明确 DOI 核对 Crossref 出版记录。",
-      "checkedAt": "2026-10-23T05:46:56Z"
+      "checkedAt": "2026-10-23T07:51:40Z"
     },
     "journal-6a0c048abd1b6cd99e34": {
       "kind": "journal",
@@ -822,7 +822,7 @@
       ],
       "source": "https://doi.org/10.3390/robotics15110212",
       "note": "通过明确 DOI 核对 Crossref 出版记录。",
-      "checkedAt": "2026-10-23T07:25:42Z"
+      "checkedAt": "2026-10-23T07:51:34Z"
     },
     "journal-62e3b3c5742eaf76fa32": {
       "kind": "journal",
@@ -833,7 +833,7 @@
       ],
       "source": "https://doi.org/10.3390/robotics15100200",
       "note": "通过明确 DOI 核对 Crossref 出版记录。",
-      "checkedAt": "2026-10-23T07:25:42Z"
+      "checkedAt": "2026-10-23T07:51:34Z"
     },
     "journal-2db42d94a76b9eb6b35d": {
       "kind": "journal",
@@ -845,7 +845,7 @@
       ],
       "source": "https://doi.org/10.1002/aisy.70563",
       "note": "通过明确 DOI 核对 Crossref 出版记录。",
-      "checkedAt": "2026-10-23T07:25:42Z"
+      "checkedAt": "2026-10-23T07:51:34Z"
     },
     "journal-8f4cf67b7735f8dbf16b": {
       "kind": "journal",
@@ -857,7 +857,7 @@
       ],
       "source": "https://doi.org/10.1007/s10514-026-10263-6",
       "note": "通过明确 DOI 核对 Crossref 出版记录。",
-      "checkedAt": "2026-10-23T07:25:43Z"
+      "checkedAt": "2026-10-23T07:51:34Z"
     },
     "journal-5e6694a0fac5a89725f7": {
       "kind": "journal",
@@ -868,7 +868,7 @@
       ],
       "source": "https://doi.org/10.1126/scirobotics.aed4592",
       "note": "通过明确 DOI 核对 Crossref 出版记录。",
-      "checkedAt": "2026-10-23T07:25:43Z"
+      "checkedAt": "2026-10-23T07:51:34Z"
     },
     "journal-5dfaed7d70238a1d3cc6": {
       "kind": "journal",
@@ -879,7 +879,7 @@
       ],
       "source": "https://doi.org/10.1126/sciadv.aec6917",
       "note": "通过明确 DOI 核对 Crossref 出版记录。",
-      "checkedAt": "2026-10-23T07:25:43Z"
+      "checkedAt": "2026-10-23T07:51:35Z"
     },
     "journal-c40866a312a33b78e616": {
       "kind": "journal",
@@ -890,7 +890,7 @@
       ],
       "source": "https://doi.org/10.1109/tmrb.2026.3742613",
       "note": "通过明确 DOI 核对 Crossref 出版记录。",
-      "checkedAt": "2026-10-23T07:25:43Z"
+      "checkedAt": "2026-10-23T07:51:35Z"
     },
     "journal-62716029e92cb36eb71c": {
       "kind": "journal",
@@ -901,7 +901,7 @@
       ],
       "source": "https://doi.org/10.58425/ajt.v4i2.438",
       "note": "通过明确 DOI 核对 Crossref 出版记录。",
-      "checkedAt": "2026-10-23T07:25:43Z"
+      "checkedAt": "2026-10-23T07:51:35Z"
     },
     "journal-65f8b74eaddfe2fbd588": {
       "kind": "journal",
@@ -913,7 +913,7 @@
       ],
       "source": "https://doi.org/10.1142/s0219843625400018",
       "note": "通过明确 DOI 核对 Crossref 出版记录。",
-      "checkedAt": "2026-10-23T07:25:43Z"
+      "checkedAt": "2026-10-23T07:51:35Z"
     },
     "journal-3072641faed77bde3ab7": {
       "kind": "journal",
@@ -924,7 +924,7 @@
       ],
       "source": "https://doi.org/10.1016/j.autcon.2025.106035",
       "note": "通过明确 DOI 核对 Crossref 出版记录。",
-      "checkedAt": "2026-10-23T07:25:43Z"
+      "checkedAt": "2026-10-23T07:51:35Z"
     },
     "journal-52671539750e0839d176": {
       "kind": "journal",
@@ -936,7 +936,7 @@
       ],
       "source": "https://doi.org/10.1007/s10489-025-06416-2",
       "note": "通过明确 DOI 核对 Crossref 出版记录。",
-      "checkedAt": "2026-10-23T07:25:43Z"
+      "checkedAt": "2026-10-23T07:51:36Z"
     },
     "journal-a9a96bb576ac9bb63cd0": {
       "kind": "journal",
@@ -947,7 +947,7 @@
       ],
       "source": "https://doi.org/10.1016/j.birob.2024.100197",
       "note": "通过明确 DOI 核对 Crossref 出版记录。",
-      "checkedAt": "2026-10-23T07:25:43Z"
+      "checkedAt": "2026-10-23T07:51:36Z"
     },
     "journal-97af4e85dce27be9ee92": {
       "kind": "journal",
@@ -959,7 +959,7 @@
       ],
       "source": "https://doi.org/10.1109/jbhi.2024.3462826",
       "note": "通过明确 DOI 核对 Crossref 出版记录。",
-      "checkedAt": "2026-10-23T07:25:44Z"
+      "checkedAt": "2026-10-23T07:51:36Z"
     },
     "journal-45a63a08c8e9fe18dd3a": {
       "kind": "journal",
@@ -970,7 +970,7 @@
       ],
       "source": "https://doi.org/10.1109/tmrb.2024.3503905",
       "note": "通过明确 DOI 核对 Crossref 出版记录。",
-      "checkedAt": "2026-10-23T07:25:44Z"
+      "checkedAt": "2026-10-23T07:51:36Z"
     },
     "journal-686e21f051bcc18571d1": {
       "kind": "journal",
@@ -982,7 +982,7 @@
       ],
       "source": "https://doi.org/10.1111/exsy.13659",
       "note": "通过明确 DOI 核对 Crossref 出版记录。",
-      "checkedAt": "2026-10-23T07:25:44Z"
+      "checkedAt": "2026-10-23T07:51:37Z"
     },
     "journal-7fc54123711a0e5df6df": {
       "kind": "journal",
@@ -993,7 +993,7 @@
       ],
       "source": "https://doi.org/10.15199/48.2024.06.60",
       "note": "通过明确 DOI 核对 Crossref 出版记录。",
-      "checkedAt": "2026-10-23T07:25:44Z"
+      "checkedAt": "2026-10-23T07:51:37Z"
     },
     "journal-76fe1c6dd5ed88457a43": {
       "kind": "journal",
@@ -1006,7 +1006,7 @@
       ],
       "source": "https://doi.org/10.1109/jsen.2024.3352005",
       "note": "通过明确 DOI 核对 Crossref 出版记录。",
-      "checkedAt": "2026-10-23T07:25:44Z"
+      "checkedAt": "2026-10-23T07:51:37Z"
     },
     "journal-321e464d7ac2e3eb7d45": {
       "kind": "journal",
@@ -1017,7 +1017,7 @@
       ],
       "source": "https://doi.org/10.1007/s43154-023-00107-x",
       "note": "通过明确 DOI 核对 Crossref 出版记录。",
-      "checkedAt": "2026-10-23T07:25:44Z"
+      "checkedAt": "2026-10-23T07:51:38Z"
     },
     "journal-9e4c927bdd4c8851862f": {
       "kind": "journal",
@@ -1029,7 +1029,7 @@
       ],
       "source": "https://doi.org/10.1142/s0219843623500196",
       "note": "通过明确 DOI 核对 Crossref 出版记录。",
-      "checkedAt": "2026-10-23T07:25:44Z"
+      "checkedAt": "2026-10-23T07:51:38Z"
     },
     "journal-feb4a6f66368b73f6e7b": {
       "kind": "journal",
@@ -1040,7 +1040,7 @@
       ],
       "source": "https://doi.org/10.3390/bioengineering10091082",
       "note": "通过明确 DOI 核对 Crossref 出版记录。",
-      "checkedAt": "2026-10-23T07:25:44Z"
+      "checkedAt": "2026-10-23T07:51:38Z"
     },
     "journal-6f7a46a75a056bbba103": {
       "kind": "journal",
@@ -1051,7 +1051,7 @@
       ],
       "source": "https://doi.org/10.1109/tmrb.2023.3290982",
       "note": "通过明确 DOI 核对 Crossref 出版记录。",
-      "checkedAt": "2026-10-23T07:47:51Z"
+      "checkedAt": "2026-10-23T07:51:38Z"
     },
     "journal-0203aa16b6ec0133268d": {
       "kind": "journal",
@@ -1062,7 +1062,7 @@
       ],
       "source": "https://doi.org/10.1186/s12984-023-01212-w",
       "note": "通过明确 DOI 核对 Crossref 出版记录。",
-      "checkedAt": "2026-10-23T07:25:44Z"
+      "checkedAt": "2026-10-23T07:51:38Z"
     },
     "journal-9d5ba49a2115a32d69d3": {
       "kind": "journal",
@@ -1073,7 +1073,7 @@
       ],
       "source": "https://doi.org/10.3390/electronics12112467",
       "note": "通过明确 DOI 核对 Crossref 出版记录。",
-      "checkedAt": "2026-10-23T07:25:45Z"
+      "checkedAt": "2026-10-23T07:51:39Z"
     },
     "journal-bfd1767076dec213bca6": {
       "kind": "journal",
@@ -1084,7 +1084,7 @@
       ],
       "source": "https://doi.org/10.1186/s12984-023-01185-w",
       "note": "通过明确 DOI 核对 Crossref 出版记录。",
-      "checkedAt": "2026-10-23T07:25:45Z"
+      "checkedAt": "2026-10-23T07:51:39Z"
     },
     "journal-ee2b8c2e3ebee9c10666": {
       "kind": "journal",
@@ -1096,7 +1096,7 @@
       ],
       "source": "https://doi.org/10.1109/lra.2023.3256135",
       "note": "通过明确 DOI 核对 Crossref 出版记录。",
-      "checkedAt": "2026-10-23T07:25:45Z"
+      "checkedAt": "2026-10-23T07:51:39Z"
     },
     "journal-ca91d65070a1a44583c8": {
       "kind": "journal",
@@ -1120,7 +1120,7 @@
       ],
       "source": "https://doi.org/10.1109/lra.2022.3207552",
       "note": "通过明确 DOI 核对 Crossref 出版记录。",
-      "checkedAt": "2026-10-23T07:25:45Z"
+      "checkedAt": "2026-10-23T07:51:39Z"
     },
     "journal-07628b19c4e853273188": {
       "kind": "journal",
@@ -1132,7 +1132,7 @@
       ],
       "source": "https://doi.org/10.3233/tad-210362",
       "note": "通过明确 DOI 核对 Crossref 出版记录。",
-      "checkedAt": "2026-10-23T07:47:51Z"
+      "checkedAt": "2026-10-23T07:51:39Z"
     },
     "journal-0c61a9477c95b99e5390": {
       "kind": "journal",
@@ -1143,7 +1143,7 @@
       ],
       "source": "https://doi.org/10.3390/app12094374",
       "note": "通过明确 DOI 核对 Crossref 出版记录。",
-      "checkedAt": "2026-10-23T07:25:45Z"
+      "checkedAt": "2026-10-23T07:51:39Z"
     },
     "journal-70d526d798a4253f081d": {
       "kind": "journal",
@@ -1155,7 +1155,7 @@
       ],
       "source": "https://doi.org/10.1109/lra.2021.3136240",
       "note": "通过明确 DOI 核对 Crossref 出版记录。",
-      "checkedAt": "2026-10-23T07:47:52Z"
+      "checkedAt": "2026-10-23T07:51:39Z"
     },
     "journal-9f5e5c84f657788f50b1": {
       "kind": "journal",
@@ -1166,7 +1166,7 @@
       ],
       "source": "https://doi.org/10.3390/mi13020157",
       "note": "通过明确 DOI 核对 Crossref 出版记录。",
-      "checkedAt": "2026-10-23T07:25:45Z"
+      "checkedAt": "2026-10-23T07:51:40Z"
     },
     "journal-c77f19aef62f21cff408": {
       "kind": "journal",
@@ -1178,7 +1178,7 @@
       ],
       "source": "https://doi.org/10.3233/thc-202423",
       "note": "通过明确 DOI 核对 Crossref 出版记录。",
-      "checkedAt": "2026-10-23T07:47:52Z"
+      "checkedAt": "2026-10-23T07:51:40Z"
     },
     "journal-df3e2b4646d64bea6e5c": {
       "kind": "journal",
@@ -1190,7 +1190,7 @@
       ],
       "source": "https://doi.org/10.1109/tcyb.2020.2972582",
       "note": "通过明确 DOI 核对 Crossref 出版记录。",
-      "checkedAt": "2026-10-23T07:47:52Z"
+      "checkedAt": "2026-10-23T07:51:40Z"
     },
     "journal-b029528d2f104df59d28": {
       "kind": "journal",
@@ -1202,7 +1202,7 @@
       ],
       "source": "https://doi.org/10.4018/ijiit.2020100105",
       "note": "通过明确 DOI 核对 Crossref 出版记录。",
-      "checkedAt": "2026-10-23T07:47:52Z"
+      "checkedAt": "2026-10-23T07:51:40Z"
     },
     "journal-2f4e3a6551594c261be4": {
       "kind": "journal",
@@ -1214,7 +1214,7 @@
       ],
       "source": "https://doi.org/10.1109/lra.2019.2927961",
       "note": "通过明确 DOI 核对 Crossref 出版记录。",
-      "checkedAt": "2026-10-23T07:47:53Z"
+      "checkedAt": "2026-10-23T07:51:40Z"
     },
     "journal-3db2b8ce836b260004c3": {
       "kind": "journal",
@@ -1225,7 +1225,7 @@
       ],
       "source": "https://doi.org/10.1109/access.2019.2954110",
       "note": "通过明确 DOI 核对 Crossref 出版记录。",
-      "checkedAt": "2026-10-23T07:25:46Z"
+      "checkedAt": "2026-10-23T07:51:40Z"
     },
     "journal-2bf8440540d03417653a": {
       "kind": "journal",
@@ -1236,7 +1236,7 @@
       ],
       "source": "https://doi.org/10.1109/access.2019.2904709",
       "note": "通过明确 DOI 核对 Crossref 出版记录。",
-      "checkedAt": "2026-10-23T07:47:53Z"
+      "checkedAt": "2026-10-23T07:51:41Z"
     },
     "journal-4da70b6df0c2f54f7f02": {
       "kind": "journal",
@@ -1247,7 +1247,7 @@
       ],
       "source": "https://doi.org/10.1038/s41598-018-29091-5",
       "note": "通过明确 DOI 核对 Crossref 出版记录。",
-      "checkedAt": "2026-10-23T07:25:46Z"
+      "checkedAt": "2026-10-23T07:51:41Z"
     },
     "journal-b784bba83909d255438c": {
       "kind": "journal",
@@ -1259,7 +1259,7 @@
       ],
       "source": "https://doi.org/10.1155/2018/6019381",
       "note": "通过明确 DOI 核对 Crossref 出版记录。",
-      "checkedAt": "2026-10-23T07:25:46Z"
+      "checkedAt": "2026-10-23T07:51:41Z"
     },
     "journal-34e3c45389d82867c998": {
       "kind": "journal",
@@ -1270,7 +1270,7 @@
       ],
       "source": "https://doi.org/10.3389/fnins.2017.00352",
       "note": "通过明确 DOI 核对 Crossref 出版记录。",
-      "checkedAt": "2026-10-23T07:47:53Z"
+      "checkedAt": "2026-10-23T07:51:41Z"
     },
     "journal-814099fcaab37dce29e9": {
       "kind": "journal",
@@ -1282,7 +1282,7 @@
       ],
       "source": "https://doi.org/10.3906/elk-1503-207",
       "note": "通过明确 DOI 核对 Crossref 出版记录。",
-      "checkedAt": "2026-10-23T07:25:46Z"
+      "checkedAt": "2026-10-23T07:51:41Z"
     },
     "journal-57ed74ce551ac1bdd6d7": {
       "kind": "journal",
@@ -1294,7 +1294,7 @@
       ],
       "source": "https://doi.org/10.1155/2017/2423643",
       "note": "通过明确 DOI 核对 Crossref 出版记录。",
-      "checkedAt": "2026-10-23T07:47:54Z"
+      "checkedAt": "2026-10-23T07:51:41Z"
     },
     "journal-9ef746a7884e22566eb7": {
       "kind": "journal",
@@ -1306,7 +1306,7 @@
       ],
       "source": "https://doi.org/10.1631/fitee.1500286",
       "note": "通过明确 DOI 核对 Crossref 出版记录。",
-      "checkedAt": "2026-10-23T07:25:47Z"
+      "checkedAt": "2026-10-23T07:51:41Z"
     },
     "journal-6401b5881777e8d9ae34": {
       "kind": "journal",
@@ -1318,7 +1318,7 @@
       ],
       "source": "https://doi.org/10.1142/s0219843615500097",
       "note": "通过明确 DOI 核对 Crossref 出版记录。",
-      "checkedAt": "2026-10-23T07:25:47Z"
+      "checkedAt": "2026-10-23T07:51:42Z"
     },
     "journal-659ef527312ba2cfeaa1": {
       "kind": "journal",
@@ -1330,7 +1330,7 @@
       ],
       "source": "https://doi.org/10.1155/2015/145734",
       "note": "通过明确 DOI 核对 Crossref 出版记录。",
-      "checkedAt": "2026-10-23T07:25:47Z"
+      "checkedAt": "2026-10-23T07:51:42Z"
     },
     "journal-a4f1af04c637e057b113": {
       "kind": "journal",
@@ -1341,7 +1341,7 @@
       ],
       "source": "https://doi.org/10.3389/fnsys.2014.00138",
       "note": "通过明确 DOI 核对 Crossref 出版记录。",
-      "checkedAt": "2026-10-23T07:25:47Z"
+      "checkedAt": "2026-10-23T07:51:42Z"
     },
     "journal-5f249f5ec2f2dfabe693": {
       "kind": "journal",
@@ -1352,7 +1352,7 @@
       ],
       "source": "https://doi.org/10.3390/s140609522",
       "note": "通过明确 DOI 核对 Crossref 出版记录。",
-      "checkedAt": "2026-10-23T07:25:47Z"
+      "checkedAt": "2026-10-23T07:51:42Z"
     },
     "journal-03efc086a8e64db5d4ff": {
       "kind": "journal",
@@ -1363,7 +1363,7 @@
       ],
       "source": "https://doi.org/10.47893/ijipvs.2013.1031",
       "note": "通过明确 DOI 核对 Crossref 出版记录。",
-      "checkedAt": "2026-10-23T07:25:47Z"
+      "checkedAt": "2026-10-23T07:51:42Z"
     },
     "journal-a83a7de9213be9e1c613": {
       "kind": "journal",
@@ -1375,7 +1375,7 @@
       ],
       "source": "https://doi.org/10.1142/s0219843612500090",
       "note": "通过明确 DOI 核对 Crossref 出版记录。",
-      "checkedAt": "2026-10-23T07:25:47Z"
+      "checkedAt": "2026-10-23T07:51:42Z"
     },
     "journal-9d13bf7983a3822694b8": {
       "kind": "journal",
@@ -1387,7 +1387,7 @@
       ],
       "source": "https://doi.org/10.1080/01691864.2012.686345",
       "note": "通过明确 DOI 核对 Crossref 出版记录。",
-      "checkedAt": "2026-10-23T07:25:47Z"
+      "checkedAt": "2026-10-23T07:51:42Z"
     },
     "journal-3bdcf251a41ff78718c9": {
       "kind": "journal",
@@ -1399,7 +1399,7 @@
       ],
       "source": "https://doi.org/10.7210/jrsj.30.8",
       "note": "通过明确 DOI 核对 Crossref 出版记录。",
-      "checkedAt": "2026-10-23T07:25:47Z"
+      "checkedAt": "2026-10-23T07:51:43Z"
     },
     "journal-e36ae7b09135d2484089": {
       "kind": "journal",
@@ -1411,7 +1411,7 @@
       ],
       "source": "https://doi.org/10.1177/1687814015590988",
       "note": "通过明确 DOI 核对 Crossref 出版记录。",
-      "checkedAt": "2026-10-23T07:47:54Z"
+      "checkedAt": "2026-10-23T07:51:41Z"
     }
   },
   "journals": {
@@ -1522,7 +1522,7 @@
       ]
     },
     "Science Robotics": {
-      "queried_at": "2026-10-23T05:59:01Z",
+      "queried_at": "2026-10-23T07:51:47Z",
       "format_version": 2,
       "metrics": [
         {
@@ -1576,7 +1576,7 @@
       ]
     },
     "Biomechanics": {
-      "queried_at": "2026-10-23T05:59:02Z",
+      "queried_at": "2026-10-23T07:51:48Z",
       "format_version": 2,
       "metrics": [
         {
@@ -1594,7 +1594,7 @@
       ]
     },
     "IEEE Transactions on Industrial Electronics": {
-      "queried_at": "2026-10-23T05:59:03Z",
+      "queried_at": "2026-10-23T07:51:49Z",
       "format_version": 2,
       "metrics": [
         {
@@ -1648,7 +1648,7 @@
       ]
     },
     "Actuators": {
-      "queried_at": "2026-10-23T05:59:04Z",
+      "queried_at": "2026-10-23T07:51:50Z",
       "format_version": 2,
       "metrics": [
         {
@@ -1702,7 +1702,7 @@
       ]
     },
     "Bioengineering": {
-      "queried_at": "2026-10-23T05:59:06Z",
+      "queried_at": "2026-10-23T07:51:53Z",
       "format_version": 2,
       "metrics": [
         {
@@ -1746,7 +1746,7 @@
       ]
     },
     "Biomimetics": {
-      "queried_at": "2026-10-23T05:59:07Z",
+      "queried_at": "2026-10-23T07:51:54Z",
       "format_version": 2,
       "metrics": [
         {
@@ -1788,7 +1788,7 @@
       ]
     },
     "IEEE Transactions on Systems, Man, and Cybernetics: Systems": {
-      "queried_at": "2026-10-23T05:59:10Z",
+      "queried_at": "2026-10-23T07:52:00Z",
       "format_version": 2,
       "metrics": [
         {
@@ -1888,7 +1888,7 @@
       ]
     },
     "Robotics": {
-      "queried_at": "2026-10-23T07:25:51Z",
+      "queried_at": "2026-10-23T07:52:00Z",
       "format_version": 2,
       "metrics": [
         {
@@ -1918,7 +1918,7 @@
       ]
     },
     "Advanced Intelligent Systems": {
-      "queried_at": "2026-10-23T07:25:53Z",
+      "queried_at": "2026-10-23T07:52:02Z",
       "format_version": 2,
       "metrics": [
         {
@@ -1960,7 +1960,7 @@
       ]
     },
     "Autonomous Robots": {
-      "queried_at": "2026-10-23T07:25:54Z",
+      "queried_at": "2026-10-23T07:52:02Z",
       "format_version": 2,
       "metrics": [
         {
@@ -2014,7 +2014,7 @@
       ]
     },
     "Science Advances": {
-      "queried_at": "2026-10-23T07:25:56Z",
+      "queried_at": "2026-10-23T07:52:04Z",
       "format_version": 2,
       "metrics": [
         {
@@ -2068,7 +2068,7 @@
       ]
     },
     "IEEE Transactions on Medical Robotics and Bionics": {
-      "queried_at": "2026-10-23T07:25:57Z",
+      "queried_at": "2026-10-23T07:52:04Z",
       "format_version": 2,
       "metrics": [
         {
@@ -2098,12 +2098,12 @@
       ]
     },
     "American Journal of Technology": {
-      "queried_at": "2026-10-23T07:25:58Z",
+      "queried_at": "2026-10-23T07:52:06Z",
       "format_version": 2,
       "metrics": []
     },
     "International Journal of Humanoid Robotics": {
-      "queried_at": "2026-10-23T07:26:00Z",
+      "queried_at": "2026-10-23T07:52:08Z",
       "format_version": 2,
       "metrics": [
         {
@@ -2157,7 +2157,7 @@
       ]
     },
     "Automation in Construction": {
-      "queried_at": "2026-10-23T07:26:01Z",
+      "queried_at": "2026-10-23T07:52:09Z",
       "format_version": 2,
       "metrics": [
         {
@@ -2211,7 +2211,7 @@
       ]
     },
     "Applied Intelligence": {
-      "queried_at": "2026-10-23T07:26:02Z",
+      "queried_at": "2026-10-23T07:52:10Z",
       "format_version": 2,
       "metrics": [
         {
@@ -2265,7 +2265,7 @@
       ]
     },
     "Biomimetic Intelligence and Robotics": {
-      "queried_at": "2026-10-23T07:26:02Z",
+      "queried_at": "2026-10-23T07:52:11Z",
       "format_version": 2,
       "metrics": [
         {
@@ -2295,7 +2295,7 @@
       ]
     },
     "IEEE Journal of Biomedical and Health Informatics": {
-      "queried_at": "2026-10-23T07:26:03Z",
+      "queried_at": "2026-10-23T07:52:12Z",
       "format_version": 2,
       "metrics": [
         {
@@ -2349,7 +2349,7 @@
       ]
     },
     "Expert Systems": {
-      "queried_at": "2026-10-23T07:26:06Z",
+      "queried_at": "2026-10-23T07:52:14Z",
       "format_version": 2,
       "metrics": [
         {
@@ -2403,12 +2403,12 @@
       ]
     },
     "PRZEGLĄD ELEKTROTECHNICZNY": {
-      "queried_at": "2026-10-23T07:26:07Z",
+      "queried_at": "2026-10-23T07:52:15Z",
       "format_version": 2,
       "metrics": []
     },
     "IEEE Sensors Journal": {
-      "queried_at": "2026-10-23T07:26:08Z",
+      "queried_at": "2026-10-23T07:52:17Z",
       "format_version": 2,
       "metrics": [
         {
@@ -2462,12 +2462,12 @@
       ]
     },
     "Current Robotics Reports": {
-      "queried_at": "2026-10-23T07:26:09Z",
+      "queried_at": "2026-10-23T07:52:19Z",
       "format_version": 2,
       "metrics": []
     },
     "Journal of NeuroEngineering and Rehabilitation": {
-      "queried_at": "2026-10-23T07:26:10Z",
+      "queried_at": "2026-10-23T07:52:20Z",
       "format_version": 2,
       "metrics": [
         {
@@ -2521,7 +2521,7 @@
       ]
     },
     "Electronics": {
-      "queried_at": "2026-10-23T07:26:12Z",
+      "queried_at": "2026-10-23T07:52:21Z",
       "format_version": 2,
       "metrics": [
         {
@@ -2575,7 +2575,7 @@
       ]
     },
     "IEEE Robotics and Automation Letters": {
-      "queried_at": "2026-10-23T07:26:12Z",
+      "queried_at": "2026-10-23T07:52:22Z",
       "format_version": 2,
       "metrics": [
         {
@@ -2629,12 +2629,12 @@
       ]
     },
     "Journal of Physics: Conference Series": {
-      "queried_at": "2026-10-23T07:26:16Z",
+      "queried_at": "2026-10-23T07:52:26Z",
       "format_version": 2,
       "metrics": []
     },
     "Applied Sciences": {
-      "queried_at": "2026-10-23T07:26:18Z",
+      "queried_at": "2026-10-23T07:52:28Z",
       "format_version": 2,
       "metrics": [
         {
@@ -2688,7 +2688,7 @@
       ]
     },
     "Micromachines": {
-      "queried_at": "2026-10-23T07:26:18Z",
+      "queried_at": "2026-10-23T07:52:29Z",
       "format_version": 2,
       "metrics": [
         {
@@ -2742,7 +2742,7 @@
       ]
     },
     "IEEE Access": {
-      "queried_at": "2026-10-23T07:26:19Z",
+      "queried_at": "2026-10-23T07:52:37Z",
       "format_version": 2,
       "metrics": [
         {
@@ -2796,7 +2796,7 @@
       ]
     },
     "Scientific Reports": {
-      "queried_at": "2026-10-23T07:26:20Z",
+      "queried_at": "2026-10-23T07:52:38Z",
       "format_version": 2,
       "metrics": [
         {
@@ -2850,7 +2850,7 @@
       ]
     },
     "Applied Bionics and Biomechanics": {
-      "queried_at": "2026-10-23T07:26:21Z",
+      "queried_at": "2026-10-23T07:52:39Z",
       "format_version": 2,
       "metrics": [
         {
@@ -2892,17 +2892,17 @@
       ]
     },
     "TURKISH JOURNAL OF ELECTRICAL ENGINEERING &amp; COMPUTER SCIENCES": {
-      "queried_at": "2026-10-23T07:26:22Z",
+      "queried_at": "2026-10-23T07:52:42Z",
       "format_version": 2,
       "metrics": []
     },
     "Frontiers of Information Technology &amp; Electronic Engineering": {
-      "queried_at": "2026-10-23T07:26:23Z",
+      "queried_at": "2026-10-23T07:52:43Z",
       "format_version": 2,
       "metrics": []
     },
     "Mathematical Problems in Engineering": {
-      "queried_at": "2026-10-23T07:26:25Z",
+      "queried_at": "2026-10-23T07:52:52Z",
       "format_version": 2,
       "metrics": [
         {
@@ -2920,7 +2920,7 @@
       ]
     },
     "Frontiers in Systems Neuroscience": {
-      "queried_at": "2026-10-23T07:26:29Z",
+      "queried_at": "2026-10-23T07:52:53Z",
       "format_version": 2,
       "metrics": [
         {
@@ -2974,7 +2974,7 @@
       ]
     },
     "Sensors": {
-      "queried_at": "2026-10-23T07:26:30Z",
+      "queried_at": "2026-10-23T07:52:54Z",
       "format_version": 2,
       "metrics": [
         {
@@ -3028,12 +3028,12 @@
       ]
     },
     "International Journal of Image Processing and Vision Science": {
-      "queried_at": "2026-10-23T07:26:31Z",
+      "queried_at": "2026-10-23T07:52:56Z",
       "format_version": 2,
       "metrics": []
     },
     "Advanced Robotics": {
-      "queried_at": "2026-10-23T07:26:32Z",
+      "queried_at": "2026-10-23T07:52:57Z",
       "format_version": 2,
       "metrics": [
         {
@@ -3087,12 +3087,12 @@
       ]
     },
     "Journal of the Robotics Society of Japan": {
-      "queried_at": "2026-10-23T07:26:34Z",
+      "queried_at": "2026-10-23T07:52:58Z",
       "format_version": 2,
       "metrics": []
     },
     "Technology and Disability": {
-      "queried_at": "2026-10-23T07:47:56Z",
+      "queried_at": "2026-10-23T07:52:27Z",
       "format_version": 2,
       "metrics": [
         {
@@ -3122,7 +3122,7 @@
       ]
     },
     "Technology and Health Care": {
-      "queried_at": "2026-10-23T07:47:59Z",
+      "queried_at": "2026-10-23T07:52:30Z",
       "format_version": 2,
       "metrics": [
         {
@@ -3176,7 +3176,7 @@
       ]
     },
     "IEEE Transactions on Cybernetics": {
-      "queried_at": "2026-10-23T07:48:00Z",
+      "queried_at": "2026-10-23T07:52:34Z",
       "format_version": 2,
       "metrics": [
         {
@@ -3230,7 +3230,7 @@
       ]
     },
     "International Journal of Intelligent Information Technologies": {
-      "queried_at": "2026-10-23T07:48:01Z",
+      "queried_at": "2026-10-23T07:52:35Z",
       "format_version": 2,
       "metrics": [
         {
@@ -3260,7 +3260,7 @@
       ]
     },
     "Frontiers in Neuroscience": {
-      "queried_at": "2026-10-23T07:48:02Z",
+      "queried_at": "2026-10-23T07:52:40Z",
       "format_version": 2,
       "metrics": [
         {
@@ -3314,7 +3314,7 @@
       ]
     },
     "Journal of Robotics": {
-      "queried_at": "2026-10-23T07:48:03Z",
+      "queried_at": "2026-10-23T07:52:42Z",
       "format_version": 2,
       "metrics": [
         {
@@ -3344,7 +3344,7 @@
       ]
     },
     "Advances in Mechanical Engineering": {
-      "queried_at": "2026-10-23T07:48:04Z",
+      "queried_at": "2026-10-23T07:52:59Z",
       "format_version": 2,
       "metrics": [
         {
@@ -5103,7 +5103,7 @@
       "source": "https://openalex.org/W7223019171",
       "scope": "arXiv 版本",
       "doi": "10.48550/arxiv.2610.25628",
-      "checkedAt": "2026-10-23T04:26:45Z"
+      "checkedAt": "2026-10-23T07:51:44Z"
     },
     "2610.28470": {
       "count": 0,
@@ -5112,7 +5112,7 @@
       "source": "https://openalex.org/W7223102345",
       "scope": "arXiv 版本",
       "doi": "10.48550/arxiv.2610.28470",
-      "checkedAt": "2026-10-23T04:26:45Z"
+      "checkedAt": "2026-10-23T07:51:44Z"
     },
     "2610.19615": {
       "count": 0,
@@ -5121,7 +5121,7 @@
       "source": "https://openalex.org/W7222275116",
       "scope": "arXiv 版本",
       "doi": "10.48550/arxiv.2610.19615",
-      "checkedAt": "2026-10-23T04:26:45Z"
+      "checkedAt": "2026-10-23T07:51:44Z"
     },
     "2610.20318": {
       "count": 0,
@@ -5130,7 +5130,7 @@
       "source": "https://openalex.org/W7222322262",
       "scope": "arXiv 版本",
       "doi": "10.48550/arxiv.2610.20318",
-      "checkedAt": "2026-10-23T04:26:45Z"
+      "checkedAt": "2026-10-23T07:51:44Z"
     },
     "2610.24779": {
       "count": 0,
@@ -5139,7 +5139,7 @@
       "source": "https://openalex.org/W7223052023",
       "scope": "arXiv 版本",
       "doi": "10.48550/arxiv.2610.24779",
-      "checkedAt": "2026-10-23T04:26:45Z"
+      "checkedAt": "2026-10-23T07:51:44Z"
     },
     "2610.26855": {
       "count": 0,
@@ -5148,7 +5148,7 @@
       "source": "https://openalex.org/W7223020088",
       "scope": "arXiv 版本",
       "doi": "10.48550/arxiv.2610.26855",
-      "checkedAt": "2026-10-23T04:26:45Z"
+      "checkedAt": "2026-10-23T07:51:44Z"
     },
     "2610.17930": {
       "count": 0,
@@ -5157,7 +5157,7 @@
       "source": "https://openalex.org/W7221816847",
       "scope": "arXiv 版本",
       "doi": "10.48550/arxiv.2610.17930",
-      "checkedAt": "2026-10-23T04:26:45Z"
+      "checkedAt": "2026-10-23T07:51:44Z"
     },
     "2610.28480": {
       "count": 0,
@@ -5166,7 +5166,7 @@
       "source": "https://openalex.org/W7223142413",
       "scope": "arXiv 版本",
       "doi": "10.48550/arxiv.2610.28480",
-      "checkedAt": "2026-10-23T04:26:45Z"
+      "checkedAt": "2026-10-23T07:51:44Z"
     },
     "2610.26043": {
       "count": 0,
@@ -5175,7 +5175,7 @@
       "source": "https://openalex.org/W7223008604",
       "scope": "arXiv 版本",
       "doi": "10.48550/arxiv.2610.26043",
-      "checkedAt": "2026-10-23T04:26:45Z"
+      "checkedAt": "2026-10-23T07:51:44Z"
     },
     "2610.27271": {
       "count": 0,
@@ -5184,7 +5184,7 @@
       "source": "https://openalex.org/W7223094116",
       "scope": "arXiv 版本",
       "doi": "10.48550/arxiv.2610.27271",
-      "checkedAt": "2026-10-23T04:26:45Z"
+      "checkedAt": "2026-10-23T07:51:44Z"
     },
     "2610.19494": {
       "count": 0,
@@ -5193,7 +5193,7 @@
       "source": "https://openalex.org/W7222189325",
       "scope": "arXiv 版本",
       "doi": "10.48550/arxiv.2610.19494",
-      "checkedAt": "2026-10-23T04:26:45Z"
+      "checkedAt": "2026-10-23T07:51:44Z"
     },
     "2610.23548": {
       "count": 0,
@@ -5202,7 +5202,7 @@
       "source": "https://openalex.org/W7222942988",
       "scope": "arXiv 版本",
       "doi": "10.48550/arxiv.2610.23548",
-      "checkedAt": "2026-10-23T04:26:45Z"
+      "checkedAt": "2026-10-23T07:51:44Z"
     },
     "2610.24675": {
       "count": 0,
@@ -5211,7 +5211,7 @@
       "source": "https://openalex.org/W7223050225",
       "scope": "arXiv 版本",
       "doi": "10.48550/arxiv.2610.24675",
-      "checkedAt": "2026-10-23T04:26:45Z"
+      "checkedAt": "2026-10-23T07:51:44Z"
     },
     "2610.24847": {
       "count": 0,
@@ -5220,7 +5220,7 @@
       "source": "https://openalex.org/W7223026986",
       "scope": "arXiv 版本",
       "doi": "10.48550/arxiv.2610.24847",
-      "checkedAt": "2026-10-23T04:26:45Z"
+      "checkedAt": "2026-10-23T07:51:44Z"
     },
     "2610.26170": {
       "count": 0,
@@ -5229,7 +5229,7 @@
       "source": "https://openalex.org/W7222998507",
       "scope": "arXiv 版本",
       "doi": "10.48550/arxiv.2610.26170",
-      "checkedAt": "2026-10-23T04:26:45Z"
+      "checkedAt": "2026-10-23T07:51:44Z"
     },
     "2610.27688": {
       "count": 0,
@@ -5238,7 +5238,7 @@
       "source": "https://openalex.org/W7223158729",
       "scope": "arXiv 版本",
       "doi": "10.48550/arxiv.2610.27688",
-      "checkedAt": "2026-10-23T04:26:45Z"
+      "checkedAt": "2026-10-23T07:51:45Z"
     },
     "2610.19067": {
       "count": 0,
@@ -5247,7 +5247,7 @@
       "source": "https://openalex.org/W7221851372",
       "scope": "arXiv 版本",
       "doi": "10.48550/arxiv.2610.19067",
-      "checkedAt": "2026-10-23T04:26:45Z"
+      "checkedAt": "2026-10-23T07:51:45Z"
     },
     "2610.15833": {
       "count": 0,
@@ -5256,7 +5256,7 @@
       "source": "https://openalex.org/W7221772533",
       "scope": "arXiv 版本",
       "doi": "10.48550/arxiv.2610.15833",
-      "checkedAt": "2026-10-23T04:26:45Z"
+      "checkedAt": "2026-10-23T07:51:45Z"
     },
     "2610.19183": {
       "count": 0,
@@ -5265,7 +5265,7 @@
       "source": "https://openalex.org/W7221902620",
       "scope": "arXiv 版本",
       "doi": "10.48550/arxiv.2610.19183",
-      "checkedAt": "2026-10-23T04:26:45Z"
+      "checkedAt": "2026-10-23T07:51:45Z"
     },
     "2610.17232": {
       "count": 0,
@@ -5274,7 +5274,7 @@
       "source": "https://openalex.org/W7221805027",
       "scope": "arXiv 版本",
       "doi": "10.48550/arxiv.2610.17232",
-      "checkedAt": "2026-10-23T04:26:45Z"
+      "checkedAt": "2026-10-23T07:51:45Z"
     },
     "2610.17999": {
       "count": 0,
@@ -5283,7 +5283,7 @@
       "source": "https://openalex.org/W7221789619",
       "scope": "arXiv 版本",
       "doi": "10.48550/arxiv.2610.17999",
-      "checkedAt": "2026-10-23T04:26:45Z"
+      "checkedAt": "2026-10-23T07:51:45Z"
     },
     "2610.18991": {
       "count": 0,
@@ -5292,7 +5292,7 @@
       "source": "https://openalex.org/W7221859940",
       "scope": "arXiv 版本",
       "doi": "10.48550/arxiv.2610.18991",
-      "checkedAt": "2026-10-23T04:26:45Z"
+      "checkedAt": "2026-10-23T07:51:45Z"
     },
     "2610.19393": {
       "count": 0,
@@ -5301,7 +5301,7 @@
       "source": "https://openalex.org/W7221963831",
       "scope": "arXiv 版本",
       "doi": "10.48550/arxiv.2610.19393",
-      "checkedAt": "2026-10-23T04:26:45Z"
+      "checkedAt": "2026-10-23T07:51:45Z"
     },
     "2610.21152": {
       "count": 0,
@@ -5310,7 +5310,7 @@
       "source": "https://openalex.org/W7222612890",
       "scope": "arXiv 版本",
       "doi": "10.48550/arxiv.2610.21152",
-      "checkedAt": "2026-10-23T04:26:45Z"
+      "checkedAt": "2026-10-23T07:51:45Z"
     },
     "2610.21534": {
       "count": 0,
@@ -5319,7 +5319,7 @@
       "source": "https://openalex.org/W7222586947",
       "scope": "arXiv 版本",
       "doi": "10.48550/arxiv.2610.21534",
-      "checkedAt": "2026-10-23T04:26:45Z"
+      "checkedAt": "2026-10-23T07:51:45Z"
     },
     "2610.22119": {
       "count": 0,
@@ -5328,7 +5328,7 @@
       "source": "https://openalex.org/W7222638978",
       "scope": "arXiv 版本",
       "doi": "10.48550/arxiv.2610.22119",
-      "checkedAt": "2026-10-23T04:26:46Z"
+      "checkedAt": "2026-10-23T07:51:45Z"
     },
     "2610.22176": {
       "count": 0,
@@ -5337,7 +5337,7 @@
       "source": "https://openalex.org/W7222481817",
       "scope": "arXiv 版本",
       "doi": "10.48550/arxiv.2610.22176",
-      "checkedAt": "2026-10-23T04:26:46Z"
+      "checkedAt": "2026-10-23T07:51:45Z"
     },
     "2610.23127": {
       "count": 0,
@@ -5346,7 +5346,7 @@
       "source": "https://openalex.org/W7222932287",
       "scope": "arXiv 版本",
       "doi": "10.48550/arxiv.2610.23127",
-      "checkedAt": "2026-10-23T04:26:46Z"
+      "checkedAt": "2026-10-23T07:51:45Z"
     },
     "2610.25711": {
       "count": 0,
@@ -5355,7 +5355,7 @@
       "source": "https://openalex.org/W7223049730",
       "scope": "arXiv 版本",
       "doi": "10.48550/arxiv.2610.25711",
-      "checkedAt": "2026-10-23T04:26:46Z"
+      "checkedAt": "2026-10-23T07:51:45Z"
     },
     "2610.24235": {
       "count": 0,
@@ -5364,7 +5364,7 @@
       "source": "https://openalex.org/W7223016895",
       "scope": "arXiv 版本",
       "doi": "10.48550/arxiv.2610.24235",
-      "checkedAt": "2026-10-23T04:26:46Z"
+      "checkedAt": "2026-10-23T07:51:45Z"
     },
     "2610.18950": {
       "count": 0,
@@ -5373,7 +5373,7 @@
       "source": "https://openalex.org/W7222278652",
       "scope": "arXiv 版本",
       "doi": "10.48550/arxiv.2610.18950",
-      "checkedAt": "2026-10-23T04:26:46Z"
+      "checkedAt": "2026-10-23T07:51:45Z"
     },
     "2610.21590": {
       "count": 0,
@@ -5382,7 +5382,7 @@
       "source": "https://openalex.org/W7222670304",
       "scope": "arXiv 版本",
       "doi": "10.48550/arxiv.2610.21590",
-      "checkedAt": "2026-10-23T04:26:46Z"
+      "checkedAt": "2026-10-23T07:51:45Z"
     },
     "2610.25288": {
       "count": 0,
@@ -5391,7 +5391,7 @@
       "source": "https://openalex.org/W7223020656",
       "scope": "arXiv 版本",
       "doi": "10.48550/arxiv.2610.25288",
-      "checkedAt": "2026-10-23T04:26:46Z"
+      "checkedAt": "2026-10-23T07:51:45Z"
     },
     "2610.15548": {
       "count": 0,
@@ -5400,7 +5400,7 @@
       "source": "https://openalex.org/W7221834413",
       "scope": "arXiv 版本",
       "doi": "10.48550/arxiv.2610.15548",
-      "checkedAt": "2026-10-23T04:26:46Z"
+      "checkedAt": "2026-10-23T07:51:45Z"
     },
     "2610.18872": {
       "count": 0,
@@ -5409,7 +5409,7 @@
       "source": "https://openalex.org/W7221798123",
       "scope": "arXiv 版本",
       "doi": "10.48550/arxiv.2610.18872",
-      "checkedAt": "2026-10-23T04:26:46Z"
+      "checkedAt": "2026-10-23T07:51:45Z"
     },
     "2610.20255": {
       "count": 0,
@@ -5418,7 +5418,7 @@
       "source": "https://openalex.org/W7222036575",
       "scope": "arXiv 版本",
       "doi": "10.48550/arxiv.2610.20255",
-      "checkedAt": "2026-10-23T04:26:46Z"
+      "checkedAt": "2026-10-23T07:51:45Z"
     },
     "journal-fb7295b34c42e8f1e599": {
       "count": 0,
@@ -5427,7 +5427,7 @@
       "source": "https://openalex.org/W7203751611",
       "scope": "正式出版版本",
       "doi": "10.1126/scirobotics.aed3973",
-      "checkedAt": "2026-10-23T05:46:57Z"
+      "checkedAt": "2026-10-23T07:51:43Z"
     },
     "journal-3b61597ea8bcd700281f": {
       "count": 2,
@@ -5436,7 +5436,7 @@
       "source": "https://openalex.org/W7127183006",
       "scope": "正式出版版本",
       "doi": "10.3390/biomechanics6010015",
-      "checkedAt": "2026-10-23T05:46:57Z"
+      "checkedAt": "2026-10-23T07:51:43Z"
     },
     "journal-047845974f2c4a4cc52e": {
       "count": 0,
@@ -5445,7 +5445,7 @@
       "source": "https://openalex.org/W7161281433",
       "scope": "正式出版版本",
       "doi": "10.1109/tie.2026.3672827",
-      "checkedAt": "2026-10-23T05:46:57Z"
+      "checkedAt": "2026-10-23T07:51:43Z"
     },
     "journal-0943f093660b0d4716e4": {
       "count": 2,
@@ -5454,7 +5454,7 @@
       "source": "https://openalex.org/W4403683317",
       "scope": "正式出版版本",
       "doi": "10.3390/act13110428",
-      "checkedAt": "2026-10-23T05:46:57Z"
+      "checkedAt": "2026-10-23T07:51:43Z"
     },
     "journal-678a878edcdc94c01adf": {
       "count": 6,
@@ -5463,7 +5463,7 @@
       "source": "https://openalex.org/W4400410248",
       "scope": "正式出版版本",
       "doi": "10.3390/bioengineering11070683",
-      "checkedAt": "2026-10-23T05:46:57Z"
+      "checkedAt": "2026-10-23T07:51:43Z"
     },
     "journal-f8477ee5c79e0a32f615": {
       "count": 11,
@@ -5472,7 +5472,7 @@
       "source": "https://openalex.org/W4394995873",
       "scope": "正式出版版本",
       "doi": "10.3390/biomimetics9040254",
-      "checkedAt": "2026-10-23T05:46:57Z"
+      "checkedAt": "2026-10-23T07:51:43Z"
     },
     "journal-e3d41799908ed14eb708": {
       "count": 221,
@@ -5481,7 +5481,7 @@
       "source": "https://openalex.org/W4394872716",
       "scope": "正式出版版本",
       "doi": "10.1126/scirobotics.adi9579",
-      "checkedAt": "2026-10-23T05:46:57Z"
+      "checkedAt": "2026-10-23T07:51:43Z"
     },
     "journal-aa691576d4c5526f5c0e": {
       "count": 19,
@@ -5490,7 +5490,7 @@
       "source": "https://openalex.org/W4391384617",
       "scope": "正式出版版本",
       "doi": "10.3390/act13020054",
-      "checkedAt": "2026-10-23T05:46:57Z"
+      "checkedAt": "2026-10-23T07:51:43Z"
     },
     "journal-5bce426b3e8a6b63e046": {
       "count": 87,
@@ -5499,13 +5499,13 @@
       "source": "https://openalex.org/W2969071609",
       "scope": "正式出版版本",
       "doi": "10.1109/tsmc.2019.2932892",
-      "checkedAt": "2026-10-23T05:46:57Z"
+      "checkedAt": "2026-10-23T07:51:44Z"
     },
     "journal-6a0c048abd1b6cd99e34": {
       "count": null,
       "status": "unindexed",
       "provider": "OpenAlex",
-      "checkedAt": "2026-10-23T07:25:48Z"
+      "checkedAt": "2026-10-23T07:51:43Z"
     },
     "journal-62e3b3c5742eaf76fa32": {
       "count": 0,
@@ -5514,7 +5514,7 @@
       "source": "https://openalex.org/W7222919694",
       "scope": "正式出版版本",
       "doi": "10.3390/robotics15100200",
-      "checkedAt": "2026-10-23T07:25:48Z"
+      "checkedAt": "2026-10-23T07:51:43Z"
     },
     "journal-2db42d94a76b9eb6b35d": {
       "count": 0,
@@ -5523,7 +5523,7 @@
       "source": "https://openalex.org/W7214932910",
       "scope": "正式出版版本",
       "doi": "10.1002/aisy.70563",
-      "checkedAt": "2026-10-23T07:25:48Z"
+      "checkedAt": "2026-10-23T07:51:43Z"
     },
     "journal-8f4cf67b7735f8dbf16b": {
       "count": 0,
@@ -5532,7 +5532,7 @@
       "source": "https://openalex.org/W7214669349",
       "scope": "正式出版版本",
       "doi": "10.1007/s10514-026-10263-6",
-      "checkedAt": "2026-10-23T07:25:48Z"
+      "checkedAt": "2026-10-23T07:51:43Z"
     },
     "journal-5e6694a0fac5a89725f7": {
       "count": 6,
@@ -5541,7 +5541,7 @@
       "source": "https://openalex.org/W7202294264",
       "scope": "正式出版版本",
       "doi": "10.1126/scirobotics.aed4592",
-      "checkedAt": "2026-10-23T07:25:48Z"
+      "checkedAt": "2026-10-23T07:51:43Z"
     },
     "journal-5dfaed7d70238a1d3cc6": {
       "count": 0,
@@ -5550,7 +5550,7 @@
       "source": "https://openalex.org/W7167940282",
       "scope": "正式出版版本",
       "doi": "10.1126/sciadv.aec6917",
-      "checkedAt": "2026-10-23T07:25:48Z"
+      "checkedAt": "2026-10-23T07:51:43Z"
     },
     "journal-c40866a312a33b78e616": {
       "count": 0,
@@ -5559,7 +5559,7 @@
       "source": "https://openalex.org/W7204411203",
       "scope": "正式出版版本",
       "doi": "10.1109/tmrb.2026.3742613",
-      "checkedAt": "2026-10-23T07:25:48Z"
+      "checkedAt": "2026-10-23T07:51:43Z"
     },
     "journal-62716029e92cb36eb71c": {
       "count": 0,
@@ -5568,7 +5568,7 @@
       "source": "https://openalex.org/W4416291018",
       "scope": "正式出版版本",
       "doi": "10.58425/ajt.v4i2.438",
-      "checkedAt": "2026-10-23T07:25:48Z"
+      "checkedAt": "2026-10-23T07:51:43Z"
     },
     "journal-65f8b74eaddfe2fbd588": {
       "count": 2,
@@ -5577,7 +5577,7 @@
       "source": "https://openalex.org/W4408680023",
       "scope": "正式出版版本",
       "doi": "10.1142/s0219843625400018",
-      "checkedAt": "2026-10-23T07:25:48Z"
+      "checkedAt": "2026-10-23T07:51:43Z"
     },
     "journal-3072641faed77bde3ab7": {
       "count": 9,
@@ -5586,7 +5586,7 @@
       "source": "https://openalex.org/W4407325834",
       "scope": "正式出版版本",
       "doi": "10.1016/j.autcon.2025.106035",
-      "checkedAt": "2026-10-23T07:25:48Z"
+      "checkedAt": "2026-10-23T07:51:43Z"
     },
     "journal-52671539750e0839d176": {
       "count": 5,
@@ -5595,7 +5595,7 @@
       "source": "https://openalex.org/W4408645493",
       "scope": "正式出版版本",
       "doi": "10.1007/s10489-025-06416-2",
-      "checkedAt": "2026-10-23T07:25:48Z"
+      "checkedAt": "2026-10-23T07:51:43Z"
     },
     "journal-a9a96bb576ac9bb63cd0": {
       "count": 14,
@@ -5604,7 +5604,7 @@
       "source": "https://openalex.org/W4404733173",
       "scope": "正式出版版本",
       "doi": "10.1016/j.birob.2024.100197",
-      "checkedAt": "2026-10-23T07:25:48Z"
+      "checkedAt": "2026-10-23T07:51:43Z"
     },
     "journal-97af4e85dce27be9ee92": {
       "count": 14,
@@ -5613,7 +5613,7 @@
       "source": "https://openalex.org/W4402570057",
       "scope": "正式出版版本",
       "doi": "10.1109/jbhi.2024.3462826",
-      "checkedAt": "2026-10-23T07:25:48Z"
+      "checkedAt": "2026-10-23T07:51:43Z"
     },
     "journal-45a63a08c8e9fe18dd3a": {
       "count": 2,
@@ -5622,7 +5622,7 @@
       "source": "https://openalex.org/W4404576657",
       "scope": "正式出版版本",
       "doi": "10.1109/tmrb.2024.3503905",
-      "checkedAt": "2026-10-23T07:25:48Z"
+      "checkedAt": "2026-10-23T07:51:43Z"
     },
     "journal-686e21f051bcc18571d1": {
       "count": 6,
@@ -5631,7 +5631,7 @@
       "source": "https://openalex.org/W4399828789",
       "scope": "正式出版版本",
       "doi": "10.1111/exsy.13659",
-      "checkedAt": "2026-10-23T07:25:48Z"
+      "checkedAt": "2026-10-23T07:51:43Z"
     },
     "journal-7fc54123711a0e5df6df": {
       "count": 11,
@@ -5640,7 +5640,7 @@
       "source": "https://openalex.org/W4399739390",
       "scope": "正式出版版本",
       "doi": "10.15199/48.2024.06.60",
-      "checkedAt": "2026-10-23T07:25:48Z"
+      "checkedAt": "2026-10-23T07:51:43Z"
     },
     "journal-76fe1c6dd5ed88457a43": {
       "count": 56,
@@ -5649,7 +5649,7 @@
       "source": "https://openalex.org/W4390938813",
       "scope": "正式出版版本",
       "doi": "10.1109/jsen.2024.3352005",
-      "checkedAt": "2026-10-23T07:25:48Z"
+      "checkedAt": "2026-10-23T07:51:43Z"
     },
     "journal-321e464d7ac2e3eb7d45": {
       "count": 32,
@@ -5658,7 +5658,7 @@
       "source": "https://openalex.org/W4389094688",
       "scope": "正式出版版本",
       "doi": "10.1007/s43154-023-00107-x",
-      "checkedAt": "2026-10-23T07:25:48Z"
+      "checkedAt": "2026-10-23T07:51:44Z"
     },
     "journal-9e4c927bdd4c8851862f": {
       "count": 3,
@@ -5667,7 +5667,7 @@
       "source": "https://openalex.org/W4387160024",
       "scope": "正式出版版本",
       "doi": "10.1142/s0219843623500196",
-      "checkedAt": "2026-10-23T07:25:48Z"
+      "checkedAt": "2026-10-23T07:51:44Z"
     },
     "journal-feb4a6f66368b73f6e7b": {
       "count": 10,
@@ -5676,13 +5676,16 @@
       "source": "https://openalex.org/W4386741405",
       "scope": "正式出版版本",
       "doi": "10.3390/bioengineering10091082",
-      "checkedAt": "2026-10-23T07:25:48Z"
+      "checkedAt": "2026-10-23T07:51:44Z"
     },
     "journal-6f7a46a75a056bbba103": {
-      "count": null,
-      "status": "unindexed",
+      "count": 29,
+      "status": "confirmed",
       "provider": "OpenAlex",
-      "checkedAt": "2026-10-23T07:25:48Z"
+      "source": "https://openalex.org/W4382657783",
+      "scope": "正式出版版本",
+      "doi": "10.1109/tmrb.2023.3290982",
+      "checkedAt": "2026-10-23T07:51:44Z"
     },
     "journal-0203aa16b6ec0133268d": {
       "count": 6,
@@ -5691,7 +5694,7 @@
       "source": "https://openalex.org/W4384025077",
       "scope": "正式出版版本",
       "doi": "10.1186/s12984-023-01212-w",
-      "checkedAt": "2026-10-23T07:25:48Z"
+      "checkedAt": "2026-10-23T07:51:44Z"
     },
     "journal-9d5ba49a2115a32d69d3": {
       "count": 12,
@@ -5700,7 +5703,7 @@
       "source": "https://openalex.org/W4378905913",
       "scope": "正式出版版本",
       "doi": "10.3390/electronics12112467",
-      "checkedAt": "2026-10-23T07:25:48Z"
+      "checkedAt": "2026-10-23T07:51:44Z"
     },
     "journal-bfd1767076dec213bca6": {
       "count": 31,
@@ -5709,7 +5712,7 @@
       "source": "https://openalex.org/W4372341827",
       "scope": "正式出版版本",
       "doi": "10.1186/s12984-023-01185-w",
-      "checkedAt": "2026-10-23T07:25:48Z"
+      "checkedAt": "2026-10-23T07:51:44Z"
     },
     "journal-ee2b8c2e3ebee9c10666": {
       "count": 35,
@@ -5718,7 +5721,7 @@
       "source": "https://openalex.org/W4324125460",
       "scope": "正式出版版本",
       "doi": "10.1109/lra.2023.3256135",
-      "checkedAt": "2026-10-23T07:25:48Z"
+      "checkedAt": "2026-10-23T07:51:44Z"
     },
     "journal-4661819e1baaccb4643e": {
       "count": 11,
@@ -5727,13 +5730,16 @@
       "source": "https://openalex.org/W4296913176",
       "scope": "正式出版版本",
       "doi": "10.1109/lra.2022.3207552",
-      "checkedAt": "2026-10-23T07:25:48Z"
+      "checkedAt": "2026-10-23T07:51:44Z"
     },
     "journal-07628b19c4e853273188": {
-      "count": null,
-      "status": "unindexed",
+      "count": 4,
+      "status": "confirmed",
       "provider": "OpenAlex",
-      "checkedAt": "2026-10-23T07:25:48Z"
+      "source": "https://openalex.org/W4220876144",
+      "scope": "正式出版版本",
+      "doi": "10.3233/tad-210362",
+      "checkedAt": "2026-10-23T07:51:44Z"
     },
     "journal-0c61a9477c95b99e5390": {
       "count": 15,
@@ -5742,13 +5748,16 @@
       "source": "https://openalex.org/W4224997930",
       "scope": "正式出版版本",
       "doi": "10.3390/app12094374",
-      "checkedAt": "2026-10-23T07:25:48Z"
+      "checkedAt": "2026-10-23T07:51:44Z"
     },
     "journal-70d526d798a4253f081d": {
-      "count": null,
-      "status": "unindexed",
+      "count": 71,
+      "status": "confirmed",
       "provider": "OpenAlex",
-      "checkedAt": "2026-10-23T07:25:48Z"
+      "source": "https://openalex.org/W4205270577",
+      "scope": "正式出版版本",
+      "doi": "10.1109/lra.2021.3136240",
+      "checkedAt": "2026-10-23T07:51:44Z"
     },
     "journal-9f5e5c84f657788f50b1": {
       "count": 10,
@@ -5757,31 +5766,43 @@
       "source": "https://openalex.org/W4206978754",
       "scope": "正式出版版本",
       "doi": "10.3390/mi13020157",
-      "checkedAt": "2026-10-23T07:25:48Z"
+      "checkedAt": "2026-10-23T07:51:44Z"
     },
     "journal-c77f19aef62f21cff408": {
-      "count": null,
-      "status": "unindexed",
+      "count": 8,
+      "status": "confirmed",
       "provider": "OpenAlex",
-      "checkedAt": "2026-10-23T07:25:48Z"
+      "source": "https://openalex.org/W3120216027",
+      "scope": "正式出版版本",
+      "doi": "10.3233/thc-202423",
+      "checkedAt": "2026-10-23T07:51:44Z"
     },
     "journal-df3e2b4646d64bea6e5c": {
-      "count": null,
-      "status": "unindexed",
+      "count": 169,
+      "status": "confirmed",
       "provider": "OpenAlex",
-      "checkedAt": "2026-10-23T07:25:48Z"
+      "source": "https://openalex.org/W3007437250",
+      "scope": "正式出版版本",
+      "doi": "10.1109/tcyb.2020.2972582",
+      "checkedAt": "2026-10-23T07:51:44Z"
     },
     "journal-b029528d2f104df59d28": {
-      "count": null,
-      "status": "unindexed",
+      "count": 7,
+      "status": "confirmed",
       "provider": "OpenAlex",
-      "checkedAt": "2026-10-23T07:25:48Z"
+      "source": "https://openalex.org/W3088253711",
+      "scope": "正式出版版本",
+      "doi": "10.4018/ijiit.2020100105",
+      "checkedAt": "2026-10-23T07:51:44Z"
     },
     "journal-2f4e3a6551594c261be4": {
-      "count": null,
-      "status": "unindexed",
+      "count": 53,
+      "status": "confirmed",
       "provider": "OpenAlex",
-      "checkedAt": "2026-10-23T07:25:48Z"
+      "source": "https://openalex.org/W2959825853",
+      "scope": "正式出版版本",
+      "doi": "10.1109/lra.2019.2927961",
+      "checkedAt": "2026-10-23T07:51:44Z"
     },
     "journal-3db2b8ce836b260004c3": {
       "count": 43,
@@ -5790,13 +5811,16 @@
       "source": "https://openalex.org/W2990997159",
       "scope": "正式出版版本",
       "doi": "10.1109/access.2019.2954110",
-      "checkedAt": "2026-10-23T07:25:48Z"
+      "checkedAt": "2026-10-23T07:51:44Z"
     },
     "journal-2bf8440540d03417653a": {
-      "count": null,
-      "status": "unindexed",
+      "count": 50,
+      "status": "confirmed",
       "provider": "OpenAlex",
-      "checkedAt": "2026-10-23T07:25:48Z"
+      "source": "https://openalex.org/W2921891871",
+      "scope": "正式出版版本",
+      "doi": "10.1109/access.2019.2904709",
+      "checkedAt": "2026-10-23T07:51:44Z"
     },
     "journal-4da70b6df0c2f54f7f02": {
       "count": 96,
@@ -5805,7 +5829,7 @@
       "source": "https://openalex.org/W2821353650",
       "scope": "正式出版版本",
       "doi": "10.1038/s41598-018-29091-5",
-      "checkedAt": "2026-10-23T07:25:48Z"
+      "checkedAt": "2026-10-23T07:51:44Z"
     },
     "journal-b784bba83909d255438c": {
       "count": 17,
@@ -5814,13 +5838,16 @@
       "source": "https://openalex.org/W2806917764",
       "scope": "正式出版版本",
       "doi": "10.1155/2018/6019381",
-      "checkedAt": "2026-10-23T07:25:48Z"
+      "checkedAt": "2026-10-23T07:51:44Z"
     },
     "journal-34e3c45389d82867c998": {
-      "count": null,
-      "status": "unindexed",
+      "count": 51,
+      "status": "confirmed",
       "provider": "OpenAlex",
-      "checkedAt": "2026-10-23T07:25:48Z"
+      "source": "https://openalex.org/W2726195204",
+      "scope": "正式出版版本",
+      "doi": "10.3389/fnins.2017.00352",
+      "checkedAt": "2026-10-23T07:51:44Z"
     },
     "journal-814099fcaab37dce29e9": {
       "count": 5,
@@ -5829,13 +5856,16 @@
       "source": "https://openalex.org/W2605497700",
       "scope": "正式出版版本",
       "doi": "10.3906/elk-1503-207",
-      "checkedAt": "2026-10-23T07:25:48Z"
+      "checkedAt": "2026-10-23T07:51:44Z"
     },
     "journal-57ed74ce551ac1bdd6d7": {
-      "count": null,
-      "status": "unindexed",
+      "count": 13,
+      "status": "confirmed",
       "provider": "OpenAlex",
-      "checkedAt": "2026-10-23T07:25:48Z"
+      "source": "https://openalex.org/W2774966123",
+      "scope": "正式出版版本",
+      "doi": "10.1155/2017/2423643",
+      "checkedAt": "2026-10-23T07:51:44Z"
     },
     "journal-9ef746a7884e22566eb7": {
       "count": 13,
@@ -5844,7 +5874,7 @@
       "source": "https://openalex.org/W2529365801",
       "scope": "正式出版版本",
       "doi": "10.1631/fitee.1500286",
-      "checkedAt": "2026-10-23T07:25:48Z"
+      "checkedAt": "2026-10-23T07:51:44Z"
     },
     "journal-6401b5881777e8d9ae34": {
       "count": 2,
@@ -5853,7 +5883,7 @@
       "source": "https://openalex.org/W2004620401",
       "scope": "正式出版版本",
       "doi": "10.1142/s0219843615500097",
-      "checkedAt": "2026-10-23T07:25:48Z"
+      "checkedAt": "2026-10-23T07:51:44Z"
     },
     "journal-659ef527312ba2cfeaa1": {
       "count": 21,
@@ -5862,7 +5892,7 @@
       "source": "https://openalex.org/W1572747828",
       "scope": "正式出版版本",
       "doi": "10.1155/2015/145734",
-      "checkedAt": "2026-10-23T07:25:48Z"
+      "checkedAt": "2026-10-23T07:51:44Z"
     },
     "journal-a4f1af04c637e057b113": {
       "count": 18,
@@ -5871,7 +5901,7 @@
       "source": "https://openalex.org/W2079520948",
       "scope": "正式出版版本",
       "doi": "10.3389/fnsys.2014.00138",
-      "checkedAt": "2026-10-23T07:25:48Z"
+      "checkedAt": "2026-10-23T07:51:44Z"
     },
     "journal-5f249f5ec2f2dfabe693": {
       "count": 24,
@@ -5880,7 +5910,7 @@
       "source": "https://openalex.org/W2011502221",
       "scope": "正式出版版本",
       "doi": "10.3390/s140609522",
-      "checkedAt": "2026-10-23T07:25:48Z"
+      "checkedAt": "2026-10-23T07:51:44Z"
     },
     "journal-03efc086a8e64db5d4ff": {
       "count": 1,
@@ -5889,7 +5919,7 @@
       "source": "https://openalex.org/W3118616857",
       "scope": "正式出版版本",
       "doi": "10.47893/ijipvs.2013.1031",
-      "checkedAt": "2026-10-23T07:25:48Z"
+      "checkedAt": "2026-10-23T07:51:44Z"
     },
     "journal-a83a7de9213be9e1c613": {
       "count": 14,
@@ -5898,7 +5928,7 @@
       "source": "https://openalex.org/W2149963833",
       "scope": "正式出版版本",
       "doi": "10.1142/s0219843612500090",
-      "checkedAt": "2026-10-23T07:25:48Z"
+      "checkedAt": "2026-10-23T07:51:44Z"
     },
     "journal-9d13bf7983a3822694b8": {
       "count": 109,
@@ -5907,7 +5937,7 @@
       "source": "https://openalex.org/W2087485438",
       "scope": "正式出版版本",
       "doi": "10.1080/01691864.2012.686345",
-      "checkedAt": "2026-10-23T07:25:48Z"
+      "checkedAt": "2026-10-23T07:51:44Z"
     },
     "journal-3bdcf251a41ff78718c9": {
       "count": 8,
@@ -5916,7 +5946,7 @@
       "source": "https://openalex.org/W2326144514",
       "scope": "正式出版版本",
       "doi": "10.7210/jrsj.30.8",
-      "checkedAt": "2026-10-23T07:25:49Z"
+      "checkedAt": "2026-10-23T07:51:44Z"
     },
     "journal-e36ae7b09135d2484089": {
       "count": 49,
@@ -5925,14 +5955,14 @@
       "source": "https://openalex.org/W2576714614",
       "scope": "正式出版版本",
       "doi": "10.1177/1687814015590988",
-      "checkedAt": "2026-10-23T07:47:54Z"
+      "checkedAt": "2026-10-23T07:51:44Z"
     }
   },
   "citation_provider": "OpenAlex",
   "citation_status": "ready",
   "citation_coverage": {
     "total": 96,
-    "confirmed": 85
+    "confirmed": 95
   },
   "coverage": {
     "journal": 60,
@@ -5941,5 +5971,5 @@
     "reference": 0,
     "total": 96
   },
-  "message": "EasyScholar 指标已同步；未确认期刊的论文不套用分区。"
+  "message": "部分服务暂不可用，保留已有缓存。"
 }

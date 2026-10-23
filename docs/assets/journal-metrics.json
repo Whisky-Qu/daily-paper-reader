@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
   "provider": "EasyScholar",
-  "generated_at": "2026-10-23T07:25:42Z",
-  "status": "partial",
+  "generated_at": "2026-10-23T07:47:51Z",
+  "status": "ready",
   "papers": {
     "2610.26043": {
       "kind": "preprint",
@@ -1043,12 +1043,15 @@
       "checkedAt": "2026-10-23T07:25:44Z"
     },
     "journal-6f7a46a75a056bbba103": {
-      "kind": "reference",
+      "kind": "journal",
+      "venue": "IEEE Transactions on Medical Robotics and Bionics",
       "doi": "10.1109/tmrb.2023.3290982",
+      "issns": [
+        "2576-3202"
+      ],
       "source": "https://doi.org/10.1109/tmrb.2023.3290982",
-      "note": "期刊列表 DOI 待核对。 Crossref 查询暂不可用，尚未完成核对。",
-      "checkedAt": "2026-10-23T07:25:42Z",
-      "lookupStatus": "unavailable"
+      "note": "通过明确 DOI 核对 Crossref 出版记录。",
+      "checkedAt": "2026-10-23T07:47:51Z"
     },
     "journal-0203aa16b6ec0133268d": {
       "kind": "journal",
@@ -1120,12 +1123,16 @@
       "checkedAt": "2026-10-23T07:25:45Z"
     },
     "journal-07628b19c4e853273188": {
-      "kind": "reference",
+      "kind": "journal",
+      "venue": "Technology and Disability",
       "doi": "10.3233/tad-210362",
+      "issns": [
+        "1055-4181",
+        "1878-643X"
+      ],
       "source": "https://doi.org/10.3233/tad-210362",
-      "note": "期刊列表 DOI 待核对。 Crossref 查询暂不可用，尚未完成核对。",
-      "checkedAt": "2026-10-23T07:25:42Z",
-      "lookupStatus": "unavailable"
+      "note": "通过明确 DOI 核对 Crossref 出版记录。",
+      "checkedAt": "2026-10-23T07:47:51Z"
     },
     "journal-0c61a9477c95b99e5390": {
       "kind": "journal",
@@ -1139,12 +1146,16 @@
       "checkedAt": "2026-10-23T07:25:45Z"
     },
     "journal-70d526d798a4253f081d": {
-      "kind": "reference",
+      "kind": "journal",
+      "venue": "IEEE Robotics and Automation Letters",
       "doi": "10.1109/lra.2021.3136240",
+      "issns": [
+        "2377-3766",
+        "2377-3774"
+      ],
       "source": "https://doi.org/10.1109/lra.2021.3136240",
-      "note": "期刊列表 DOI 待核对。 Crossref 查询暂不可用，尚未完成核对。",
-      "checkedAt": "2026-10-23T07:25:42Z",
-      "lookupStatus": "unavailable"
+      "note": "通过明确 DOI 核对 Crossref 出版记录。",
+      "checkedAt": "2026-10-23T07:47:52Z"
     },
     "journal-9f5e5c84f657788f50b1": {
       "kind": "journal",
@@ -1158,36 +1169,52 @@
       "checkedAt": "2026-10-23T07:25:45Z"
     },
     "journal-c77f19aef62f21cff408": {
-      "kind": "reference",
+      "kind": "journal",
+      "venue": "Technology and Health Care",
       "doi": "10.3233/thc-202423",
+      "issns": [
+        "0928-7329",
+        "1878-7401"
+      ],
       "source": "https://doi.org/10.3233/thc-202423",
-      "note": "期刊列表 DOI 待核对。 Crossref 查询暂不可用，尚未完成核对。",
-      "checkedAt": "2026-10-23T07:25:42Z",
-      "lookupStatus": "unavailable"
+      "note": "通过明确 DOI 核对 Crossref 出版记录。",
+      "checkedAt": "2026-10-23T07:47:52Z"
     },
     "journal-df3e2b4646d64bea6e5c": {
-      "kind": "reference",
+      "kind": "journal",
+      "venue": "IEEE Transactions on Cybernetics",
       "doi": "10.1109/tcyb.2020.2972582",
+      "issns": [
+        "2168-2267",
+        "2168-2275"
+      ],
       "source": "https://doi.org/10.1109/tcyb.2020.2972582",
-      "note": "期刊列表 DOI 待核对。 Crossref 查询暂不可用，尚未完成核对。",
-      "checkedAt": "2026-10-23T07:25:42Z",
-      "lookupStatus": "unavailable"
+      "note": "通过明确 DOI 核对 Crossref 出版记录。",
+      "checkedAt": "2026-10-23T07:47:52Z"
     },
     "journal-b029528d2f104df59d28": {
-      "kind": "reference",
+      "kind": "journal",
+      "venue": "International Journal of Intelligent Information Technologies",
       "doi": "10.4018/ijiit.2020100105",
+      "issns": [
+        "1548-3657",
+        "1548-3665"
+      ],
       "source": "https://doi.org/10.4018/ijiit.2020100105",
-      "note": "期刊列表 DOI 待核对。 Crossref 查询暂不可用，尚未完成核对。",
-      "checkedAt": "2026-10-23T07:25:42Z",
-      "lookupStatus": "unavailable"
+      "note": "通过明确 DOI 核对 Crossref 出版记录。",
+      "checkedAt": "2026-10-23T07:47:52Z"
     },
     "journal-2f4e3a6551594c261be4": {
-      "kind": "reference",
+      "kind": "journal",
+      "venue": "IEEE Robotics and Automation Letters",
       "doi": "10.1109/lra.2019.2927961",
+      "issns": [
+        "2377-3766",
+        "2377-3774"
+      ],
       "source": "https://doi.org/10.1109/lra.2019.2927961",
-      "note": "期刊列表 DOI 待核对。 Crossref 查询暂不可用，尚未完成核对。",
-      "checkedAt": "2026-10-23T07:25:42Z",
-      "lookupStatus": "unavailable"
+      "note": "通过明确 DOI 核对 Crossref 出版记录。",
+      "checkedAt": "2026-10-23T07:47:53Z"
     },
     "journal-3db2b8ce836b260004c3": {
       "kind": "journal",
@@ -1201,12 +1228,15 @@
       "checkedAt": "2026-10-23T07:25:46Z"
     },
     "journal-2bf8440540d03417653a": {
-      "kind": "reference",
+      "kind": "journal",
+      "venue": "IEEE Access",
       "doi": "10.1109/access.2019.2904709",
+      "issns": [
+        "2169-3536"
+      ],
       "source": "https://doi.org/10.1109/access.2019.2904709",
-      "note": "期刊列表 DOI 待核对。 Crossref 查询暂不可用，尚未完成核对。",
-      "checkedAt": "2026-10-23T07:25:42Z",
-      "lookupStatus": "unavailable"
+      "note": "通过明确 DOI 核对 Crossref 出版记录。",
+      "checkedAt": "2026-10-23T07:47:53Z"
     },
     "journal-4da70b6df0c2f54f7f02": {
       "kind": "journal",
@@ -1232,12 +1262,15 @@
       "checkedAt": "2026-10-23T07:25:46Z"
     },
     "journal-34e3c45389d82867c998": {
-      "kind": "reference",
+      "kind": "journal",
+      "venue": "Frontiers in Neuroscience",
       "doi": "10.3389/fnins.2017.00352",
+      "issns": [
+        "1662-453X"
+      ],
       "source": "https://doi.org/10.3389/fnins.2017.00352",
-      "note": "期刊列表 DOI 待核对。 Crossref 查询暂不可用，尚未完成核对。",
-      "checkedAt": "2026-10-23T07:25:42Z",
-      "lookupStatus": "unavailable"
+      "note": "通过明确 DOI 核对 Crossref 出版记录。",
+      "checkedAt": "2026-10-23T07:47:53Z"
     },
     "journal-814099fcaab37dce29e9": {
       "kind": "journal",
@@ -1252,12 +1285,16 @@
       "checkedAt": "2026-10-23T07:25:46Z"
     },
     "journal-57ed74ce551ac1bdd6d7": {
-      "kind": "reference",
+      "kind": "journal",
+      "venue": "Journal of Robotics",
       "doi": "10.1155/2017/2423643",
+      "issns": [
+        "1687-9600",
+        "1687-9619"
+      ],
       "source": "https://doi.org/10.1155/2017/2423643",
-      "note": "期刊列表 DOI 待核对。 Crossref 查询暂不可用，尚未完成核对。",
-      "checkedAt": "2026-10-23T07:25:42Z",
-      "lookupStatus": "unavailable"
+      "note": "通过明确 DOI 核对 Crossref 出版记录。",
+      "checkedAt": "2026-10-23T07:47:54Z"
     },
     "journal-9ef746a7884e22566eb7": {
       "kind": "journal",
@@ -1363,6 +1400,18 @@
       "source": "https://doi.org/10.7210/jrsj.30.8",
       "note": "通过明确 DOI 核对 Crossref 出版记录。",
       "checkedAt": "2026-10-23T07:25:47Z"
+    },
+    "journal-e36ae7b09135d2484089": {
+      "kind": "journal",
+      "venue": "Advances in Mechanical Engineering",
+      "doi": "10.1177/1687814015590988",
+      "issns": [
+        "1687-8132",
+        "1687-8140"
+      ],
+      "source": "https://doi.org/10.1177/1687814015590988",
+      "note": "通过明确 DOI 核对 Crossref 出版记录。",
+      "checkedAt": "2026-10-23T07:47:54Z"
     }
   },
   "journals": {
@@ -3041,6 +3090,312 @@
       "queried_at": "2026-10-23T07:26:34Z",
       "format_version": 2,
       "metrics": []
+    },
+    "Technology and Disability": {
+      "queried_at": "2026-10-23T07:47:56Z",
+      "format_version": 2,
+      "metrics": [
+        {
+          "journal": "Technology and Disability",
+          "issn": "1055-4181",
+          "kind": "中科院升级版",
+          "value": "4区",
+          "year": null,
+          "category": "医学",
+          "source": "https://www.easyscholar.cc/console/user/open",
+          "origin": "EasyScholar 开放接口",
+          "yearLabel": "接口未提供数据年份",
+          "provider_field": "sciUp"
+        },
+        {
+          "journal": "Technology and Disability",
+          "issn": "1055-4181",
+          "kind": "JIF",
+          "value": "0.8",
+          "year": null,
+          "category": "",
+          "source": "https://www.easyscholar.cc/console/user/open",
+          "origin": "EasyScholar 开放接口",
+          "yearLabel": "接口未提供数据年份",
+          "provider_field": "sciif"
+        }
+      ]
+    },
+    "Technology and Health Care": {
+      "queried_at": "2026-10-23T07:47:59Z",
+      "format_version": 2,
+      "metrics": [
+        {
+          "journal": "Technology and Health Care",
+          "issn": "0928-7329",
+          "kind": "中科院升级版",
+          "value": "4区",
+          "year": null,
+          "category": "医学",
+          "source": "https://www.easyscholar.cc/console/user/open",
+          "origin": "EasyScholar 开放接口",
+          "yearLabel": "接口未提供数据年份",
+          "provider_field": "sciUp"
+        },
+        {
+          "journal": "Technology and Health Care",
+          "issn": "0928-7329",
+          "kind": "中科院基础版",
+          "value": "4区",
+          "year": null,
+          "category": "医学",
+          "source": "https://www.easyscholar.cc/console/user/open",
+          "origin": "EasyScholar 开放接口",
+          "yearLabel": "接口未提供数据年份",
+          "provider_field": "sciBase"
+        },
+        {
+          "journal": "Technology and Health Care",
+          "issn": "0928-7329",
+          "kind": "JIF",
+          "value": "1.3",
+          "year": null,
+          "category": "",
+          "source": "https://www.easyscholar.cc/console/user/open",
+          "origin": "EasyScholar 开放接口",
+          "yearLabel": "接口未提供数据年份",
+          "provider_field": "sciif"
+        },
+        {
+          "journal": "Technology and Health Care",
+          "issn": "0928-7329",
+          "kind": "JCR",
+          "value": "Q4",
+          "year": null,
+          "category": "SCI",
+          "source": "https://www.easyscholar.cc/console/user/open",
+          "origin": "EasyScholar 开放接口",
+          "yearLabel": "接口未提供数据年份",
+          "provider_field": "sci"
+        }
+      ]
+    },
+    "IEEE Transactions on Cybernetics": {
+      "queried_at": "2026-10-23T07:48:00Z",
+      "format_version": 2,
+      "metrics": [
+        {
+          "journal": "IEEE Transactions on Cybernetics",
+          "issn": "2168-2267",
+          "kind": "中科院升级版",
+          "value": "1区",
+          "year": null,
+          "category": "计算机科学",
+          "source": "https://www.easyscholar.cc/console/user/open",
+          "origin": "EasyScholar 开放接口",
+          "yearLabel": "接口未提供数据年份",
+          "provider_field": "sciUp"
+        },
+        {
+          "journal": "IEEE Transactions on Cybernetics",
+          "issn": "2168-2267",
+          "kind": "中科院基础版",
+          "value": "1区",
+          "year": null,
+          "category": "工程技术",
+          "source": "https://www.easyscholar.cc/console/user/open",
+          "origin": "EasyScholar 开放接口",
+          "yearLabel": "接口未提供数据年份",
+          "provider_field": "sciBase"
+        },
+        {
+          "journal": "IEEE Transactions on Cybernetics",
+          "issn": "2168-2267",
+          "kind": "JIF",
+          "value": "11.3",
+          "year": null,
+          "category": "",
+          "source": "https://www.easyscholar.cc/console/user/open",
+          "origin": "EasyScholar 开放接口",
+          "yearLabel": "接口未提供数据年份",
+          "provider_field": "sciif"
+        },
+        {
+          "journal": "IEEE Transactions on Cybernetics",
+          "issn": "2168-2267",
+          "kind": "JCR",
+          "value": "Q1",
+          "year": null,
+          "category": "SCI",
+          "source": "https://www.easyscholar.cc/console/user/open",
+          "origin": "EasyScholar 开放接口",
+          "yearLabel": "接口未提供数据年份",
+          "provider_field": "sci"
+        }
+      ]
+    },
+    "International Journal of Intelligent Information Technologies": {
+      "queried_at": "2026-10-23T07:48:01Z",
+      "format_version": 2,
+      "metrics": [
+        {
+          "journal": "International Journal of Intelligent Information Technologies",
+          "issn": "1548-3657",
+          "kind": "中科院升级版",
+          "value": "4区",
+          "year": null,
+          "category": "计算机科学",
+          "source": "https://www.easyscholar.cc/console/user/open",
+          "origin": "EasyScholar 开放接口",
+          "yearLabel": "接口未提供数据年份",
+          "provider_field": "sciUp"
+        },
+        {
+          "journal": "International Journal of Intelligent Information Technologies",
+          "issn": "1548-3657",
+          "kind": "JIF",
+          "value": "1.7",
+          "year": null,
+          "category": "",
+          "source": "https://www.easyscholar.cc/console/user/open",
+          "origin": "EasyScholar 开放接口",
+          "yearLabel": "接口未提供数据年份",
+          "provider_field": "sciif"
+        }
+      ]
+    },
+    "Frontiers in Neuroscience": {
+      "queried_at": "2026-10-23T07:48:02Z",
+      "format_version": 2,
+      "metrics": [
+        {
+          "journal": "Frontiers in Neuroscience",
+          "issn": "1662-453X",
+          "kind": "中科院升级版",
+          "value": "3区",
+          "year": null,
+          "category": "医学",
+          "source": "https://www.easyscholar.cc/console/user/open",
+          "origin": "EasyScholar 开放接口",
+          "yearLabel": "接口未提供数据年份",
+          "provider_field": "sciUp"
+        },
+        {
+          "journal": "Frontiers in Neuroscience",
+          "issn": "1662-453X",
+          "kind": "中科院基础版",
+          "value": "3区",
+          "year": null,
+          "category": "医学",
+          "source": "https://www.easyscholar.cc/console/user/open",
+          "origin": "EasyScholar 开放接口",
+          "yearLabel": "接口未提供数据年份",
+          "provider_field": "sciBase"
+        },
+        {
+          "journal": "Frontiers in Neuroscience",
+          "issn": "1662-453X",
+          "kind": "JIF",
+          "value": "4.0",
+          "year": null,
+          "category": "",
+          "source": "https://www.easyscholar.cc/console/user/open",
+          "origin": "EasyScholar 开放接口",
+          "yearLabel": "接口未提供数据年份",
+          "provider_field": "sciif"
+        },
+        {
+          "journal": "Frontiers in Neuroscience",
+          "issn": "1662-453X",
+          "kind": "JCR",
+          "value": "Q2",
+          "year": null,
+          "category": "SCI",
+          "source": "https://www.easyscholar.cc/console/user/open",
+          "origin": "EasyScholar 开放接口",
+          "yearLabel": "接口未提供数据年份",
+          "provider_field": "sci"
+        }
+      ]
+    },
+    "Journal of Robotics": {
+      "queried_at": "2026-10-23T07:48:03Z",
+      "format_version": 2,
+      "metrics": [
+        {
+          "journal": "Journal of Robotics",
+          "issn": "1687-9600",
+          "kind": "中科院升级版",
+          "value": "4区",
+          "year": null,
+          "category": "计算机科学",
+          "source": "https://www.easyscholar.cc/console/user/open",
+          "origin": "EasyScholar 开放接口",
+          "yearLabel": "接口未提供数据年份",
+          "provider_field": "sciUp"
+        },
+        {
+          "journal": "Journal of Robotics",
+          "issn": "1687-9600",
+          "kind": "JIF",
+          "value": "1.9",
+          "year": null,
+          "category": "",
+          "source": "https://www.easyscholar.cc/console/user/open",
+          "origin": "EasyScholar 开放接口",
+          "yearLabel": "接口未提供数据年份",
+          "provider_field": "sciif"
+        }
+      ]
+    },
+    "Advances in Mechanical Engineering": {
+      "queried_at": "2026-10-23T07:48:04Z",
+      "format_version": 2,
+      "metrics": [
+        {
+          "journal": "Advances in Mechanical Engineering",
+          "issn": "1687-8132",
+          "kind": "中科院升级版",
+          "value": "4区",
+          "year": null,
+          "category": "工程技术",
+          "source": "https://www.easyscholar.cc/console/user/open",
+          "origin": "EasyScholar 开放接口",
+          "yearLabel": "接口未提供数据年份",
+          "provider_field": "sciUp"
+        },
+        {
+          "journal": "Advances in Mechanical Engineering",
+          "issn": "1687-8132",
+          "kind": "中科院基础版",
+          "value": "4区",
+          "year": null,
+          "category": "工程技术",
+          "source": "https://www.easyscholar.cc/console/user/open",
+          "origin": "EasyScholar 开放接口",
+          "yearLabel": "接口未提供数据年份",
+          "provider_field": "sciBase"
+        },
+        {
+          "journal": "Advances in Mechanical Engineering",
+          "issn": "1687-8132",
+          "kind": "JIF",
+          "value": "2.3",
+          "year": null,
+          "category": "",
+          "source": "https://www.easyscholar.cc/console/user/open",
+          "origin": "EasyScholar 开放接口",
+          "yearLabel": "接口未提供数据年份",
+          "provider_field": "sciif"
+        },
+        {
+          "journal": "Advances in Mechanical Engineering",
+          "issn": "1687-8132",
+          "kind": "JCR",
+          "value": "Q2",
+          "year": null,
+          "category": "SCI",
+          "source": "https://www.easyscholar.cc/console/user/open",
+          "origin": "EasyScholar 开放接口",
+          "yearLabel": "接口未提供数据年份",
+          "provider_field": "sci"
+        }
+      ]
     }
   },
   "metrics": [
@@ -4473,6 +4828,270 @@
       "origin": "EasyScholar 开放接口",
       "yearLabel": "接口未提供数据年份",
       "provider_field": "sci"
+    },
+    {
+      "journal": "Technology and Disability",
+      "issn": "1055-4181",
+      "kind": "中科院升级版",
+      "value": "4区",
+      "year": null,
+      "category": "医学",
+      "source": "https://www.easyscholar.cc/console/user/open",
+      "origin": "EasyScholar 开放接口",
+      "yearLabel": "接口未提供数据年份",
+      "provider_field": "sciUp"
+    },
+    {
+      "journal": "Technology and Disability",
+      "issn": "1055-4181",
+      "kind": "JIF",
+      "value": "0.8",
+      "year": null,
+      "category": "",
+      "source": "https://www.easyscholar.cc/console/user/open",
+      "origin": "EasyScholar 开放接口",
+      "yearLabel": "接口未提供数据年份",
+      "provider_field": "sciif"
+    },
+    {
+      "journal": "Technology and Health Care",
+      "issn": "0928-7329",
+      "kind": "中科院升级版",
+      "value": "4区",
+      "year": null,
+      "category": "医学",
+      "source": "https://www.easyscholar.cc/console/user/open",
+      "origin": "EasyScholar 开放接口",
+      "yearLabel": "接口未提供数据年份",
+      "provider_field": "sciUp"
+    },
+    {
+      "journal": "Technology and Health Care",
+      "issn": "0928-7329",
+      "kind": "中科院基础版",
+      "value": "4区",
+      "year": null,
+      "category": "医学",
+      "source": "https://www.easyscholar.cc/console/user/open",
+      "origin": "EasyScholar 开放接口",
+      "yearLabel": "接口未提供数据年份",
+      "provider_field": "sciBase"
+    },
+    {
+      "journal": "Technology and Health Care",
+      "issn": "0928-7329",
+      "kind": "JIF",
+      "value": "1.3",
+      "year": null,
+      "category": "",
+      "source": "https://www.easyscholar.cc/console/user/open",
+      "origin": "EasyScholar 开放接口",
+      "yearLabel": "接口未提供数据年份",
+      "provider_field": "sciif"
+    },
+    {
+      "journal": "Technology and Health Care",
+      "issn": "0928-7329",
+      "kind": "JCR",
+      "value": "Q4",
+      "year": null,
+      "category": "SCI",
+      "source": "https://www.easyscholar.cc/console/user/open",
+      "origin": "EasyScholar 开放接口",
+      "yearLabel": "接口未提供数据年份",
+      "provider_field": "sci"
+    },
+    {
+      "journal": "IEEE Transactions on Cybernetics",
+      "issn": "2168-2267",
+      "kind": "中科院升级版",
+      "value": "1区",
+      "year": null,
+      "category": "计算机科学",
+      "source": "https://www.easyscholar.cc/console/user/open",
+      "origin": "EasyScholar 开放接口",
+      "yearLabel": "接口未提供数据年份",
+      "provider_field": "sciUp"
+    },
+    {
+      "journal": "IEEE Transactions on Cybernetics",
+      "issn": "2168-2267",
+      "kind": "中科院基础版",
+      "value": "1区",
+      "year": null,
+      "category": "工程技术",
+      "source": "https://www.easyscholar.cc/console/user/open",
+      "origin": "EasyScholar 开放接口",
+      "yearLabel": "接口未提供数据年份",
+      "provider_field": "sciBase"
+    },
+    {
+      "journal": "IEEE Transactions on Cybernetics",
+      "issn": "2168-2267",
+      "kind": "JIF",
+      "value": "11.3",
+      "year": null,
+      "category": "",
+      "source": "https://www.easyscholar.cc/console/user/open",
+      "origin": "EasyScholar 开放接口",
+      "yearLabel": "接口未提供数据年份",
+      "provider_field": "sciif"
+    },
+    {
+      "journal": "IEEE Transactions on Cybernetics",
+      "issn": "2168-2267",
+      "kind": "JCR",
+      "value": "Q1",
+      "year": null,
+      "category": "SCI",
+      "source": "https://www.easyscholar.cc/console/user/open",
+      "origin": "EasyScholar 开放接口",
+      "yearLabel": "接口未提供数据年份",
+      "provider_field": "sci"
+    },
+    {
+      "journal": "International Journal of Intelligent Information Technologies",
+      "issn": "1548-3657",
+      "kind": "中科院升级版",
+      "value": "4区",
+      "year": null,
+      "category": "计算机科学",
+      "source": "https://www.easyscholar.cc/console/user/open",
+      "origin": "EasyScholar 开放接口",
+      "yearLabel": "接口未提供数据年份",
+      "provider_field": "sciUp"
+    },
+    {
+      "journal": "International Journal of Intelligent Information Technologies",
+      "issn": "1548-3657",
+      "kind": "JIF",
+      "value": "1.7",
+      "year": null,
+      "category": "",
+      "source": "https://www.easyscholar.cc/console/user/open",
+      "origin": "EasyScholar 开放接口",
+      "yearLabel": "接口未提供数据年份",
+      "provider_field": "sciif"
+    },
+    {
+      "journal": "Frontiers in Neuroscience",
+      "issn": "1662-453X",
+      "kind": "中科院升级版",
+      "value": "3区",
+      "year": null,
+      "category": "医学",
+      "source": "https://www.easyscholar.cc/console/user/open",
+      "origin": "EasyScholar 开放接口",
+      "yearLabel": "接口未提供数据年份",
+      "provider_field": "sciUp"
+    },
+    {
+      "journal": "Frontiers in Neuroscience",
+      "issn": "1662-453X",
+      "kind": "中科院基础版",
+      "value": "3区",
+      "year": null,
+      "category": "医学",
+      "source": "https://www.easyscholar.cc/console/user/open",
+      "origin": "EasyScholar 开放接口",
+      "yearLabel": "接口未提供数据年份",
+      "provider_field": "sciBase"
+    },
+    {
+      "journal": "Frontiers in Neuroscience",
+      "issn": "1662-453X",
+      "kind": "JIF",
+      "value": "4.0",
+      "year": null,
+      "category": "",
+      "source": "https://www.easyscholar.cc/console/user/open",
+      "origin": "EasyScholar 开放接口",
+      "yearLabel": "接口未提供数据年份",
+      "provider_field": "sciif"
+    },
+    {
+      "journal": "Frontiers in Neuroscience",
+      "issn": "1662-453X",
+      "kind": "JCR",
+      "value": "Q2",
+      "year": null,
+      "category": "SCI",
+      "source": "https://www.easyscholar.cc/console/user/open",
+      "origin": "EasyScholar 开放接口",
+      "yearLabel": "接口未提供数据年份",
+      "provider_field": "sci"
+    },
+    {
+      "journal": "Journal of Robotics",
+      "issn": "1687-9600",
+      "kind": "中科院升级版",
+      "value": "4区",
+      "year": null,
+      "category": "计算机科学",
+      "source": "https://www.easyscholar.cc/console/user/open",
+      "origin": "EasyScholar 开放接口",
+      "yearLabel": "接口未提供数据年份",
+      "provider_field": "sciUp"
+    },
+    {
+      "journal": "Journal of Robotics",
+      "issn": "1687-9600",
+      "kind": "JIF",
+      "value": "1.9",
+      "year": null,
+      "category": "",
+      "source": "https://www.easyscholar.cc/console/user/open",
+      "origin": "EasyScholar 开放接口",
+      "yearLabel": "接口未提供数据年份",
+      "provider_field": "sciif"
+    },
+    {
+      "journal": "Advances in Mechanical Engineering",
+      "issn": "1687-8132",
+      "kind": "中科院升级版",
+      "value": "4区",
+      "year": null,
+      "category": "工程技术",
+      "source": "https://www.easyscholar.cc/console/user/open",
+      "origin": "EasyScholar 开放接口",
+      "yearLabel": "接口未提供数据年份",
+      "provider_field": "sciUp"
+    },
+    {
+      "journal": "Advances in Mechanical Engineering",
+      "issn": "1687-8132",
+      "kind": "中科院基础版",
+      "value": "4区",
+      "year": null,
+      "category": "工程技术",
+      "source": "https://www.easyscholar.cc/console/user/open",
+      "origin": "EasyScholar 开放接口",
+      "yearLabel": "接口未提供数据年份",
+      "provider_field": "sciBase"
+    },
+    {
+      "journal": "Advances in Mechanical Engineering",
+      "issn": "1687-8132",
+      "kind": "JIF",
+      "value": "2.3",
+      "year": null,
+      "category": "",
+      "source": "https://www.easyscholar.cc/console/user/open",
+      "origin": "EasyScholar 开放接口",
+      "yearLabel": "接口未提供数据年份",
+      "provider_field": "sciif"
+    },
+    {
+      "journal": "Advances in Mechanical Engineering",
+      "issn": "1687-8132",
+      "kind": "JCR",
+      "value": "Q2",
+      "year": null,
+      "category": "SCI",
+      "source": "https://www.easyscholar.cc/console/user/open",
+      "origin": "EasyScholar 开放接口",
+      "yearLabel": "接口未提供数据年份",
+      "provider_field": "sci"
     }
   ],
   "resolver_version": 2,
@@ -5101,15 +5720,6 @@
       "doi": "10.1109/lra.2023.3256135",
       "checkedAt": "2026-10-23T07:25:48Z"
     },
-    "journal-ca91d65070a1a44583c8": {
-      "count": 11,
-      "status": "confirmed",
-      "provider": "OpenAlex",
-      "source": "https://openalex.org/W4361273296",
-      "scope": "正式出版版本",
-      "doi": "10.1088/1742-6596/2456/1/012002",
-      "checkedAt": "2026-10-23T07:25:48Z"
-    },
     "journal-4661819e1baaccb4643e": {
       "count": 11,
       "status": "confirmed",
@@ -5307,6 +5917,15 @@
       "scope": "正式出版版本",
       "doi": "10.7210/jrsj.30.8",
       "checkedAt": "2026-10-23T07:25:49Z"
+    },
+    "journal-e36ae7b09135d2484089": {
+      "count": 49,
+      "status": "confirmed",
+      "provider": "OpenAlex",
+      "source": "https://openalex.org/W2576714614",
+      "scope": "正式出版版本",
+      "doi": "10.1177/1687814015590988",
+      "checkedAt": "2026-10-23T07:47:54Z"
     }
   },
   "citation_provider": "OpenAlex",
@@ -5316,11 +5935,11 @@
     "confirmed": 85
   },
   "coverage": {
-    "journal": 50,
+    "journal": 60,
     "conference": 3,
     "preprint": 33,
-    "reference": 10,
+    "reference": 0,
     "total": 96
   },
-  "message": "部分服务暂不可用，保留已有缓存。"
+  "message": "EasyScholar 指标已同步；未确认期刊的论文不套用分区。"
 }

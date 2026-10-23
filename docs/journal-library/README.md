@@ -70,8 +70,6 @@
 
 <p><a href="#/journal-library/journal-ee2b8c2e3ebee9c10666">Environment-Based Assistance Modulation for a Hip Exosuit via Computer Vision</a> · IEEE Robotics and Automation Letters · 2023-05</p>
 
-<p><a href="#/journal-library/journal-ca91d65070a1a44583c8">Review of Human-exoskeleton Control Strategy for Lower Limb Rehabilitation Exoskeleton</a> · Journal of Physics: Conference Series · 2023-03-01</p>
-
 <p><a href="#/journal-library/journal-4661819e1baaccb4643e">Vision Assisted Control of Lower Extremity Exoskeleton for Obstacle Avoidance With Dynamic Constraint Based Piecewise Nonlinear MPC</a> · IEEE Robotics and Automation Letters · 2022-10</p>
 
 <p><a href="#/journal-library/journal-07628b19c4e853273188">Intrinsic motivation for using a wearable hip exoskeleton</a> · Technology and Disability · 2022-05-01</p>
@@ -107,6 +105,8 @@
 <p><a href="#/journal-library/journal-57ed74ce551ac1bdd6d7">Bounded Control of an Actuated Lower-Limb Exoskeleton</a> · Journal of Robotics · 2017</p>
 
 <p><a href="#/journal-library/journal-9ef746a7884e22566eb7">Human hip joint center analysis for biomechanical design of a hip joint exoskeleton</a> · Frontiers of Information Technology &amp; Electronic Engineering · 2016-10-15</p>
+
+<p><a href="#/journal-library/journal-e36ae7b09135d2484089">Design and control of hybrid actuation lower limb exoskeleton</a> · Advances in Mechanical Engineering · 2015-06-26</p>
 
 <p><a href="#/journal-library/journal-6401b5881777e8d9ae34">Active Visual Perception for Humanoid Robots</a> · International Journal of Humanoid Robotics · 2015-03-12</p>
 

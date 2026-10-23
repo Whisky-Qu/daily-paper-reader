@@ -2,7 +2,7 @@
   "schema_version": 1,
   "date": "journal-library",
   "date_label": "已发表期刊",
-  "generated_at": "2026-10-23T07:25:01Z",
+  "generated_at": "2026-10-23T07:47:42Z",
   "status": "ready",
   "query_signature": "f0588fd6a1cbdaea0a0cabed3da003762b5ba33d38eb63dd895660a28476af02",
   "papers": [
@@ -810,31 +810,6 @@
       "added_at": "2026-10-23T07:25:01Z"
     },
     {
-      "paper_id": "journal-ca91d65070a1a44583c8",
-      "route": "journal-library/journal-ca91d65070a1a44583c8",
-      "title": "Review of Human-exoskeleton Control Strategy for Lower Limb Rehabilitation Exoskeleton",
-      "doi": "10.1088/1742-6596/2456/1/012002",
-      "venue": "Journal of Physics: Conference Series",
-      "issns": [
-        "1742-6588",
-        "1742-6596"
-      ],
-      "authors": "Yi Long, Hexiao Guo, Yutian Chi, Duncheng Mo",
-      "publication_date": "2023-03-01",
-      "date_precision": 3,
-      "abstract": "Abstract The research on exoskeleton robots has been widely carried out for many years around the world, especially the development of new-style lower limb exoskeletons for rehabilitation and assistance is one of the key research directions. The focus on the control system of lower limb exoskeletons for rehabilitation is discussed. Based on the public literature in recent years, it is summarized from three aspects, i.e., movement mode switching, human gait recognition and human-exoskeleton interaction control. Finally, the technical issues of the current lower limb rehabilitation exoskeleton control strategy are discussed. The future development prospects and research directions of the lower limb rehabilitation exoskeleton are prospected, and some suggestions on how to achieve a more efficient and accurate control are given.",
-      "pdf": "",
-      "evidence": "原摘要摘录：Abstract The research on exoskeleton robots has been widely carried out for many years around the world, especially the development of new-style lower limb exoskeletons for rehabilitation and assistance is one of the key research directions. The focus on the control system of lower limb exoskeletons for rehabilitation is discussed.",
-      "tags": [
-        {
-          "kind": "query",
-          "label": "hip-exo"
-        }
-      ],
-      "section": "journal",
-      "added_at": "2026-10-23T07:25:01Z"
-    },
-    {
       "paper_id": "journal-4661819e1baaccb4643e",
       "route": "journal-library/journal-4661819e1baaccb4643e",
       "title": "Vision Assisted Control of Lower Extremity Exoskeleton for Obstacle Avoidance With Dynamic Constraint Based Piecewise Nonlinear MPC",
@@ -1277,6 +1252,31 @@
       ],
       "section": "journal",
       "added_at": "2026-10-23T07:25:01Z"
+    },
+    {
+      "paper_id": "journal-e36ae7b09135d2484089",
+      "route": "journal-library/journal-e36ae7b09135d2484089",
+      "title": "Design and control of hybrid actuation lower limb exoskeleton",
+      "doi": "10.1177/1687814015590988",
+      "venue": "Advances in Mechanical Engineering",
+      "issns": [
+        "1687-8132",
+        "1687-8140"
+      ],
+      "authors": "Hipolito Aguilar-Sierra, Wen Yu, Sergio Salazar, Ricardo Lopez",
+      "publication_date": "2015-06-26",
+      "date_precision": 3,
+      "abstract": "In this article, two types of actuators are applied for a lower limb exoskeleton. They are DC motors with the harmonic drive and the pneumatic artificial muscles. This combination takes advantages of both the harmonic drive and the pneumatic artificial muscle. It provides both high accuracy position control and high ratio of strength and weight. The shortcomings of the two actuators are overcome by the hybrid actuation, for example, low control accuracy and modeling difficult of pneumatic artificial muscle, compactness, and structural flexibility of DC motors. The design and modeling processes are discussed to show the proposed exoskeleton can increase the strength of human lower limbs. Experiments and analysis of the exoskeleton are given to evaluate the effectiveness of the design and modeling.",
+      "pdf": "",
+      "evidence": "原摘要摘录：In this article, two types of actuators are applied for a lower limb exoskeleton. They are DC motors with the harmonic drive and the pneumatic artificial muscles. This combination takes advantages of both the harmonic drive and the pneumatic artificial muscle.",
+      "tags": [
+        {
+          "kind": "query",
+          "label": "hip-exo"
+        }
+      ],
+      "section": "journal",
+      "added_at": "2026-10-23T07:47:42Z"
     },
     {
       "paper_id": "journal-6401b5881777e8d9ae34",

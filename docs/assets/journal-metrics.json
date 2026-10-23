@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "provider": "EasyScholar",
-  "generated_at": "2026-10-23T05:53:14Z",
+  "generated_at": "2026-10-23T05:58:59Z",
   "status": "ready",
   "papers": {
     "2610.26043": {
@@ -922,7 +922,8 @@
       ]
     },
     "Science Robotics": {
-      "queried_at": "2026-10-23T05:46:59Z",
+      "queried_at": "2026-10-23T05:59:01Z",
+      "format_version": 2,
       "metrics": [
         {
           "journal": "Science Robotics",
@@ -975,7 +976,8 @@
       ]
     },
     "Biomechanics": {
-      "queried_at": "2026-10-23T05:47:00Z",
+      "queried_at": "2026-10-23T05:59:02Z",
+      "format_version": 2,
       "metrics": [
         {
           "journal": "Biomechanics",
@@ -992,7 +994,8 @@
       ]
     },
     "IEEE Transactions on Industrial Electronics": {
-      "queried_at": "2026-10-23T05:47:02Z",
+      "queried_at": "2026-10-23T05:59:03Z",
+      "format_version": 2,
       "metrics": [
         {
           "journal": "IEEE Transactions on Industrial Electronics",
@@ -1045,7 +1048,8 @@
       ]
     },
     "Actuators": {
-      "queried_at": "2026-10-23T05:47:03Z",
+      "queried_at": "2026-10-23T05:59:04Z",
+      "format_version": 2,
       "metrics": [
         {
           "journal": "Actuators",
@@ -1098,7 +1102,8 @@
       ]
     },
     "Bioengineering": {
-      "queried_at": "2026-10-23T05:49:06Z",
+      "queried_at": "2026-10-23T05:59:06Z",
+      "format_version": 2,
       "metrics": [
         {
           "journal": "Bioengineering",
@@ -1111,11 +1116,38 @@
           "origin": "EasyScholar 开放接口",
           "yearLabel": "接口未提供数据年份",
           "provider_field": "sciUp"
+        },
+        {
+          "journal": "Bioengineering",
+          "issn": "2306-5354",
+          "kind": "JIF",
+          "value": "4.4",
+          "year": null,
+          "category": "",
+          "source": "https://www.easyscholar.cc/console/user/open",
+          "origin": "EasyScholar 开放接口",
+          "yearLabel": "接口未提供数据年份",
+          "provider_field": "sciif",
+          "query_name": "Bioengineering-Basel"
+        },
+        {
+          "journal": "Bioengineering",
+          "issn": "2306-5354",
+          "kind": "JCR",
+          "value": "Q2",
+          "year": null,
+          "category": "SCI",
+          "source": "https://www.easyscholar.cc/console/user/open",
+          "origin": "EasyScholar 开放接口",
+          "yearLabel": "接口未提供数据年份",
+          "provider_field": "sci",
+          "query_name": "Bioengineering-Basel"
         }
       ]
     },
     "Biomimetics": {
-      "queried_at": "2026-10-23T05:47:05Z",
+      "queried_at": "2026-10-23T05:59:07Z",
+      "format_version": 2,
       "metrics": [
         {
           "journal": "Biomimetics",
@@ -1156,7 +1188,8 @@
       ]
     },
     "IEEE Transactions on Systems, Man, and Cybernetics: Systems": {
-      "queried_at": "2026-10-23T05:47:06Z",
+      "queried_at": "2026-10-23T05:59:10Z",
+      "format_version": 2,
       "metrics": [
         {
           "journal": "IEEE Transactions on Systems, Man, and Cybernetics: Systems",
@@ -1519,6 +1552,32 @@
       "origin": "EasyScholar 开放接口",
       "yearLabel": "接口未提供数据年份",
       "provider_field": "sciUp"
+    },
+    {
+      "journal": "Bioengineering",
+      "issn": "2306-5354",
+      "kind": "JIF",
+      "value": "4.4",
+      "year": null,
+      "category": "",
+      "source": "https://www.easyscholar.cc/console/user/open",
+      "origin": "EasyScholar 开放接口",
+      "yearLabel": "接口未提供数据年份",
+      "provider_field": "sciif",
+      "query_name": "Bioengineering-Basel"
+    },
+    {
+      "journal": "Bioengineering",
+      "issn": "2306-5354",
+      "kind": "JCR",
+      "value": "Q2",
+      "year": null,
+      "category": "SCI",
+      "source": "https://www.easyscholar.cc/console/user/open",
+      "origin": "EasyScholar 开放接口",
+      "yearLabel": "接口未提供数据年份",
+      "provider_field": "sci",
+      "query_name": "Bioengineering-Basel"
     },
     {
       "journal": "Biomimetics",

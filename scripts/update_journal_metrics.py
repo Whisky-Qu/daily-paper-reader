@@ -50,6 +50,10 @@ class Client:
             raise RuntimeError('未配置 EASYSCHOLAR_SECRET_KEY')
         url = PROVIDER + '?' + urllib.parse.urlencode({'secretKey': self.key, 'publicationName': journal})
         payload = json.loads(self.get(url, provider=True))
+        fields = ((payload.get('data') or {}).get('officialRank') or {}).get('all') or {}
+        diagnostic = json.dumps({field: fields.get(field) for field in FIELDS}, ensure_ascii=False) if isinstance(fields, dict) else '{}'
+        if self.key not in diagnostic:
+            print('[DEBUG-journal-fields] ' + journal + ': ' + diagnostic)
         return normalize_rank(payload, journal)
 
 def normalize_rank(payload, journal, issns=None):
@@ -297,7 +301,7 @@ def refresh(root, *, key, force=False, probe='', client=None):
     if key:
         for journal, issns in list(journals.items())[:100]:
             cached = result['journals'].get(journal, {})
-            if not force and fresh(cached.get('queried_at')):
+            if not force and journal != probe and fresh(cached.get('queried_at')):
                 continue
             try:
                 metrics = client.rank(journal)

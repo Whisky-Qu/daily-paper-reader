@@ -1,0 +1,230 @@
+{
+  "schema_version": 1,
+  "date": "journal-library",
+  "date_label": "已发表期刊",
+  "generated_at": "2026-10-23T05:46:43Z",
+  "status": "ready",
+  "query_signature": "f0588fd6a1cbdaea0a0cabed3da003762b5ba33d38eb63dd895660a28476af02",
+  "papers": [
+    {
+      "paper_id": "journal-fb7295b34c42e8f1e599",
+      "route": "journal-library/journal-fb7295b34c42e8f1e599",
+      "title": "Evolution of humanoid locomotion control",
+      "doi": "10.1126/scirobotics.aed3973",
+      "venue": "Science Robotics",
+      "issns": [
+        "2470-9476"
+      ],
+      "authors": "Yan Gu, Guanya Shi, Fan Shi, I-Chia Chang, Yen-Jen Wang, Qilong Cheng, Zachary Olkin, Ivan Lopez-Sanchez, Yunchu Feng, Jian Zhang, Aaron D. Ames, Hao Su, Koushil Sreenath",
+      "publication_date": "2026-08-19",
+      "date_precision": 3,
+      "abstract": "Humanoid robots stand at the forefront of robotics, aiming to capture the agility, robustness, and expressivity of human movement in an anthropomorphic form. The locomotion control of humanoids has evolved from classical model–based methods to reinforcement learning powered by large-scale simulation and now to generative models that produce adaptive, whole-body behaviors, propelling humanoids toward operation in real-world environments. This survey positions humanoid control at a turning point, converging toward a unified paradigm of physics-guided generative intelligence that integrates optimization, learning, and predictive reasoning. We identify three core principles linking these paradigms: physics-based modeling, constrained decision-making, and adaptation to uncertainty. Building on these connections, we provide recommendations for researchers and outline open challenges in safety, accessibility, and human-level capability. These directions represent a transformation from engineered stability to intelligent autonomy, laying the groundwork for humanoid generalists capable of operating safely, collaborating naturally, and extending human capability in the open world.",
+      "pdf": "",
+      "evidence": "原摘要摘录：Humanoid robots stand at the forefront of robotics, aiming to capture the agility, robustness, and expressivity of human movement in an anthropomorphic form. The locomotion control of humanoids has evolved from classical model–based methods to reinforcement learning powered by large-scale simulation and now to generative models that…",
+      "tags": [
+        {
+          "kind": "query",
+          "label": "humanoid"
+        }
+      ],
+      "section": "journal",
+      "added_at": "2026-10-23T05:46:43Z"
+    },
+    {
+      "paper_id": "journal-3b61597ea8bcd700281f",
+      "route": "journal-library/journal-3b61597ea8bcd700281f",
+      "title": "Hip Exoskeleton Assistance During Sit-to-Stand Transitions",
+      "doi": "10.3390/biomechanics6010015",
+      "venue": "Biomechanics",
+      "issns": [
+        "2673-7078"
+      ],
+      "authors": "Martin Grimmer, Omid Mohseni, Julian Seiler, Maziar A. Sharbafi, Rolf Findeisen, Andre Seyfarth, Mario Kupnik",
+      "publication_date": "2026-02-02",
+      "date_precision": 3,
+      "abstract": "Background/Objectives: This study investigated the biomechanics of a hip exoskeleton during sit-to-stand transitions. Methods: Eleven participants performed the task under three conditions: without the exoskeleton (No Exo), wearing the exoskeleton without assistance (Exo Off), and wearing it with hip extension assistance (Exo On). Results: The analyses revealed that joint angles (hip, knee, and ankle) and vertical ground reaction forces were comparable across all conditions. However, Exo Off significantly increased transition time, whereas Exo On did not differ significantly from No Exo. Additionally, both exoskeleton conditions led to increased integrated EMG (iEMG) activity in the rectus femoris, vastus medialis, and gluteus maximus—likely due to the added device mass. Notably, iEMG analysis revealed a significant reduction in gluteus maximus activity in Exo On compared to Exo Off. Conclusions: Despite providing only moderate torque assistance (0.12 Nm/kg), the results suggest that well-timed exoskeleton support can partially reduce the physical demands of sit-to-stand transitions. However, the observed reduction in gluteus maximus activity was limited, likely reflecting the combined effects of the assistance strategy, including its magnitude and timing, user adaptation and training, postural demands due to device weight and external torques, and mechanical constraints such as potential joint misalignment. Further research is needed to optimize hip exoskeleton support for daily activities.",
+      "pdf": "https://www.mdpi.com/2673-7078/6/1/15/pdf?version=1770028986",
+      "evidence": "原摘要摘录：Background/Objectives: This study investigated the biomechanics of a hip exoskeleton during sit-to-stand transitions. Methods: Eleven participants performed the task under three conditions: without the exoskeleton (No Exo), wearing the exoskeleton without assistance (Exo Off), and wearing it with hip extension assistance (Exo On).",
+      "tags": [
+        {
+          "kind": "query",
+          "label": "hip-exo"
+        }
+      ],
+      "section": "journal",
+      "added_at": "2026-10-23T05:46:43Z"
+    },
+    {
+      "paper_id": "journal-047845974f2c4a4cc52e",
+      "route": "journal-library/journal-047845974f2c4a4cc52e",
+      "title": "DIH2H: Decomposed Imitation for Humanoid Locomotion From Human to Humanoid",
+      "doi": "10.1109/tie.2026.3672827",
+      "venue": "IEEE Transactions on Industrial Electronics",
+      "issns": [
+        "0278-0046",
+        "1557-9948"
+      ],
+      "authors": "Shibo Shao, Chengran Lin, Guofeng Du, Zhengcai Cao, MengChu Zhou",
+      "publication_date": "2026",
+      "date_precision": 1,
+      "abstract": "In recent years, humanoid robots with flexible locomotion capabilities have attracted significant attention. Imitation from human motion has proven to be an effective approach for them to learn. This article presents a novel training framework called Decomposed Imitation from Human to Humanoid (DIH2H). We define a “key skill set” to represent essential human motions. By introducing an action redirection mechanism, an agent learns joint motion patterns rather than directly copying human motions. This focused approach allows a humanoid robot to effectively handle the differences between its own locomotion and human gaits, thereby preventing unnatural motion. The control policy is trained separately for the robot’s upper and lower body. The lower body employs imitation learning (IL), while the upper one leverages a combination of IL and curriculum learning. By gradually introducing increasingly challenging tasks and diverse environments, the upper body can robustly adapt to dynamic changes across various terrains and motions. Simulation results demonstrate that DIH2H improves policy learning efficiency and generalization across diverse tasks and environments, achieving a 10% increase in imitation accuracy and 25% higher data efficiency over its existing peers.",
+      "pdf": "",
+      "evidence": "原摘要摘录：In recent years, humanoid robots with flexible locomotion capabilities have attracted significant attention. Imitation from human motion has proven to be an effective approach for them to learn. This article presents a novel training framework called Decomposed Imitation from Human to Humanoid (DIH2H).",
+      "tags": [
+        {
+          "kind": "query",
+          "label": "humanoid"
+        }
+      ],
+      "section": "journal",
+      "added_at": "2026-10-23T05:46:43Z"
+    },
+    {
+      "paper_id": "journal-0943f093660b0d4716e4",
+      "route": "journal-library/journal-0943f093660b0d4716e4",
+      "title": "Adaptive Vision-Based Gait Environment Classification for Soft Ankle Exoskeleton",
+      "doi": "10.3390/act13110428",
+      "venue": "Actuators",
+      "issns": [
+        "2076-0825"
+      ],
+      "authors": "Gayoung Yang, Jeong Heo, Brian Byunghyun Kang",
+      "publication_date": "2024-10-23",
+      "date_precision": 3,
+      "abstract": "Lower limb exoskeletons have been developed to improve functionality and assist with daily activities in various environments. Although these systems utilize sensors for gait phase detection, they lack anticipatory information about environmental changes, which limits their adaptability. This paper presents a vision-based intelligent gait environment detection algorithm for a lightweight ankle exosuit designed to enhance gait stability and safety for stroke patients, particularly during stair negotiation. The proposed system employs YOLOv8 for real-time environment classification, combined with a long short-term memory (LSTM) network for spatio-temporal feature extraction, enabling the precise detection of environmental transitions. An experimental study evaluated the classification algorithm and soft ankle exosuit performance through three conditions using kinematic analysis and muscle activation measurements. The algorithm achieved an overall accuracy of over 95% per class, which significantly enhanced the exosuit’s ability to detect environmental changes, and thereby improved its responsiveness to various conditions. Notably, the exosuit increased the ankle dorsiflexion angles and reduced the muscle activation during the stair ascent, which enhanced the foot clearance. The results of this study indicate that advanced spatio-temporal feature analysis and environment classification improve the exoskeleton’s gait assistance, improving adaptability in complex environments for stroke patients.",
+      "pdf": "",
+      "evidence": "原摘要摘录：Lower limb exoskeletons have been developed to improve functionality and assist with daily activities in various environments. Although these systems utilize sensors for gait phase detection, they lack anticipatory information about environmental changes, which limits their adaptability.",
+      "tags": [
+        {
+          "kind": "query",
+          "label": "exo-vision"
+        }
+      ],
+      "section": "journal",
+      "added_at": "2026-10-23T05:46:43Z"
+    },
+    {
+      "paper_id": "journal-678a878edcdc94c01adf",
+      "route": "journal-library/journal-678a878edcdc94c01adf",
+      "title": "Hip Exoskeleton for Cycling Assistance",
+      "doi": "10.3390/bioengineering11070683",
+      "venue": "Bioengineering",
+      "issns": [
+        "2306-5354"
+      ],
+      "authors": "Martin Grimmer, Guoping Zhao",
+      "publication_date": "2024-07-05",
+      "date_precision": 3,
+      "abstract": "Cycling stands as one of the most widely embraced leisure activities and serves purposes such as exercise, rehabilitation, and commuting. This study aimed to assess the feasibility of assisting three unimpaired participants (age: 34.0 ± 7.9 years, height: 1.86 ± 0.02 m, weight: 75.7 ± 12.7 kg) using the GuroX hip exoskeleton, originally designed for walking assistance, during cycling against a resistance of 1 W/kg. The performance evaluation employed a sweep protocol that manipulated the timing of the exoskeleton’s peak extension and flexion torque in addition to human-in-the-loop optimization to enhance these timings based on metabolic cost. Our findings indicate that with a peak assistance torque of approximately 10.3 Nm for extension and flexion, the GuroX substantially reduced the net metabolic cost of cycling by 31.4 ± 8.1% and 26.4 ± 14.1% compared to transparent and without exoskeleton conditions, respectively. This demonstrates the significant potential of a hip exoskeleton developed for walking assistance to profoundly benefit cycling. Additionally, customizing the assistance strategy proves beneficial in maximizing assistance. While we attribute the average motor power to be a major contributor to the reduced cycling effort, participant feedback suggests that user comfort and synchronization between the user and exoskeleton may have played integral roles. Further research should validate our initial findings by employing a larger participant pool in real-world conditions. Incorporating a more diverse set of parameters for the human-in-the-loop optimization could enhance individualized assistance strategies.",
+      "pdf": "",
+      "evidence": "原摘要摘录：Cycling stands as one of the most widely embraced leisure activities and serves purposes such as exercise, rehabilitation, and commuting. This study aimed to assess the feasibility of assisting three unimpaired participants (age: 34.0 ± 7.9 years, height: 1.86 ± 0.02 m, weight: 75.7 ± 12.7 kg) using the GuroX hip exoskeleton, originally…",
+      "tags": [
+        {
+          "kind": "query",
+          "label": "hip-exo"
+        }
+      ],
+      "section": "journal",
+      "added_at": "2026-10-23T05:46:43Z"
+    },
+    {
+      "paper_id": "journal-f8477ee5c79e0a32f615",
+      "route": "journal-library/journal-f8477ee5c79e0a32f615",
+      "title": "Review of Vision-Based Environmental Perception for Lower-Limb Exoskeleton Robots",
+      "doi": "10.3390/biomimetics9040254",
+      "venue": "Biomimetics",
+      "issns": [
+        "2313-7673"
+      ],
+      "authors": "Chen Wang, Zhongcai Pei, Yanan Fan, Shuang Qiu, Zhiyong Tang",
+      "publication_date": "2024-04-22",
+      "date_precision": 3,
+      "abstract": "The exoskeleton robot is a wearable electromechanical device inspired by animal exoskeletons. It combines technologies such as sensing, control, information, and mobile computing, enhancing human physical abilities and assisting in rehabilitation training. In recent years, with the development of visual sensors and deep learning, the environmental perception of exoskeletons has drawn widespread attention in the industry. Environmental perception can provide exoskeletons with a certain level of autonomous perception and decision-making ability, enhance their stability and safety in complex environments, and improve the human–machine–environment interaction loop. This paper provides a review of environmental perception and its related technologies of lower-limb exoskeleton robots. First, we briefly introduce the visual sensors and control system. Second, we analyze and summarize the key technologies of environmental perception, including related datasets, detection of critical terrains, and environment-oriented adaptive gait planning. Finally, we analyze the current factors limiting the development of exoskeleton environmental perception and propose future directions.",
+      "pdf": "https://www.mdpi.com/2313-7673/9/4/254/pdf?version=1713797311",
+      "evidence": "原摘要摘录：The exoskeleton robot is a wearable electromechanical device inspired by animal exoskeletons. It combines technologies such as sensing, control, information, and mobile computing, enhancing human physical abilities and assisting in rehabilitation training.",
+      "tags": [
+        {
+          "kind": "query",
+          "label": "exo-vision"
+        }
+      ],
+      "section": "journal",
+      "added_at": "2026-10-23T05:46:43Z"
+    },
+    {
+      "paper_id": "journal-e3d41799908ed14eb708",
+      "route": "journal-library/journal-e3d41799908ed14eb708",
+      "title": "Real-world humanoid locomotion with reinforcement learning",
+      "doi": "10.1126/scirobotics.adi9579",
+      "venue": "Science Robotics",
+      "issns": [
+        "2470-9476"
+      ],
+      "authors": "Ilija Radosavovic, Tete Xiao, Bike Zhang, Trevor Darrell, Jitendra Malik, Koushil Sreenath",
+      "publication_date": "2024-04-17",
+      "date_precision": 3,
+      "abstract": "Humanoid robots that can autonomously operate in diverse environments have the potential to help address labor shortages in factories, assist elderly at home, and colonize new planets. Although classical controllers for humanoid robots have shown impressive results in a number of settings, they are challenging to generalize and adapt to new environments. Here, we present a fully learning-based approach for real-world humanoid locomotion. Our controller is a causal transformer that takes the history of proprioceptive observations and actions as input and predicts the next action. We hypothesized that the observation-action history contains useful information about the world that a powerful transformer model can use to adapt its behavior in context, without updating its weights. We trained our model with large-scale model-free reinforcement learning on an ensemble of randomized environments in simulation and deployed it to the real-world zero-shot. Our controller could walk over various outdoor terrains, was robust to external disturbances, and could adapt in context.",
+      "pdf": "https://arxiv.org/pdf/2303.03381",
+      "evidence": "原摘要摘录：Humanoid robots that can autonomously operate in diverse environments have the potential to help address labor shortages in factories, assist elderly at home, and colonize new planets.",
+      "tags": [
+        {
+          "kind": "query",
+          "label": "humanoid"
+        }
+      ],
+      "section": "journal",
+      "added_at": "2026-10-23T05:46:43Z"
+    },
+    {
+      "paper_id": "journal-aa691576d4c5526f5c0e",
+      "route": "journal-library/journal-aa691576d4c5526f5c0e",
+      "title": "Optimizing Exoskeleton Assistance: Muscle Synergy-Based Actuation for Personalized Hip Exoskeleton Control",
+      "doi": "10.3390/act13020054",
+      "venue": "Actuators",
+      "issns": [
+        "2076-0825"
+      ],
+      "authors": "Yehao Ma, Dewei Liu, Zehao Yan, Linfan Yu, Lianghong Gui, Canjun Yang, Wei Yang",
+      "publication_date": "2024-01-31",
+      "date_precision": 3,
+      "abstract": "Exoskeleton robots hold promising prospects for rehabilitation training in individuals with weakened muscular conditions. However, achieving improved human–machine interaction and delivering customized assistance remains a challenging task. This paper introduces a muscle synergy-based human-in-the-loop (HIL) optimization framework for hip exoskeletons to offer more personalized torque assistance. Initially, we propose a muscle synergy similarity index to quantify the similarity of synergy while walking with and without the assistance of an exoskeleton. By integrating surface electromyography (sEMG) signals to calculate metrics evaluating muscle synergy and iteratively optimizing assistance parameters in real time, a muscle synergy-based HIL optimized torque configuration is presented and tested on a portable hip exoskeleton. Iterative optimization explores the optimal and suboptimal assistance torque profiles for six healthy volunteers, simultaneously testing zero torque and predefined assistance configurations, and verified the corresponding muscle synergy similarity indices through experimental testing. In our validation experiments, the assistance parameters generated through HIL optimization significantly enhance muscle synergy similarity during walking with exoskeletal assistance, with an optimal average of 0.80 ± 0.04 (mean ± std), marking a 6.3% improvement over prior assistive studies and achieving 96.4% similarity compared with free walking. This demonstrates that the proposed muscle synergy-based HIL optimization can ensure robotic exoskeleton-assisted walking as “natural” as possible.",
+      "pdf": "https://www.mdpi.com/2076-0825/13/2/54/pdf?version=1706693129",
+      "evidence": "原摘要摘录：Exoskeleton robots hold promising prospects for rehabilitation training in individuals with weakened muscular conditions. However, achieving improved human–machine interaction and delivering customized assistance remains a challenging task.",
+      "tags": [
+        {
+          "kind": "query",
+          "label": "hip-exo"
+        }
+      ],
+      "section": "journal",
+      "added_at": "2026-10-23T05:46:43Z"
+    },
+    {
+      "paper_id": "journal-5bce426b3e8a6b63e046",
+      "route": "journal-library/journal-5bce426b3e8a6b63e046",
+      "title": "Vision-Assisted Autonomous Lower-Limb Exoskeleton Robot",
+      "doi": "10.1109/tsmc.2019.2932892",
+      "venue": "IEEE Transactions on Systems, Man, and Cybernetics: Systems",
+      "issns": [
+        "2168-2216",
+        "2168-2232"
+      ],
+      "authors": "Du-Xin Liu, Jing Xu, Chunjie Chen, Xingguo Long, Dacheng Tao, Xinyu Wu",
+      "publication_date": "2021-06",
+      "date_precision": 2,
+      "abstract": "Lower-limb exoskeleton robots can effectively help patients with lower-limb disabilities caused by stroke or spinal cord injury to walk again. However, when faced with complex ground surfaces, patients find it difficult to quickly and accurately transmit the motion intention to the robot, resulting in falls or errors. In this article, we develop the vision-assisted autonomous lower-limb exoskeleton robot (VALOR). Based on the principles of human visual feedback and motion decision-making, a vision-assisted autonomous gait pattern planning method is proposed to improve the adaptability of the robot to the environment. The robot obtains environmental information via an RGB-D camera and extracts the ground object features that might affect gait. Then, the robot makes an autonomous decision according to the environmental features, robot state, and safety constraints. Lastly, a suitable step length and height are given to the parameterized gait pattern planning model of robot to assist with walking. The feasibility of the proposed method is verified on VALOR in a controlled indoor environment with limited obstacles, and our results demonstrate that the method can significantly improve robot adaptability to complex walking environments.",
+      "pdf": "",
+      "evidence": "原摘要摘录：Lower-limb exoskeleton robots can effectively help patients with lower-limb disabilities caused by stroke or spinal cord injury to walk again. However, when faced with complex ground surfaces, patients find it difficult to quickly and accurately transmit the motion intention to the robot, resulting in falls or errors.",
+      "tags": [
+        {
+          "kind": "query",
+          "label": "exo-vision"
+        }
+      ],
+      "section": "journal",
+      "added_at": "2026-10-23T05:46:43Z"
+    }
+  ],
+  "query_failures": [],
+  "method": "Crossref DOI 核验；关键词在标题/摘要中同时命中；每方向每次最多新增 3 篇，总计最多 60 篇。"
+}

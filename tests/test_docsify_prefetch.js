@@ -306,3 +306,13 @@ function testPdfPreviewDoesNotHijackPaperChatLayout() {
 testPdfPreviewDoesNotHijackPaperChatLayout();
 
 console.log('docsify prefetch tests passed');
+
+{
+  const source=extractConstFunction('isJournalCatalogFile');
+  const context={}; vm.createContext(context);
+  vm.runInContext(source+'\nthis.matches=isJournalCatalogFile;',context);
+  assert.equal(context.matches('journal-library/README.md'),true);
+  assert.equal(context.matches('journal-library/journal-678a878edcdc94c01adf.md'),false);
+  assert.equal((js.match(/isLandingLikePage = .*isJournalCatalogFile\(file\)/g)||[]).length,2,
+    'normal and deferred rendering must keep paper chat off the library catalog');
+}

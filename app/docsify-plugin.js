@@ -1563,6 +1563,10 @@ window.$docsify = {
         );
       };
 
+      const isJournalCatalogFile = (file) => {
+        return /^journal-library\/README\.md$/i.test(String(file || ''));
+      };
+
       const isReportRouteFile = (file) => {
         const f = String(file || '');
         return /^(?:\d{6}\/\d{2}|\d{8}-\d{8})\/README\.md$/i.test(f);
@@ -3280,7 +3284,7 @@ window.$docsify = {
             lowerId === 'readme' ||
             routePath === '/' ||
             routePath === '';
-          const isLandingLikePage = isHomePage || isReportRouteFile(file);
+          const isLandingLikePage = isHomePage || isReportRouteFile(file) || isJournalCatalogFile(file);
           const mainContent = document.querySelector('.markdown-section');
           if (mainContent) {
             const root = isPaperRouteFile(file) ? ensurePageContentRoot() : null;
@@ -3380,7 +3384,7 @@ window.$docsify = {
         const file = vm && vm.route ? vm.route.file : '';
         const isReportPage = isReportRouteFile(file);
         const isPaperPage = isPaperRouteFile(file);
-        const isLandingLikePage = isHomePage || isReportPage;
+        const isLandingLikePage = isHomePage || isReportPage || isJournalCatalogFile(file);
         syncPageTypeClasses({ isHomePage, isReportPage, isPaperPage });
         closePdfPreview();
         document.querySelectorAll('[data-paper-media-modal]').forEach((modal) => {

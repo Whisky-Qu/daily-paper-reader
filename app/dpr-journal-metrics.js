@@ -51,6 +51,8 @@
 .dpr-journal-card{padding:1rem 1.1rem;margin:1.2rem 0;border:1px solid var(--border-color,#e1e6ef);border-radius:14px;background:var(--sidebar-background,#fafbfe)}
 .dpr-journal-card h2{margin:.1rem 0 .7rem;font-size:1.05rem;line-height:1.55}.dpr-journal-card .dpr-journal-summary{font-size:.88rem;line-height:1.75;overflow-wrap:anywhere}
 .dpr-journal-card .dpr-journal-metrics{padding:0;border:0;margin:.5rem 0;background:transparent}.dpr-journal-card .dpr-journal-metrics h3{display:none}
+#dpr-journal-metrics .dpr-metric-chip,#dpr-journal-catalog .dpr-metric-chip{color:var(--dpr-chip-color)!important}
+#dpr-journal-metrics h3{color:var(--text-color,#34495e)!important}
 body.dpr-dark .dpr-journal-metrics .dpr-metric-chip{filter:brightness(.93)}
 @media(max-width:600px){.dpr-journal-metrics{padding:.85rem}.dpr-journal-metrics .dpr-metric-chip{font-size:.8rem;padding:4px 9px}}
 `;

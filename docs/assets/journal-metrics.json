@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "provider": "EasyScholar",
-  "generated_at": "2026-10-23T05:49:04Z",
+  "generated_at": "2026-10-23T05:52:20Z",
   "status": "ready",
   "papers": {
     "2610.26043": {
@@ -1183,6 +1183,47 @@
           "provider_field": "sciBase"
         }
       ]
+    },
+    "Bioengineering-Basel": {
+      "queried_at": "2026-10-23T05:52:21Z",
+      "metrics": [
+        {
+          "journal": "Bioengineering-Basel",
+          "issn": "",
+          "kind": "中科院升级版",
+          "value": "3区",
+          "year": null,
+          "category": "医学",
+          "source": "https://www.easyscholar.cc/console/user/open",
+          "origin": "EasyScholar 开放接口",
+          "yearLabel": "接口未提供数据年份",
+          "provider_field": "sciUp"
+        },
+        {
+          "journal": "Bioengineering-Basel",
+          "issn": "",
+          "kind": "JIF",
+          "value": "4.4",
+          "year": null,
+          "category": "",
+          "source": "https://www.easyscholar.cc/console/user/open",
+          "origin": "EasyScholar 开放接口",
+          "yearLabel": "接口未提供数据年份",
+          "provider_field": "sciif"
+        },
+        {
+          "journal": "Bioengineering-Basel",
+          "issn": "",
+          "kind": "JCR",
+          "value": "Q2",
+          "year": null,
+          "category": "SCI",
+          "source": "https://www.easyscholar.cc/console/user/open",
+          "origin": "EasyScholar 开放接口",
+          "yearLabel": "接口未提供数据年份",
+          "provider_field": "sci"
+        }
+      ]
     }
   },
   "metrics": [
@@ -1509,6 +1550,42 @@
       "origin": "EasyScholar 开放接口",
       "yearLabel": "接口未提供数据年份",
       "provider_field": "sciBase"
+    },
+    {
+      "journal": "Bioengineering-Basel",
+      "issn": "",
+      "kind": "中科院升级版",
+      "value": "3区",
+      "year": null,
+      "category": "医学",
+      "source": "https://www.easyscholar.cc/console/user/open",
+      "origin": "EasyScholar 开放接口",
+      "yearLabel": "接口未提供数据年份",
+      "provider_field": "sciUp"
+    },
+    {
+      "journal": "Bioengineering-Basel",
+      "issn": "",
+      "kind": "JIF",
+      "value": "4.4",
+      "year": null,
+      "category": "",
+      "source": "https://www.easyscholar.cc/console/user/open",
+      "origin": "EasyScholar 开放接口",
+      "yearLabel": "接口未提供数据年份",
+      "provider_field": "sciif"
+    },
+    {
+      "journal": "Bioengineering-Basel",
+      "issn": "",
+      "kind": "JCR",
+      "value": "Q2",
+      "year": null,
+      "category": "SCI",
+      "source": "https://www.easyscholar.cc/console/user/open",
+      "origin": "EasyScholar 开放接口",
+      "yearLabel": "接口未提供数据年份",
+      "provider_field": "sci"
     }
   ],
   "resolver_version": 2,

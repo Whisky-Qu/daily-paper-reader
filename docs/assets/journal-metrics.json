@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "provider": "EasyScholar",
-  "generated_at": "2026-10-23T05:52:20Z",
+  "generated_at": "2026-10-23T05:53:14Z",
   "status": "ready",
   "papers": {
     "2610.26043": {
@@ -1224,6 +1224,35 @@
           "provider_field": "sci"
         }
       ]
+    },
+    "IEEE TRANSACTIONS ON SYSTEMS MAN AND CYBERNETICS-SYSTEMS": {
+      "queried_at": "2026-10-23T05:53:16Z",
+      "metrics": [
+        {
+          "journal": "IEEE TRANSACTIONS ON SYSTEMS MAN AND CYBERNETICS-SYSTEMS",
+          "issn": "",
+          "kind": "中科院升级版",
+          "value": "1区",
+          "year": null,
+          "category": "计算机科学",
+          "source": "https://www.easyscholar.cc/console/user/open",
+          "origin": "EasyScholar 开放接口",
+          "yearLabel": "接口未提供数据年份",
+          "provider_field": "sciUp"
+        },
+        {
+          "journal": "IEEE TRANSACTIONS ON SYSTEMS MAN AND CYBERNETICS-SYSTEMS",
+          "issn": "",
+          "kind": "中科院基础版",
+          "value": "1区",
+          "year": null,
+          "category": "工程技术",
+          "source": "https://www.easyscholar.cc/console/user/open",
+          "origin": "EasyScholar 开放接口",
+          "yearLabel": "接口未提供数据年份",
+          "provider_field": "sciBase"
+        }
+      ]
     }
   },
   "metrics": [
@@ -1586,6 +1615,30 @@
       "origin": "EasyScholar 开放接口",
       "yearLabel": "接口未提供数据年份",
       "provider_field": "sci"
+    },
+    {
+      "journal": "IEEE TRANSACTIONS ON SYSTEMS MAN AND CYBERNETICS-SYSTEMS",
+      "issn": "",
+      "kind": "中科院升级版",
+      "value": "1区",
+      "year": null,
+      "category": "计算机科学",
+      "source": "https://www.easyscholar.cc/console/user/open",
+      "origin": "EasyScholar 开放接口",
+      "yearLabel": "接口未提供数据年份",
+      "provider_field": "sciUp"
+    },
+    {
+      "journal": "IEEE TRANSACTIONS ON SYSTEMS MAN AND CYBERNETICS-SYSTEMS",
+      "issn": "",
+      "kind": "中科院基础版",
+      "value": "1区",
+      "year": null,
+      "category": "工程技术",
+      "source": "https://www.easyscholar.cc/console/user/open",
+      "origin": "EasyScholar 开放接口",
+      "yearLabel": "接口未提供数据年份",
+      "provider_field": "sciBase"
     }
   ],
   "resolver_version": 2,

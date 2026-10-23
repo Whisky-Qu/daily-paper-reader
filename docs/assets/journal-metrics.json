@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "provider": "EasyScholar",
-  "generated_at": "2026-10-22T21:51:45Z",
+  "generated_at": "2026-10-23T04:26:45Z",
   "status": "ready",
   "papers": {
     "2610.26043": {
@@ -819,6 +819,338 @@
     }
   ],
   "resolver_version": 2,
+  "citations": {
+    "2610.25628": {
+      "count": 0,
+      "status": "confirmed",
+      "provider": "OpenAlex",
+      "source": "https://openalex.org/W7223019171",
+      "scope": "arXiv 版本",
+      "doi": "10.48550/arxiv.2610.25628",
+      "checkedAt": "2026-10-23T04:26:45Z"
+    },
+    "2610.28470": {
+      "count": 0,
+      "status": "confirmed",
+      "provider": "OpenAlex",
+      "source": "https://openalex.org/W7223102345",
+      "scope": "arXiv 版本",
+      "doi": "10.48550/arxiv.2610.28470",
+      "checkedAt": "2026-10-23T04:26:45Z"
+    },
+    "2610.19615": {
+      "count": 0,
+      "status": "confirmed",
+      "provider": "OpenAlex",
+      "source": "https://openalex.org/W7222275116",
+      "scope": "arXiv 版本",
+      "doi": "10.48550/arxiv.2610.19615",
+      "checkedAt": "2026-10-23T04:26:45Z"
+    },
+    "2610.20318": {
+      "count": 0,
+      "status": "confirmed",
+      "provider": "OpenAlex",
+      "source": "https://openalex.org/W7222322262",
+      "scope": "arXiv 版本",
+      "doi": "10.48550/arxiv.2610.20318",
+      "checkedAt": "2026-10-23T04:26:45Z"
+    },
+    "2610.24779": {
+      "count": 0,
+      "status": "confirmed",
+      "provider": "OpenAlex",
+      "source": "https://openalex.org/W7223052023",
+      "scope": "arXiv 版本",
+      "doi": "10.48550/arxiv.2610.24779",
+      "checkedAt": "2026-10-23T04:26:45Z"
+    },
+    "2610.26855": {
+      "count": 0,
+      "status": "confirmed",
+      "provider": "OpenAlex",
+      "source": "https://openalex.org/W7223020088",
+      "scope": "arXiv 版本",
+      "doi": "10.48550/arxiv.2610.26855",
+      "checkedAt": "2026-10-23T04:26:45Z"
+    },
+    "2610.17930": {
+      "count": 0,
+      "status": "confirmed",
+      "provider": "OpenAlex",
+      "source": "https://openalex.org/W7221816847",
+      "scope": "arXiv 版本",
+      "doi": "10.48550/arxiv.2610.17930",
+      "checkedAt": "2026-10-23T04:26:45Z"
+    },
+    "2610.28480": {
+      "count": 0,
+      "status": "confirmed",
+      "provider": "OpenAlex",
+      "source": "https://openalex.org/W7223142413",
+      "scope": "arXiv 版本",
+      "doi": "10.48550/arxiv.2610.28480",
+      "checkedAt": "2026-10-23T04:26:45Z"
+    },
+    "2610.26043": {
+      "count": 0,
+      "status": "confirmed",
+      "provider": "OpenAlex",
+      "source": "https://openalex.org/W7223008604",
+      "scope": "arXiv 版本",
+      "doi": "10.48550/arxiv.2610.26043",
+      "checkedAt": "2026-10-23T04:26:45Z"
+    },
+    "2610.27271": {
+      "count": 0,
+      "status": "confirmed",
+      "provider": "OpenAlex",
+      "source": "https://openalex.org/W7223094116",
+      "scope": "arXiv 版本",
+      "doi": "10.48550/arxiv.2610.27271",
+      "checkedAt": "2026-10-23T04:26:45Z"
+    },
+    "2610.19494": {
+      "count": 0,
+      "status": "confirmed",
+      "provider": "OpenAlex",
+      "source": "https://openalex.org/W7222189325",
+      "scope": "arXiv 版本",
+      "doi": "10.48550/arxiv.2610.19494",
+      "checkedAt": "2026-10-23T04:26:45Z"
+    },
+    "2610.23548": {
+      "count": 0,
+      "status": "confirmed",
+      "provider": "OpenAlex",
+      "source": "https://openalex.org/W7222942988",
+      "scope": "arXiv 版本",
+      "doi": "10.48550/arxiv.2610.23548",
+      "checkedAt": "2026-10-23T04:26:45Z"
+    },
+    "2610.24675": {
+      "count": 0,
+      "status": "confirmed",
+      "provider": "OpenAlex",
+      "source": "https://openalex.org/W7223050225",
+      "scope": "arXiv 版本",
+      "doi": "10.48550/arxiv.2610.24675",
+      "checkedAt": "2026-10-23T04:26:45Z"
+    },
+    "2610.24847": {
+      "count": 0,
+      "status": "confirmed",
+      "provider": "OpenAlex",
+      "source": "https://openalex.org/W7223026986",
+      "scope": "arXiv 版本",
+      "doi": "10.48550/arxiv.2610.24847",
+      "checkedAt": "2026-10-23T04:26:45Z"
+    },
+    "2610.26170": {
+      "count": 0,
+      "status": "confirmed",
+      "provider": "OpenAlex",
+      "source": "https://openalex.org/W7222998507",
+      "scope": "arXiv 版本",
+      "doi": "10.48550/arxiv.2610.26170",
+      "checkedAt": "2026-10-23T04:26:45Z"
+    },
+    "2610.27688": {
+      "count": 0,
+      "status": "confirmed",
+      "provider": "OpenAlex",
+      "source": "https://openalex.org/W7223158729",
+      "scope": "arXiv 版本",
+      "doi": "10.48550/arxiv.2610.27688",
+      "checkedAt": "2026-10-23T04:26:45Z"
+    },
+    "2610.19067": {
+      "count": 0,
+      "status": "confirmed",
+      "provider": "OpenAlex",
+      "source": "https://openalex.org/W7221851372",
+      "scope": "arXiv 版本",
+      "doi": "10.48550/arxiv.2610.19067",
+      "checkedAt": "2026-10-23T04:26:45Z"
+    },
+    "2610.15833": {
+      "count": 0,
+      "status": "confirmed",
+      "provider": "OpenAlex",
+      "source": "https://openalex.org/W7221772533",
+      "scope": "arXiv 版本",
+      "doi": "10.48550/arxiv.2610.15833",
+      "checkedAt": "2026-10-23T04:26:45Z"
+    },
+    "2610.19183": {
+      "count": 0,
+      "status": "confirmed",
+      "provider": "OpenAlex",
+      "source": "https://openalex.org/W7221902620",
+      "scope": "arXiv 版本",
+      "doi": "10.48550/arxiv.2610.19183",
+      "checkedAt": "2026-10-23T04:26:45Z"
+    },
+    "2610.17232": {
+      "count": 0,
+      "status": "confirmed",
+      "provider": "OpenAlex",
+      "source": "https://openalex.org/W7221805027",
+      "scope": "arXiv 版本",
+      "doi": "10.48550/arxiv.2610.17232",
+      "checkedAt": "2026-10-23T04:26:45Z"
+    },
+    "2610.17999": {
+      "count": 0,
+      "status": "confirmed",
+      "provider": "OpenAlex",
+      "source": "https://openalex.org/W7221789619",
+      "scope": "arXiv 版本",
+      "doi": "10.48550/arxiv.2610.17999",
+      "checkedAt": "2026-10-23T04:26:45Z"
+    },
+    "2610.18991": {
+      "count": 0,
+      "status": "confirmed",
+      "provider": "OpenAlex",
+      "source": "https://openalex.org/W7221859940",
+      "scope": "arXiv 版本",
+      "doi": "10.48550/arxiv.2610.18991",
+      "checkedAt": "2026-10-23T04:26:45Z"
+    },
+    "2610.19393": {
+      "count": 0,
+      "status": "confirmed",
+      "provider": "OpenAlex",
+      "source": "https://openalex.org/W7221963831",
+      "scope": "arXiv 版本",
+      "doi": "10.48550/arxiv.2610.19393",
+      "checkedAt": "2026-10-23T04:26:45Z"
+    },
+    "2610.21152": {
+      "count": 0,
+      "status": "confirmed",
+      "provider": "OpenAlex",
+      "source": "https://openalex.org/W7222612890",
+      "scope": "arXiv 版本",
+      "doi": "10.48550/arxiv.2610.21152",
+      "checkedAt": "2026-10-23T04:26:45Z"
+    },
+    "2610.21534": {
+      "count": 0,
+      "status": "confirmed",
+      "provider": "OpenAlex",
+      "source": "https://openalex.org/W7222586947",
+      "scope": "arXiv 版本",
+      "doi": "10.48550/arxiv.2610.21534",
+      "checkedAt": "2026-10-23T04:26:45Z"
+    },
+    "2610.22119": {
+      "count": 0,
+      "status": "confirmed",
+      "provider": "OpenAlex",
+      "source": "https://openalex.org/W7222638978",
+      "scope": "arXiv 版本",
+      "doi": "10.48550/arxiv.2610.22119",
+      "checkedAt": "2026-10-23T04:26:46Z"
+    },
+    "2610.22176": {
+      "count": 0,
+      "status": "confirmed",
+      "provider": "OpenAlex",
+      "source": "https://openalex.org/W7222481817",
+      "scope": "arXiv 版本",
+      "doi": "10.48550/arxiv.2610.22176",
+      "checkedAt": "2026-10-23T04:26:46Z"
+    },
+    "2610.23127": {
+      "count": 0,
+      "status": "confirmed",
+      "provider": "OpenAlex",
+      "source": "https://openalex.org/W7222932287",
+      "scope": "arXiv 版本",
+      "doi": "10.48550/arxiv.2610.23127",
+      "checkedAt": "2026-10-23T04:26:46Z"
+    },
+    "2610.25711": {
+      "count": 0,
+      "status": "confirmed",
+      "provider": "OpenAlex",
+      "source": "https://openalex.org/W7223049730",
+      "scope": "arXiv 版本",
+      "doi": "10.48550/arxiv.2610.25711",
+      "checkedAt": "2026-10-23T04:26:46Z"
+    },
+    "2610.24235": {
+      "count": 0,
+      "status": "confirmed",
+      "provider": "OpenAlex",
+      "source": "https://openalex.org/W7223016895",
+      "scope": "arXiv 版本",
+      "doi": "10.48550/arxiv.2610.24235",
+      "checkedAt": "2026-10-23T04:26:46Z"
+    },
+    "2610.18950": {
+      "count": 0,
+      "status": "confirmed",
+      "provider": "OpenAlex",
+      "source": "https://openalex.org/W7222278652",
+      "scope": "arXiv 版本",
+      "doi": "10.48550/arxiv.2610.18950",
+      "checkedAt": "2026-10-23T04:26:46Z"
+    },
+    "2610.21590": {
+      "count": 0,
+      "status": "confirmed",
+      "provider": "OpenAlex",
+      "source": "https://openalex.org/W7222670304",
+      "scope": "arXiv 版本",
+      "doi": "10.48550/arxiv.2610.21590",
+      "checkedAt": "2026-10-23T04:26:46Z"
+    },
+    "2610.25288": {
+      "count": 0,
+      "status": "confirmed",
+      "provider": "OpenAlex",
+      "source": "https://openalex.org/W7223020656",
+      "scope": "arXiv 版本",
+      "doi": "10.48550/arxiv.2610.25288",
+      "checkedAt": "2026-10-23T04:26:46Z"
+    },
+    "2610.15548": {
+      "count": 0,
+      "status": "confirmed",
+      "provider": "OpenAlex",
+      "source": "https://openalex.org/W7221834413",
+      "scope": "arXiv 版本",
+      "doi": "10.48550/arxiv.2610.15548",
+      "checkedAt": "2026-10-23T04:26:46Z"
+    },
+    "2610.18872": {
+      "count": 0,
+      "status": "confirmed",
+      "provider": "OpenAlex",
+      "source": "https://openalex.org/W7221798123",
+      "scope": "arXiv 版本",
+      "doi": "10.48550/arxiv.2610.18872",
+      "checkedAt": "2026-10-23T04:26:46Z"
+    },
+    "2610.20255": {
+      "count": 0,
+      "status": "confirmed",
+      "provider": "OpenAlex",
+      "source": "https://openalex.org/W7222036575",
+      "scope": "arXiv 版本",
+      "doi": "10.48550/arxiv.2610.20255",
+      "checkedAt": "2026-10-23T04:26:46Z"
+    }
+  },
+  "citation_provider": "OpenAlex",
+  "citation_status": "ready",
+  "citation_coverage": {
+    "total": 36,
+    "confirmed": 36
+  },
   "coverage": {
     "journal": 0,
     "conference": 3,

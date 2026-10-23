@@ -106,8 +106,10 @@ def test_citations_exact_doi_zero_unknown_and_published_version():
     assert failures == 0 and result['2610.12345']['count'] == 0
     assert result['2610.11111']['count'] is None and result['2610.11111']['status'] == 'unindexed'
     assert result['2610.12345']['scope'] == 'arXiv 版本'
-    result, _ = m.refresh_citations(Stub(), papers, {'2610.12345': {'doi': '10.1000/published'}}, {})
+    result, _ = m.refresh_citations(Stub(), papers, {'2610.12345': {'kind': 'journal', 'doi': '10.1000/published'}}, {})
     assert result['2610.12345']['count'] == 8 and result['2610.12345']['scope'] == '正式出版版本'
+    result, _ = m.refresh_citations(Stub(), papers, {'2610.12345': {'kind': 'reference', 'doi': '10.1000/published'}}, {})
+    assert result['2610.12345']['count'] == 0 and result['2610.12345']['scope'] == 'arXiv 版本'
 
 def test_citation_failure_retains_successful_count_and_rejects_ambiguous_doi():
     class Failed:

@@ -193,9 +193,10 @@ def refresh_citations(client, papers, publications, previous, *, force=False):
         batch = pending[start:start + 25]
         identifiers = {}
         for key in batch:
-            doi = publications.get(key, {}).get('doi')
+            publication = publications.get(key, {})
+            doi = publication.get('doi')
             versions = []
-            if doi and doi.startswith('10.') and not doi.lower().startswith(('10.6084/', '10.48550/')):
+            if publication.get('kind') in ('journal', 'conference') and doi and doi.startswith('10.') and not doi.lower().startswith(('10.6084/', '10.48550/')):
                 versions.append((doi.lower(), '正式出版版本'))
             if re.fullmatch(r'\d{4}\.\d{4,5}', key):
                 versions.append(('10.48550/arxiv.' + key, 'arXiv 版本'))

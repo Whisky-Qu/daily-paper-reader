@@ -182,6 +182,61 @@ def resolve_doi(client, record):
                 'source': 'https://doi.org/' + doi, 'note': '通过明确 DOI 核对 Crossref 出版记录。', 'checkedAt': now()}
     return record
 
+def refresh_citations(client, papers, publications, previous, *, force=False):
+    """Paper-level counts: exact DOI only, never infer a count from a title hit."""
+    results = {key: value for key, value in previous.items() if key in papers}
+    pending = [key for key in papers if force or not fresh(results.get(key, {}).get('checkedAt'), days=1)
+               or results.get(key, {}).get('status') == 'unavailable']
+    failures = 0
+    # Up to two versions per paper; one small batch, one request per 25 papers.
+    for start in range(0, len(pending), 25):
+        batch = pending[start:start + 25]
+        identifiers = {}
+        for key in batch:
+            doi = publications.get(key, {}).get('doi')
+            versions = []
+            if doi and doi.startswith('10.') and not doi.lower().startswith(('10.6084/', '10.48550/')):
+                versions.append((doi.lower(), '正式出版版本'))
+            if re.fullmatch(r'\d{4}\.\d{4,5}', key):
+                versions.append(('10.48550/arxiv.' + key, 'arXiv 版本'))
+            identifiers[key] = versions
+        dois = sorted({doi for values in identifiers.values() for doi, _ in values})
+        if not dois:
+            continue
+        try:
+            url = 'https://api.openalex.org/works?' + urllib.parse.urlencode({
+                'filter': 'doi:' + '|'.join('https://doi.org/' + doi for doi in dois),
+                'per-page': 100, 'select': 'id,doi,title,cited_by_count'})
+            payload = json.loads(client.get(url))
+            if not isinstance(payload.get('results'), list):
+                raise RuntimeError('Invalid citation response')
+            by_doi = {}
+            for work in payload['results']:
+                doi = str(work.get('doi', '')).lower().removeprefix('https://doi.org/')
+                count, source = work.get('cited_by_count'), str(work.get('id', ''))
+                if doi not in dois or type(count) is not int or count < 0 or not re.fullmatch(r'https://openalex.org/W\d+', source):
+                    continue
+                by_doi.setdefault(doi, []).append(work)
+            for key in batch:
+                match = next(((by_doi[doi][0], scope, doi) for doi, scope in identifiers[key]
+                              if len(by_doi.get(doi, [])) == 1), None)
+                if match:
+                    work, scope, doi = match
+                    results[key] = {'count': work['cited_by_count'], 'status': 'confirmed', 'provider': 'OpenAlex',
+                                    'source': work['id'], 'scope': scope, 'doi': doi, 'checkedAt': now()}
+                else:
+                    old = results.get(key, {})
+                    results[key] = dict(old, status='unindexed', lastAttemptAt=now()) if type(old.get('count')) is int else {
+                        'count': None, 'status': 'unindexed', 'provider': 'OpenAlex', 'checkedAt': now()}
+        except Exception:
+            failures += 1
+            for key in batch:
+                results[key] = dict(results.get(key) or {'count': None, 'provider': 'OpenAlex'},
+                                    status='unavailable', lastAttemptAt=now())
+        if start + 25 < len(pending):
+            client.sleep(.5)
+    return results, failures
+
 def refresh(root, *, key, force=False, probe='', client=None):
     output = root / 'docs/assets/journal-metrics.json'
     try:
@@ -214,6 +269,12 @@ def refresh(root, *, key, force=False, probe='', client=None):
                         record, lookupStatus='unavailable', note=record['note'] + ' Crossref 查询暂不可用，尚未完成核对。')
         except Exception:
             errors += 1
+    result['citations'], citation_failures = refresh_citations(
+        client, papers, result['papers'], previous.get('citations') or {}, force=force)
+    result['citation_provider'] = 'OpenAlex'
+    result['citation_status'] = 'partial' if citation_failures else 'ready'
+    result['citation_coverage'] = {'total': len(papers), 'confirmed': sum(
+        value.get('status') == 'confirmed' for value in result['citations'].values())}
     journals = {}
     for publication in result['papers'].values():
         if publication.get('kind') == 'journal' and publication.get('venue'):

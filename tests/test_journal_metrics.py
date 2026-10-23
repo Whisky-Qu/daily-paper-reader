@@ -92,3 +92,34 @@ def test_crossref_discovery_requires_title_authors_and_unique_doi():
     assert m.discover_publication(Stub([work, ambiguous]), record)['kind'] == 'preprint'
     preprint = dict(work, type='posted-content')
     assert m.discover_publication(Stub([preprint]), record)['kind'] == 'preprint'
+
+def test_citations_exact_doi_zero_unknown_and_published_version():
+    class Stub:
+        def get(self, url):
+            return json.dumps({'results': [
+                {'id': 'https://openalex.org/W123', 'doi': 'https://doi.org/10.48550/arxiv.2610.12345', 'cited_by_count': 0},
+                {'id': 'https://openalex.org/W456', 'doi': 'https://doi.org/10.1000/published', 'cited_by_count': 8},
+                {'id': 'https://openalex.org/W789', 'doi': 'https://doi.org/10.9999/unrelated', 'cited_by_count': 999}
+            ]}).encode()
+    papers = {'2610.12345': {}, '2610.11111': {}}
+    result, failures = m.refresh_citations(Stub(), papers, {}, {})
+    assert failures == 0 and result['2610.12345']['count'] == 0
+    assert result['2610.11111']['count'] is None and result['2610.11111']['status'] == 'unindexed'
+    assert result['2610.12345']['scope'] == 'arXiv 版本'
+    result, _ = m.refresh_citations(Stub(), papers, {'2610.12345': {'doi': '10.1000/published'}}, {})
+    assert result['2610.12345']['count'] == 8 and result['2610.12345']['scope'] == '正式出版版本'
+
+def test_citation_failure_retains_successful_count_and_rejects_ambiguous_doi():
+    class Failed:
+        def get(self, url): raise RuntimeError('unavailable')
+    old = {'2610.12345': {'count': 4, 'checkedAt': '2020-01-01T00:00:00Z', 'source': 'https://openalex.org/W1'}}
+    result, failures = m.refresh_citations(Failed(), {'2610.12345': {}}, {}, old)
+    assert failures == 1 and result['2610.12345']['count'] == 4
+    assert result['2610.12345']['checkedAt'] == old['2610.12345']['checkedAt']
+    assert result['2610.12345']['status'] == 'unavailable'
+    class Ambiguous:
+        def get(self, url):
+            work = {'id': 'https://openalex.org/W1', 'doi': 'https://doi.org/10.48550/arxiv.2610.12345', 'cited_by_count': 1}
+            return json.dumps({'results': [work, dict(work, id='https://openalex.org/W2')]}).encode()
+    result, _ = m.refresh_citations(Ambiguous(), {'2610.12345': {}}, {}, {})
+    assert result['2610.12345']['count'] is None

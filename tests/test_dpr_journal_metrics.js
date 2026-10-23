@@ -15,3 +15,13 @@ assert.ok(!api.render(evil,'j').includes('<img'));
 evil.papers.j.venue='Journal'; evil.papers.j.issns=['9999-9999'];
 assert.equal(api.applicable(evil,'j').length,1); // only title-only record can match
 console.log('PASS: correct paper identity, preprint/ISSN boundaries, unknown years, escaped provider text');
+data.citations={'2610.25628':{count:0,status:'confirmed',provider:'OpenAlex',scope:'arXiv 版本',checkedAt:'2026-10-23T00:00:00Z',source:'https://openalex.org/W123'}};
+assert.ok(api.render(data,'2610.25628').includes('被引 0'));
+assert.ok(api.render(data,'2610.25628').includes('OpenAlex'));
+assert.ok(api.render(data,'2610.25628').includes('dpr-chip-cited'));
+data.citations['2610.25628']={count:null,status:'unindexed',provider:'OpenAlex'};
+assert.ok(api.render(data,'2610.25628').includes('尚未收录'));
+assert.ok(!api.render(data,'2610.25628').includes('被引 0'));
+assert.ok(api.render(data,'j').includes('dpr-chip-cas'));
+assert.ok(api.render(data,'j').includes('dpr-chip-if'));
+console.log('PASS: colored metric pills, confirmed zero distinct from unknown, citation provenance');

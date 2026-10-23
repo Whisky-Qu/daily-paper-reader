@@ -988,7 +988,7 @@
 
   function collectUnreadPaperIdsForSnapshot(model, readMap) {
     var ids = new Set();
-    taskPapers(model).forEach(function (paper) { if (!paperReadStatus(paper, readMap || {})) ids.add(paperIdentity(paper)); });
+    taskPapers(model).concat(model.journalLibrary || []).forEach(function (paper) { if (!paperReadStatus(paper, readMap || {})) ids.add(paperIdentity(paper)); });
     flattenDailyPapers(model).forEach(function (record) {
       var id = paperIdentity(record.paper);
       if (id && !paperReadStatus(record.paper, readMap || {})) ids.add(id);

@@ -65,6 +65,13 @@ def conference_series(venue, issns=()):
         r'\b(?:conference series|web of conferences|conference proceedings|procedia)\b', venue, re.I))
 
 
+def usable_abstract(text):
+    # Some Crossref/OpenAlex records contain affiliation markers or a generic
+    # publisher description in the abstract field. Neither supports a reading card.
+    return len(text.strip()) >= 80 and len(re.findall(r'[A-Za-z]{2,}', text)) >= 10 and not re.search(
+        r'Wydawnictwo\s+SIGMA-NOT|wydaje\s+czasopisma\s+fachowe', text, re.I)
+
+
 def accepted(work, keyword, today):
     date, _ = date_of(work)
     return (work.get('type') == 'journal-article' and bool(work.get('container-title')) and bool(work.get('ISSN'))
@@ -129,7 +136,7 @@ def refresh(root, *, per_topic=3, target_per_topic=0, fetch=get):
     target = root / 'docs/journal-library/_daily_state.json'
     previous = json.loads(target.read_text()) if target.exists() else {}
     papers = {p['doi'].lower(): p for p in previous.get('papers', [])
-              if not conference_series(p.get('venue', ''), p.get('issns') or [])}
+              if not conference_series(p.get('venue', ''), p.get('issns') or []) and usable_abstract(p.get('abstract', ''))}
     repaired = len(papers) != len(previous.get('papers', []))
     profiles = (yaml.safe_load((root / 'config.yaml').read_text()).get('subscriptions') or {}).get('intent_profiles') or []
     stamp = dt.datetime.now(dt.timezone.utc).replace(microsecond=0).isoformat().replace('+00:00', 'Z')
@@ -197,6 +204,7 @@ def refresh(root, *, per_topic=3, target_per_topic=0, fetch=get):
                 continue
             date, precision = date_of(work)
             abstract = plain(work.get('abstract'))
+            if not usable_abstract(abstract): abstract = ''
             pdf = ''
             try:
                 oa = fetch('https://api.openalex.org/works/https://doi.org/' + urllib.parse.quote(doi, safe=''))
@@ -207,7 +215,7 @@ def refresh(root, *, per_topic=3, target_per_topic=0, fetch=get):
                     pdf = safe_url((oa.get('best_oa_location') or {}).get('pdf_url'))
             except Exception:
                 pass  # Missing OA content does not invalidate a verified journal DOI.
-            if not abstract:
+            if not usable_abstract(abstract):
                 continue  # A reading card needs an actual source abstract, not a title paraphrase.
             pid = doi_id(doi)
             papers[doi] = {'paper_id': pid, 'route': 'journal-library/' + pid,

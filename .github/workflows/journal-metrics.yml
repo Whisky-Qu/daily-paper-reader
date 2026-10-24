@@ -15,6 +15,10 @@ on:
         type: choice
         options: ['0', '20', '30']
         default: '0'
+      chinese_editorial_b64:
+        description: 'Optional source-fingerprinted public Chinese introduction corrections (gzip/base64)'
+        type: string
+        default: ''
   workflow_run:
     workflows: ['daily-paper-reader']
     types: [completed]
@@ -49,6 +53,19 @@ jobs:
         env:
           LIBRARY_TARGET: ${{ inputs.library_target_per_topic || '0' }}
         run: python scripts/update_journal_library.py --target-per-topic "$LIBRARY_TARGET"
+      - name: Cache offline translation weights
+        if: steps.policy.outputs.run_daily == 'true'
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/dpr-translation
+          key: dpr-nllb-600m-int8-v1
+      - name: Prepare Chinese journal introductions without API calls
+        env:
+          DPR_CHINESE_EDITORIAL_B64: ${{ inputs.chinese_editorial_b64 }}
+        if: steps.policy.outputs.run_daily == 'true'
+        run: |
+          python -m pip install -r requirements-journal-translation.txt
+          python scripts/translate_journal_library.py
       - name: Update public journal metadata cache
         if: steps.policy.outputs.run_daily == 'true'
         env:

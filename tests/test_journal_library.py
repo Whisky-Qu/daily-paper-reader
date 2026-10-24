@@ -141,3 +141,9 @@ def test_bulk_per_venue_cap_broadens_coverage_without_inventing_extra_papers(tmp
         return {}
     result=library.refresh(tmp_path,fetch=fetch,target_per_topic=10)
     assert len(result['papers'])==5 and result['topic_counts']['hip']==5
+
+
+def test_abstract_rejects_affiliations_and_publisher_boilerplate():
+    assert not library.usable_abstract('1, 2')
+    assert not library.usable_abstract('Wydawnictwo SIGMA-NOT wydaje czasopisma fachowe ' * 10)
+    assert library.usable_abstract(library.plain(work()['abstract']))

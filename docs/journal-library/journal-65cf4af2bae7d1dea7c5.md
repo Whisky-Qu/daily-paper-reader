@@ -6,9 +6,9 @@ doi: "10.1109/lra.2022.3182106"
 paper_id: "journal-65cf4af2bae7d1dea7c5"
 source: "IEEE Robotics and Automation Letters"
 tags: ["query:hip-exo"]
-tldr: "在本文中 随着 Force Profile 2 (FP2)，峰值KAM降低了9.61%和冲动KAM降低了1…"
+tldr: "通过绳驱髋外展助力调节步行生物力学，比较五种力曲线与两档峰值力。八名健康参与者实验中，两种曲线降低了膝内收力矩；其中一组峰值降低9.61%，提示其减轻膝关节负荷的潜力。"
 evidence: "正式期刊记录已按 DOI 核对；简介为原摘要摘录，非 AI 全文解读。"
-title_zh: "软外骨骼助力服辅助髋关节 外展用于膝关节在行走时降低吸附时刻"
+title_zh: "通过髋外展助力降低步行膝内收力矩的软体助力服"
 translation_source: "NLLB-200 600M · 免费离线机器翻译 · 机器人术语表v1"
 translation_sha: "f96c6c9c11c7a42a48623c4bd0b0b40c5af254cbf65dad024151506bdab17816"
 ---
@@ -20,7 +20,7 @@ translation_sha: "f96c6c9c11c7a42a48623c4bd0b0b40c5af254cbf65dad024151506bdab178
 
 ## 翻译说明
 
-NLLB-200 600M · 免费离线机器翻译 · 机器人术语表v1；中文概述为原摘要的方法和结果摘录，关键术语与数值请结合英文原文核对。
+中文概述已依据原摘要核对整理；完整中文摘要由免费离线机器翻译生成，关键术语与数值请结合英文原文核对。
 <!-- dpr-offline-zh:end -->
 
 ## Abstract

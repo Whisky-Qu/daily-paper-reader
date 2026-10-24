@@ -858,7 +858,7 @@
       "date_precision": 2,
       "abstract": "The knee joint experiences significant torques in the frontal plane to keep the body upright during walking. Excessive loading over time can lead to knee osteoarthritis (OA), the progression of which is correlated with external knee adduction moment (KAM). In this paper, we present a wearable soft robotic exosuit that applies a hip abduction torque and evaluate its ability to reduce KAM. The exosuit uses a portable cable actuation system to generate torque when desired while remaining unrestrictive when unpowered. We explored five different force profiles on healthy participants (N=8) walking on an instrumented treadmill at 1.25 m/s. For each force profile, we tested two peak force levels: 15% and 20% of bodyweight. We observed KAM reductions with two of the five profiles. With Force Profile 2 (FP2), peak KAM was reduced by 9.61% and impulse KAM by 12.76%. With Force Profile 5 (FP5), we saw reductions of peak KAM by 6.14% and impulse KAM by 21.09%. These initial findings show that the device has the ability to change walking biomechanics in a consistent and potentially beneficial way.",
       "pdf": "",
-      "evidence": "在本文中 随着 Force Profile 2 (FP2)，峰值KAM降低了9.61%和冲动KAM降低了1…",
+      "evidence": "通过绳驱髋外展助力调节步行生物力学，比较五种力曲线与两档峰值力。八名健康参与者实验中，两种曲线降低了膝内收力矩；其中一组峰值降低9.61%，提示其减轻膝关节负荷的潜力。",
       "tags": [
         {
           "kind": "query",
@@ -867,7 +867,7 @@
       ],
       "section": "journal",
       "added_at": "2026-10-24T03:22:15Z",
-      "title_zh": "软外骨骼助力服辅助髋关节 外展用于膝关节在行走时降低吸附时刻"
+      "title_zh": "通过髋外展助力降低步行膝内收力矩的软体助力服"
     },
     {
       "paper_id": "journal-07628b19c4e853273188",
@@ -1217,7 +1217,7 @@
       "date_precision": 3,
       "abstract": "Using active vision to perceive surroundings instead of just passively receiving information, humans develop the ability to explore unknown environments. Humanoid robot active vision research has already half a century history. It covers comprehensive research areas and plenty of studies have been done. Nowadays, the new trend is to use a stereo setup or a Kinect with neck movements to realize active vision. However, human perception is a combination of eye and neck movements. This paper presents an advanced active vision system that works in a similar way as human vision. The main contributions are: a design of a set of controllers that mimic eye and neck movements, including saccade eye movements, pursuit eye movements, vestibulo-ocular reflex eye movements and vergence eye movements; an adaptive selection mechanism based on properties of objects to automatically choose an optimal tracking algorithm; a novel Multimodal Visual Odometry Perception method that combines stereopsis and convergence to enable robots to perform both precise action in action space and scene exploration in personal space. Experimental results prove the effectiveness and robustness of our system. Besides, the system works in real-time constraints with low-cost cameras and motors, providing an affordable solution for industrial applications.",
       "pdf": "",
-      "evidence": "这篇论文介绍了一种先进的活跃视觉系统， 实验结果证明了我们的系统的有效性和鲁棒性",
+      "evidence": "模拟眼球与颈部协同运动，结合扫视、追踪、前庭眼反射和聚散控制，并按目标特性选择跟踪算法。融合立体视觉与聚散信息，支持精细动作和场景探索，实验验证了实时性及鲁棒性。",
       "tags": [
         {
           "kind": "query",
@@ -1226,7 +1226,7 @@
       ],
       "section": "journal",
       "added_at": "2026-10-24T03:22:15Z",
-      "title_zh": "具有多模态视觉视觉视觉视觉视觉视觉视觉视觉视觉视觉视觉视觉视觉"
+      "title_zh": "融合多模态视觉里程计的人形机器人主动视觉系统"
     },
     {
       "paper_id": "journal-34e3c45389d82867c998",

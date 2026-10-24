@@ -2,7 +2,7 @@
   "schema_version": 1,
   "date": "journal-library",
   "date_label": "已发表期刊",
-  "generated_at": "2026-10-23T07:47:42Z",
+  "generated_at": "2026-10-24T03:22:15Z",
   "status": "ready",
   "query_signature": "f0588fd6a1cbdaea0a0cabed3da003762b5ba33d38eb63dd895660a28476af02",
   "papers": [
@@ -20,7 +20,7 @@
       "date_precision": 3,
       "abstract": "Reliable Human Pose Estimation (HPE) is essential for vision-based monitoring of upper-limb movements in exoskeleton-assisted rehabilitation. However, the robotic structure, camera placement, and arm orientation may challenge pose-estimation performance, and widely used markerless models remain insufficiently benchmarked under these conditions. This paper benchmarks 10 representative HPE models on video sequences of a healthy participant wearing an upper-limb exoskeleton (idle, with the collaborative manipulator locked), recorded with an OAK-D camera from frontal, top-down, and lateral placements, covering elbow flexion and extension under shoulder flexion and shoulder abduction. Performance is assessed across accuracy, robustness, temporal stability, and speed. RTMO-M achieved the highest accuracy (Percentage of Correct Keypoints (PCK) = 0.921 ± 0.081), while YOLO26m offered the best accuracy-throughput trade-off (PCK = 0.896 ± 0.125, 27.0 ± 3.5 frames per second). Camera placement influenced accuracy more than model selection: frontal placement achieved a mean PCK of 0.947 versus 0.719 for lateral, a gap exceeding the largest inter-model difference. An ablation across five YOLO size variants and three recording resolutions further characterizes accuracy–speed trade-offs and resolution sensitivity. Results highlight the importance of model and camera configuration for vision-based HPE with upper-limb exoskeletons in laboratory scenarios representing rehabilitation conditions.",
       "pdf": "",
-      "evidence": "原摘要摘录：Reliable Human Pose Estimation (HPE) is essential for vision-based monitoring of upper-limb movements in exoskeleton-assisted rehabilitation. However, the robotic structure, camera placement, and arm orientation may challenge pose-estimation performance, and widely used markerless models remain insufficiently benchmarked under these…",
+      "evidence": "比较10种姿态估计模型，评估相机位置和手臂姿态对外骨骼康复监测的影响。正面拍摄的准确率优于侧面，相机布置的影响大于模型选择；RTMO-M精度最高，YOLO26m在准确率与速度之间更均衡。",
       "tags": [
         {
           "kind": "query",
@@ -28,7 +28,8 @@
         }
       ],
       "section": "journal",
-      "added_at": "2026-10-23T07:25:01Z"
+      "added_at": "2026-10-23T07:25:01Z",
+      "title_zh": "上肢康复外骨骼场景中的无标记视觉人体姿态估计评测"
     },
     {
       "paper_id": "journal-62e3b3c5742eaf76fa32",
@@ -44,7 +45,7 @@
       "date_precision": 3,
       "abstract": "With the advancement of exoskeleton technology, the need for accurate adaptation to users’ movements for effective human–exoskeleton interaction is paramount. Therefore, predicting lower-limb joint trajectories, including hip, knee and ankle joints, is a critical aspect of exoskeleton control during locomotion. While joint-angle prediction has traditionally relied on empirical and biomechanical models, machine learning approaches have demonstrated strong capabilities in modeling complex temporal relationships in time-series data. This study presents a comparative evaluation of ARMA (2,2), ARIMA (2,1,2), RNN, LSTM and GRU models for predicting joint angles during human–exoskeleton (HEXO) locomotion. The models were evaluated utilizing R2, MAE, RMSE, training time and inference time. The results showed that the deep learning models consistently outperformed the traditional statistical approaches. Among all of the evaluated models, the RNN achieved the highest predictive accuracy, attaining an R2 ≈ 99.41% for the HEXO hip joint-angle trajectory. Among all of the deep learning architectures, the GRU proved the most favorable balance between prediction accuracy and computational cost. These findings suggest that improvements in predictive accuracy may enhance an exoskeleton’s responsiveness to complex movement patterns and improve biomechanical synchronization. Additionally, the findings provide useful insights for the development of intelligent exoskeleton control systems and identification of opportunities for future research. However, the findings are based on simulated joint-angle data and require validation using experimental exoskeleton datasets before real-world deployment.",
       "pdf": "",
-      "evidence": "原摘要摘录：With the advancement of exoskeleton technology, the need for accurate adaptation to users’ movements for effective human–exoskeleton interaction is paramount. Therefore, predicting lower-limb joint trajectories, including hip, knee and ankle joints, is a critical aspect of exoskeleton control during locomotion.",
+      "evidence": "比较ARMA、ARIMA、RNN、LSTM和GRU对外骨骼行走关节轨迹的预测。深度模型优于传统统计方法，RNN精度最高，GRU的精度与计算开销更均衡；结果来自仿真数据，尚需真实外骨骼实验验证。",
       "tags": [
         {
           "kind": "query",
@@ -52,7 +53,8 @@
         }
       ],
       "section": "journal",
-      "added_at": "2026-10-23T07:25:01Z"
+      "added_at": "2026-10-23T07:25:01Z",
+      "title_zh": "人机协同行走中的关节角度时序预测模型比较"
     },
     {
       "paper_id": "journal-2db42d94a76b9eb6b35d",
@@ -69,7 +71,7 @@
       "date_precision": 3,
       "abstract": "Humanoid whole‐body control policies receive limited proprioception at execution time, while simulation exposes richer privileged information during training. Such information can improve policy learning, but using it for deployable control requires transferring training‐only cues without changing the execution‐time sensing interface. While existing methods often rely on teacher distillation or explicit prediction of physical quantities, this work treats the transfer as a representation‐learning problem. To address this, DVP is introduced as a Dual‐View Proprioceptive (DVP) framework that turns privileged simulation states into training‐only latent supervision. For each simulated state, DVP pairs the privileged state with a view containing only the inputs available to the deployed actor. A dual‐cosine objective then aligns the privileged and deployable latent features while PPO optimizes the control policy. At execution time, the actor uses only deployment‐available inputs, and the privileged branch is removed. On LimX Oli velocity tracking and whole‐body motion tracking, DVP improves learning progress, control quality, action smoothness, and tracking accuracy over representative representation‐learning and privileged‐learning baselines. Cross‐platform motion‐tracking simulations on Unitree G1, Booster K1, and Noetix E1 test generality across morphology scales, while MuJoCo sim‐to‐sim evaluation and limited LimX Oli hardware demonstrations show execution through the deployable interface. Source code is available at DVP_code .",
       "pdf": "https://onlinelibrary.wiley.com/doi/pdfdirect/10.1002/aisy.70563",
-      "evidence": "原摘要摘录：Humanoid whole‐body control policies receive limited proprioception at execution time, while simulation exposes richer privileged information during training. Such information can improve policy learning, but using it for deployable control requires transferring training‐only cues without changing the execution‐time sensing interface.",
+      "evidence": "DVP用双视图潜在特征对齐，将仿真特权信息转化为训练监督，执行时只需本体输入。跨机器人仿真显示运动跟踪、动作平滑性和学习效率改善，并提供有限的LimX Oli实机演示。",
       "tags": [
         {
           "kind": "query",
@@ -77,7 +79,8 @@
         }
       ],
       "section": "journal",
-      "added_at": "2026-10-23T07:25:01Z"
+      "added_at": "2026-10-23T07:25:01Z",
+      "title_zh": "面向可部署人形机器人全身控制的双视图表示学习"
     },
     {
       "paper_id": "journal-8f4cf67b7735f8dbf16b",
@@ -94,7 +97,7 @@
       "date_precision": 3,
       "abstract": "Abstract Humanoid locomotion over varying terrains typically relies on exteroceptive perception or manually tuned control gains, both of which limit robustness in real-world deployment. This paper presents a fully proprioceptive terrain-adaptive control approach that enables humanoid robots to walk across flat, uneven, and inclined surfaces using only joint encoders and a body-mounted inertial measurement unit, without any external sensing or terrain-specific tuning. Our central idea is that continuous terrain does not need to be seen to be handled: its local geometry can be inferred from proprioceptive signals alone, and control behavior can continuously adapt to this estimate so that the robot automatically prioritizes contact safety on inclines while preserving nominal performance on flat ground. This adaptation is driven by a feasibility margin that quantifies how much of the friction cone remains available to the quadratic programming optimizer, and is realized through a feasibility-aware whole-body controller (FAWBC) that modulates its cost weights accordingly. Simulation experiments on the Unitree G1 humanoid demonstrate stable locomotion across flat ground, uneven terrain, and a $$10^\\circ $$ 10 ∘ ramp, where a fixed-weight baseline falls. The approach is further validated on the physical Unitree G1 across flat ground, grassland, wood-chip terrain, and a $$15^\\circ $$ 15 ∘ ramp, confirming its real-world feasibility. The video of the real-robot experiments is available at https://tinyurl.com/FAWBCexperiments .",
       "pdf": "https://link.springer.com/content/pdf/10.1007/s10514-026-10263-6.pdf",
-      "evidence": "原摘要摘录：Abstract Humanoid locomotion over varying terrains typically relies on exteroceptive perception or manually tuned control gains, both of which limit robustness in real-world deployment.",
+      "evidence": "仅利用关节编码器和机身IMU估计地形，通过摩擦锥可行性裕度调整全身控制权重。Unitree G1在不平地面和坡道上保持稳定，并在草地、木屑地及15°坡道完成实机验证。",
       "tags": [
         {
           "kind": "query",
@@ -102,7 +105,8 @@
         }
       ],
       "section": "journal",
-      "added_at": "2026-10-23T07:25:01Z"
+      "added_at": "2026-10-23T07:25:01Z",
+      "title_zh": "面向地形自适应人形行走的可行性感知全身控制"
     },
     {
       "paper_id": "journal-fb7295b34c42e8f1e599",
@@ -118,7 +122,7 @@
       "date_precision": 3,
       "abstract": "Humanoid robots stand at the forefront of robotics, aiming to capture the agility, robustness, and expressivity of human movement in an anthropomorphic form. The locomotion control of humanoids has evolved from classical model–based methods to reinforcement learning powered by large-scale simulation and now to generative models that produce adaptive, whole-body behaviors, propelling humanoids toward operation in real-world environments. This survey positions humanoid control at a turning point, converging toward a unified paradigm of physics-guided generative intelligence that integrates optimization, learning, and predictive reasoning. We identify three core principles linking these paradigms: physics-based modeling, constrained decision-making, and adaptation to uncertainty. Building on these connections, we provide recommendations for researchers and outline open challenges in safety, accessibility, and human-level capability. These directions represent a transformation from engineered stability to intelligent autonomy, laying the groundwork for humanoid generalists capable of operating safely, collaborating naturally, and extending human capability in the open world.",
       "pdf": "",
-      "evidence": "原摘要摘录：Humanoid robots stand at the forefront of robotics, aiming to capture the agility, robustness, and expressivity of human movement in an anthropomorphic form. The locomotion control of humanoids has evolved from classical model–based methods to reinforcement learning powered by large-scale simulation and now to generative models that…",
+      "evidence": "综述人形控制从模型优化、强化学习到生成模型的演变，提炼物理建模、约束决策和不确定性适应三条共同主线，并讨论安全性、可及性及通用自主能力仍面临的问题。",
       "tags": [
         {
           "kind": "query",
@@ -126,7 +130,8 @@
         }
       ],
       "section": "journal",
-      "added_at": "2026-10-23T05:46:43Z"
+      "added_at": "2026-10-23T05:46:43Z",
+      "title_zh": "人形机器人运动控制的演进"
     },
     {
       "paper_id": "journal-5e6694a0fac5a89725f7",
@@ -142,7 +147,7 @@
       "date_precision": 3,
       "abstract": "Despite the rise of billion-parameter foundation models trained across thousands of graphical processing units (GPUs), similar scaling gains have not been shown for humanoid control. Current neural controllers for humanoids remain modest in size, target a limited set of behaviors, and are trained on a handful of GPUs. We show that scaling model capacity, data, and compute yields a generalist humanoid controller capable of natural, robust whole-body movements. We position motion tracking as a scalable task for humanoid control, leveraging dense supervision from diverse motion-capture data to acquire human motion priors without manual reward engineering. We build a foundation model for motion tracking by scaling along three axes: network size (1.2 to 42 million parameters), dataset volume (more than 100 million frames from 700 hours of motion capture), and compute (21,000 GPU hours). Beyond demonstrating the benefits of scale, we further show downstream utility through a real-time kinematic planner that bridges motion tracking to tasks such as navigation, enabling natural and interactive control, as well as a unified token space that supports virtual reality (VR) teleoperation and vision-language-action (VLA) models with a single policy. Through this interface, we demonstrate autonomous VLA-driven whole-body locomanipulation requiring coordinated hand and foot placement. Scaling motion tracking exhibits favorable properties: Performance improves steadily with compute and data diversity, and learned policies generalize to unseen motions, establishing motion tracking at scale as a practical foundation for humanoid control.",
       "pdf": "https://arxiv.org/pdf/2511.07820",
-      "evidence": "原摘要摘录：Despite the rise of billion-parameter foundation models trained across thousands of graphical processing units (GPUs), similar scaling gains have not been shown for humanoid control. Current neural controllers for humanoids remain modest in size, target a limited set of behaviors, and are trained on a handful of GPUs.",
+      "evidence": "同时扩大模型、动捕数据与训练算力，构建通用人形运动跟踪控制器。策略可泛化到未见动作，并通过实时规划和统一接口连接导航、VR遥操作及视觉语言动作模型，支持全身移动操作。",
       "tags": [
         {
           "kind": "query",
@@ -150,7 +155,8 @@
         }
       ],
       "section": "journal",
-      "added_at": "2026-10-23T07:25:01Z"
+      "added_at": "2026-10-23T07:25:01Z",
+      "title_zh": "SONIC：通过规模化运动跟踪实现自然的人形全身控制"
     },
     {
       "paper_id": "journal-5dfaed7d70238a1d3cc6",
@@ -166,7 +172,7 @@
       "date_precision": 3,
       "abstract": "Exosuits can assist gait and reduce fatigue for both healthy and pathological populations, yet their bulky, rigid actuators (usually motors or pneumatic actuators) hinder natural, comfortable movement. Dielectric elastomer actuators (DEAs) provide a lightweight, compliant alternative, but are constrained by insufficient force, energy output, and integration challenges. Herein, we propose a motor-free hip exosuit driven by high-output fibrous DEAs, offering a previously unexplored paradigm for lower-limb assistance. We develop high-aspect-ratio fibrous DEAs that deliver high blocked stress (381.6 mN·mm −2 ), energy density (260 J/kg), and power density (1,664 W/kg), enabled by a dual-polar molecular design of the elastomer to overcome the intrinsic trade-offs between dielectric and mechanical properties. A Lego-like integration strategy is established to efficiently bundle fibers for force amplification. The resulting exosuit reduces the walking metabolic cost by 13.9% compared to no assistance, surpassing most hip exoskeletons. These findings advance DEAs toward practical wearable robotics for real-world human assistance.",
       "pdf": "",
-      "evidence": "原摘要摘录：Exosuits can assist gait and reduce fatigue for both healthy and pathological populations, yet their bulky, rigid actuators (usually motors or pneumatic actuators) hinder natural, comfortable movement.",
+      "evidence": "采用高输出纤维介电弹性体驱动器，替代笨重电机或气动执行器，并通过模块化纤维束放大输出。与无辅助相比，髋关节助力服使步行代谢成本降低13.9%，展示柔性驱动的可穿戴助力潜力。",
       "tags": [
         {
           "kind": "query",
@@ -174,7 +180,8 @@
         }
       ],
       "section": "journal",
-      "added_at": "2026-10-23T07:25:01Z"
+      "added_at": "2026-10-23T07:25:01Z",
+      "title_zh": "高输出纤维介电弹性体驱动的无电机髋关节助力服"
     },
     {
       "paper_id": "journal-3b61597ea8bcd700281f",
@@ -190,7 +197,7 @@
       "date_precision": 3,
       "abstract": "Background/Objectives: This study investigated the biomechanics of a hip exoskeleton during sit-to-stand transitions. Methods: Eleven participants performed the task under three conditions: without the exoskeleton (No Exo), wearing the exoskeleton without assistance (Exo Off), and wearing it with hip extension assistance (Exo On). Results: The analyses revealed that joint angles (hip, knee, and ankle) and vertical ground reaction forces were comparable across all conditions. However, Exo Off significantly increased transition time, whereas Exo On did not differ significantly from No Exo. Additionally, both exoskeleton conditions led to increased integrated EMG (iEMG) activity in the rectus femoris, vastus medialis, and gluteus maximus—likely due to the added device mass. Notably, iEMG analysis revealed a significant reduction in gluteus maximus activity in Exo On compared to Exo Off. Conclusions: Despite providing only moderate torque assistance (0.12 Nm/kg), the results suggest that well-timed exoskeleton support can partially reduce the physical demands of sit-to-stand transitions. However, the observed reduction in gluteus maximus activity was limited, likely reflecting the combined effects of the assistance strategy, including its magnitude and timing, user adaptation and training, postural demands due to device weight and external torques, and mechanical constraints such as potential joint misalignment. Further research is needed to optimize hip exoskeleton support for daily activities.",
       "pdf": "https://www.mdpi.com/2673-7078/6/1/15/pdf?version=1770028986",
-      "evidence": "原摘要摘录：Background/Objectives: This study investigated the biomechanics of a hip exoskeleton during sit-to-stand transitions. Methods: Eleven participants performed the task under three conditions: without the exoskeleton (No Exo), wearing the exoskeleton without assistance (Exo Off), and wearing it with hip extension assistance (Exo On).",
+      "evidence": "11名参与者比较无设备、无动力和主动助力三种条件。适时助力相较无动力状态降低了臀大肌活动，但设备质量仍增加部分肌肉负荷，说明助力时序、力矩和人机适应需要共同优化。",
       "tags": [
         {
           "kind": "query",
@@ -198,7 +205,8 @@
         }
       ],
       "section": "journal",
-      "added_at": "2026-10-23T05:46:43Z"
+      "added_at": "2026-10-23T05:46:43Z",
+      "title_zh": "坐站转换中的髋关节外骨骼辅助"
     },
     {
       "paper_id": "journal-c40866a312a33b78e616",
@@ -214,7 +222,7 @@
       "date_precision": 1,
       "abstract": "Work-related musculoskeletal disorders (WMSDs) remain a major challenge in physically demanding occupations, motivating the development of active wearable exoskeletons to reduce physical strain during manual handling tasks. A key requirement for such systems is the ability to anticipate user motion intention and deliver timely, task-appropriate assistance in real-world settings. This paper presents an intention-driven control framework for a cable-driven upper-limb exoskeleton based on multimodal vision-inertial sensing. Visual information from an egocentric camera and kinematic data from wrist-mounted inertial measurement units are fused to recognise three fundamental manual handling actions: lifting, walking, and placing. Multimodal data were collected from 20 participants to train and evaluate the intention prediction model offline. The framework was further validated through real-time experiments with three participants on a physical exoskeleton, achieving an overall classification accuracy of 97%. Predicted actions preceded measurable muscle activation by an average of 1.62 s, enabling anticipatory assistance rather than reactive support. Electromyography-based evaluation further showed reductions of 63.5% and 42.9% in biceps and triceps muscle activation, respectively, during box-carrying tasks. These results show that multimodal intention prediction can enable timely and physically effective assistance in wearable robotic systems.",
       "pdf": "",
-      "evidence": "原摘要摘录：Work-related musculoskeletal disorders (WMSDs) remain a major challenge in physically demanding occupations, motivating the development of active wearable exoskeletons to reduce physical strain during manual handling tasks.",
+      "evidence": "融合第一视角相机与腕部IMU，提前识别抬举、行走和放置动作。实机实验分类准确率为97%，预测平均领先肌肉激活1.62秒；搬运任务中肱二头肌与肱三头肌活动均降低。",
       "tags": [
         {
           "kind": "query",
@@ -222,7 +230,8 @@
         }
       ],
       "section": "journal",
-      "added_at": "2026-10-23T07:25:01Z"
+      "added_at": "2026-10-23T07:25:01Z",
+      "title_zh": "融合视觉与惯性传感的绳驱上肢外骨骼意图控制"
     },
     {
       "paper_id": "journal-047845974f2c4a4cc52e",
@@ -239,7 +248,7 @@
       "date_precision": 1,
       "abstract": "In recent years, humanoid robots with flexible locomotion capabilities have attracted significant attention. Imitation from human motion has proven to be an effective approach for them to learn. This article presents a novel training framework called Decomposed Imitation from Human to Humanoid (DIH2H). We define a “key skill set” to represent essential human motions. By introducing an action redirection mechanism, an agent learns joint motion patterns rather than directly copying human motions. This focused approach allows a humanoid robot to effectively handle the differences between its own locomotion and human gaits, thereby preventing unnatural motion. The control policy is trained separately for the robot’s upper and lower body. The lower body employs imitation learning (IL), while the upper one leverages a combination of IL and curriculum learning. By gradually introducing increasingly challenging tasks and diverse environments, the upper body can robustly adapt to dynamic changes across various terrains and motions. Simulation results demonstrate that DIH2H improves policy learning efficiency and generalization across diverse tasks and environments, achieving a 10% increase in imitation accuracy and 25% higher data efficiency over its existing peers.",
       "pdf": "",
-      "evidence": "原摘要摘录：In recent years, humanoid robots with flexible locomotion capabilities have attracted significant attention. Imitation from human motion has proven to be an effective approach for them to learn. This article presents a novel training framework called Decomposed Imitation from Human to Humanoid (DIH2H).",
+      "evidence": "通过关键技能集与动作重定向学习关节运动规律，并分别训练上下身策略，减少直接复制人体动作造成的不自然运动。仿真中模仿准确率提高10%，数据效率提高25%。",
       "tags": [
         {
           "kind": "query",
@@ -247,7 +256,8 @@
         }
       ],
       "section": "journal",
-      "added_at": "2026-10-23T05:46:43Z"
+      "added_at": "2026-10-23T05:46:43Z",
+      "title_zh": "DIH2H：从人体到人形机器人的分解模仿学习"
     },
     {
       "paper_id": "journal-62716029e92cb36eb71c",
@@ -263,7 +273,7 @@
       "date_precision": 3,
       "abstract": "Aim: The inspections of the rebar are attempted manually at the point of repetition, posture production that differs in terms of accuracy and throughput. This study aimed to evaluate the effectiveness of integrating industrial exoskeletons (both passive and powered) with edge-deployed computer vision systems in improving safety, productivity, and measurement accuracy during rebar inspections. Methods: Thirty qualified investigators participated in completing a randomized 2x2 crossover study, with three projects involving the exoskeleton and vision assist on/off. Participants performed manual and exoskeleton-assisted rebar inspections using vision-augmented tools. Data were collected using surface electromyography (sEMG) and inertial measurement units (IMUs) to assess ergonomic effects. Measurement accuracy and productivity were quantified using precision/recall scores and throughput metrics. Results: Exoskeleton-plus-vision improved throughput, increasing it by 142.174 m² by an average of +22.5 %, and reducing cycle time per 100 m² by 18.2%, based on 1,920 bay-level observations. Erector-spinae and anterior-deltoid activity decreased 3% and 31% respectively, at the same output and time, at near extension beyond 30°, and length of time. Fidelity to measurement was preserved or was improved: spacing MAE was not inferior (0.2 mm vs. the manual), lap error was reduced to 5.1 mm (6.8 mm vs. 2.9 mm), and cover error was reduced to 2.5 mm (2.9 mm vs. 2.5mm. There were increases in safety (near-miss IRR = 0.74) and a reduction in cost per square meter (down to 0.36), resulting in an 18.2% decrease, with a typical payback of 8-13 months, according to device classification. These findings suggest a strategy for safer and faster rebar QA along the auditable line. Conclusion: The study concludes that integrating industrial exoskeleton support with edge-deployed computer vision systems can significantly enhance safety, efficiency, and information traceability during rebar inspection. This makes it a viable and scientifically tested avenue for more automated and ergonomically oriented quality control within the construction industry. Recommendation: It also suggests that construction companies should test and deploy exoskeleton-aided, vision-enabled inspection tools under various site and environmental conditions to optimize deployment standards, verify scalability, and measure the economic benefits of different projects.",
       "pdf": "https://gprjournals.org/journals/index.php/ajt/article/download/438/441",
-      "evidence": "原摘要摘录：Aim: The inspections of the rebar are attempted manually at the point of repetition, posture production that differs in terms of accuracy and throughput. This study aimed to evaluate the effectiveness of integrating industrial exoskeletons (both passive and powered) with edge-deployed computer vision systems in improving safety,…",
+      "evidence": "将工业外骨骼与边缘视觉检测结合，在30人交叉实验中评估作业效率、肌肉负荷与测量精度。摘要报告检测吞吐量提高、周期缩短，部分肌肉活动降低；实际推广仍需不同工地条件下验证。",
       "tags": [
         {
           "kind": "query",
@@ -271,7 +281,8 @@
         }
       ],
       "section": "journal",
-      "added_at": "2026-10-23T07:25:01Z"
+      "added_at": "2026-10-23T07:25:01Z",
+      "title_zh": "融合外骨骼辅助与视觉的钢筋质量检测"
     },
     {
       "paper_id": "journal-65f8b74eaddfe2fbd588",
@@ -288,7 +299,7 @@
       "date_precision": 3,
       "abstract": "This paper addresses the challenge of deploying high-Degree-of-Freedom (DoF) humanoid robots in real-world scenarios, a critical issue in robotics. Previous approaches often relied on oversimplified assumptions, limiting robots’ adaptability. This work emphasizes the need for a flexible control framework for operational efficacy and safety. Significant advancements include floating-based kinematics for expanded robot workspace and stability, and a recursive algorithm for the Centroidal Momentum Matrix (CMM), enhancing motion planning. A novel self-collision avoidance algorithm employing boundary spheres and Control Barrier Functions (CBFs) ensures operational safety. A major contribution is the development of a control barrier function-based Quadratic Programming (QP)-based control framework integrating Proportional-Derivative (PD) control for stable walking. The paper simplifies trajectory design by categorizing motion tasks and enhances dynamic stability using a new angular momentum rate change compensation method with force-torque sensor feedback. These improvements mark a substantial leap in humanoid robotics, enhancing efficiency, functionality, and adaptability, and paving the way for their broader integration into human society.",
       "pdf": "",
-      "evidence": "原摘要摘录：This paper addresses the challenge of deploying high-Degree-of-Freedom (DoF) humanoid robots in real-world scenarios, a critical issue in robotics. Previous approaches often relied on oversimplified assumptions, limiting robots’ adaptability.",
+      "evidence": "将控制障碍函数、自碰撞边界球与二次规划结合，在全身控制中同时处理任务执行和安全约束。框架还利用质心动量与力矩传感反馈改善行走稳定性，减少过度简化假设对实际部署的限制。",
       "tags": [
         {
           "kind": "query",
@@ -296,7 +307,8 @@
         }
       ],
       "section": "journal",
-      "added_at": "2026-10-23T07:25:01Z"
+      "added_at": "2026-10-23T07:25:01Z",
+      "title_zh": "基于控制障碍函数的人形机器人全身控制框架"
     },
     {
       "paper_id": "journal-3072641faed77bde3ab7",
@@ -312,7 +324,7 @@
       "date_precision": 2,
       "abstract": "This paper proposes a video-driven biomechanical analysis method for measuring muscular loads influenced by wearing an exoskeleton suit, combining vision-based motion capture and virtual modeling approaches. Motion data obtained from site videos is integrated with a newly developed human-exoskeleton model in biomechanical software, to simulate muscular loads on the human body and evaluate exoskeleton suits. This method has been validated through experimental tests, where simulated and directly measured muscle activations were compared for four types of lifting tasks. The results indicate that this method successfully estimates neuromuscular activations of the low back muscles with and without wearing an exoskeleton suit, though the effect of the exoskeleton suit tends to be overestimated in simulations. Despite this limitation, the proposed method is expected to assist in efficiently evaluating exoskeleton use in practice, thereby facilitating the more widespread adoption of passive exoskeletons in construction. • A video-driven simulation approach is proposed for evaluating passive exoskeletons. • Vision-based motion capture data is used to simulate construction tasks. • Simulated biomechanical loads accurately reflect actual muscle loads. • The method contributes to building a virtual exoskeleton development platform.",
       "pdf": "",
-      "evidence": "原摘要摘录：This paper proposes a video-driven biomechanical analysis method for measuring muscular loads influenced by wearing an exoskeleton suit, combining vision-based motion capture and virtual modeling approaches.",
+      "evidence": "利用作业视频提取人体运动，并在人机耦合模型中估计佩戴外骨骼后的肌肉负荷。四类抬举实验支持该方法用于评估，但仿真倾向高估外骨骼收益，需要结合实测肌电核对。",
       "tags": [
         {
           "kind": "query",
@@ -320,7 +332,8 @@
         }
       ],
       "section": "journal",
-      "added_at": "2026-10-23T07:25:01Z"
+      "added_at": "2026-10-23T07:25:01Z",
+      "title_zh": "结合视觉动捕与虚拟建模的被动背部外骨骼生物力学评估"
     },
     {
       "paper_id": "journal-52671539750e0839d176",
@@ -337,7 +350,7 @@
       "date_precision": 3,
       "abstract": "Abstract Exoskeletons can assist human locomotion in real-life scenarios, but existing tools for decoding locomotion modes (LMs) focus on recognition rather than prediction, which can lead to delayed assistance. This study proposes a long short-term memory (LSTM) neural network to predict five LMs (level-walking, ramp ascent/descent, stair ascent/descent) with greater lead time compared to state-of-the-art methods. We examined the optimal sequence length (SL) for LSTM-based LM prediction, using data from inertial sensors placed on the lower limbs and the lower back, along with a waist-mounted infrared laser. Ten subjects walked in real-life scenarios, both with and without an ankle–foot exoskeleton. Results show that a 1-s SL provides the most advanced and accurate LM prediction, outperforming SLs of 0.6, 0.8, and 1.2 s. The proposed LSTM model achieved an accuracy of 98 ± 0.31%, predicting LMs 0.66 s in advance (for an average stride time of 1.98 ± 0.83 s). Level-walking presented more misclassifications, and the model primarily relied on inertial data over laser input. Overall, these findings demonstrate the LSTM’s strong predictive capability for both assisted and non-assisted walking and independent of which limb executes the transition, supporting its applicability for exoskeleton-assisted locomotion.",
       "pdf": "",
-      "evidence": "原摘要摘录：Abstract Exoskeletons can assist human locomotion in real-life scenarios, but existing tools for decoding locomotion modes (LMs) focus on recognition rather than prediction, which can lead to delayed assistance.",
+      "evidence": "使用LSTM融合惯性数据与腰部激光信息，预测平地、坡道及楼梯等五种运动模式。10名参与者实验中，1秒输入窗口效果最佳，平均可提前0.66秒预测，准确率约98%，适用于有无辅助的步行。",
       "tags": [
         {
           "kind": "query",
@@ -345,7 +358,8 @@
         }
       ],
       "section": "journal",
-      "added_at": "2026-10-23T07:25:01Z"
+      "added_at": "2026-10-23T07:25:01Z",
+      "title_zh": "有无踝足外骨骼辅助时的真实步行运动模式预测"
     },
     {
       "paper_id": "journal-a9a96bb576ac9bb63cd0",
@@ -361,7 +375,7 @@
       "date_precision": 2,
       "abstract": "In recent years, humanoid robots have gained significant attention due to their potential to revolutionize various industries, from healthcare to manufacturing. A key factor driving this transformation is the advancement of visual perception systems, which are crucial for making humanoid robots more intelligent and autonomous. Despite the progress, the full potential of vision-based technologies in humanoid robots has yet to be fully realized. This review aims to provide a comprehensive overview of recent advancements in visual perception applied to humanoid robots, specifically focusing on applications in state estimation and environmental interaction. By summarizing key developments and analyzing the challenges and opportunities in these areas, this paper seeks to inspire future research that can unlock new capabilities for humanoid robots, enabling them to better navigate complex environments, perform intricate tasks, and interact seamlessly with humans.",
       "pdf": "",
-      "evidence": "原摘要摘录：In recent years, humanoid robots have gained significant attention due to their potential to revolutionize various industries, from healthcare to manufacturing. A key factor driving this transformation is the advancement of visual perception systems, which are crucial for making humanoid robots more intelligent and autonomous.",
+      "evidence": "梳理人形机器人视觉感知在状态估计和环境交互中的进展，讨论复杂环境导航、精细任务执行及人机交互的关键挑战，为感知与运动控制协同研究提供问题框架。",
       "tags": [
         {
           "kind": "query",
@@ -369,7 +383,8 @@
         }
       ],
       "section": "journal",
-      "added_at": "2026-10-23T07:25:01Z"
+      "added_at": "2026-10-23T07:25:01Z",
+      "title_zh": "人形机器人视觉感知研究综述"
     },
     {
       "paper_id": "journal-97af4e85dce27be9ee92",
@@ -386,7 +401,7 @@
       "date_precision": 2,
       "abstract": "Real-time continuous locomotion mode recognition and seamless timely transition detection is critical for the exoskeleton robot. This study aims to present a comprehensive and innovative framework for locomotion mode recognition and transition prediction, exclusively utilizing inertial measurement unit (IMU) signals from the exoskeleton. In this framework, a CNN-BiLSTM model was developed and trained to be the classifier and a novel majority filter was designed to reduce the transition misjudgment rate. Moreover, a comprehensive evaluation system encompassing eight dimensions for the classifier, incorporating evaluation metrics specifically for transition misjudgment, was proposed. We collected locomotion motion data from six subjects wearing a rigid exoskeleton robot using six IMU sensors on the exoskeleton. The proposed method achieves a high level of recognition accuracy, with an overall average of 99.58 for the five steady locomotion modes (level ground walking (LG), stair ascent/descent (SA/SD), and ramp ascent/descent (RA/RD)) across six subjects following the transition decision. All transitions are recognizable, and the majority can be predicted in advance, with an average prediction time of 353 ms. Furthermore, the implementation of majority filter resulted in an average 87.04 reduction in the transition misjudgment rate among six subjects, thereby decreasing the average transition misjudgment rate to 4.82. Finally, the model was tested on a Jetson Nano to verify its real-time performance. The results presented above were obtained under the condition where either leg could function as the first transition leg and revealed that the developed system was capable of achieving precise locomotion mode recognition and timely transition prediction, with high real-time performance.",
       "pdf": "",
-      "evidence": "原摘要摘录：Real-time continuous locomotion mode recognition and seamless timely transition detection is critical for the exoskeleton robot. This study aims to present a comprehensive and innovative framework for locomotion mode recognition and transition prediction, exclusively utilizing inertial measurement unit (IMU) signals from the exoskeleton.",
+      "evidence": "仅使用外骨骼IMU信号，结合CNN-BiLSTM与多数滤波识别稳态步态和模式切换。六人实验中，多数切换可提前预测，平均提前353毫秒；滤波降低了切换误判，并在Jetson Nano验证实时性。",
       "tags": [
         {
           "kind": "query",
@@ -394,7 +409,8 @@
         }
       ],
       "section": "journal",
-      "added_at": "2026-10-23T07:25:01Z"
+      "added_at": "2026-10-23T07:25:01Z",
+      "title_zh": "下肢外骨骼的实时连续运动模式识别与切换预测"
     },
     {
       "paper_id": "journal-45a63a08c8e9fe18dd3a",
@@ -410,7 +426,7 @@
       "date_precision": 2,
       "abstract": "Over the past decade, considerable steps have been made in designing wearable assistive devices that reduce the metabolic cost of walking. As the field continues to advance, a growing emphasis is extending to human running, driven by the goal of improving efficiency and reducing metabolic strain. In our study, we developed a portable active exosuit to support hip extension during endurance running. The exosuit, featuring custom linear actuators and a control system synchronous with the wearer’s kinematics, initially underwent bench testing and, finally, a field evaluation with users running at their self-selected pace on an athletics track. Results from seven participants showed a significant reduction in the metabolic cost of transport when the exosuit was active. Specifically, we observed a 9.6% decrease with respect to the unpowered condition, with a 4.3% net saving compared to not wearing the device. Additionally, kinematic assessments revealed no alteration of the participants’ motion after toe-off, indicating transparency to physiological movement pattern during hip flexion. These findings highlight the potential of the exosuit to enhance athletic performance, opening new possibilities for running assistance in real-world scenarios.",
       "pdf": "",
-      "evidence": "原摘要摘录：Over the past decade, considerable steps have been made in designing wearable assistive devices that reduce the metabolic cost of walking. As the field continues to advance, a growing emphasis is extending to human running, driven by the goal of improving efficiency and reducing metabolic strain.",
+      "evidence": "通过自制线性驱动器和同步控制提供髋伸展助力。七名参与者在田径场测试中，主动助力相较无动力条件降低代谢运输成本9.6%，相较不穿设备净降低4.3%，且未改变离地后的髋屈曲运动。",
       "tags": [
         {
           "kind": "query",
@@ -418,7 +434,8 @@
         }
       ],
       "section": "journal",
-      "added_at": "2026-10-23T07:25:01Z"
+      "added_at": "2026-10-23T07:25:01Z",
+      "title_zh": "用于提高跑步效率的便携髋关节助力服设计与地面测试"
     },
     {
       "paper_id": "journal-0943f093660b0d4716e4",
@@ -434,7 +451,7 @@
       "date_precision": 3,
       "abstract": "Lower limb exoskeletons have been developed to improve functionality and assist with daily activities in various environments. Although these systems utilize sensors for gait phase detection, they lack anticipatory information about environmental changes, which limits their adaptability. This paper presents a vision-based intelligent gait environment detection algorithm for a lightweight ankle exosuit designed to enhance gait stability and safety for stroke patients, particularly during stair negotiation. The proposed system employs YOLOv8 for real-time environment classification, combined with a long short-term memory (LSTM) network for spatio-temporal feature extraction, enabling the precise detection of environmental transitions. An experimental study evaluated the classification algorithm and soft ankle exosuit performance through three conditions using kinematic analysis and muscle activation measurements. The algorithm achieved an overall accuracy of over 95% per class, which significantly enhanced the exosuit’s ability to detect environmental changes, and thereby improved its responsiveness to various conditions. Notably, the exosuit increased the ankle dorsiflexion angles and reduced the muscle activation during the stair ascent, which enhanced the foot clearance. The results of this study indicate that advanced spatio-temporal feature analysis and environment classification improve the exoskeleton’s gait assistance, improving adaptability in complex environments for stroke patients.",
       "pdf": "",
-      "evidence": "原摘要摘录：Lower limb exoskeletons have been developed to improve functionality and assist with daily activities in various environments. Although these systems utilize sensors for gait phase detection, they lack anticipatory information about environmental changes, which limits their adaptability.",
+      "evidence": "将YOLOv8与LSTM结合，识别环境类别及其时序变化，为轻量踝关节助力服提供前瞻信息。实验中各类准确率超过95%，上楼时踝背屈增加、部分肌肉活动降低，有助于改善足部离地间隙。",
       "tags": [
         {
           "kind": "query",
@@ -442,7 +459,8 @@
         }
       ],
       "section": "journal",
-      "added_at": "2026-10-23T05:46:43Z"
+      "added_at": "2026-10-23T05:46:43Z",
+      "title_zh": "软体踝关节外骨骼的自适应视觉步行环境分类"
     },
     {
       "paper_id": "journal-678a878edcdc94c01adf",
@@ -458,7 +476,7 @@
       "date_precision": 3,
       "abstract": "Cycling stands as one of the most widely embraced leisure activities and serves purposes such as exercise, rehabilitation, and commuting. This study aimed to assess the feasibility of assisting three unimpaired participants (age: 34.0 ± 7.9 years, height: 1.86 ± 0.02 m, weight: 75.7 ± 12.7 kg) using the GuroX hip exoskeleton, originally designed for walking assistance, during cycling against a resistance of 1 W/kg. The performance evaluation employed a sweep protocol that manipulated the timing of the exoskeleton’s peak extension and flexion torque in addition to human-in-the-loop optimization to enhance these timings based on metabolic cost. Our findings indicate that with a peak assistance torque of approximately 10.3 Nm for extension and flexion, the GuroX substantially reduced the net metabolic cost of cycling by 31.4 ± 8.1% and 26.4 ± 14.1% compared to transparent and without exoskeleton conditions, respectively. This demonstrates the significant potential of a hip exoskeleton developed for walking assistance to profoundly benefit cycling. Additionally, customizing the assistance strategy proves beneficial in maximizing assistance. While we attribute the average motor power to be a major contributor to the reduced cycling effort, participant feedback suggests that user comfort and synchronization between the user and exoskeleton may have played integral roles. Further research should validate our initial findings by employing a larger participant pool in real-world conditions. Incorporating a more diverse set of parameters for the human-in-the-loop optimization could enhance individualized assistance strategies.",
       "pdf": "",
-      "evidence": "原摘要摘录：Cycling stands as one of the most widely embraced leisure activities and serves purposes such as exercise, rehabilitation, and commuting. This study aimed to assess the feasibility of assisting three unimpaired participants (age: 34.0 ± 7.9 years, height: 1.86 ± 0.02 m, weight: 75.7 ± 12.7 kg) using the GuroX hip exoskeleton, originally…",
+      "evidence": "将原用于步行的GuroX髋关节外骨骼用于骑行，通过扫描助力时序和人在环优化调整屈伸力矩。三名参与者中，相较不穿设备的净代谢成本平均降低26.4%；小样本结果仍需更大规模实地验证。",
       "tags": [
         {
           "kind": "query",
@@ -466,7 +484,8 @@
         }
       ],
       "section": "journal",
-      "added_at": "2026-10-23T05:46:43Z"
+      "added_at": "2026-10-23T05:46:43Z",
+      "title_zh": "用于骑行辅助的髋关节外骨骼"
     },
     {
       "paper_id": "journal-686e21f051bcc18571d1",
@@ -483,7 +502,7 @@
       "date_precision": 3,
       "abstract": "Abstract Providing the human body with smooth and natural assistance through lower limb exoskeletons is crucial. However, a significant challenge is identifying various locomotion modes to enable the exoskeleton to offer seamless support. In this study, we propose a method for locomotion mode recognition named Convolution‐enhanced Vision Transformer (Conv‐ViT). This method maximizes the benefits of convolution for feature extraction and fusion, as well as the self‐attention mechanism of the Transformer, to efficiently capture and handle long‐term dependencies among different positions within the input sequence. By equipping the exoskeleton with inertial measurement units, we collected motion data from 27 healthy subjects, using it as input to train the Conv‐ViT model. To ensure the exoskeleton's stability and safety during transitions between various locomotion modes, we not only examined the typical five steady modes (involving walking on level ground [WL], stair ascent [SA], stair descent [SD], ramp ascent [RA], and ramp descent [RD]) but also extensively explored eight locomotion transitions (including WL‐SA, WL‐SD, WL‐RA, WL‐RD, SA‐WL, SD‐WL, RA‐WL, RD‐WL). In tasks involving the recognition of five steady locomotions and eight transitions, the recognition accuracy reached 98.87% and 96.74%, respectively. Compared with three popular algorithms, ViT, convolutional neural networks, and support vector machine, the results show that the proposed method has the best recognition performance, and there are highly significant differences in accuracy and F1 score compared to other methods. Finally, we also demonstrated the excellent performance of Conv‐ViT in terms of generalization performance.",
       "pdf": "https://onlinelibrary.wiley.com/doi/pdfdirect/10.1111/exsy.13659",
-      "evidence": "原摘要摘录：Abstract Providing the human body with smooth and natural assistance through lower limb exoskeletons is crucial. However, a significant challenge is identifying various locomotion modes to enable the exoskeleton to offer seamless support.",
+      "evidence": "Conv-ViT融合卷积特征提取与自注意力，利用27名健康参与者的IMU数据识别步态及切换。五种稳态模式和八种转换的准确率分别达98.87%与96.74%，并比较了模型泛化表现。",
       "tags": [
         {
           "kind": "query",
@@ -491,31 +510,8 @@
         }
       ],
       "section": "journal",
-      "added_at": "2026-10-23T07:25:01Z"
-    },
-    {
-      "paper_id": "journal-7fc54123711a0e5df6df",
-      "route": "journal-library/journal-7fc54123711a0e5df6df",
-      "title": "PID Control of a Lower Limb Rehabilitation Exoskeleton",
-      "doi": "10.15199/48.2024.06.60",
-      "venue": "PRZEGLĄD ELEKTROTECHNICZNY",
-      "issns": [
-        "0033-2097"
-      ],
-      "authors": "Nahla Touati",
-      "publication_date": "2024-06-11",
-      "date_precision": 3,
-      "abstract": "Wydawnictwo SIGMA-NOT wydaje czasopisma fachowe informujące swoich czytelników o najnowszych osiągnięciach naukowych i nowoczesnych rozwiązaniach technicznych w Polsce i na świecie, popularyzuje problemy techniczne oraz poszerza wiedzę i kulturę techniczną.",
-      "pdf": "",
-      "evidence": "原摘要摘录：Wydawnictwo SIGMA-NOT wydaje czasopisma fachowe informujące swoich czytelników o najnowszych osiągnięciach naukowych i nowoczesnych rozwiązaniach technicznych w Polsce i na świecie, popularyzuje problemy techniczne oraz poszerza wiedzę i kulturę techniczną.",
-      "tags": [
-        {
-          "kind": "query",
-          "label": "hip-exo"
-        }
-      ],
-      "section": "journal",
-      "added_at": "2026-10-23T07:25:01Z"
+      "added_at": "2026-10-23T07:25:01Z",
+      "title_zh": "卷积增强视觉Transformer用于下肢外骨骼运动模式识别"
     },
     {
       "paper_id": "journal-f8477ee5c79e0a32f615",
@@ -531,7 +527,7 @@
       "date_precision": 3,
       "abstract": "The exoskeleton robot is a wearable electromechanical device inspired by animal exoskeletons. It combines technologies such as sensing, control, information, and mobile computing, enhancing human physical abilities and assisting in rehabilitation training. In recent years, with the development of visual sensors and deep learning, the environmental perception of exoskeletons has drawn widespread attention in the industry. Environmental perception can provide exoskeletons with a certain level of autonomous perception and decision-making ability, enhance their stability and safety in complex environments, and improve the human–machine–environment interaction loop. This paper provides a review of environmental perception and its related technologies of lower-limb exoskeleton robots. First, we briefly introduce the visual sensors and control system. Second, we analyze and summarize the key technologies of environmental perception, including related datasets, detection of critical terrains, and environment-oriented adaptive gait planning. Finally, we analyze the current factors limiting the development of exoskeleton environmental perception and propose future directions.",
       "pdf": "https://www.mdpi.com/2313-7673/9/4/254/pdf?version=1713797311",
-      "evidence": "原摘要摘录：The exoskeleton robot is a wearable electromechanical device inspired by animal exoskeletons. It combines technologies such as sensing, control, information, and mobile computing, enhancing human physical abilities and assisting in rehabilitation training.",
+      "evidence": "综述外骨骼的视觉传感器、环境数据集、关键地形检测和面向环境的自适应步态规划。重点讨论感知如何支持复杂环境中的安全控制，以及人机环境闭环仍存在哪些限制与研究方向。",
       "tags": [
         {
           "kind": "query",
@@ -539,7 +535,8 @@
         }
       ],
       "section": "journal",
-      "added_at": "2026-10-23T05:46:43Z"
+      "added_at": "2026-10-23T05:46:43Z",
+      "title_zh": "下肢外骨骼机器人视觉环境感知综述"
     },
     {
       "paper_id": "journal-e3d41799908ed14eb708",
@@ -555,7 +552,7 @@
       "date_precision": 3,
       "abstract": "Humanoid robots that can autonomously operate in diverse environments have the potential to help address labor shortages in factories, assist elderly at home, and colonize new planets. Although classical controllers for humanoid robots have shown impressive results in a number of settings, they are challenging to generalize and adapt to new environments. Here, we present a fully learning-based approach for real-world humanoid locomotion. Our controller is a causal transformer that takes the history of proprioceptive observations and actions as input and predicts the next action. We hypothesized that the observation-action history contains useful information about the world that a powerful transformer model can use to adapt its behavior in context, without updating its weights. We trained our model with large-scale model-free reinforcement learning on an ensemble of randomized environments in simulation and deployed it to the real-world zero-shot. Our controller could walk over various outdoor terrains, was robust to external disturbances, and could adapt in context.",
       "pdf": "https://arxiv.org/pdf/2303.03381",
-      "evidence": "原摘要摘录：Humanoid robots that can autonomously operate in diverse environments have the potential to help address labor shortages in factories, assist elderly at home, and colonize new planets.",
+      "evidence": "采用因果Transformer，根据本体观测与历史动作预测下一步控制。在随机化仿真环境中进行大规模强化学习，再零样本部署到实机；机器人可适应多种户外地形、外部扰动及环境变化。",
       "tags": [
         {
           "kind": "query",
@@ -563,7 +560,8 @@
         }
       ],
       "section": "journal",
-      "added_at": "2026-10-23T05:46:43Z"
+      "added_at": "2026-10-23T05:46:43Z",
+      "title_zh": "利用强化学习实现真实环境中的人形机器人行走"
     },
     {
       "paper_id": "journal-76fe1c6dd5ed88457a43",
@@ -581,7 +579,7 @@
       "date_precision": 3,
       "abstract": "The interactive control of lower limb exoskeleton robots (LLERs) is important to achieve compliance and safety. Significant challenges in the interactive control of LLERs include how to accurately recognize human motion intention, how to accurately recognize the motion environment, and how to achieve natural, stable, and accurate interactive control in accordance with the human motion intention and the environment. This article presents a detailed classification of motion intention recognition, interactive control based on motion intention, and interactive control based on the LLER’s motion environment and summarizes the methodologies in each category. In addition, the advantages and disadvantages of motion intention recognition, motion environment recognition, and interactive control based on the motion intention and motion environment are analyzed from a macroscopic perspective, and current trends are discussed. Finally, this article explores which requirements should be met in future LLER applications to improve the naturalness, stability, and accuracy of interactive control.",
       "pdf": "",
-      "evidence": "原摘要摘录：The interactive control of lower limb exoskeleton robots (LLERs) is important to achieve compliance and safety. Significant challenges in the interactive control of LLERs include how to accurately recognize human motion intention, how to accurately recognize the motion environment, and how to achieve natural, stable, and accurate…",
+      "evidence": "按运动意图识别、基于意图的交互控制及基于环境的交互控制分类梳理方法，比较各类方案的优势与局限，讨论自然、稳定和精准助力所需的感知与控制条件。",
       "tags": [
         {
           "kind": "query",
@@ -589,7 +587,8 @@
         }
       ],
       "section": "journal",
-      "added_at": "2026-10-23T07:25:01Z"
+      "added_at": "2026-10-23T07:25:01Z",
+      "title_zh": "下肢外骨骼机器人人机交互控制综述"
     },
     {
       "paper_id": "journal-aa691576d4c5526f5c0e",
@@ -605,7 +604,7 @@
       "date_precision": 3,
       "abstract": "Exoskeleton robots hold promising prospects for rehabilitation training in individuals with weakened muscular conditions. However, achieving improved human–machine interaction and delivering customized assistance remains a challenging task. This paper introduces a muscle synergy-based human-in-the-loop (HIL) optimization framework for hip exoskeletons to offer more personalized torque assistance. Initially, we propose a muscle synergy similarity index to quantify the similarity of synergy while walking with and without the assistance of an exoskeleton. By integrating surface electromyography (sEMG) signals to calculate metrics evaluating muscle synergy and iteratively optimizing assistance parameters in real time, a muscle synergy-based HIL optimized torque configuration is presented and tested on a portable hip exoskeleton. Iterative optimization explores the optimal and suboptimal assistance torque profiles for six healthy volunteers, simultaneously testing zero torque and predefined assistance configurations, and verified the corresponding muscle synergy similarity indices through experimental testing. In our validation experiments, the assistance parameters generated through HIL optimization significantly enhance muscle synergy similarity during walking with exoskeletal assistance, with an optimal average of 0.80 ± 0.04 (mean ± std), marking a 6.3% improvement over prior assistive studies and achieving 96.4% similarity compared with free walking. This demonstrates that the proposed muscle synergy-based HIL optimization can ensure robotic exoskeleton-assisted walking as “natural” as possible.",
       "pdf": "https://www.mdpi.com/2076-0825/13/2/54/pdf?version=1706693129",
-      "evidence": "原摘要摘录：Exoskeleton robots hold promising prospects for rehabilitation training in individuals with weakened muscular conditions. However, achieving improved human–machine interaction and delivering customized assistance remains a challenging task.",
+      "evidence": "通过表面肌电构建肌肉协同相似度指标，在线迭代优化髋关节助力参数。六名健康参与者实验中，最优助力使步行肌肉协同更接近自由行走，支持以自然人机协调为目标的个体化控制。",
       "tags": [
         {
           "kind": "query",
@@ -613,7 +612,8 @@
         }
       ],
       "section": "journal",
-      "added_at": "2026-10-23T05:46:43Z"
+      "added_at": "2026-10-23T05:46:43Z",
+      "title_zh": "基于肌肉协同的人在环优化与个性化髋关节助力"
     },
     {
       "paper_id": "journal-321e464d7ac2e3eb7d45",
@@ -629,7 +629,7 @@
       "date_precision": 3,
       "abstract": "Abstract Purpose of Review The field of humanoid robotics, perception plays a fundamental role in enabling robots to interact seamlessly with humans and their surroundings, leading to improved safety, efficiency, and user experience. This scientific study investigates various perception modalities and techniques employed in humanoid robots, including visual, auditory, and tactile sensing by exploring recent state-of-the-art approaches for perceiving and understanding the internal state, the environment, objects, and human activities. Recent Findings Internal state estimation makes extensive use of Bayesian filtering methods and optimization techniques based on maximum a-posteriori formulation by utilizing proprioceptive sensing. In the area of external environment understanding, with an emphasis on robustness and adaptability to dynamic, unforeseen environmental changes, the new slew of research discussed in this study have focused largely on multi-sensor fusion and machine learning in contrast to the use of hand-crafted, rule-based systems. Human robot interaction methods have established the importance of contextual information representation and memory for understanding human intentions. Summary This review summarizes the recent developments and trends in the field of perception in humanoid robots. Three main areas of application are identified, namely, internal state estimation, external environment estimation, and human robot interaction. The applications of diverse sensor modalities in each of these areas are considered and recent significant works are discussed.",
       "pdf": "https://link.springer.com/content/pdf/10.1007/s43154-023-00107-x.pdf",
-      "evidence": "原摘要摘录：Abstract Purpose of Review The field of humanoid robotics, perception plays a fundamental role in enabling robots to interact seamlessly with humans and their surroundings, leading to improved safety, efficiency, and user experience.",
+      "evidence": "围绕内部状态估计、外部环境理解和人机交互三类任务，综述视觉、听觉、触觉及本体传感的应用，讨论贝叶斯估计、多传感融合、机器学习和上下文记忆的发展趋势。",
       "tags": [
         {
           "kind": "query",
@@ -637,7 +637,8 @@
         }
       ],
       "section": "journal",
-      "added_at": "2026-10-23T07:25:01Z"
+      "added_at": "2026-10-23T07:25:01Z",
+      "title_zh": "人形机器人的多模态感知"
     },
     {
       "paper_id": "journal-9e4c927bdd4c8851862f",
@@ -654,7 +655,7 @@
       "date_precision": 3,
       "abstract": "Humanoid robots still have a low-level perception of their surroundings, which is a formidable obstacle to performing complex tasks. To improve their perceptual capabilities, high-level semantic information can be incorporated into their perceptual framework so that they can gain the ability to infer and understand their environment accurately. Among the various techniques available, semantic Simultaneous Localization and Mapping (SLAM) becomes a promising avenue for achieving this perception enhancement. While semantic SLAM can enhance a robot’s ability to perform tasks, the accurate perception, and association of semantic objects in complex and dynamic environments remain challenging. Hence, the need arises for a solution that swiftly and precisely associates object measurements with landmarks, considering their motion properties, and promptly rectifies erroneous associations in real time. To this end, we propose a semantic perception approach designed explicitly for dynamic environments, adept at distinguishing between dynamic and static objects. Furthermore, we propose two association strategies: dynamic object association based on semantic map points and static object association based on object pose information. And as the number of object measurements associated with the landmarks increases, we perform the association validation algorithm to verify the association for the landmark to improve the accuracy of the association. The proposed method is extensively evaluated on both simulated indoor sequences obtained from humanoid robot viewpoints and the KITTI dataset. Experimental results show that our approach significantly improves the robustness and accuracy of object association and trajectory estimation.",
       "pdf": "",
-      "evidence": "原摘要摘录：Humanoid robots still have a low-level perception of their surroundings, which is a formidable obstacle to performing complex tasks. To improve their perceptual capabilities, high-level semantic information can be incorporated into their perceptual framework so that they can gain the ability to infer and understand their environment…",
+      "evidence": "区分动态和静态物体，分别利用语义地图点及物体位姿进行关联，并随观测增加持续验证关联结果。在仿真人形视角序列和KITTI数据集上，物体关联与轨迹估计的准确性和鲁棒性得到改善。",
       "tags": [
         {
           "kind": "query",
@@ -662,7 +663,8 @@
         }
       ],
       "section": "journal",
-      "added_at": "2026-10-23T07:25:01Z"
+      "added_at": "2026-10-23T07:25:01Z",
+      "title_zh": "动态视觉SLAM下的人形机器人物体感知与关联"
     },
     {
       "paper_id": "journal-feb4a6f66368b73f6e7b",
@@ -678,7 +680,7 @@
       "date_precision": 3,
       "abstract": "This study introduces a novel convolutional neural network (CNN) architecture, encompassing both single and multi-head designs, developed to identify a user’s locomotion activity while using a wearable lower limb robot. Our research involved 500 healthy adult participants in an activities of daily living (ADL) space, conducted from 1 September to 30 November 2022. We collected prospective data to identify five locomotion activities (level ground walking, stair ascent/descent, and ramp ascent/descent) across three terrains: flat ground, staircase, and ramp. To evaluate the predictive capabilities of the proposed CNN architectures, we compared its performance with three other models: one CNN and two hybrid models (CNN-LSTM and LSTM-CNN). Experiments were conducted using multivariate signals of various types obtained from electromyograms (EMGs) and the wearable robot. Our results reveal that the deeper CNN architecture significantly surpasses the performance of the three competing models. The proposed model, leveraging encoder data such as hip angles and velocities, along with postural signals such as roll, pitch, and yaw from the wearable lower limb robot, achieved superior performance with an inference speed of 1.14 s. Specifically, the F-measure performance of the proposed model reached 96.17%, compared to 90.68% for DDLMI, 94.41% for DeepConvLSTM, and 95.57% for LSTM-CNN, respectively.",
       "pdf": "https://www.mdpi.com/2306-5354/10/9/1082/pdf?version=1694598613",
-      "evidence": "原摘要摘录：This study introduces a novel convolutional neural network (CNN) architecture, encompassing both single and multi-head designs, developed to identify a user’s locomotion activity while using a wearable lower limb robot.",
+      "evidence": "利用关节角度、速度和姿态等多变量信号识别五类步行活动，并比较单头、多头CNN及混合网络。研究数据来自500名健康成年人，所提模型F值达到96.17%，摘要报告推理时间为1.14秒。",
       "tags": [
         {
           "kind": "query",
@@ -686,7 +688,8 @@
         }
       ],
       "section": "journal",
-      "added_at": "2026-10-23T07:25:01Z"
+      "added_at": "2026-10-23T07:25:01Z",
+      "title_zh": "可穿戴外骨骼运动活动识别的多变量CNN模型"
     },
     {
       "paper_id": "journal-6f7a46a75a056bbba103",
@@ -702,7 +705,7 @@
       "date_precision": 2,
       "abstract": "Active exoskeletons for the lower extremities are increasingly being used in rehabilitation therapy. One of the key areas of research in developing these assistive devices is ensuring safe human-machine interaction, which requires both a safe mechanical system and an effective assistive control framework. Therefore, we present a novel human cooperative control framework for exoskeletons with variable stiffness actuators to assist users during both the swing and stance phases of walking and other motion sequences such as sit-to-stand. The control framework estimates the user’s joint torques during the swing and stance phases using an Unscented Kalman Filter (UKF) and inverse kinematics, respectively. Using the Lower-Limb Exoskeleton with Serial Elastic Actuators (L2Exo-SE) as an example, the control approach was validated for its applicability to exoskeletons with compliant actuators. The validation results reveal a reduction of the average user’s joint torque during gait by 63.6%-78.4% for the hip and 40.8%-50.2% for the knee compared to non-assisted walking. Furthermore, we introduce an automatic stiffness selection for the serial elasticity of the variable stiffness actuator (VSA) based on the gait phases and the active human joint torque. The stiffness variation increases the physical human-robot interaction during the swing phase while maintaining a high control bandwidth during the stance phase.",
       "pdf": "",
-      "evidence": "原摘要摘录：Active exoskeletons for the lower extremities are increasingly being used in rehabilitation therapy. One of the key areas of research in developing these assistive devices is ensuring safe human-machine interaction, which requires both a safe mechanical system and an effective assistive control framework.",
+      "evidence": "分别用无迹卡尔曼滤波和逆运动学估计摆动期与支撑期的人体关节力矩，并按步态调节驱动刚度。L2Exo-SE实验显示人体髋、膝关节平均力矩降低，兼顾柔顺交互与支撑期控制带宽。",
       "tags": [
         {
           "kind": "query",
@@ -710,7 +713,8 @@
         }
       ],
       "section": "journal",
-      "added_at": "2026-10-23T07:25:01Z"
+      "added_at": "2026-10-23T07:25:01Z",
+      "title_zh": "柔顺驱动下肢外骨骼的人机协同控制"
     },
     {
       "paper_id": "journal-0203aa16b6ec0133268d",
@@ -726,7 +730,7 @@
       "date_precision": 3,
       "abstract": "Abstract Background Asymmetric walking gait impairs activities of daily living in neurological patient populations, increases their fall risk, and leads to comorbidities. Accessible, long-term rehabilitation methods are needed to help neurological patients restore symmetrical walking patterns. This study aimed to determine if a passive unilateral hip exosuit can modify an induced asymmetric walking gait pattern. We hypothesized that a passive hip exosuit would diminish initial- and post-split-belt treadmill walking after-effects in healthy young adults. Methods We divided 15 healthy young adults evenly between three experimental groups that each completed a baseline trial, an adaptation period with different interventions for each group, and a post-adaptation trial. To isolate the contribution of the exosuit we compared a group adapting to the exosuit and split-belt treadmill (Exo-Sb) to groups adapting to exosuit-only (Exo-only) and split-belt only (Sb-only) conditions. The independent variables step length, stance time, and swing time symmetry were analyzed across five timepoints (baseline, early- and late adaptation, and early- and late post-adaptation) using a 3 × 5 mixed ANOVA. Results We found significant interaction and time effects on step length, stance time and swing time symmetry. Sb-only produced increased step length asymmetry at early adaptation compared to baseline (p < 0.0001) and an after-effect with increased asymmetry at early post-adaptation compared to baseline (p < 0.0001). Exo-only increased step length asymmetry (in the opposite direction as Sb-only) at early adaptation compared to baseline (p = 0.0392) but did not influence the participants sufficiently to result in a post-effect. Exo-Sb produced similar changes in step length asymmetry in the same direction as Sb-only (p = 0.0014). However, in contrast to Sb-only there was no significant after-effect between early post-adaptation and baseline (p = 0.0885). Conclusion The passive exosuit successfully diminished asymmetrical step length after-effects induced by the split-belt treadmill in Exo-Sb. These results support the passive exosuit’s ability to alter walking gait patterns.",
       "pdf": "https://jneuroengrehab.biomedcentral.com/counter/pdf/10.1186/s12984-023-01212-w",
-      "evidence": "原摘要摘录：Abstract Background Asymmetric walking gait impairs activities of daily living in neurological patient populations, increases their fall risk, and leads to comorbidities. Accessible, long-term rehabilitation methods are needed to help neurological patients restore symmetrical walking patterns.",
+      "evidence": "15名健康青年分组接受分带跑台和助力服干预。被动助力服减轻了跑台诱发的步长不对称后效，说明其能够改变步态模式；结果不能直接等同于神经疾病患者的长期康复获益。",
       "tags": [
         {
           "kind": "query",
@@ -734,7 +738,8 @@
         }
       ],
       "section": "journal",
-      "added_at": "2026-10-23T07:25:01Z"
+      "added_at": "2026-10-23T07:25:01Z",
+      "title_zh": "被动单侧髋关节助力服能否减轻步行不对称"
     },
     {
       "paper_id": "journal-9d5ba49a2115a32d69d3",
@@ -750,7 +755,7 @@
       "date_precision": 3,
       "abstract": "Soft exosuits are an emerging class of robots that have been shown to significantly reduce the metabolic cost of daily human movement. However, most soft exosuits are currently being studied for walking and running, and relatively minor research has been carried out on exosuits for stair climbing. Numerous exoskeletons used for stair climbing have a more rigid structure and are heavier, which may result in a greater force required by the wearer to overcome the weight from the exoskeleton when ascending stairs, which can result in metabolic costs. As a result, a reduction in rigid structures can reduce the weight of the exoskeleton and further reduce metabolic costs during stair climbing. In this paper, a waist-wearable soft exosuit was designed that assists hip flexion to aid stair climbing in older adults, in order to demonstrate the importance of choosing to assist hip flexion during stair climbing. An admittance delayed feedback control method was also proposed to use the angular information measured by the IMUs to enable the exosuit to adapt to different staircases. Metabolic experiments have shown that people who use soft exosuits have an average decrease of 6.9% in metabolism when they climb stairs than those who do not. The muscle fatigue experiments demonstrated a reduction in muscle fatigue of approximately 9.35%, 38.75% and 9.65% for the rectus femoris, lateral femoris and gastrocnemius muscles, respectively, when compared to cases without the soft exosuit. The results show that assisted hip flexion during stair climbing is a reasonable approach to effectively reduce metabolic consumption and muscle fatigue.",
       "pdf": "https://www.mdpi.com/2079-9292/12/11/2467/pdf?version=1685442175",
-      "evidence": "原摘要摘录：Soft exosuits are an emerging class of robots that have been shown to significantly reduce the metabolic cost of daily human movement. However, most soft exosuits are currently being studied for walking and running, and relatively minor research has been carried out on exosuits for stair climbing.",
+      "evidence": "设计腰部穿戴的软体助力服，利用IMU角度和导纳延迟反馈适应不同楼梯。代谢实验显示，相较无助力服条件，上楼代谢消耗平均降低6.9%，部分下肢肌肉疲劳也有所减轻。",
       "tags": [
         {
           "kind": "query",
@@ -758,7 +763,8 @@
         }
       ],
       "section": "journal",
-      "added_at": "2026-10-23T07:25:01Z"
+      "added_at": "2026-10-23T07:25:01Z",
+      "title_zh": "通过髋屈曲辅助上楼的便携软体助力服"
     },
     {
       "paper_id": "journal-bfd1767076dec213bca6",
@@ -774,7 +780,7 @@
       "date_precision": 3,
       "abstract": "Abstract Background The aging of the population and the progressive increase of life expectancy in developed countries is leading to a high incidence of age-related cerebrovascular diseases, which affect people’s motor and cognitive capabilities and might result in the loss of arm and hand functions. Such conditions have a detrimental impact on people’s quality of life. Assistive robots have been developed to help people with motor or cognitive disabilities to perform activities of daily living (ADLs) independently. Most of the robotic systems for assisting on ADLs proposed in the state of the art are mainly external manipulators and exoskeletal devices. The main objective of this study is to compare the performance of an hybrid EEG/EOG interface to perform ADLs when the user is controlling an exoskeleton rather than using an external manipulator. Methods Ten impaired participants (5 males and 5 females, mean age 52 ± 16 years) were instructed to use both systems to perform a drinking task and a pouring task comprising multiple subtasks. For each device, two modes of operation were studied: synchronous mode (the user received a visual cue indicating the sub-tasks to be performed at each time) and asynchronous mode (the user started and finished each of the sub-tasks independently). Fluent control was assumed when the time for successful initializations ranged below 3 s and a reliable control in case it remained below 5 s. NASA-TLX questionnaire was used to evaluate the task workload. For the trials involving the use of the exoskeleton, a custom Likert-Scale questionnaire was used to evaluate the user’s experience in terms of perceived comfort, safety, and reliability. Results All participants were able to control both systems fluently and reliably. However, results suggest better performances of the exoskeleton over the external manipulator (75% successful initializations remain below 3 s in case of the exoskeleton and bellow 5s in case of the external manipulator). Conclusions Although the results of our study in terms of fluency and reliability of EEG control suggest better performances of the exoskeleton over the external manipulator, such results cannot be considered conclusive, due to the heterogeneity of the population under test and the relatively limited number of participants.",
       "pdf": "https://jneuroengrehab.biomedcentral.com/counter/pdf/10.1186/s12984-023-01185-w",
-      "evidence": "原摘要摘录：Abstract Background The aging of the population and the progressive increase of life expectancy in developed countries is leading to a high incidence of age-related cerebrovascular diseases, which affect people’s motor and cognitive capabilities and might result in the loss of arm and hand functions.",
+      "evidence": "10名运动障碍参与者通过混合EEG/EOG接口完成饮水与倒水任务，比较外骨骼与外部机械臂。两类系统均可实现流畅控制，外骨骼部分指标更好，但样本小且人群异质，结论仍需验证。",
       "tags": [
         {
           "kind": "query",
@@ -782,7 +788,8 @@
         }
       ],
       "section": "journal",
-      "added_at": "2026-10-23T07:25:01Z"
+      "added_at": "2026-10-23T07:25:01Z",
+      "title_zh": "脑电眼电接口与自主视觉引导的整臂外骨骼日常辅助"
     },
     {
       "paper_id": "journal-ee2b8c2e3ebee9c10666",
@@ -799,7 +806,7 @@
       "date_precision": 2,
       "abstract": "Just like in humans vision plays a fundamental role in guiding adaptive locomotion, when designing the control strategy for a walking assistive technology, the use of computer vision may substantially improve modulation of the assistance based on the external environment. In this letter, we developed a hip exosuit controller able to distinguish among three different walking terrains through the use of an RGB camera and to adapt the assistance accordingly. The system was tested with seven healthy participants walking throughout an overground path comprising of staircases and level ground. Subjects performed the task with the exosuit disabled (Exo Off), constant assistance profile (Vision Off), and with assistance modulation (Vision On). Our results showed that the controller was able to classify in real-time the path in front of the user with an overall accuracy per class above the 85%, and to perform assistance modulation accordingly. Evaluation related to the effects on the user showed thatVision Onwas able to outperform the other two conditions: we obtained significantly higher metabolic savings thanExo Off, with a peak of$\\approx$$-20\\%$when climbing up the staircase and$\\approx$$-16\\%$in the overall path, and thanVision Offwhen ascending or descending stairs. Such advancements in the field may yield to a step forward for the exploitation of lightweight walking assistive technologies in real-life scenarios.",
       "pdf": "",
-      "evidence": "原摘要摘录：Just like in humans vision plays a fundamental role in guiding adaptive locomotion, when designing the control strategy for a walking assistive technology, the use of computer vision may substantially improve modulation of the assistance based on the external environment.",
+      "evidence": "通过RGB相机区分步行地形，并据此调整髋关节助力曲线。七人地面路径实验中，各类别识别准确率超过85%；视觉自适应助力相较设备关闭条件提高代谢收益，也优于部分固定助力场景。",
       "tags": [
         {
           "kind": "query",
@@ -807,7 +814,8 @@
         }
       ],
       "section": "journal",
-      "added_at": "2026-10-23T07:25:01Z"
+      "added_at": "2026-10-23T07:25:01Z",
+      "title_zh": "基于计算机视觉环境识别的髋关节助力调节"
     },
     {
       "paper_id": "journal-4661819e1baaccb4643e",
@@ -824,7 +832,7 @@
       "date_precision": 2,
       "abstract": "This article proposed a humanoid obstacle passability strategy (OPS) to enhance human-exoskeleton integrated system to cross over multi-obstacle in sagittal plane. A hybrid bounding box integrated with closeness regression in L-shape section and synchronous convergence in convex hull search (HBB-LC) is designed to recognize geometric features of staggered obstacles with partial surface occluded. A human-in-the-loop gait pattern planning mechanism based on nonlinear model predictive control (NMPC) is designed for decoupling mapping. To overcome local oscillation and achieve humanoid behavior transition during NMPC optimization, an intermediate switching criterion based on instantaneous capture point (ICP) transfer principle and guiding interpolation inflection is established to trigger the external intervention of piecewise NMPC models. Exploitation of OPS achieves the contributions below: 1) Sectional attitude and dimension features of spatial multi-obstacle are accurately extracted, with size deviation within 3.4–16.1 mm, recognition accuracy within 89.2%–96.8%. 2) Traversal avoidance region of swing toe/heel orbit (SHO/STO) is enhanced by 28.7%–86.8% (with uplift/sidesway range (UR/SR) by 0.071–0.154 m/0.057–0.092 m). 3) Security margin between STO/SHO and obstacle vertex is improved by 0.05–0.19 m (53.3%–161.1%). 4) Elapsed time of crossing obstacles is reduced by 0.62–1.03 s (with gait phase by 36.2%–43.5%). Experimental verification proves significant augmentation for crossing obstacles by OPS.",
       "pdf": "",
-      "evidence": "原摘要摘录：This article proposed a humanoid obstacle passability strategy (OPS) to enhance human-exoskeleton integrated system to cross over multi-obstacle in sagittal plane. A hybrid bounding box integrated with closeness regression in L-shape section and synchronous convergence in convex hull search (HBB-LC) is designed to recognize geometric…",
+      "evidence": "从部分遮挡的多障碍场景中提取几何特征，再利用人在环规划和分段NMPC调整跨越步态。实验显示足尖与足跟的安全裕度增大、跨障时间缩短，为人机系统多障碍通行提供控制方法。",
       "tags": [
         {
           "kind": "query",
@@ -832,7 +840,34 @@
         }
       ],
       "section": "journal",
-      "added_at": "2026-10-23T07:25:01Z"
+      "added_at": "2026-10-23T07:25:01Z",
+      "title_zh": "结合动态约束分段非线性MPC的视觉避障外骨骼控制"
+    },
+    {
+      "paper_id": "journal-65cf4af2bae7d1dea7c5",
+      "route": "journal-library/journal-65cf4af2bae7d1dea7c5",
+      "title": "A Soft Exosuit Assisting Hip Abduction for Knee Adduction Moment Reduction During Walking",
+      "doi": "10.1109/lra.2022.3182106",
+      "venue": "IEEE Robotics and Automation Letters",
+      "issns": [
+        "2377-3766",
+        "2377-3774"
+      ],
+      "authors": "Hee Doo Yang, Myles Cooper, Asa Eckert-Erdheim, Dorothy Orzel, Conor J. Walsh",
+      "publication_date": "2022-07",
+      "date_precision": 2,
+      "abstract": "The knee joint experiences significant torques in the frontal plane to keep the body upright during walking. Excessive loading over time can lead to knee osteoarthritis (OA), the progression of which is correlated with external knee adduction moment (KAM). In this paper, we present a wearable soft robotic exosuit that applies a hip abduction torque and evaluate its ability to reduce KAM. The exosuit uses a portable cable actuation system to generate torque when desired while remaining unrestrictive when unpowered. We explored five different force profiles on healthy participants (N=8) walking on an instrumented treadmill at 1.25 m/s. For each force profile, we tested two peak force levels: 15% and 20% of bodyweight. We observed KAM reductions with two of the five profiles. With Force Profile 2 (FP2), peak KAM was reduced by 9.61% and impulse KAM by 12.76%. With Force Profile 5 (FP5), we saw reductions of peak KAM by 6.14% and impulse KAM by 21.09%. These initial findings show that the device has the ability to change walking biomechanics in a consistent and potentially beneficial way.",
+      "pdf": "",
+      "evidence": "在本文中 随着 Force Profile 2 (FP2)，峰值KAM降低了9.61%和冲动KAM降低了1…",
+      "tags": [
+        {
+          "kind": "query",
+          "label": "hip-exo"
+        }
+      ],
+      "section": "journal",
+      "added_at": "2026-10-24T03:22:15Z",
+      "title_zh": "软外骨骼助力服辅助髋关节 外展用于膝关节在行走时降低吸附时刻"
     },
     {
       "paper_id": "journal-07628b19c4e853273188",
@@ -849,7 +884,7 @@
       "date_precision": 3,
       "abstract": "BACKGROUND: Walking difficulties put an individual at high risk of falling, institutionalisation and even death. The use of robotical rehabilitation or assistive devices for walking has gained considerable interest as a means of improving patients’ gait abilities. OBJECTIVE: The aim of this research was to examine patients’ intrinsic motivation to train with a wearable hip exoskeleton (Honda Walking Assist). METHODS: Rehabilitation patients (stroke, medullar lesion, orthopaedic surgery) and elderly ([Formula: see text] 65 yrs) with walking difficulties were recruited for this study ([Formula: see text] 23). Each walked with the Honda Walking Assist for 30 minutes during one therapy session and completed the Intrinsic Motivation Inventory (IMI) afterwards. RESULTS: All participants presented with high scores on the IMI, in particular for the items ‘interest/enjoyment’ (median: 43; 25[Formula: see text]–75[Formula: see text] perc.: 37–46; maximal score: 49), ‘perceived competence of walking’ (35 [31–38]; max. score 42) and ‘value/usefulness’ (44 [35–49]; max. score 49). CONCLUSIONS: This robotic exoskeleton for assisted walking was considered a valuable device by the majority of participants, eliciting a high degree of motivation and enjoyment.",
       "pdf": "https://content.iospress.com:443/download/technology-and-disability/tad210362?id=technology-and-disability%2Ftad210362",
-      "evidence": "原摘要摘录：BACKGROUND: Walking difficulties put an individual at high risk of falling, institutionalisation and even death. The use of robotical rehabilitation or assistive devices for walking has gained considerable interest as a means of improving patients’ gait abilities.",
+      "evidence": "对存在步行困难的康复患者及老年人进行单次30分钟Honda Walking Assist体验，并评估兴趣、胜任感和实用价值。参与者总体动机与愉悦感较高，但研究不等于长期功能改善或临床疗效证明。",
       "tags": [
         {
           "kind": "query",
@@ -857,7 +892,8 @@
         }
       ],
       "section": "journal",
-      "added_at": "2026-10-23T07:25:01Z"
+      "added_at": "2026-10-23T07:25:01Z",
+      "title_zh": "使用可穿戴髋关节外骨骼训练的内在动机"
     },
     {
       "paper_id": "journal-0c61a9477c95b99e5390",
@@ -873,7 +909,7 @@
       "date_precision": 3,
       "abstract": "We propose the use of computer vision for adaptive semi-autonomous control of an upper limb exoskeleton for assisting users with severe tetraplegia to increase independence and quality of life. A tongue-based interface was used together with the semi-autonomous control such that individuals with complete tetraplegia were able to use it despite being paralyzed from the neck down. The semi-autonomous control uses computer vision to detect nearby objects and estimate how to grasp them to assist the user in controlling the exoskeleton. Three control schemes were tested: non-autonomous (i.e., manual control using the tongue) control, semi-autonomous control with a fixed level of autonomy, and a semi-autonomous control with a confidence-based adaptive level of autonomy. Studies on experimental participants with and without tetraplegia were carried out. The control schemes were evaluated both in terms of their performance, such as the time and number of commands needed to complete a given task, as well as ratings from the users. The studies showed a clear and significant improvement in both performance and user ratings when using either of the semi-autonomous control schemes. The adaptive semi-autonomous control outperformed the fixed version in some scenarios, namely, in the more complex tasks and with users with more training in using the system.",
       "pdf": "https://www.mdpi.com/2076-3417/12/9/4374/pdf?version=1652319763",
-      "evidence": "原摘要摘录：We propose the use of computer vision for adaptive semi-autonomous control of an upper limb exoskeleton for assisting users with severe tetraplegia to increase independence and quality of life.",
+      "evidence": "将舌控接口与视觉物体识别、抓取估计结合，比较手动、固定自主程度和置信度自适应控制。半自主方案减少任务时间与操作负担；自适应控制在复杂任务及训练较充分的用户中更有优势。",
       "tags": [
         {
           "kind": "query",
@@ -881,7 +917,8 @@
         }
       ],
       "section": "journal",
-      "added_at": "2026-10-23T07:25:01Z"
+      "added_at": "2026-10-23T07:25:01Z",
+      "title_zh": "面向四肢瘫痪用户的视觉自适应半自主上肢外骨骼控制"
     },
     {
       "paper_id": "journal-70d526d798a4253f081d",
@@ -898,7 +935,7 @@
       "date_precision": 2,
       "abstract": "Reproducing the mechanisms of human locomotion is a hard challenge. Assistive wearable devices in this context need to be lightweight, portable, and to adapt to the wearer’s walking pattern. Aiming to combine the aforementioned features, we developed a soft wearable exosuit to assist hip flexion during walking. The main feature of the device is underactuation, i.e., a single actuator is used to assist bilateral hip flexion. A control strategy based on Adaptive Oscillators and gait phase estimation is implemented to deliver flexible assistance and to adapt to changes in walking pattern. The system was tested on six healthy subjects. Preliminary results show good performance of the control algorithm to track human gait and to deliver symmetrical assistance to both legs. First kinematic and muscular assessments revealed promising results at walking speeds near to the natural human walking, where the device did not alter hip kinematics and decreased the effort required by muscles contributing to hip flexion. Once validated on a larger sample of subjects, the device can have the potentialities to be used in clinical and wellness applications.",
       "pdf": "",
-      "evidence": "原摘要摘录：Reproducing the mechanisms of human locomotion is a hard challenge. Assistive wearable devices in this context need to be lightweight, portable, and to adapt to the wearer’s walking pattern. Aiming to combine the aforementioned features, we developed a soft wearable exosuit to assist hip flexion during walking.",
+      "evidence": "使用单个驱动器提供双侧髋屈曲助力，并通过自适应振荡器和步态相位估计跟随行走变化。六名健康参与者的初步实验支持对称助力，且未明显改变髋运动；仍需扩大样本验证。",
       "tags": [
         {
           "kind": "query",
@@ -906,7 +943,8 @@
         }
       ],
       "section": "journal",
-      "added_at": "2026-10-23T07:25:01Z"
+      "added_at": "2026-10-23T07:25:01Z",
+      "title_zh": "基于自适应振荡器的欠驱动软体髋关节助力服"
     },
     {
       "paper_id": "journal-9f5e5c84f657788f50b1",
@@ -922,7 +960,7 @@
       "date_precision": 3,
       "abstract": "The soft exosuit is an emerging robotics, which has been proven to considerably reduce the metabolic consumption of human walking and running. However, compared to walking, relatively few soft exosuits have been studied for running. Many soft exosuits used for running are worn on the back and with a heavy weight load, which may cause instability while running and potentially increase metabolic consumption. Therefore, reducing the weight of the whole soft exosuit system as much as possible and keeping the soft exosuit close to the center of gravity, may improve running stability and further reduce metabolic consumption. In this paper, a portable waist-loaded soft exosuit, the weight of which is almost entirely concentrated at the waist, is shown to assist hip flexion during running, and justifies choosing to assist hip flexion while running. As indicated by the experiments of motion flexibility, wearing the waist-loaded soft exosuit can assist in performing many common and complex motions. The metabolic consumption experiments proved that the portable waist-loaded soft exosuit reduces the metabolic consumption rate of wearers when jogging on the treadmill at 6 km per hour by 7.79% compared with locomotion without the exosuit. Additionally, at the running speed of 8 km per hour, using the waist-loaded soft exosuit can reduce metabolic consumption rate by 4.74%. Similarly, at the running speed of 10 km per hour, it also can be reduced by 6.12%. It is demonstrated that assisting hip flexion for running is also a reasonable method, and wearing the waist-loaded soft exosuit can keep human motion flexibility and reduce metabolic consumption.",
       "pdf": "https://www.mdpi.com/2072-666X/13/2/157/pdf?version=1643005108",
-      "evidence": "原摘要摘录：The soft exosuit is an emerging robotics, which has been proven to considerably reduce the metabolic consumption of human walking and running. However, compared to walking, relatively few soft exosuits have been studied for running.",
+      "evidence": "将主要重量集中于腰部以减轻背负影响，通过髋屈曲助力降低跑步消耗。在6、8及10公里每小时的跑台测试中，相较不穿设备的代谢率分别降低7.79%、4.74%及6.12%，并保留动作灵活性。",
       "tags": [
         {
           "kind": "query",
@@ -930,7 +968,8 @@
         }
       ],
       "section": "journal",
-      "added_at": "2026-10-23T07:25:01Z"
+      "added_at": "2026-10-23T07:25:01Z",
+      "title_zh": "用于跑步髋屈曲辅助的腰载便携软体助力服"
     },
     {
       "paper_id": "journal-c77f19aef62f21cff408",
@@ -947,7 +986,7 @@
       "date_precision": 3,
       "abstract": "BACKGROUND: Population aging is now a universal trend. Many elderly persons can only conduct limited and short time walking because of age-related skeletal muscle decline of the lower limbs. The wearable device for walking assistance is beneficial to improve the life quality of the elderly. OBJECTIVE: This study aimed to propose a soft exosuit for walking assistance of the elderly and verify its feasibility. METHODS: The wearable structure and control strategy were presented. The performance of the soft exosuit was tested by force tracking evaluation and metabolic cost test. RESULTS: The mean error of the measured and target peak force was 1.1%. The metabolic cost with assistance on while wearing the exosuit was reduced by 9.2% compared with that in locomotion assistance off. The reduction of assistance on was 7.1% compared with no exosuit. CONCLUSIONS: The proposed soft exosuit has the potential to improve the walking efficiency of the elderly.",
       "pdf": "",
-      "evidence": "原摘要摘录：BACKGROUND: Population aging is now a universal trend. Many elderly persons can only conduct limited and short time walking because of age-related skeletal muscle decline of the lower limbs. The wearable device for walking assistance is beneficial to improve the life quality of the elderly.",
+      "evidence": "设计助力服结构与控制策略，通过力跟踪和代谢实验验证可行性。主动助力相较设备无动力条件降低代谢成本9.2%，相较不穿设备降低7.1%，提示其改善老年步行效率的潜力。",
       "tags": [
         {
           "kind": "query",
@@ -955,7 +994,8 @@
         }
       ],
       "section": "journal",
-      "added_at": "2026-10-23T07:25:01Z"
+      "added_at": "2026-10-23T07:25:01Z",
+      "title_zh": "面向老年人髋伸展辅助的软体助力服"
     },
     {
       "paper_id": "journal-5bce426b3e8a6b63e046",
@@ -972,7 +1012,7 @@
       "date_precision": 2,
       "abstract": "Lower-limb exoskeleton robots can effectively help patients with lower-limb disabilities caused by stroke or spinal cord injury to walk again. However, when faced with complex ground surfaces, patients find it difficult to quickly and accurately transmit the motion intention to the robot, resulting in falls or errors. In this article, we develop the vision-assisted autonomous lower-limb exoskeleton robot (VALOR). Based on the principles of human visual feedback and motion decision-making, a vision-assisted autonomous gait pattern planning method is proposed to improve the adaptability of the robot to the environment. The robot obtains environmental information via an RGB-D camera and extracts the ground object features that might affect gait. Then, the robot makes an autonomous decision according to the environmental features, robot state, and safety constraints. Lastly, a suitable step length and height are given to the parameterized gait pattern planning model of robot to assist with walking. The feasibility of the proposed method is verified on VALOR in a controlled indoor environment with limited obstacles, and our results demonstrate that the method can significantly improve robot adaptability to complex walking environments.",
       "pdf": "",
-      "evidence": "原摘要摘录：Lower-limb exoskeleton robots can effectively help patients with lower-limb disabilities caused by stroke or spinal cord injury to walk again. However, when faced with complex ground surfaces, patients find it difficult to quickly and accurately transmit the motion intention to the robot, resulting in falls or errors.",
+      "evidence": "利用RGB-D相机识别影响步态的地面物体，结合环境特征、机器人状态与安全约束自主选择步长和步高。室内有限障碍实验验证了可行性，说明视觉决策可改善外骨骼环境适应能力。",
       "tags": [
         {
           "kind": "query",
@@ -980,7 +1020,8 @@
         }
       ],
       "section": "journal",
-      "added_at": "2026-10-23T05:46:43Z"
+      "added_at": "2026-10-23T05:46:43Z",
+      "title_zh": "视觉辅助自主下肢外骨骼VALOR"
     },
     {
       "paper_id": "journal-df3e2b4646d64bea6e5c",
@@ -997,7 +1038,7 @@
       "date_precision": 2,
       "abstract": "This article reports our study on a reduced adaptive fuzzy decoupling control for our lower limb exoskeleton system which typically is a multi-input-multi-output (MIMO) uncertain nonlinear system. To show the applicability and generality of the proposed control methods, a more general MIMO uncertain nonlinear system model is considered. By decoupling control, the entire MIMO system is separated into several MISO subsystems. In our experiments, such a system may have problems (even unstable) if a traditional fuzzy approximator is used to estimate the complicated coupling terms. In this article, to overcome this problem, a reduced adaptive fuzzy system together with a compensation term is proposed. Compared to traditional approaches, the proposed fuzzy control approach can reduce possible chattering phenomena and achieve better control performance. By employing the proposed control scheme to an actual 2-DOF lower limb exoskeleton rehabilitation robot system, it can be seen from the experimental results that, as expected, it has good performance to track the model trajectory of a human walking gait. Therefore, it can be concluded that the developed approach is effective for the control of a lower limb exoskeleton system.",
       "pdf": "",
-      "evidence": "原摘要摘录：This article reports our study on a reduced adaptive fuzzy decoupling control for our lower limb exoskeleton system which typically is a multi-input-multi-output (MIMO) uncertain nonlinear system. To show the applicability and generality of the proposed control methods, a more general MIMO uncertain nonlinear system model is considered.",
+      "evidence": "将不确定多输入多输出系统拆分为多个子系统，并用简化模糊系统和补偿项处理耦合，减少抖振。二自由度下肢康复外骨骼实验表明，该控制能够有效跟踪人体行走参考轨迹。",
       "tags": [
         {
           "kind": "query",
@@ -1005,7 +1046,8 @@
         }
       ],
       "section": "journal",
-      "added_at": "2026-10-23T07:25:01Z"
+      "added_at": "2026-10-23T07:25:01Z",
+      "title_zh": "下肢外骨骼的简化自适应模糊解耦控制"
     },
     {
       "paper_id": "journal-b029528d2f104df59d28",
@@ -1022,7 +1064,7 @@
       "date_precision": 2,
       "abstract": "In this paper, a humanoid robot soccer perception system, consisting of a ball, field detection, and localization, is developed in order to deal with the new rules in RoboCup. Color segmentation and image morphology are improved together with a more sophisticated machine learning algorithm to detect a soccer ball robustly. Those algorithms are still favorable due to its real-time running in most of the embedded platform. For localization, the field is divided into pre-deðned grids and employing k-NN (k-nearest neighbor) to determine the robot location in the grids. Pre-defined grids are used to reduce computation due to matching with a map. Experiment results show that the developed system relatively well for adapting to the new rules update.",
       "pdf": "",
-      "evidence": "原摘要摘录：In this paper, a humanoid robot soccer perception system, consisting of a ball, field detection, and localization, is developed in order to deal with the new rules in RoboCup. Color segmentation and image morphology are improved together with a more sophisticated machine learning algorithm to detect a soccer ball robustly.",
+      "evidence": "针对RoboCup规则变化，结合颜色分割、图像形态学和机器学习完成足球及场地检测，再用预设网格与k近邻方法定位机器人，在降低计算量的同时满足嵌入式实时感知需求。",
       "tags": [
         {
           "kind": "query",
@@ -1030,7 +1072,8 @@
         }
       ],
       "section": "journal",
-      "added_at": "2026-10-23T07:25:01Z"
+      "added_at": "2026-10-23T07:25:01Z",
+      "title_zh": "EROS人形足球机器人的视觉感知系统"
     },
     {
       "paper_id": "journal-2f4e3a6551594c261be4",
@@ -1047,7 +1090,7 @@
       "date_precision": 2,
       "abstract": "Control of two-wheeled humanoid robots poses several challenges due to the unstable dynamics of their mobile base and the coupling between the upper and lower body dynamics. The problem is often faced in the literature with methods based on the linearized or simplified models that fail in exploiting the whole body dynamic capabilities of the platform in use. In this letter, we tackle the problem of whole-body dynamic control for a mobile wheeled unstable humanoid robot. Compared to the existing approaches based on online optimization to guarantee respect of the constraints, we propose a control method that takes into account the nominal constrained dynamics of the robot in the quasi-velocities through an internal model, thus reducing the computational burden. A computed-torque control law in the quasi-velocities is used to stabilize the robot around the upper position. We report on preliminary experimental results and on the method effectiveness in rejecting unknown external disturbances.",
       "pdf": "",
-      "evidence": "原摘要摘录：Control of two-wheeled humanoid robots poses several challenges due to the unstable dynamics of their mobile base and the coupling between the upper and lower body dynamics.",
+      "evidence": "针对双轮底盘与上身动力学耦合，在准速度空间中利用内部模型处理约束动力学，并用计算力矩控制维持直立。初步实验验证了稳定与抗未知外部扰动的能力，同时降低在线优化计算负担。",
       "tags": [
         {
           "kind": "query",
@@ -1055,7 +1098,8 @@
         }
       ],
       "section": "journal",
-      "added_at": "2026-10-23T07:25:01Z"
+      "added_at": "2026-10-23T07:25:01Z",
+      "title_zh": "不稳定轮式人形机器人的动态全身控制"
     },
     {
       "paper_id": "journal-3db2b8ce836b260004c3",
@@ -1071,7 +1115,7 @@
       "date_precision": 1,
       "abstract": "In this paper, a Proportional-Integral-Derivative (PID) controller tuning scheme by Initialized Model Reference Adaptive Control (IMRAC) for a Lower Limb Exoskeleton (LLE) is presented. Mathematical expression of the LLE structure is determined using Lagrangian and Kirchoff’s equations. The transfer function of the structure based on the physical features of the links, and actuators is established under Range of Motion (RoM) condition. The PID controller of the LLE is tuned in a closed-loop control system using Ziegler-Nichols (Z-N) for initializing parameters of IMRAC. Adjustment mechanism is a gradient based method for real-time adaptation of tuned PID controller. A Lyapunov function has been applied to confirm the stability of IMRAC. The proposed IMRAC shows faster convergence in comparison with conventional non-initialized model reference adaptive control. It can be ascertained the proposed tuning scheme is applicable for real-time tuning of PID controller of LLE.",
       "pdf": "https://ieeexplore.ieee.org/ielx7/6287639/8600701/08906124.pdf",
-      "evidence": "原摘要摘录：In this paper, a Proportional-Integral-Derivative (PID) controller tuning scheme by Initialized Model Reference Adaptive Control (IMRAC) for a Lower Limb Exoskeleton (LLE) is presented. Mathematical expression of the LLE structure is determined using Lagrangian and Kirchoff’s equations.",
+      "evidence": "以Ziegler-Nichols方法初始化PID参数，再通过梯度自适应机制在线调整，并用李雅普诺夫分析验证稳定性。相比未初始化的模型参考自适应控制，所提方案收敛更快，适用于外骨骼PID在线整定。",
       "tags": [
         {
           "kind": "query",
@@ -1079,7 +1123,8 @@
         }
       ],
       "section": "journal",
-      "added_at": "2026-10-23T07:25:01Z"
+      "added_at": "2026-10-23T07:25:01Z",
+      "title_zh": "下肢外骨骼的初始化模型参考自适应控制"
     },
     {
       "paper_id": "journal-2bf8440540d03417653a",
@@ -1095,7 +1140,7 @@
       "date_precision": 1,
       "abstract": "A variable magnification ratio transmission structure powered by the electric actuators is proposed to improve the flexibility and portability of the exoskeleton under heavy load carrying condition. The parameters of connecting rod size and hanging position are optimized to ensure that the output torque of active joints can fully envelope the demand load area. The control strategy based on intrinsic sensing is designed to realize the automatic human motion intention prediction and flexible trajectory tracking. The newly developed split embedded connecting rod can accurately measure the human-robot interaction (HRI) force applied to the exoskeleton and extract the human motion intention without being affected by the differences in wearing status. The force tracking control based on the zero-force following is modified by feedforward compensation with extreme learning machine (ELM), which enhances the response speed to human motion intention and reduces the HRI force by 70.6%. Based on multi-sensor information, stacked autoencoder deep neural networks (DNNs) are utilized to realize the automatic locomotion transition and the corresponding control parameters' switching. After optimization by a hybrid algorithm of genetic algorithm and particle swarm optimization (GA_PSO), the identification accuracy is enhanced from 96.2% to 99.7%. The adaptive neural-fuzzy inference system (ANFIS) is used to analyze the plantar pressure to achieve flexible switching between the swing phase and the stance phase. The experiments under various gait motion trajectories assisted by novel weight-bearing exoskeleton are carried out for evaluation, and the performance of the proposed control strategy based on motion intention prediction, locomotion mode identification, and gait phase switching is effectively verified.",
       "pdf": "https://ieeexplore.ieee.org/ielx7/6287639/8600701/08667030.pdf",
-      "evidence": "原摘要摘录：A variable magnification ratio transmission structure powered by the electric actuators is proposed to improve the flexibility and portability of the exoskeleton under heavy load carrying condition.",
+      "evidence": "结合可变传动机构、交互力感知、深度网络和足底压力分析，实现意图跟随、运动模式识别及步态相位切换。实验中交互力降低70.6%，优化后的运动状态识别准确率从96.2%提高至99.7%。",
       "tags": [
         {
           "kind": "query",
@@ -1103,7 +1148,8 @@
         }
       ],
       "section": "journal",
-      "added_at": "2026-10-23T07:25:01Z"
+      "added_at": "2026-10-23T07:25:01Z",
+      "title_zh": "结合运动意图预测与状态识别的承重下肢外骨骼"
     },
     {
       "paper_id": "journal-4da70b6df0c2f54f7f02",
@@ -1119,7 +1165,7 @@
       "date_precision": 3,
       "abstract": "Abstract Arm and finger paralysis, e.g. due to brain stem stroke, often results in the inability to perform activities of daily living (ADLs) such as eating and drinking. Recently, it was shown that a hybrid electroencephalography/electrooculography (EEG/EOG) brain/neural hand exoskeleton can restore hand function to quadriplegics, but it was unknown whether such control paradigm can be also used for fluent, reliable and safe operation of a semi-autonomous whole-arm exoskeleton restoring ADLs. To test this, seven abled-bodied participants (seven right-handed males, mean age 30 ± 8 years) were instructed to use an EEG/EOG-controlled whole-arm exoskeleton attached to their right arm to perform a drinking task comprising multiple sub-tasks (reaching, grasping, drinking, moving back and releasing a cup). Fluent and reliable control was defined as average ‘time to initialize’ (TTI) execution of each sub-task below 3 s with successful initializations of at least 75% of sub-tasks within 5 s. During use of the system, no undesired side effects were reported. All participants were able to fluently and reliably control the vision-guided autonomous whole-arm exoskeleton (average TTI 2.12 ± 0.78 s across modalities with 75% successful initializations reached at 1.9 s for EOG and 4.1 s for EEG control) paving the way for restoring ADLs in severe arm and hand paralysis.",
       "pdf": "https://www.nature.com/articles/s41598-018-29091-5.pdf",
-      "evidence": "原摘要摘录：Abstract Arm and finger paralysis, e.g. due to brain stem stroke, often results in the inability to perform activities of daily living (ADLs) such as eating and drinking. Recently, it was shown that a hybrid electroencephalography/electrooculography (EEG/EOG) brain/neural hand exoskeleton can restore hand function to quadriplegics, but it…",
+      "evidence": "七名健康参与者使用EEG/EOG接口完成伸手、抓握和饮水等分步任务。视觉引导系统实现了流畅可靠的启动控制，平均启动时间约2.12秒；研究支持可行性，但并非瘫痪患者的疗效试验。",
       "tags": [
         {
           "kind": "query",
@@ -1127,7 +1173,8 @@
         }
       ],
       "section": "journal",
-      "added_at": "2026-10-23T07:25:01Z"
+      "added_at": "2026-10-23T07:25:01Z",
+      "title_zh": "脑电眼电共享控制与视觉引导整臂外骨骼的可行性及安全性"
     },
     {
       "paper_id": "journal-b784bba83909d255438c",
@@ -1144,7 +1191,7 @@
       "date_precision": 3,
       "abstract": "Exoskeletons arise as the common ground between robotics and biomechanics, where rehabilitation is the main field in which these two disciplines find cohesion. One of the most relevant challenges in upper limb exoskeleton design relies in the high complexity of the human shoulder, where current devices implement elaborate systems only to emulate the drifting center of rotation of the shoulder joint. This paper proposes the use of 3D scanning vision technologies to ease the design process and its implementation on a variety of subjects, while a motion tracking system based on vision technologies is applied to assess the exoskeleton reachable workspace compared with an asymptomatic subject. Furthermore, the anatomic fitting index is proposed, which compares the anatomic workspace of the user with the exoskeleton workspace and provides insight into its features. This work proposes an exoskeleton architecture that considers the clavicle motion over the coronal plane whose workspace is determined by substituting the direct kinematics model with the dimensional parameters of the user. Simulations and numerical examples are used to validate the analytical results and to conciliate the experimental results provided by the vision tracking system.",
       "pdf": "",
-      "evidence": "原摘要摘录：Exoskeletons arise as the common ground between robotics and biomechanics, where rehabilitation is the main field in which these two disciplines find cohesion. One of the most relevant challenges in upper limb exoskeleton design relies in the high complexity of the human shoulder, where current devices implement elaborate systems only to…",
+      "evidence": "利用三维扫描与视觉运动跟踪辅助个体化肩关节机构设计，并提出解剖适配指数比较人体与外骨骼工作空间。方法考虑锁骨运动，通过建模、仿真和实验分析改善上肢外骨骼的解剖匹配。",
       "tags": [
         {
           "kind": "query",
@@ -1152,7 +1199,34 @@
         }
       ],
       "section": "journal",
-      "added_at": "2026-10-23T07:25:01Z"
+      "added_at": "2026-10-23T07:25:01Z",
+      "title_zh": "基于视觉的上肢外骨骼肩关节机构设计与工作空间评估"
+    },
+    {
+      "paper_id": "journal-c326e2535d78108468ba",
+      "route": "journal-library/journal-c326e2535d78108468ba",
+      "title": "An Advanced Active Vision System with Multimodal Visual Odometry Perception for Humanoid Robots",
+      "doi": "10.1142/s0219843617500062",
+      "venue": "International Journal of Humanoid Robotics",
+      "issns": [
+        "0219-8436",
+        "1793-6942"
+      ],
+      "authors": "Xin Wang, Pieter Jonker",
+      "publication_date": "2017-08-25",
+      "date_precision": 3,
+      "abstract": "Using active vision to perceive surroundings instead of just passively receiving information, humans develop the ability to explore unknown environments. Humanoid robot active vision research has already half a century history. It covers comprehensive research areas and plenty of studies have been done. Nowadays, the new trend is to use a stereo setup or a Kinect with neck movements to realize active vision. However, human perception is a combination of eye and neck movements. This paper presents an advanced active vision system that works in a similar way as human vision. The main contributions are: a design of a set of controllers that mimic eye and neck movements, including saccade eye movements, pursuit eye movements, vestibulo-ocular reflex eye movements and vergence eye movements; an adaptive selection mechanism based on properties of objects to automatically choose an optimal tracking algorithm; a novel Multimodal Visual Odometry Perception method that combines stereopsis and convergence to enable robots to perform both precise action in action space and scene exploration in personal space. Experimental results prove the effectiveness and robustness of our system. Besides, the system works in real-time constraints with low-cost cameras and motors, providing an affordable solution for industrial applications.",
+      "pdf": "",
+      "evidence": "这篇论文介绍了一种先进的活跃视觉系统， 实验结果证明了我们的系统的有效性和鲁棒性",
+      "tags": [
+        {
+          "kind": "query",
+          "label": "humanoid"
+        }
+      ],
+      "section": "journal",
+      "added_at": "2026-10-24T03:22:15Z",
+      "title_zh": "具有多模态视觉视觉视觉视觉视觉视觉视觉视觉视觉视觉视觉视觉视觉"
     },
     {
       "paper_id": "journal-34e3c45389d82867c998",
@@ -1168,7 +1242,7 @@
       "date_precision": 3,
       "abstract": "We demonstrated the design, production, and functional properties of the Exoskeleton Actuated by the Soft Modules (EAsoftM). Integrating the 3D printed exoskeleton with passive joints to compensate gravity and with active joints to rotate the shoulder and elbow joints resulted in ultra-light system that could assist planar reaching motion by using the vision-based control law. The EAsoftM can support the reaching motion with compliance realized by the soft materials and pneumatic actuation. In addition, the vision-based control law has been proposed for the precise control over the target reaching motion within the millimeter scale. Aiming at rehabilitation exercise for individuals, typically soft actuators have been developed for relatively small motions, such as grasping motion, and one of the challenges has been to extend their use for a wider range reaching motion. The proposed EAsoftM presented one possible solution for this challenge by transmitting the torque effectively along the anatomically aligned with a human body exoskeleton. The proposed integrated systems will be an ideal solution for neurorehabilitation where affordable, wearable, and portable systems are required to be customized for individuals with specific motor impairments.",
       "pdf": "https://www.frontiersin.org/articles/10.3389/fnins.2017.00352/pdf",
-      "evidence": "原摘要摘录：We demonstrated the design, production, and functional properties of the Exoskeleton Actuated by the Soft Modules (EAsoftM). Integrating the 3D printed exoskeleton with passive joints to compensate gravity and with active joints to rotate the shoulder and elbow joints resulted in ultra-light system that could assist planar reaching motion…",
+      "evidence": "将三维打印外骨骼、重力补偿被动关节和气动软驱动模块结合，实现柔顺的肩肘平面伸手辅助。视觉反馈将目标到达控制到毫米尺度，为轻量、便携和个体化神经康复设备提供设计思路。",
       "tags": [
         {
           "kind": "query",
@@ -1176,7 +1250,8 @@
         }
       ],
       "section": "journal",
-      "added_at": "2026-10-23T07:25:01Z"
+      "added_at": "2026-10-23T07:25:01Z",
+      "title_zh": "软模块驱动外骨骼及其上肢精确伸手视觉控制"
     },
     {
       "paper_id": "journal-814099fcaab37dce29e9",
@@ -1193,7 +1268,7 @@
       "date_precision": 1,
       "abstract": "This paper deals with the whole body motion control problem of humanoid robots by using automatic and bilateral control methods. Advanced motion controllers are proposed so that human daily life activities, such as walking on an uneven terrain and contacting an unknown object, can be performed. It is shown that the uncertainty of environmental impedance variation is one of the main challenging issues in the design of the automatic control systems, i.e. a humanoid robot may easily lose its stability when it contacts an unstructured environment. A novel bilateral control method is proposed for humanoid robots so as to overcome the environmental uncertainty problem. It is shown that more dexterous and versatile tasks can be easily performed by transforming the skills of humans to humanoid robots in the proposed bilateral control system. A disturbance observer is used not only to achieve the robustness of the motion control system but also to perform sensorless contact motion control tasks. The performance of sensorless contact force estimation is significantly improved by deriving the exact dynamic model of humanoid robots. A floating point base exact dynamic model is derived by using the extended Newton-Euler algorithm. A new robot simulator is designed by using the proposed dynamic model and the Virtual Reality toolbox of MATLAB. Simulation results are given to show the validity of the proposals.",
       "pdf": "",
-      "evidence": "原摘要摘录：This paper deals with the whole body motion control problem of humanoid robots by using automatic and bilateral control methods. Advanced motion controllers are proposed so that human daily life activities, such as walking on an uneven terrain and contacting an unknown object, can be performed.",
+      "evidence": "通过双边控制将人的操作技能传递给人形机器人，以应对未知环境阻抗。结合精确动力学模型与扰动观测器改善无力传感器的接触力估计，仿真验证了运动与接触任务控制方法。",
       "tags": [
         {
           "kind": "query",
@@ -1201,7 +1276,8 @@
         }
       ],
       "section": "journal",
-      "added_at": "2026-10-23T07:25:01Z"
+      "added_at": "2026-10-23T07:25:01Z",
+      "title_zh": "利用双边控制实现人形机器人全身运动"
     },
     {
       "paper_id": "journal-57ed74ce551ac1bdd6d7",
@@ -1218,7 +1294,7 @@
       "date_precision": 1,
       "abstract": "A bounded control strategy is employed for the rehabilitation and assistance of a patient with lower-limb disorder. Complete and partial lower-limb motor function disorders are considered. This application is centered on the knee and the ankle joint level, thereby considering a user in a sitting position. A high gain observer is used in the estimation of the angular position and angular velocities which is then applied to the estimation of the joint torques. The level of human contribution is feedback of a fraction of the estimated joint torque. This is utilised in order to meet the demands for a bounded human torque; that is, τ h ≤ N 2 , n ≤ N 1 , n . The asymptotic stability of the bounded control law without human contribution and the convergence analysis of the high gain observer is verified using Lyapunov-based analysis. Simulations are performed to verify the proposed control law. Results obtained guarantee a fair trajectory tracking of the physiotherapist trajectory.",
       "pdf": "",
-      "evidence": "原摘要摘录：A bounded control strategy is employed for the rehabilitation and assistance of a patient with lower-limb disorder. Complete and partial lower-limb motor function disorders are considered. This application is centered on the knee and the ankle joint level, thereby considering a user in a sitting position.",
+      "evidence": "面向坐姿下的膝踝辅助，利用高增益观测器估计关节位置、速度及力矩，并限制人体参与力矩。李雅普诺夫分析验证稳定性与观测收敛，仿真表明可跟踪治疗师设定的参考轨迹。",
       "tags": [
         {
           "kind": "query",
@@ -1226,7 +1302,8 @@
         }
       ],
       "section": "journal",
-      "added_at": "2026-10-23T07:25:01Z"
+      "added_at": "2026-10-23T07:25:01Z",
+      "title_zh": "主动下肢外骨骼的有界控制"
     },
     {
       "paper_id": "journal-9ef746a7884e22566eb7",
@@ -1243,7 +1320,7 @@
       "date_precision": 3,
       "abstract": "We propose a new method for the customized design of hip exoskeletons based on the optimization of the humanmachine physical interface to improve user comfort. The approach is based on mechanisms designed to follow the natural trajectories of the human hip as the flexion angle varies during motion. The motions of the hip joint center with variation of the flexion angle were measured and the resulting trajectory was modeled. An exoskeleton mechanism capable to follow the hip center’s movement was designed to cover the full motion ranges of flexion and abduction angles, and was adopted in a lower extremity assistive exoskeleton. The resulting design can reduce human-machine interaction forces by 24.1% and 76.0% during hip flexion and abduction, respectively, leading to a more ergonomic and comfortable-to-wear exoskeleton system. The human-exoskeleton model was analyzed to further validate the decrease of the hip joint internal force during hip joint flexion or abduction by applying the resulting design.",
       "pdf": "",
-      "evidence": "原摘要摘录：We propose a new method for the customized design of hip exoskeletons based on the optimization of the humanmachine physical interface to improve user comfort. The approach is based on mechanisms designed to follow the natural trajectories of the human hip as the flexion angle varies during motion.",
+      "evidence": "测量髋屈曲过程中旋转中心的移动轨迹，并据此设计可随动的人机接口。结果显示髋屈曲和外展时的交互力分别降低24.1%和76.0%，说明考虑自然关节中心运动有助于提升佩戴舒适性。",
       "tags": [
         {
           "kind": "query",
@@ -1251,7 +1328,8 @@
         }
       ],
       "section": "journal",
-      "added_at": "2026-10-23T07:25:01Z"
+      "added_at": "2026-10-23T07:25:01Z",
+      "title_zh": "面向髋关节外骨骼设计的人体髋旋转中心分析"
     },
     {
       "paper_id": "journal-e36ae7b09135d2484089",
@@ -1268,7 +1346,7 @@
       "date_precision": 3,
       "abstract": "In this article, two types of actuators are applied for a lower limb exoskeleton. They are DC motors with the harmonic drive and the pneumatic artificial muscles. This combination takes advantages of both the harmonic drive and the pneumatic artificial muscle. It provides both high accuracy position control and high ratio of strength and weight. The shortcomings of the two actuators are overcome by the hybrid actuation, for example, low control accuracy and modeling difficult of pneumatic artificial muscle, compactness, and structural flexibility of DC motors. The design and modeling processes are discussed to show the proposed exoskeleton can increase the strength of human lower limbs. Experiments and analysis of the exoskeleton are given to evaluate the effectiveness of the design and modeling.",
       "pdf": "",
-      "evidence": "原摘要摘录：In this article, two types of actuators are applied for a lower limb exoskeleton. They are DC motors with the harmonic drive and the pneumatic artificial muscles. This combination takes advantages of both the harmonic drive and the pneumatic artificial muscle.",
+      "evidence": "结合带谐波减速器的直流电机与气动人工肌肉，兼顾位置控制精度和较高力重比。论文给出机构设计、动力学建模及实验分析，讨论混合驱动如何弥补单一执行器的结构和控制局限。",
       "tags": [
         {
           "kind": "query",
@@ -1276,7 +1354,8 @@
         }
       ],
       "section": "journal",
-      "added_at": "2026-10-23T07:47:42Z"
+      "added_at": "2026-10-23T07:47:42Z",
+      "title_zh": "混合驱动下肢外骨骼的设计与控制"
     },
     {
       "paper_id": "journal-6401b5881777e8d9ae34",
@@ -1293,7 +1372,7 @@
       "date_precision": 3,
       "abstract": "Robots detect and keep track of relevant objects in their environment to accomplish some tasks. Many of them are equipped with mobile cameras as the main sensors, process the images and maintain an internal representation of the detected objects. We propose a novel active visual memory that moves the camera to detect objects in robot's surroundings and tracks their positions. This visual memory is based on a combination of multi-modal filters that efficiently integrates partial information. The visual attention subsystem is distributed among the software components in charge of detecting relevant objects. We demonstrate the efficiency and robustness of this perception system in a real humanoid robot participating in the RoboCup SPL competition.",
       "pdf": "",
-      "evidence": "原摘要摘录：Robots detect and keep track of relevant objects in their environment to accomplish some tasks. Many of them are equipped with mobile cameras as the main sensors, process the images and maintain an internal representation of the detected objects.",
+      "evidence": "构建主动视觉记忆，驱动相机发现周围目标并持续跟踪位置，通过多模态滤波整合不完整观测。系统在参加RoboCup SPL比赛的真实人形机器人上验证了感知效率与鲁棒性。",
       "tags": [
         {
           "kind": "query",
@@ -1301,7 +1380,8 @@
         }
       ],
       "section": "journal",
-      "added_at": "2026-10-23T07:25:01Z"
+      "added_at": "2026-10-23T07:25:01Z",
+      "title_zh": "人形机器人的主动视觉感知"
     },
     {
       "paper_id": "journal-659ef527312ba2cfeaa1",
@@ -1318,7 +1398,7 @@
       "date_precision": 1,
       "abstract": "Current trends in Robotics aim to close the gap that separates technology and humans, bringing novel robotic devices in order to improve human performance. Although robotic exoskeletons represent a breakthrough in mobility enhancement, there are design challenges related to the forces exerted to the users’ joints that result in severe injuries. This occurs due to the fact that most of the current developments consider the joints as noninvariant rotational axes. This paper proposes the use of commercial vision systems in order to perform biomimetic joint design for robotic exoskeletons. This work proposes a kinematic model based on irregular shaped cams as the joint mechanism that emulates the bone-to-bone joints in the human body. The paper follows a geometric approach for determining the location of the instantaneous center of rotation in order to design the cam contours. Furthermore, the use of a commercial vision system is proposed as the main measurement tool due to its noninvasive feature and for allowing subjects under measurement to move freely. The application of this method resulted in relevant information about the displacements of the instantaneous center of rotation at the human knee joint.",
       "pdf": "https://downloads.hindawi.com/journals/mpe/2015/145734.pdf",
-      "evidence": "原摘要摘录：Current trends in Robotics aim to close the gap that separates technology and humans, bringing novel robotic devices in order to improve human performance. Although robotic exoskeletons represent a breakthrough in mobility enhancement, there are design challenges related to the forces exerted to the users’ joints that result in severe…",
+      "evidence": "利用非侵入式视觉测量获取膝关节瞬时旋转中心的变化，并通过不规则凸轮机构模拟人体关节运动。该方法为外骨骼仿生关节轮廓设计及人机轴线匹配提供几何依据。",
       "tags": [
         {
           "kind": "query",
@@ -1326,7 +1406,8 @@
         }
       ],
       "section": "journal",
-      "added_at": "2026-10-23T07:25:01Z"
+      "added_at": "2026-10-23T07:25:01Z",
+      "title_zh": "面向外骨骼的视觉几何人体膝关节逆向建模"
     },
     {
       "paper_id": "journal-a4f1af04c637e057b113",
@@ -1342,7 +1423,7 @@
       "date_precision": 3,
       "abstract": "We propose to tackle in this paper the problem of controlling whole-body humanoid robot behavior through non-invasive brain-machine interfacing (BMI), motivated by the perspective of mapping human motor control strategies to human-like mechanical avatar. Our solution is based on the adequate reduction of the controllable dimensionality of a high-DOF humanoid motion in line with the state-of-the-art possibilities of non-invasive BMI technologies, leaving the complement subspace part of the motion to be planned and executed by an autonomous humanoid whole-body motion planning and control framework. The results are shown in full physics-based simulation of a 36-degree-of-freedom humanoid motion controlled by a user through EEG-extracted brain signals generated with motor imagery task.",
       "pdf": "https://www.frontiersin.org/articles/10.3389/fnsys.2014.00138/pdf",
-      "evidence": "原摘要摘录：We propose to tackle in this paper the problem of controlling whole-body humanoid robot behavior through non-invasive brain-machine interfacing (BMI), motivated by the perspective of mapping human motor control strategies to human-like mechanical avatar.",
+      "evidence": "将高自由度全身运动压缩为适合非侵入式脑机接口控制的低维输入，其余动作由自主规划和控制系统完成。研究在36自由度人形机器人的物理仿真中，用运动想象脑电信号验证了控制方法。",
       "tags": [
         {
           "kind": "query",
@@ -1350,7 +1431,8 @@
         }
       ],
       "section": "journal",
-      "added_at": "2026-10-23T07:25:01Z"
+      "added_at": "2026-10-23T07:25:01Z",
+      "title_zh": "基于脑机接口的人形机器人全身运动控制"
     },
     {
       "paper_id": "journal-5f249f5ec2f2dfabe693",
@@ -1366,7 +1448,7 @@
       "date_precision": 3,
       "abstract": "One of the main issues within the field of social robotics is to endow robots with the ability to direct attention to people with whom they are interacting. Different approaches follow bio-inspired mechanisms, merging audio and visual cues to localize a person using multiple sensors. However, most of these fusion mechanisms have been used in fixed systems, such as those used in video-conference rooms, and thus, they may incur difficulties when constrained to the sensors with which a robot can be equipped. Besides, within the scope of interactive autonomous robots, there is a lack in terms of evaluating the benefits of audio-visual attention mechanisms, compared to only audio or visual approaches, in real scenarios. Most of the tests conducted have been within controlled environments, at short distances and/or with off-line performance measurements. With the goal of demonstrating the benefit of fusing sensory information with a Bayes inference for interactive robotics, this paper presents a system for localizing a person by processing visual and audio data. Moreover, the performance of this system is evaluated and compared via considering the technical limitations of unimodal systems. The experiments show the promise of the proposed approach for the proactive detection and tracking of speakers in a human-robot interactive framework.",
       "pdf": "https://www.mdpi.com/1424-8220/14/6/9522/pdf?version=1403353939",
-      "evidence": "原摘要摘录：One of the main issues within the field of social robotics is to endow robots with the ability to direct attention to people with whom they are interacting. Different approaches follow bio-inspired mechanisms, merging audio and visual cues to localize a person using multiple sensors.",
+      "evidence": "利用贝叶斯推断融合视觉与音频信息，定位并主动跟踪交互中的说话者。实验比较单一感官与融合方案，说明在机器人自身传感配置受限时，多模态注意机制仍有助于交互感知。",
       "tags": [
         {
           "kind": "query",
@@ -1374,7 +1456,8 @@
         }
       ],
       "section": "journal",
-      "added_at": "2026-10-23T07:25:01Z"
+      "added_at": "2026-10-23T07:25:01Z",
+      "title_zh": "人形机器人头部的视听融合感知系统"
     },
     {
       "paper_id": "journal-03efc086a8e64db5d4ff",
@@ -1390,7 +1473,7 @@
       "date_precision": 2,
       "abstract": "The fundamental technologies for Human-Computer Interaction are Hand motion tracking and Gesture Identification. The same technology has been adapted for Human-Robot Interaction. This paper discusses a natural methodology for Human-Robot Interaction. In the proposed system, the accelerometers at the fingers, tracks specific gestures. These gestures are identified by the controller, which in turn controls the actuators that results in Humanoid walking. The Humanoid under consideration has 8 Degrees of Freedom.",
       "pdf": "https://doi.org/10.47893/ijipvs.2013.1031",
-      "evidence": "原摘要摘录：The fundamental technologies for Human-Computer Interaction are Hand motion tracking and Gesture Identification. The same technology has been adapted for Human-Robot Interaction. This paper discusses a natural methodology for Human-Robot Interaction. In the proposed system, the accelerometers at the fingers, tracks specific gestures.",
+      "evidence": "在手指上布置加速度传感器识别特定手势，再将手势映射为八自由度人形机器人的执行器控制指令，探索利用自然手部动作实现人机交互与行走操控的方法。",
       "tags": [
         {
           "kind": "query",
@@ -1398,7 +1481,8 @@
         }
       ],
       "section": "journal",
-      "added_at": "2026-10-23T07:25:01Z"
+      "added_at": "2026-10-23T07:25:01Z",
+      "title_zh": "通过动态手指手势操控人形机器人行走"
     },
     {
       "paper_id": "journal-a83a7de9213be9e1c613",
@@ -1415,7 +1499,7 @@
       "date_precision": 3,
       "abstract": "In this work, we propose a landmark-based navigation approach that integrates (1) high-level motion planning capabilities that take into account the landmarks position and visibility and (2) a stack of feasible visual servoing tasks based on footprints to follow. The path planner computes a collision-free path that considers sensory, geometric, and kinematic constraints that are specific to humanoid robots. Based on recent results in movement neuroscience that suggest that most humans exhibit nonholonomic constraints when walking in open spaces, the humanoid steering behavior is modeled as a differential-drive wheeled robot (DDR). The obtained paths are made of geometric primitives that are the shortest in distance in free spaces. The footprints around the path and the positions of the landmarks to which the gaze must be directed are used within a stack-of-tasks (SoT) framework to compute the whole-body motion of the humanoid. We provide some experiments that verify the effectiveness of the proposed strategy on the HRP-2 platform.",
       "pdf": "",
-      "evidence": "原摘要摘录：In this work, we propose a landmark-based navigation approach that integrates (1) high-level motion planning capabilities that take into account the landmarks position and visibility and (2) a stack of feasible visual servoing tasks based on footprints to follow.",
+      "evidence": "联合考虑地标位置、可见性、几何及运动学约束，生成无碰撞路径和落脚点，再通过任务栈视觉伺服计算全身运动。HRP-2实验验证了地标导航与步态执行相结合的方案。",
       "tags": [
         {
           "kind": "query",
@@ -1423,7 +1507,8 @@
         }
       ],
       "section": "journal",
-      "added_at": "2026-10-23T07:25:01Z"
+      "added_at": "2026-10-23T07:25:01Z",
+      "title_zh": "视觉引导任务中的人形机器人运动规划"
     },
     {
       "paper_id": "journal-9d13bf7983a3822694b8",
@@ -1440,7 +1525,7 @@
       "date_precision": 3,
       "abstract": "We aim at planning multi-contact sequences of stances and postures for humanoid robots. The output sequence defines the contact transitions that allow our robot to realize different kind of tasks, ranging from biped locomotion to dexterous manipulation. The central component of the planning framework is a best-first algorithm that performs a search of the contacts to be added or removed at each step, following an input collision-free guide path, and making calls to an optimization-based inverse kinematics solver under static equilibrium constraints. The planner can handle systems made of multiple robots and/or manipulated objects through a centralized multi-agent approach, opening the way for multi-robot collaborative locomotion and manipulation planning. Results are presented in virtual environments, with discussion on execution on the real robot HRP-2 in an example situation.",
       "pdf": "",
-      "evidence": "原摘要摘录：We aim at planning multi-contact sequences of stances and postures for humanoid robots. The output sequence defines the contact transitions that allow our robot to realize different kind of tasks, ranging from biped locomotion to dexterous manipulation.",
+      "evidence": "沿无碰撞引导路径，用最佳优先搜索增删接触，并调用静态平衡约束下的逆运动学求解器，规划行走和灵巧操作的多接触序列。方法可扩展到多机器人及被操作物体，主要结果来自虚拟环境。",
       "tags": [
         {
           "kind": "query",
@@ -1448,32 +1533,8 @@
         }
       ],
       "section": "journal",
-      "added_at": "2026-10-23T07:25:01Z"
-    },
-    {
-      "paper_id": "journal-3bdcf251a41ff78718c9",
-      "route": "journal-library/journal-3bdcf251a41ff78718c9",
-      "title": "Study on Locomotion of Musculoskeletal Humanoid",
-      "doi": "10.7210/jrsj.30.8",
-      "venue": "Journal of the Robotics Society of Japan",
-      "issns": [
-        "0289-1824",
-        "1884-7145"
-      ],
-      "authors": "Kenichi Narioka, Koh Hosoda",
-      "publication_date": "2012",
-      "date_precision": 1,
-      "abstract": "1, 2",
-      "pdf": "https://www.jstage.jst.go.jp/article/jrsj/30/1/30_1_8/_pdf",
-      "evidence": "原摘要摘录：1, 2",
-      "tags": [
-        {
-          "kind": "query",
-          "label": "humanoid"
-        }
-      ],
-      "section": "journal",
-      "added_at": "2026-10-23T07:25:01Z"
+      "added_at": "2026-10-23T07:25:01Z",
+      "title_zh": "人形机器人行走与操作的接触序列规划"
     }
   ],
   "query_failures": [],
@@ -1482,7 +1543,13 @@
     "exo-vision": 20,
     "humanoid": 20
   },
-  "journal_count": 45,
+  "journal_count": 43,
   "target_per_topic": 20,
-  "method": "Crossref DOI 核验；关键词在标题/摘要中同时命中；本次补充至每方向最多 20 篇、每方向每刊最多5篇。总计最多120篇。"
+  "method": "Crossref DOI 核验；关键词在标题/摘要中同时命中；本次补充至每方向最多 20 篇、每方向每刊最多5篇。总计最多120篇。",
+  "chinese_translation": {
+    "engine": "NLLB-200 600M · 免费离线机器翻译 · 机器人术语表v1",
+    "status": "ready",
+    "confirmed": 60,
+    "failed": []
+  }
 }

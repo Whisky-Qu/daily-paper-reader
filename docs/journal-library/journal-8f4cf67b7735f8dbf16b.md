@@ -6,10 +6,23 @@ doi: "10.1007/s10514-026-10263-6"
 paper_id: "journal-8f4cf67b7735f8dbf16b"
 source: "Autonomous Robots"
 tags: ["query:humanoid"]
-tldr: "原摘要摘录：Abstract Humanoid locomotion over varying terrains typically relies on exteroceptive perception or manually tuned control gains, both of which limit robustness in real-world deployment."
+tldr: "仅利用关节编码器和机身IMU估计地形，通过摩擦锥可行性裕度调整全身控制权重。Unitree G1在不平地面和坡道上保持稳定，并在草地、木屑地及15°坡道完成实机验证。"
 evidence: "正式期刊记录已按 DOI 核对；简介为原摘要摘录，非 AI 全文解读。"
 pdf: "https://link.springer.com/content/pdf/10.1007/s10514-026-10263-6.pdf"
+title_zh: "面向地形自适应人形行走的可行性感知全身控制"
+translation_source: "NLLB-200 600M · 免费离线机器翻译 · 机器人术语表v1"
+translation_sha: "566940c9aac21a406626fd315f163978d955cc4266b5ad343b4518dd4fe11e4b"
 ---
+
+<!-- dpr-offline-zh:start -->
+## 中文摘要
+
+抽象人形机器人 运动在不同地形上通常依赖于外部感知感知或手动调节的控制收益，这两者都限制了鲁棒性在现实世界中部署.本文介绍了一种完全适应地形的本体感知控制方法，使人形机器人能够通过仅使用联合编码器和装载惯性测量单元穿过平坦，不均等和倾斜的表面，而无需任何外部传感或地形特定调整.我们的核心想法是，连续地形不需要被看到来处理:其本地几何仅可以从本体感知信号来推断，控制行为可以连续适应这一估计，以便机器人自动优先考虑斜坡上的接触安全，同时保留平面地面上的名义性能.这种适应是由可行性差距驱动的，它量化了对方形编程优化器的摩擦孔数量，并通过可行性意识的全体控制器 (FAWBC) 实现，从而调节其成本权重.在Unitree G1 人形机器人上的模拟实验显示，在平面地，不平面地形上运动是稳定的.这种方法在物理Unitree G1上进一步验证了平地，草地，木头地形和15美元左右的15美元的坡道，证实了其现实可行性.现实机器人实验的视频可在http://tinyurl.com/FAWBCexperiments上找到。
+
+## 翻译说明
+
+中文概述已依据原摘要核对整理；完整中文摘要由免费离线机器翻译生成，关键术语与数值请结合英文原文核对。
+<!-- dpr-offline-zh:end -->
 
 ## Abstract
 

@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "provider": "EasyScholar",
-  "generated_at": "2026-10-23T07:50:58Z",
+  "generated_at": "2026-10-24T03:29:10Z",
   "status": "partial",
   "papers": {
     "2610.26043": {
@@ -1412,6 +1412,30 @@
       "source": "https://doi.org/10.1177/1687814015590988",
       "note": "通过明确 DOI 核对 Crossref 出版记录。",
       "checkedAt": "2026-10-23T07:51:41Z"
+    },
+    "journal-65cf4af2bae7d1dea7c5": {
+      "kind": "journal",
+      "venue": "IEEE Robotics and Automation Letters",
+      "doi": "10.1109/lra.2022.3182106",
+      "issns": [
+        "2377-3766",
+        "2377-3774"
+      ],
+      "source": "https://doi.org/10.1109/lra.2022.3182106",
+      "note": "通过明确 DOI 核对 Crossref 出版记录。",
+      "checkedAt": "2026-10-24T03:29:36Z"
+    },
+    "journal-c326e2535d78108468ba": {
+      "kind": "journal",
+      "venue": "International Journal of Humanoid Robotics",
+      "doi": "10.1142/s0219843617500062",
+      "issns": [
+        "0219-8436",
+        "1793-6942"
+      ],
+      "source": "https://doi.org/10.1142/s0219843617500062",
+      "note": "通过明确 DOI 核对 Crossref 出版记录。",
+      "checkedAt": "2026-10-24T03:29:36Z"
     }
   },
   "journals": {
@@ -5633,15 +5657,6 @@
       "doi": "10.1111/exsy.13659",
       "checkedAt": "2026-10-23T07:51:43Z"
     },
-    "journal-7fc54123711a0e5df6df": {
-      "count": 11,
-      "status": "confirmed",
-      "provider": "OpenAlex",
-      "source": "https://openalex.org/W4399739390",
-      "scope": "正式出版版本",
-      "doi": "10.15199/48.2024.06.60",
-      "checkedAt": "2026-10-23T07:51:43Z"
-    },
     "journal-76fe1c6dd5ed88457a43": {
       "count": 56,
       "status": "confirmed",
@@ -5939,15 +5954,6 @@
       "doi": "10.1080/01691864.2012.686345",
       "checkedAt": "2026-10-23T07:51:44Z"
     },
-    "journal-3bdcf251a41ff78718c9": {
-      "count": 8,
-      "status": "confirmed",
-      "provider": "OpenAlex",
-      "source": "https://openalex.org/W2326144514",
-      "scope": "正式出版版本",
-      "doi": "10.7210/jrsj.30.8",
-      "checkedAt": "2026-10-23T07:51:44Z"
-    },
     "journal-e36ae7b09135d2484089": {
       "count": 49,
       "status": "confirmed",
@@ -5956,6 +5962,24 @@
       "scope": "正式出版版本",
       "doi": "10.1177/1687814015590988",
       "checkedAt": "2026-10-23T07:51:44Z"
+    },
+    "journal-65cf4af2bae7d1dea7c5": {
+      "count": 26,
+      "status": "confirmed",
+      "provider": "OpenAlex",
+      "source": "https://openalex.org/W4285286222",
+      "scope": "正式出版版本",
+      "doi": "10.1109/lra.2022.3182106",
+      "checkedAt": "2026-10-24T03:29:36Z"
+    },
+    "journal-c326e2535d78108468ba": {
+      "count": 2,
+      "status": "confirmed",
+      "provider": "OpenAlex",
+      "source": "https://openalex.org/W2605504727",
+      "scope": "正式出版版本",
+      "doi": "10.1142/s0219843617500062",
+      "checkedAt": "2026-10-24T03:29:36Z"
     }
   },
   "citation_provider": "OpenAlex",

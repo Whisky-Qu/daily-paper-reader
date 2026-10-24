@@ -44,8 +44,6 @@
 
 <p><a href="#/journal-library/journal-686e21f051bcc18571d1">Convolution‐enhanced vision transformer method for lower limb exoskeleton locomotion mode recognition</a> · Expert Systems · 2024-06-18</p>
 
-<p><a href="#/journal-library/journal-7fc54123711a0e5df6df">PID Control of a Lower Limb Rehabilitation Exoskeleton</a> · PRZEGLĄD ELEKTROTECHNICZNY · 2024-06-11</p>
-
 <p><a href="#/journal-library/journal-f8477ee5c79e0a32f615">Review of Vision-Based Environmental Perception for Lower-Limb Exoskeleton Robots</a> · Biomimetics · 2024-04-22</p>
 
 <p><a href="#/journal-library/journal-e3d41799908ed14eb708">Real-world humanoid locomotion with reinforcement learning</a> · Science Robotics · 2024-04-17</p>
@@ -71,6 +69,8 @@
 <p><a href="#/journal-library/journal-ee2b8c2e3ebee9c10666">Environment-Based Assistance Modulation for a Hip Exosuit via Computer Vision</a> · IEEE Robotics and Automation Letters · 2023-05</p>
 
 <p><a href="#/journal-library/journal-4661819e1baaccb4643e">Vision Assisted Control of Lower Extremity Exoskeleton for Obstacle Avoidance With Dynamic Constraint Based Piecewise Nonlinear MPC</a> · IEEE Robotics and Automation Letters · 2022-10</p>
+
+<p><a href="#/journal-library/journal-65cf4af2bae7d1dea7c5">A Soft Exosuit Assisting Hip Abduction for Knee Adduction Moment Reduction During Walking</a> · IEEE Robotics and Automation Letters · 2022-07</p>
 
 <p><a href="#/journal-library/journal-07628b19c4e853273188">Intrinsic motivation for using a wearable hip exoskeleton</a> · Technology and Disability · 2022-05-01</p>
 
@@ -98,6 +98,8 @@
 
 <p><a href="#/journal-library/journal-b784bba83909d255438c">Vision System-Based Design and Assessment of a Novel Shoulder Joint Mechanism for an Enhanced Workspace Upper Limb Exoskeleton</a> · Applied Bionics and Biomechanics · 2018-06-03</p>
 
+<p><a href="#/journal-library/journal-c326e2535d78108468ba">An Advanced Active Vision System with Multimodal Visual Odometry Perception for Humanoid Robots</a> · International Journal of Humanoid Robotics · 2017-08-25</p>
+
 <p><a href="#/journal-library/journal-34e3c45389d82867c998">Design and Validation of Exoskeleton Actuated by Soft Modules toward Neurorehabilitation—Vision-Based Control for Precise Reaching Motion of Upper Limb</a> · Frontiers in Neuroscience · 2017-07-07</p>
 
 <p><a href="#/journal-library/journal-814099fcaab37dce29e9">Whole body motion control of humanoid robots using bilateral control</a> · TURKISH JOURNAL OF ELECTRICAL ENGINEERING &amp; COMPUTER SCIENCES · 2017</p>
@@ -121,7 +123,5 @@
 <p><a href="#/journal-library/journal-a83a7de9213be9e1c613">HUMANOID LOCOMOTION PLANNING FOR VISUALLY GUIDED TASKS</a> · International Journal of Humanoid Robotics · 2012-08-08</p>
 
 <p><a href="#/journal-library/journal-9d13bf7983a3822694b8">Humanoid Robot Locomotion and Manipulation Step Planning</a> · Advanced Robotics · 2012-07-05</p>
-
-<p><a href="#/journal-library/journal-3bdcf251a41ff78718c9">Study on Locomotion of Musculoskeletal Humanoid</a> · Journal of the Robotics Society of Japan · 2012</p>
 
 </div>

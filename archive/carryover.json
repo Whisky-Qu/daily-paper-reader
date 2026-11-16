@@ -1,20 +1,25 @@
 {
-  "generated_at": "2026-10-22T06:36:09.183678+00:00",
-  "updated_date": "20261013-20261022",
+  "generated_at": "2026-11-16T09:11:24.569464+00:00",
+  "updated_date": "20261107-20261116",
   "carryover_days": 9,
   "tag_states": {
     "hip-exo": {
-      "updated_date": "20261013-20261022",
+      "updated_date": "20261107-20261116",
       "carryover_days": 9,
       "items": []
     },
     "exo-vision": {
-      "updated_date": "20261013-20261022",
+      "updated_date": "20261107-20261116",
       "carryover_days": 9,
       "items": []
     },
     "humanoid": {
-      "updated_date": "20261013-20261022",
+      "updated_date": "20261107-20261116",
+      "carryover_days": 9,
+      "items": []
+    },
+    "embodied-ai": {
+      "updated_date": "20261107-20261116",
       "carryover_days": 9,
       "items": []
     }
